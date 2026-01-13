@@ -69,7 +69,7 @@ class ChoiceEpisodeManager:
         main_layout.addItem(spacer)
         # 获取所有站点ID并排序
         crawler = self.crawler
-        site_ids = sorted(list(crawler.config["site_configs"].keys()))
+        site_ids = sorted(list(crawler.site_configs.keys()))
         # 创建所有站点的初始卡片
         self.site_widgets.clear()
         self.runners.clear()
@@ -154,8 +154,12 @@ class ChoiceEpisodeManager:
                 return
             episode = route['episodes'][episode_index]
             episode_url = episode['link']
-            # 获取视频链接
             video_url = self.crawler.find_video_stream(episode_url, site_id)
+            if 'url=' in video_url:
+                start = video_url.find('url=') + 4
+                end = video_url.find('&', start)
+                if end == -1: end = len(video_url)
+                video_url = video_url[start:end]
             # 打印结果
             print(f"站点: {site_id}")
             print(f"线路: {route['route']}")

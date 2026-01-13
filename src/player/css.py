@@ -13,17 +13,16 @@ class VideoCrawler:
         """初始化爬虫，直接加载配置"""
         config_path = Path(__file__).parent / config_file
         self.config = json.loads(config_path.read_text(encoding='utf-8'))
+        self.site_configs = self.config.get("site_configs", {})
 
     def search_site(self, keyword, site_id):
-        if site_id not in self.config["site_configs"]:
-            return None
-
-        site_config = self.config["site_configs"][site_id]
+        site_config = self.site_configs.get(site_id)
         url = site_config["base_url"] + site_config["search_path"].replace("{keyword}", keyword)
         headers = {'User-Agent': site_config.get("user_agent")}
         try:
             response = httpx.get(url, headers=headers, timeout=10)
-            tree = html.fromstring(response.content)
+            response.encoding = 'utf-8'
+            tree = html.fromstring(response.text)
             titles = tree.cssselect(site_config["title"])
             links = tree.cssselect(site_config["link"])
             # 收集所有结果并计算相似度
@@ -58,11 +57,12 @@ class VideoCrawler:
         return None
 
     def get_routes(self, page_url, site_id):
-        site_config = self.config["site_configs"][site_id]
+        site_config = self.site_configs.get(site_id)
         headers = {'User-Agent': site_config.get("user_agent")}
         try:
             response = httpx.get(page_url, headers=headers, timeout=10)
-            tree = html.fromstring(response.content)
+            response.encoding = 'utf-8'
+            tree = html.fromstring(response.text)
             routes = []
             route_tabs = tree.cssselect(site_config["route_tabs"])
             episode_containers = tree.cssselect(site_config["episode_containers"])
@@ -86,7 +86,7 @@ class VideoCrawler:
             return []
 
     def find_video_stream(self, episode_url, site_id):
-        site_config = self.config["site_configs"][site_id]
+        site_config = self.site_configs.get(site_id)
         pattern = re.compile('|'.join(site_config["video_patterns"]), re.IGNORECASE)
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
@@ -94,12 +94,12 @@ class VideoCrawler:
             video_url = None
             def on_request(request):
                 nonlocal video_url
-                if pattern.search(request.url):
+                if not video_url and pattern.search(request.url):
                     video_url = request.url
             page.on("request", on_request)
             try:
-                page.goto(episode_url, wait_until="networkidle", timeout=30000)
-                page.wait_for_timeout(5000)
+                page.goto(episode_url, wait_until="domcontentloaded", timeout=15000)
+                page.wait_for_timeout(3000)
                 return video_url
             finally:
                 browser.close()

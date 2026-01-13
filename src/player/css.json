@@ -8,7 +8,7 @@
       "route_tabs": ".anthology-tab .swiper-slide",
       "episode_containers": ".anthology-list-box",
       "episode_items": ".anthology-list-play a",
-      "video_patterns": ["\\.m3u8"],
+      "video_patterns": [".m3u8"],
       "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     },
     "NT": {
@@ -19,6 +19,17 @@
       "route_tabs": "#menu0 li",
       "episode_containers": "#content .mod",
       "episode_items": "ul li a",
+      "video_patterns": ["tiktokcdn"],
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    },
+    "wedm": {
+      "base_url": "https://vdm10.com",
+      "search_path": "/search/-------------.html?wd={keyword}",
+      "title": ".result_title a",
+      "link": ".result_title a",
+      "route_tabs": ".con_c2_title .tab-switch",
+      "episode_containers": ".tab-content",
+      "episode_items": ".con_c2_list li a",
       "video_patterns": ["tiktokcdn"],
       "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
