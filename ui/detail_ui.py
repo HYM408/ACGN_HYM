@@ -1,0 +1,253 @@
+from PySide6.QtGui import QFont, QIcon
+from PySide6.QtCore import QCoreApplication, QMetaObject, QSize, Qt
+from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel,QPushButton, QSizePolicy, QSpacerItem, QTabWidget,QTextEdit, QVBoxLayout, QWidget
+
+class Ui_DetailPage(object):
+    def setupUi(self, DetailPage):
+        if not DetailPage.objectName():
+            DetailPage.setObjectName(u"DetailPage")
+        DetailPage.resize(1525, 942)
+        DetailPage.setStyleSheet(u"background-color: rgb(255, 255, 255);")
+        self.verticalLayout_11 = QVBoxLayout(DetailPage)
+        self.verticalLayout_11.setSpacing(0)
+        self.verticalLayout_11.setObjectName(u"verticalLayout_11")
+        self.verticalLayout_11.setContentsMargins(0, 0, 0, 0)
+        self.frame_3 = QFrame(DetailPage)
+        self.frame_3.setObjectName(u"frame_3")
+        self.frame_3.setStyleSheet(u"background-color: white;\n"
+"border: none;")
+        self.frame_3.setFrameShape(QFrame.StyledPanel)
+        self.frame_3.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_11 = QHBoxLayout(self.frame_3)
+        self.horizontalLayout_11.setSpacing(0)
+        self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
+        self.horizontalLayout_11.setContentsMargins(0, 0, 0, 0)
+        self.pushButton_19 = QPushButton(self.frame_3)
+        self.pushButton_19.setObjectName(u"pushButton_19")
+        self.pushButton_19.setMinimumSize(QSize(45, 45))
+        self.pushButton_19.setMaximumSize(QSize(45, 45))
+        self.pushButton_19.setStyleSheet(u"QPushButton {\n"
+"	background-color: white;\n"
+"	border:none;\n"
+"	border-radius:22px\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: rgb(237, 237, 238);\n"
+"}")
+        icon = QIcon()
+        icon.addFile(u"icons/back.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.pushButton_19.setIcon(icon)
+        self.pushButton_19.setIconSize(QSize(25, 25))
+
+        self.horizontalLayout_11.addWidget(self.pushButton_19, 0, Qt.AlignLeft)
+
+        self.pushButton_20 = QPushButton(self.frame_3)
+        self.pushButton_20.setObjectName(u"pushButton_20")
+        self.pushButton_20.setMinimumSize(QSize(45, 45))
+        self.pushButton_20.setMaximumSize(QSize(45, 45))
+        self.pushButton_20.setStyleSheet(u"QPushButton {\n"
+"	background-color: white;\n"
+"	border:none;\n"
+"	border-radius:22px\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: rgb(237, 237, 238);\n"
+"}")
+        icon1 = QIcon()
+        icon1.addFile(u"../../../../Python/Project/ACGN_HYM/icons/openUrl.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.pushButton_20.setIcon(icon1)
+        self.pushButton_20.setIconSize(QSize(20, 20))
+
+        self.horizontalLayout_11.addWidget(self.pushButton_20, 0, Qt.AlignRight)
+
+
+        self.verticalLayout_11.addWidget(self.frame_3)
+
+        self.frame_4 = QFrame(DetailPage)
+        self.frame_4.setObjectName(u"frame_4")
+        self.frame_4.setMinimumSize(QSize(0, 310))
+        self.frame_4.setMaximumSize(QSize(16777215, 310))
+        self.frame_4.setStyleSheet(u"QFrame {\n"
+"	background-color: white;\n"
+"	border: none;\n"
+"}")
+        self.frame_4.setFrameShape(QFrame.StyledPanel)
+        self.frame_4.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_14 = QHBoxLayout(self.frame_4)
+        self.horizontalLayout_14.setSpacing(0)
+        self.horizontalLayout_14.setObjectName(u"horizontalLayout_14")
+        self.horizontalLayout_14.setContentsMargins(50, 0, 50, 0)
+        self.cover_label_3 = QLabel(self.frame_4)
+        self.cover_label_3.setObjectName(u"cover_label_3")
+        self.cover_label_3.setMinimumSize(QSize(220, 310))
+        self.cover_label_3.setMaximumSize(QSize(220, 310))
+        self.cover_label_3.setStyleSheet(u"border-radius: 15px;")
+        self.cover_label_3.setAlignment(Qt.AlignCenter)
+
+        self.horizontalLayout_14.addWidget(self.cover_label_3)
+
+        self.verticalLayout_13 = QVBoxLayout()
+        self.verticalLayout_13.setSpacing(13)
+        self.verticalLayout_13.setObjectName(u"verticalLayout_13")
+        self.verticalLayout_13.setContentsMargins(10, -1, -1, 0)
+        self.textEdit = QTextEdit(self.frame_4)
+        self.textEdit.setObjectName(u"textEdit")
+        self.textEdit.setMinimumSize(QSize(0, 45))
+        self.textEdit.setMaximumSize(QSize(16777215, 45))
+        font = QFont()
+        font.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
+        font.setPointSize(20)
+        font.setBold(True)
+        self.textEdit.setFont(font)
+        self.textEdit.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.textEdit.setFrameShape(QFrame.NoFrame)
+        self.textEdit.setReadOnly(True)
+
+        self.verticalLayout_13.addWidget(self.textEdit)
+
+        self.pushButton_23 = QPushButton(self.frame_4)
+        self.pushButton_23.setObjectName(u"pushButton_23")
+        self.pushButton_23.setMinimumSize(QSize(80, 35))
+        font1 = QFont()
+        font1.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
+        font1.setPointSize(15)
+        font1.setBold(False)
+        self.pushButton_23.setFont(font1)
+        self.pushButton_23.setStyleSheet(u"border: 1px solid gray;\n"
+"border-radius:8px;")
+
+        self.verticalLayout_13.addWidget(self.pushButton_23, 0, Qt.AlignLeft)
+
+        self.pushButton_24 = QPushButton(self.frame_4)
+        self.pushButton_24.setObjectName(u"pushButton_24")
+        font2 = QFont()
+        font2.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
+        font2.setPointSize(15)
+        self.pushButton_24.setFont(font2)
+        self.pushButton_24.setStyleSheet(u"border: none;")
+
+        self.verticalLayout_13.addWidget(self.pushButton_24, 0, Qt.AlignLeft)
+
+        self.pushButton_21 = QPushButton(self.frame_4)
+        self.pushButton_21.setObjectName(u"pushButton_21")
+        self.pushButton_21.setFont(font2)
+        self.pushButton_21.setStyleSheet(u"border: none;")
+
+        self.verticalLayout_13.addWidget(self.pushButton_21, 0, Qt.AlignLeft)
+
+        self.pushButton_25 = QPushButton(self.frame_4)
+        self.pushButton_25.setObjectName(u"pushButton_25")
+        self.pushButton_25.setFont(font2)
+        self.pushButton_25.setStyleSheet(u"border: none;")
+
+        self.verticalLayout_13.addWidget(self.pushButton_25, 0, Qt.AlignLeft)
+
+        self.pushButton_26 = QPushButton(self.frame_4)
+        self.pushButton_26.setObjectName(u"pushButton_26")
+        self.pushButton_26.setMinimumSize(QSize(80, 35))
+        self.pushButton_26.setFont(font2)
+        self.pushButton_26.setStyleSheet(u"border: 1px solid gray;\n"
+"border-radius:15px")
+
+        self.verticalLayout_13.addWidget(self.pushButton_26, 0, Qt.AlignLeft)
+
+        self.pushButton_27 = QPushButton(self.frame_4)
+        self.pushButton_27.setObjectName(u"pushButton_27")
+        font3 = QFont()
+        font3.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
+        font3.setPointSize(14)
+        self.pushButton_27.setFont(font3)
+        self.pushButton_27.setStyleSheet(u"border: none;")
+
+        self.verticalLayout_13.addWidget(self.pushButton_27, 0, Qt.AlignLeft)
+
+
+        self.horizontalLayout_14.addLayout(self.verticalLayout_13)
+
+        self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_14.addItem(self.horizontalSpacer_6)
+
+
+        self.verticalLayout_11.addWidget(self.frame_4)
+
+        self.tabWidget = QTabWidget(DetailPage)
+        self.tabWidget.setObjectName(u"tabWidget")
+        self.tabWidget.setMinimumSize(QSize(0, 100))
+        font4 = QFont()
+        font4.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
+        font4.setPointSize(12)
+        font4.setBold(False)
+        self.tabWidget.setFont(font4)
+        self.tabWidget.setStyleSheet(u"QTabWidget::tab-bar {\n"
+"    alignment: center;\n"
+"}")
+        self.tab = QWidget()
+        self.tab.setObjectName(u"tab")
+        self.verticalLayout_14 = QVBoxLayout(self.tab)
+        self.verticalLayout_14.setSpacing(10)
+        self.verticalLayout_14.setObjectName(u"verticalLayout_14")
+        self.verticalLayout_14.setContentsMargins(50, 20, 50, 0)
+        self.frame_5 = QFrame(self.tab)
+        self.frame_5.setObjectName(u"frame_5")
+        self.frame_5.setStyleSheet(u"border: none;")
+        self.frame_5.setFrameShape(QFrame.StyledPanel)
+        self.frame_5.setFrameShadow(QFrame.Raised)
+
+        self.verticalLayout_14.addWidget(self.frame_5, 0, Qt.AlignTop)
+
+        self.textEdit_2 = QTextEdit(self.tab)
+        self.textEdit_2.setObjectName(u"textEdit_2")
+        font5 = QFont()
+        font5.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
+        font5.setPointSize(10)
+        font5.setBold(True)
+        self.textEdit_2.setFont(font5)
+        self.textEdit_2.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.textEdit_2.setStyleSheet(u"")
+        self.textEdit_2.setFrameShape(QFrame.NoFrame)
+        self.textEdit_2.setReadOnly(True)
+
+        self.verticalLayout_14.addWidget(self.textEdit_2)
+
+        self.tabWidget.addTab(self.tab, "")
+        self.tab_2 = QWidget()
+        self.tab_2.setObjectName(u"tab_2")
+        self.tabWidget.addTab(self.tab_2, "")
+        self.tab_3 = QWidget()
+        self.tab_3.setObjectName(u"tab_3")
+        self.tabWidget.addTab(self.tab_3, "")
+        self.tab_4 = QWidget()
+        self.tab_4.setObjectName(u"tab_4")
+        self.tabWidget.addTab(self.tab_4, "")
+
+        self.verticalLayout_11.addWidget(self.tabWidget)
+
+
+        self.retranslateUi(DetailPage)
+
+        self.tabWidget.setCurrentIndex(0)
+
+
+        QMetaObject.connectSlotsByName(DetailPage)
+    # setupUi
+
+    def retranslateUi(self, DetailPage):
+        self.pushButton_19.setText("")
+        self.pushButton_20.setText("")
+        self.cover_label_3.setText(QCoreApplication.translate("DetailPage", u"\u5c01\u9762", None))
+        self.pushButton_23.setText(QCoreApplication.translate("DetailPage", u"\u65f6\u95f4", None))
+        self.pushButton_24.setText(QCoreApplication.translate("DetailPage", u"\u5168-\u8bdd", None))
+        self.pushButton_21.setText(QCoreApplication.translate("DetailPage", u"|\u4eba\u8bc4|#", None))
+        self.pushButton_25.setText(QCoreApplication.translate("DetailPage", u"\u6536\u85cf/\u5728\u770b/\u629b\u5f03", None))
+        self.pushButton_26.setText(QCoreApplication.translate("DetailPage", u"\u8ffd\u756a", None))
+        self.pushButton_27.setText(QCoreApplication.translate("DetailPage", u"\u9009\u96c6", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("DetailPage", u"\u8be6\u60c5", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("DetailPage", u"\u89d2\u8272", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QCoreApplication.translate("DetailPage", u"\u76f8\u5173\u6761\u76ee", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), QCoreApplication.translate("DetailPage", u"\u5236\u4f5c\u4eba\u5458", None))
+        pass
+    # retranslateUi
+

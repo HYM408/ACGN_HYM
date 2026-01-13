@@ -1,0 +1,105 @@
+from pathlib import Path
+from lxml import html
+import re
+import json
+from urllib.parse import urljoin
+from difflib import SequenceMatcher
+from playwright.sync_api import sync_playwright
+import httpx
+
+
+class VideoCrawler:
+    def __init__(self, config_file="css.json"):
+        """初始化爬虫，直接加载配置"""
+        config_path = Path(__file__).parent / config_file
+        self.config = json.loads(config_path.read_text(encoding='utf-8'))
+
+    def search_site(self, keyword, site_id):
+        if site_id not in self.config["site_configs"]:
+            return None
+
+        site_config = self.config["site_configs"][site_id]
+        url = site_config["base_url"] + site_config["search_path"].replace("{keyword}", keyword)
+        headers = {'User-Agent': site_config.get("user_agent")}
+        try:
+            response = httpx.get(url, headers=headers, timeout=10)
+            tree = html.fromstring(response.content)
+            titles = tree.cssselect(site_config["title"])
+            links = tree.cssselect(site_config["link"])
+            # 收集所有结果并计算相似度
+            results = []
+            for title_elem, link_elem in zip(titles, links):
+                title = title_elem.text_content().strip()
+                link = urljoin(site_config["base_url"], link_elem.get('href'))
+                similarity = SequenceMatcher(None, keyword, title).ratio()
+
+                results.append({
+                    'title': title,
+                    'link': link,
+                    'similarity': similarity
+                })
+
+            # 选择相似度最高的结果
+            if results:
+                best_result = max(results, key=lambda x: x['similarity'])
+
+                # 获取线路
+                routes = self.get_routes(best_result['link'], site_id)
+
+                return {
+                    'title': best_result['title'],
+                    'link': best_result['link'],
+                    'similarity': best_result['similarity'],
+                    'site': site_id,
+                    'routes': routes
+                }
+        except Exception as e:
+            print(f"站点 {site_id} 搜索失败: {e}")
+        return None
+
+    def get_routes(self, page_url, site_id):
+        site_config = self.config["site_configs"][site_id]
+        headers = {'User-Agent': site_config.get("user_agent")}
+        try:
+            response = httpx.get(page_url, headers=headers, timeout=10)
+            tree = html.fromstring(response.content)
+            routes = []
+            route_tabs = tree.cssselect(site_config["route_tabs"])
+            episode_containers = tree.cssselect(site_config["episode_containers"])
+            for route_tab, container in zip(route_tabs, episode_containers):
+                route_name = route_tab.text_content().strip()
+                episodes = []
+                for ep in container.cssselect(site_config["episode_items"]):
+                    episode_name = ep.text_content().strip()
+                    episode_link = ep.get('href')
+                    episodes.append({
+                        'name': episode_name,
+                        'link': urljoin(page_url, episode_link)
+                    })
+                routes.append({
+                    'route': route_name,
+                    'episodes': episodes
+                })
+            return routes
+        except Exception as e:
+            print(f"获取线路失败: {e}")
+            return []
+
+    def find_video_stream(self, episode_url, site_id):
+        site_config = self.config["site_configs"][site_id]
+        pattern = re.compile('|'.join(site_config["video_patterns"]), re.IGNORECASE)
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            video_url = None
+            def on_request(request):
+                nonlocal video_url
+                if pattern.search(request.url):
+                    video_url = request.url
+            page.on("request", on_request)
+            try:
+                page.goto(episode_url, wait_until="networkidle", timeout=30000)
+                page.wait_for_timeout(5000)
+                return video_url
+            finally:
+                browser.close()

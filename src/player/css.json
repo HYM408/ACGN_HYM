@@ -1,0 +1,26 @@
+{
+  "site_configs": {
+    "girigirilove": {
+      "base_url": "https://bgm.girigirilove.com",
+      "search_path": "/search/-------------/?wd={keyword}",
+      "title": ".slide-info-title",
+      "link": "a[href*='/GV']",
+      "route_tabs": ".anthology-tab .swiper-slide",
+      "episode_containers": ".anthology-list-box",
+      "episode_items": ".anthology-list-play a",
+      "video_patterns": ["\\.m3u8"],
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    },
+    "NT": {
+      "base_url": "https://www.ntdm8.com",
+      "search_path": "/search/-------------.html?wd={keyword}",
+      "title": ".cell_imform_name",
+      "link": ".cell_poster",
+      "route_tabs": "#menu0 li",
+      "episode_containers": "#content .mod",
+      "episode_items": "ul li a",
+      "video_patterns": ["tiktokcdn"],
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    }
+  }
+}
