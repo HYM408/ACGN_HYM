@@ -1,8 +1,8 @@
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QPushButton, QLabel
 from PySide6.QtCore import QObject, Qt, Signal
-from src.sqlite import get_episodes_by_subject_id
+from PySide6.QtWidgets import QPushButton, QLabel
 from src.thread_manager import thread_manager
+from src.sqlite import get_episodes_by_subject_id
 
 
 class EpisodeManager(QObject):

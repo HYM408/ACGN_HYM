@@ -1,5 +1,5 @@
-from src.sqlite import insert_many_data, clear_table
 from src.thread_manager import thread_manager
+from src.sqlite import insert_many_data, clear_table
 
 
 class SettingsPageManager:

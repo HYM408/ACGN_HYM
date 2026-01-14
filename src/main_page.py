@@ -1,12 +1,11 @@
-from PySide6.QtCore import Qt, QSize, QTimer, QObject, Signal
 from PySide6.QtGui import QIcon, QFont, QCursor
+from PySide6.QtCore import Qt, QSize, QTimer, QObject, Signal
 from PySide6.QtWidgets import QLabel, QFrame, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QPushButton
-from src.image_utils import load_image_with_cache
-from src.sqlite import get_by_subject_type_and_type
-from src.menu_utils import show_status_selector
-from src.rss import rss_manager
 from src.cache_manager import CacheManager
 from src.thread_manager import thread_manager
+from src.menu_utils import show_status_selector
+from src.image_utils import load_image_with_cache
+from src.sqlite import get_by_subject_type_and_type
 
 
 class MainPageManager(QObject):
