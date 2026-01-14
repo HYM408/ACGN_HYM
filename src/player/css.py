@@ -1,16 +1,16 @@
-from pathlib import Path
-from lxml import html
 import re
 import json
+import httpx
+from lxml import html
+from pathlib import Path
 from urllib.parse import urljoin
 from difflib import SequenceMatcher
 from playwright.sync_api import sync_playwright
-import httpx
 
 
 class VideoCrawler:
     def __init__(self, config_file="css.json"):
-        """初始化爬虫，直接加载配置"""
+        """初始化爬虫"""
         config_path = Path(__file__).parent / config_file
         self.config = json.loads(config_path.read_text(encoding='utf-8'))
         self.site_configs = self.config.get("site_configs", {})
@@ -32,7 +32,6 @@ class VideoCrawler:
             tree = html.fromstring(response.text)
             titles = tree.cssselect(site_config["title"])
             links = tree.cssselect(site_config["link"])
-            # 收集所有结果并计算相似度
             results = []
             for title_elem, link_elem in zip(titles, links):
                 title = title_elem.text_content().strip()
@@ -40,26 +39,11 @@ class VideoCrawler:
                 similarity = SequenceMatcher(None, keyword, title).ratio()
                 if link.startswith("http://"):
                     link = link.replace("http://", "https://", 1)
-                results.append({
-                    'title': title,
-                    'link': link,
-                    'similarity': similarity
-                })
-
-            # 选择相似度最高的结果
+                results.append({'title': title, 'link': link, 'similarity': similarity})
             if results:
                 best_result = max(results, key=lambda x: x['similarity'])
-
-                # 获取线路
                 routes = self.get_routes(best_result['link'], site_id)
-
-                return {
-                    'title': best_result['title'],
-                    'link': best_result['link'],
-                    'similarity': best_result['similarity'],
-                    'site': site_id,
-                    'routes': routes
-                }
+                return {'title': best_result['title'], 'link': best_result['link'], 'similarity': best_result['similarity'], 'site': site_id, 'routes': routes}
         except Exception as e:
             print(f"站点 {site_id} 搜索失败: {e}")
         return None
@@ -80,20 +64,15 @@ class VideoCrawler:
                 for ep in container.cssselect(site_config["episode_items"]):
                     episode_name = ep.text_content().strip()
                     episode_link = ep.get('href')
-                    episodes.append({
-                        'name': episode_name,
-                        'link': urljoin(page_url, episode_link)
-                    })
-                routes.append({
-                    'route': route_name,
-                    'episodes': episodes
-                })
+                    episodes.append({'name': episode_name, 'link': urljoin(page_url, episode_link)})
+                routes.append({'route': route_name, 'episodes': episodes})
             return routes
         except Exception as e:
             print(f"获取线路失败: {e}")
             return []
 
     def find_video_stream(self, episode_url, site_id):
+        """捕获视频播放链接"""
         site_config = self.site_configs.get(site_id)
         pattern = re.compile('|'.join(site_config["video_patterns"]), re.IGNORECASE)
         with sync_playwright() as p:

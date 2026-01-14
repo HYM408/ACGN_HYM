@@ -1,33 +1,16 @@
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
-from PySide6.QtCore import QThreadPool, Signal, QObject, Qt
 from PySide6.QtWidgets import QPushButton, QVBoxLayout, QLabel, QFrame, QHBoxLayout, QSpacerItem, QSizePolicy
 from src.player.css import VideoCrawler
 from src.sqlite import get_by_subject_id
+from src.thread_manager import thread_manager
 from src.player.player_ui import play_video_in_player
-
-
-class SiteSearchRunner(QObject):
-    """站点搜索执行器"""
-    site_completed = Signal(dict)
-
-    def __init__(self, site_id, keyword, crawler):
-        super().__init__()
-        self.site_id = site_id
-        self.keyword = keyword
-        self.crawler = crawler
-
-    def run(self):
-        result = self.crawler.search_site(self.keyword, self.site_id)
-        status = 'success' if result and result.get('routes') else 'failed'
-        self.site_completed.emit({'site_id': self.site_id,'status': status,'result': result})
 
 
 class ChoiceEpisodeManager:
     def __init__(self, main_window):
         self.main_window = main_window
         self.site_widgets = {}
-        self.thread_pool = QThreadPool()
-        self.runners = []
         self.current_episode_data = None
         self.crawler = VideoCrawler()
 
@@ -75,19 +58,16 @@ class ChoiceEpisodeManager:
         spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         main_layout.addItem(spacer)
         # 获取所有站点
-        crawler = self.crawler
-        site_ids = sorted(list(crawler.site_configs.keys()))
+        site_ids = sorted(list(self.crawler.site_configs.keys()))
         # 创建初始卡片
         self.site_widgets.clear()
-        self.runners.clear()
         for site_id in site_ids:
             site_widget = self.create_site_widget(site_id, 'loading', None)
             self.site_widgets[site_id] = site_widget
             self.sites_layout.addWidget(site_widget)
-            runner = SiteSearchRunner(site_id, keyword, crawler)
-            runner.site_completed.connect(self.update_site_widget)
-            self.runners.append(runner)
-            self.thread_pool.start(runner.run)
+        # 搜索线程
+        thread_manager.site_search_completed.connect(self.update_site_widget)
+        thread_manager.search_sites(site_ids, keyword, self.crawler)
 
     def create_site_widget(self, site_id, status, result):
         """创建站点卡片"""
@@ -95,7 +75,7 @@ class ChoiceEpisodeManager:
         layout = QVBoxLayout(site_frame)
         layout.setContentsMargins(15, 15, 15, 15)
         layout.setSpacing(10)
-        # 第一行：站点和来源
+        # 站点
         top_layout = QHBoxLayout()
         top_layout.setSpacing(10)
         # 站点名称
@@ -117,7 +97,7 @@ class ChoiceEpisodeManager:
             source_label.setText("✗")
         top_layout.addWidget(source_label, 1)
         layout.addLayout(top_layout)
-        # 线路按钮（水平排列，左对齐）
+        # 线路
         if status == 'success' and result.get('routes'):
             routes_layout = QHBoxLayout()
             routes_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -139,13 +119,13 @@ class ChoiceEpisodeManager:
                         border-color: #aaa;
                     }
                 """)
-                button.clicked.connect(lambda checked, s=site_id, r=route:self.handle_route_click(s, r))
+                button.clicked.connect(lambda checked, s=site_id, r=route: self.handle_route_click(s, r))
                 routes_layout.addWidget(button)
             layout.addLayout(routes_layout)
         return site_frame
 
     def handle_route_click(self, site_id, route):
-        """处理线路按钮点击事件"""
+        """点击线路"""
         sort = None
         if 'sort' in self.current_episode_data:
             sort = self.current_episode_data.get('sort')
@@ -158,37 +138,30 @@ class ChoiceEpisodeManager:
                 return
             episode = route['episodes'][episode_index]
             episode_url = episode['link']
-            video_url = self.crawler.find_video_stream(episode_url, site_id)
-            if video_url is None:
-                print("video_url=None")
-                return
-            if 'url=' in video_url:
-                start = video_url.find('url=') + 4
-                end = video_url.find('&', start)
-                if end == -1: end = len(video_url)
-                video_url = video_url[start:end]
-            # 打印结果
-            print(f"{episode_url}")
-            print(f"{video_url}")
-            # 播放视频
-            if video_url:
-                player_widget = self.main_window.loaded_pages["player"]
-                self.main_window.main_stackedWidget.setCurrentWidget(player_widget)
-                if play_video_in_player(player_widget, video_url):
-                    print("视频开始播放")
-                else:
-                    print("视频播放失败")
+            print(f"开始获取视频链接: {episode_url}")
+            thread_manager.fetch_video_url(episode_url, site_id, self.crawler, self.on_video_fetched)
         except (ValueError, IndexError) as e:
             print(f"错误：{str(e)}")
 
+    def on_video_fetched(self, video_url):
+        """视频链接获取完成的回调"""
+        if video_url:
+            print(f"链接:{video_url}")
+            player_widget = self.main_window.loaded_pages["player"]
+            self.main_window.main_stackedWidget.setCurrentWidget(player_widget)
+            if play_video_in_player(player_widget, video_url):
+                print("视频开始播放")
+            else:
+                print("视频播放失败")
+        else:
+            print("获取视频链接失败")
+
     def update_site_widget(self, site_data):
-        """更新站点卡片"""
+        """更新站点组件"""
         site_id = site_data['site_id']
         status = site_data['status']
         result = site_data['result']
-        # 创建新的卡片
         new_widget = self.create_site_widget(site_id, status, result)
-        # 替换旧的卡片
         if site_id in self.site_widgets:
             old_widget = self.site_widgets[site_id]
             index = self.sites_layout.indexOf(old_widget)
