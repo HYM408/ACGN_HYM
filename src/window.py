@@ -10,7 +10,7 @@ from src.main_page import MainPageManager
 from src.detail_page import DetailManager
 from src.episode_page import EpisodeManager
 from src.search_page import SearchPageManager
-from src.player.player import setup_video_player
+from src.player.player_ui_manager import setup_video_player
 from src.settings_page import SettingsPageManager
 from src.player.choice_episode import ChoiceEpisodeManager
 
