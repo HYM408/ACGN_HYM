@@ -6,14 +6,14 @@ from PySide6.QtWidgets import QApplication, QStyle
 from src.rss import rss_manager
 from src.window import MainWindow
 from src.config import create_config
-from src.sqlite import cleanup as cleanup_db
-from src.thread_manager import thread_manager
 
 
 def cleanup():
     """退出时清理资源"""
+    from src.sqlite import cleanup
+    from src.thread_manager import thread_manager
+    cleanup()
     thread_manager.cleanup()
-    cleanup_db()
     print("资源清理完成")
 
 
