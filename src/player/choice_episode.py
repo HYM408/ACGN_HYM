@@ -39,13 +39,20 @@ class ChoiceEpisodeManager:
         self.get_name_and_fetch_routes(episode_data)
 
     def get_name_and_fetch_routes(self, episode_data):
-        subject_id = episode_data.get('subject_id')
+        """获取subject_id"""
+        if 'episode' in episode_data and isinstance(episode_data['episode'], dict):
+            subject_id = episode_data['episode'].get('subject_id')
+            if 'sort' not in episode_data and 'episode' in episode_data:
+                episode_data['sort'] = episode_data['episode'].get('sort')
+        else:
+            subject_id = episode_data.get('subject_id')
         collection_data = get_by_subject_id(subject_id)
         keyword = collection_data.get('subject_name_cn') or collection_data.get('subject_name')
         if keyword:
             self.fetch_route_names(keyword)
 
     def fetch_route_names(self, keyword):
+        """获取视频线路"""
         player_widget = self.main_window.loaded_pages["player"]
         container = player_widget.ui.scrollAreaWidgetContents
         # 清空容器
@@ -59,25 +66,24 @@ class ChoiceEpisodeManager:
         main_layout = QVBoxLayout(container)
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(5)
-        # 站点容器
+        # 站点
         self.sites_container = QFrame(container)
         self.sites_layout = QVBoxLayout(self.sites_container)
         self.sites_layout.setSpacing(5)
         main_layout.addWidget(self.sites_container)
-        # 在底部添加弹簧
+        # 底部弹簧
         spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         main_layout.addItem(spacer)
-        # 获取所有站点ID并排序
+        # 获取所有站点
         crawler = self.crawler
         site_ids = sorted(list(crawler.site_configs.keys()))
-        # 创建所有站点的初始卡片
+        # 创建初始卡片
         self.site_widgets.clear()
         self.runners.clear()
         for site_id in site_ids:
             site_widget = self.create_site_widget(site_id, 'loading', None)
             self.site_widgets[site_id] = site_widget
             self.sites_layout.addWidget(site_widget)
-            # 创建并启动搜索运行器
             runner = SiteSearchRunner(site_id, keyword, crawler)
             runner.site_completed.connect(self.update_site_widget)
             self.runners.append(runner)
@@ -140,13 +146,11 @@ class ChoiceEpisodeManager:
 
     def handle_route_click(self, site_id, route):
         """处理线路按钮点击事件"""
-        if not self.current_episode_data:
-            print("错误：未找到当前剧集数据")
-            return
-        sort = self.current_episode_data.get('sort')
-        if sort is None:
-            print("错误：未找到sort值")
-            return
+        sort = None
+        if 'sort' in self.current_episode_data:
+            sort = self.current_episode_data.get('sort')
+        elif 'episode' in self.current_episode_data and isinstance(self.current_episode_data['episode'], dict):
+            sort = self.current_episode_data['episode'].get('sort')
         try:
             episode_index = int(sort) - 1
             if episode_index < 0 or episode_index >= len(route['episodes']):
@@ -164,11 +168,8 @@ class ChoiceEpisodeManager:
                 if end == -1: end = len(video_url)
                 video_url = video_url[start:end]
             # 打印结果
-            print(f"站点: {site_id}")
-            print(f"线路: {route['route']}")
-            print(f"剧集: {episode['name']}")
-            print(f"剧集链接: {episode_url}")
-            print(f"视频链接: {video_url}")
+            print(f"{episode_url}")
+            print(f"{video_url}")
             # 播放视频
             if video_url:
                 player_widget = self.main_window.loaded_pages["player"]
@@ -178,7 +179,7 @@ class ChoiceEpisodeManager:
                 else:
                     print("视频播放失败")
         except (ValueError, IndexError) as e:
-            print(f"错误：处理剧集数据时出错 - {str(e)}")
+            print(f"错误：{str(e)}")
 
     def update_site_widget(self, site_data):
         """更新站点卡片"""
