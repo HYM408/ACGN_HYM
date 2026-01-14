@@ -18,7 +18,14 @@ class VideoCrawler:
     def search_site(self, keyword, site_id):
         site_config = self.site_configs.get(site_id)
         url = site_config["base_url"] + site_config["search_path"].replace("{keyword}", keyword)
-        headers = {'User-Agent': site_config.get("user_agent")}
+        headers = {
+            'User-Agent': site_config.get("user_agent"),
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+        }
         try:
             response = httpx.get(url, headers=headers, timeout=10)
             response.encoding = 'utf-8'
@@ -31,7 +38,8 @@ class VideoCrawler:
                 title = title_elem.text_content().strip()
                 link = urljoin(site_config["base_url"], link_elem.get('href'))
                 similarity = SequenceMatcher(None, keyword, title).ratio()
-
+                if link.startswith("http://"):
+                    link = link.replace("http://", "https://", 1)
                 results.append({
                     'title': title,
                     'link': link,
@@ -92,14 +100,23 @@ class VideoCrawler:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
             video_url = None
+            found = False
             def on_request(request):
-                nonlocal video_url
-                if not video_url and pattern.search(request.url):
+                nonlocal video_url, found
+                if not found and pattern.search(request.url):
                     video_url = request.url
+                    found = True
             page.on("request", on_request)
             try:
-                page.goto(episode_url, wait_until="domcontentloaded", timeout=15000)
-                page.wait_for_timeout(3000)
+                page.goto(episode_url)
+                max_checks = 30
+                for _ in range(max_checks):
+                    if found:
+                        break
+                    page.wait_for_timeout(500)
                 return video_url
+            except Exception as e:
+                print(f"访问页面时出错: {e}")
+                return None
             finally:
                 browser.close()

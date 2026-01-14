@@ -32,6 +32,116 @@
       "episode_items": ".con_c2_list li a",
       "video_patterns": ["tiktokcdn"],
       "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    },
+    "稀饭动漫": {
+      "base_url": "https://dm.xifanacg.com",
+      "search_path": "/search.html?wd={keyword}",
+      "title": ".slide-info-title.hide",
+      "link": "a[href^='/bangumi/']",
+      "route_tabs": ".anthology-tab .swiper-slide",
+      "episode_containers": ".anthology-list-box",
+      "episode_items": ".anthology-list-play a",
+      "video_patterns": [".mp4"],
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    },
+    "omofun": {
+      "base_url": "https://omofun.icu",
+      "search_path": "/vod/search.html?wd={keyword}",
+      "title": ".module-card-item-title a",
+      "link": ".module-card-item-title a",
+      "route_tabs": ".module-tab-item.tab-item",
+      "episode_containers": ".module-list.sort-list.tab-list.his-tab-list",
+      "episode_items": ".module-play-list-link",
+      "video_patterns": ["sns-video-hw",".mp4","tiktokcdn"],
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    },
+    "饭团动漫(半墙)": {
+      "base_url": "https://acgfta.com",
+      "search_path": "/search.html?wd={keyword}",
+      "title": ".anime-card .stretched-link",
+      "link": ".anime-card .stretched-link",
+      "route_tabs": ".nav-pills .nav-item .nav-link",
+      "episode_containers": ".tab-content .tab-pane",
+      "episode_items": ".btn-episode",
+      "video_patterns": [".m3u8"],
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    },
+    "番茄动漫": {
+      "base_url": "https://www.fqdm.cc",
+      "search_path": "/index.php/vod/search.html?wd={keyword}",
+      "title": ".module-card-item-title a",
+      "link": ".module-card-item-poster",
+      "route_tabs": ".module-tab-item.tab-item",
+      "episode_containers": ".module-list.sort-list.tab-list.his-tab-list",
+      "episode_items": ".module-play-list-link",
+      "video_patterns": ["index.m3u8"],
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    },
+    "风车动漫": {
+      "base_url": "https://www.dmla4.com",
+      "search_path": "/search/-------------.html?wd={keyword}",
+      "title": "h3.title a",
+      "link": "h3.title a",
+      "route_tabs": ".nav.nav-tabs li",
+      "episode_containers": ".tab-pane",
+      "episode_items": ".stui-content__playlist li a",
+      "video_patterns": ["tiktokcdn"],
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    },
+    "AGE动漫": {
+      "base_url": "https://www.agedm.io",
+      "search_path": "/search?query={keyword}&page=1",
+      "title": ".card-title a",
+      "link": ".card-title a",
+      "route_tabs": ".nav.nav-pills li button",
+      "episode_containers": ".tab-content .tab-pane",
+      "episode_items": ".video_detail_episode li a.video_detail_spisode_link",
+      "video_patterns": ["video"],
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    },
+    "动漫蛋": {
+      "base_url": "https://www.dmdan8.com",
+      "search_path": "/search/-------------.html?wd={keyword}",
+      "title": ".stui-vodlist__media .detail h3.title a",
+      "link": ".stui-vodlist__media .detail h3.title a",
+      "route_tabs": ".nav.nav-tabs li a[data-toggle='tab']",
+      "episode_containers": ".tab-content .tab-pane",
+      "episode_items": ".stui-content__playlist li a",
+      "video_patterns": ["tiktokcdn"],
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    },
+    "樱花动漫(半墙)": {
+      "base_url": "https://www.yinghua14.com",
+      "search_path": "/index.php/vod/search.html?wd={keyword}",
+      "title": ".stui-vodlist__media .detail h3.title a",
+      "link": ".stui-vodlist__media .detail h3.title a",
+      "route_tabs": ".stui-pannel-box.b.playlist .stui-pannel__head h3.title",
+      "episode_containers": ".stui-pannel-box.b.playlist .stui-pannel_bd",
+      "episode_items": ".stui-content__playlist li a",
+      "video_patterns": [".m3u8"],
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    },
+    "中国动漫网(验证码问题)": {
+      "base_url": "https://zgacgn.com",
+      "search_path": "/search.php?searchword={keyword}",
+      "title": "#cont_pub .tit a",
+      "link": "#cont_pub .tit a",
+      "route_tabs": "div.playAsc h2.rightTitle",
+      "episode_containers": "div.playAsc ul.playList.clearfix",
+      "episode_items": "li a",
+      "video_patterns": [".m3u8"],
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    },
+    "七色动漫": {
+      "base_url": "https://www.7sefun.top",
+      "search_path": "/vodsearch/-------------.html?wd={keyword}",
+      "title": ".video-by",
+      "link": ".video-wrapper",
+      "route_tabs": ".chat-stream .chat .chat-header .chat-stream-bfq",
+      "episode_containers": ".chat-stream .chat .message-container.vod-play-list-container",
+      "episode_items": "span a",
+      "video_patterns": ["tiktokcdn"],
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
   }
 }

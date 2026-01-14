@@ -155,6 +155,9 @@ class ChoiceEpisodeManager:
             episode = route['episodes'][episode_index]
             episode_url = episode['link']
             video_url = self.crawler.find_video_stream(episode_url, site_id)
+            if video_url is None:
+                print("video_url=None")
+                return
             if 'url=' in video_url:
                 start = video_url.find('url=') + 4
                 end = video_url.find('&', start)
