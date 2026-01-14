@@ -2,4 +2,5 @@ PySide6
 httpx
 python-vlc
 lxml
+cssselect
 playwright
