@@ -41,7 +41,7 @@
       "route_tabs": ".anthology-tab .swiper-slide",
       "episode_containers": ".anthology-list-box",
       "episode_items": ".anthology-list-play a",
-      "video_patterns": [".mp4"],
+      "video_patterns": ["hydownload",".mp4"],
       "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     },
     "omofun": {

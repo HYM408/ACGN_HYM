@@ -52,7 +52,7 @@ class VideoCrawler:
         site_config = self.site_configs.get(site_id)
         headers = {'User-Agent': site_config.get("user_agent")}
         try:
-            response = httpx.get(page_url, headers=headers, timeout=10)
+            response = httpx.get(page_url, headers=headers, timeout=10, follow_redirects=True)
             response.encoding = 'utf-8'
             tree = html.fromstring(response.text)
             routes = []
