@@ -56,9 +56,6 @@ class VlcPlayer:
         try:
             media = self.instance.media_new(video_url)
             media.add_option(":avcodec-hw=dxva2")
-            media.add_option(":network-caching=100")
-            media.add_option(":file-caching=100")
-            media.add_option(":disc-caching=100")
             self.player.set_media(media)
             self.player.play()
             print(f"开始播放: {video_url}")

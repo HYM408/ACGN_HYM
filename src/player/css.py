@@ -24,10 +24,10 @@ class VideoCrawler:
             'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
             'Accept-Encoding': 'gzip, deflate, br',
             'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
+            'Upgrade-Insecure-Requests': '1'
         }
         try:
-            response = httpx.get(url, headers=headers, timeout=10)
+            response = httpx.get(url, headers=headers, timeout=10, follow_redirects=True)
             response.encoding = 'utf-8'
             tree = html.fromstring(response.text)
             titles = tree.cssselect(site_config["title"])
