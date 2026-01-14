@@ -1,16 +1,16 @@
 from PySide6.QtCore import Qt, QPoint, QTimer
 from PySide6.QtWidgets import QMainWindow, QWidget
-from src.player.player_ui import setup_video_player
 from ui.main_ui import Ui_MainWindow
 from ui.search_ui import Ui_SearchPage
 from ui.detail_ui import Ui_DetailPage
-from ui.choice_ui import Ui_choicePage
-from ui.player_ui import Ui_EpisodePage
+from ui.player_ui import Ui_choicePage
+from ui.episode_ui import Ui_EpisodePage
 from ui.settings_ui import Ui_SettingsPage
 from src.main_page import MainPageManager
 from src.detail_page import DetailManager
 from src.episode_page import EpisodeManager
 from src.search_page import SearchPageManager
+from src.player.player import setup_video_player
 from src.settings_page import SettingsPageManager
 from src.player.choice_episode import ChoiceEpisodeManager
 
@@ -65,6 +65,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.main_stackedWidget.addWidget(player_widget)
         self.video_player = setup_video_player(player_widget)
         self.PlayerManager = ChoiceEpisodeManager(self)
+        self.video_player.back_requested.connect(self.on_player_back_requested)
+
+    def on_player_back_requested(self):
+        """播放器返回"""
+        if self.video_player and self.video_player.is_fullscreen_mode:
+            self.video_player._exit_fullscreen()
+        self.go_back_history()
 
     def setup_titlebar(self):
         """设置标题栏功能"""

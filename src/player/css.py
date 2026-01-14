@@ -45,7 +45,7 @@ class VideoCrawler:
                 routes = self.get_routes(best_result['link'], site_id)
                 return {'title': best_result['title'], 'link': best_result['link'], 'similarity': best_result['similarity'], 'site': site_id, 'routes': routes}
         except Exception as e:
-            print(f"站点 {site_id} 搜索失败: {e}")
+            print(f"{site_id} 搜索失败: {e}")
         return None
 
     def get_routes(self, page_url, site_id):

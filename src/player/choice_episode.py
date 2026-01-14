@@ -1,10 +1,10 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QPushButton, QVBoxLayout, QLabel, QFrame, QHBoxLayout, QSpacerItem, QSizePolicy
+from PySide6.QtWidgets import QPushButton, QVBoxLayout, QLabel, QFrame, QHBoxLayout, QSpacerItem, QSizePolicy, QWidget
 from src.player.css import VideoCrawler
 from src.sqlite import get_by_subject_id
 from src.thread_manager import thread_manager
-from src.player.player_ui import play_video_in_player
+from src.player.player import play_video_in_player
 
 
 class ChoiceEpisodeManager:
@@ -16,6 +16,8 @@ class ChoiceEpisodeManager:
 
     def show_player_page(self, episode_data):
         print(episode_data)
+        current_index = self.main_window.main_stackedWidget.currentIndex()
+        self.main_window.page_history.append(current_index)
         player_widget = self.main_window.loaded_pages["player"]
         self.main_window.main_stackedWidget.setCurrentWidget(player_widget)
         self.current_episode_data = episode_data
@@ -38,34 +40,18 @@ class ChoiceEpisodeManager:
         """获取视频线路"""
         player_widget = self.main_window.loaded_pages["player"]
         container = player_widget.ui.scrollAreaWidgetContents
-        # 清空容器
+        if layout := container.layout():
+            QWidget().setLayout(layout)
+        container.setLayout(QVBoxLayout())
         layout = container.layout()
-        if layout:
-            while layout.count():
-                item = layout.takeAt(0)
-                if item.widget():
-                    item.widget().deleteLater()
-        # 创建主布局
-        main_layout = QVBoxLayout(container)
-        main_layout.setContentsMargins(10, 10, 10, 10)
-        main_layout.setSpacing(5)
-        # 站点
-        self.sites_container = QFrame(container)
-        self.sites_layout = QVBoxLayout(self.sites_container)
-        self.sites_layout.setSpacing(5)
-        main_layout.addWidget(self.sites_container)
-        # 底部弹簧
-        spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        main_layout.addItem(spacer)
-        # 获取所有站点
-        site_ids = sorted(list(self.crawler.site_configs.keys()))
-        # 创建初始卡片
-        self.site_widgets.clear()
+        layout.setContentsMargins(10, 10, 10, 10)
+        site_ids = sorted(self.crawler.site_configs.keys())
+        self.site_widgets = {}
         for site_id in site_ids:
-            site_widget = self.create_site_widget(site_id, 'loading', None)
-            self.site_widgets[site_id] = site_widget
-            self.sites_layout.addWidget(site_widget)
-        # 搜索线程
+            widget = self.create_site_widget(site_id, 'loading', None)
+            self.site_widgets[site_id] = widget
+            layout.addWidget(widget)
+        layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
         thread_manager.site_search_completed.connect(self.update_site_widget)
         thread_manager.search_sites(site_ids, keyword, self.crawler)
 
@@ -138,7 +124,7 @@ class ChoiceEpisodeManager:
                 return
             episode = route['episodes'][episode_index]
             episode_url = episode['link']
-            print(f"开始获取视频链接: {episode_url}")
+            print(f"开始获取视频: {episode_url}")
             thread_manager.fetch_video_url(episode_url, site_id, self.crawler, self.on_video_fetched)
         except (ValueError, IndexError) as e:
             print(f"错误：{str(e)}")
@@ -158,15 +144,15 @@ class ChoiceEpisodeManager:
 
     def update_site_widget(self, site_data):
         """更新站点组件"""
-        site_id = site_data['site_id']
-        status = site_data['status']
-        result = site_data['result']
+        site_id, status, result = site_data['site_id'], site_data['status'], site_data['result']
+        if site_id not in self.site_widgets:
+            return
         new_widget = self.create_site_widget(site_id, status, result)
-        if site_id in self.site_widgets:
-            old_widget = self.site_widgets[site_id]
-            index = self.sites_layout.indexOf(old_widget)
+        old_widget = self.site_widgets[site_id]
+        if layout := old_widget.parent().layout():
+            index = layout.indexOf(old_widget)
             if index >= 0:
-                self.sites_layout.removeWidget(old_widget)
+                layout.removeWidget(old_widget)
+                layout.insertWidget(index, new_widget)
                 old_widget.deleteLater()
-                self.sites_layout.insertWidget(index, new_widget)
                 self.site_widgets[site_id] = new_widget
