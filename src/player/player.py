@@ -213,28 +213,10 @@ class VideoPlayerWidget(QWidget):
         self.video_widget.seek_requested.connect(self.seek_video)
         self.video_widget.control_overlay.play_pause_requested.connect(self.toggle_play_pause)
         self.video_widget.control_overlay.fullscreen_requested.connect(self._toggle_fullscreen)
+        self.video_widget.control_overlay.back_requested.connect(self._on_back_button_clicked)
         layout.addWidget(self.video_widget)
         self.setStyleSheet("QWidget { background-color: #000000; }")
         self.setFocusPolicy(Qt.StrongFocus)
-        # 返回按钮
-        self.back_button = QPushButton(self)
-        self.back_button.setIcon(QIcon("icons/back.png"))
-        self.back_button.setIconSize(QSize(32, 32))
-        self.back_button.setFixedSize(50, 50)
-        self.back_button.setStyleSheet("""
-            QPushButton {
-                background-color: rgba(0, 0, 0, 100);
-                border: none;
-                border-radius: 25px;
-            }
-            QPushButton:hover {
-                background-color: rgba(0, 0, 0, 150);
-            }
-        """)
-        self.back_button.move(20, 20)
-        self.back_button.clicked.connect(self._on_back_button_clicked)
-        self.back_button.raise_()
-        self.back_button.setVisible(True)
 
     def _on_back_button_clicked(self):
         """返回按钮点击事件"""

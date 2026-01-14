@@ -1,12 +1,13 @@
 from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import Qt, QTimer, QRect, QPoint, Signal
-from PySide6.QtGui import QPainter, QColor, QPaintEvent, QMouseEvent, QFont
+from PySide6.QtGui import QPainter, QColor, QPaintEvent, QMouseEvent, QFont, QPixmap
 
 
 class ControlOverlay(QWidget):
     """视频控制面板"""
     play_pause_requested = Signal()
     fullscreen_requested = Signal()
+    back_requested = Signal()
     volume_changed = Signal(float)
 
     def __init__(self, parent=None):
@@ -17,13 +18,15 @@ class ControlOverlay(QWidget):
         self.is_playing = True
         self.current_volume = 50
         # 颜色
-        self.bg_color = QColor(100, 100, 100, 150)
-        self.prog_color = QColor(220, 50, 50, 180)
-        self.point_color = QColor(255, 255, 255, 200)
-        self.btn_color = QColor(255, 255, 255, 200)
-        self.text_color = QColor(255, 255, 255, 200)
+        self.bg_color = QColor(0, 0, 0, 180)
+        self.prog_color = QColor(220, 50, 50, 220)
+        self.point_color = QColor(255, 255, 255, 220)
+        self.btn_color = QColor(255, 255, 255, 220)
+        self.text_color = QColor(255, 255, 255, 220)
         # 按钮尺寸
-        self.btn_radius = 12
+        self.btn_radius = 14
+        # 返回按钮图片
+        self.back_icon = QPixmap("icons/back2.png")
         # 时间
         self.current_time = 0
         self.total_time = 0
@@ -93,19 +96,33 @@ class ControlOverlay(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         w, h = self.width(), self.height()
-        # 底部控制栏区域
-        control_height = 60
-        control_y = h - control_height
-        # 绘制半透明背景
-        painter.fillRect(0, control_y, w, control_height, QColor(0, 0, 0, 180))
-        # 进度条
-        bar_y = control_y + 10
-        bar_x_start = 20
-        bar_width = w - 40
-        bar_height = 6
-        # 进度条背景
+        # 返回按钮
+        back_btn_center = QPoint(30, 30)
+        self.back_btn_center = back_btn_center
+        back_btn_radius = self.btn_radius
+        # 返回按钮背景
         painter.setPen(Qt.NoPen)
         painter.setBrush(self.bg_color)
+        painter.drawEllipse(back_btn_center, back_btn_radius, back_btn_radius)
+        # 返回按钮图标
+        icon_size = int(back_btn_radius * 1.4)
+        icon_x = back_btn_center.x() - icon_size // 2
+        icon_y = back_btn_center.y() - icon_size // 2
+        scaled_pixmap = self.back_icon.scaled(icon_size, icon_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        painter.drawPixmap(icon_x, icon_y, scaled_pixmap)
+        # 底部控制面板
+        control_height = 80
+        control_y = h - control_height
+        # 绘制半透明背景
+        painter.fillRect(0, control_y, w, control_height, self.bg_color)
+        # 进度条
+        bar_y = control_y + 30
+        bar_x_start = 20
+        bar_width = w - 40
+        bar_height = 8
+        # 进度条背景
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(QColor(100, 100, 100, 150))
         painter.drawRect(bar_x_start, bar_y, bar_width, bar_height)
         # 进度条
         if self.progress_position > 0:
@@ -115,18 +132,18 @@ class ControlOverlay(QWidget):
             # 进度点
             point_x = bar_x_start + prog_width
             painter.setBrush(self.point_color)
-            painter.drawEllipse(QPoint(point_x, bar_y + bar_height // 2), 6, 6)
+            painter.drawEllipse(QPoint(point_x, bar_y + bar_height // 2), 8, 8)
         # 时间显示
-        time_font = QFont("Arial", 10)
+        time_font = QFont("Arial", 11)
         painter.setFont(time_font)
         painter.setPen(self.text_color)
         current_time_str = self.format_time(self.current_time)
         total_time_str = self.format_time(self.total_time)
         time_text = f"{current_time_str} / {total_time_str}"
         text_x = bar_x_start
-        painter.drawText(text_x, bar_y - 5, time_text)
+        painter.drawText(text_x, bar_y - 8, time_text)
         # 按钮区域
-        btn_y = control_y + 35
+        btn_y = control_y + 65
         # 计算按钮位置
         play_btn_center = QPoint(30, btn_y)
         volume_btn_center = QPoint(70, btn_y)
@@ -136,15 +153,14 @@ class ControlOverlay(QWidget):
         self.volume_btn_center = volume_btn_center
         self.fullscreen_btn_center = fullscreen_btn_center
         # 播放/暂停
-        painter.setPen(Qt.NoPen)
         painter.setBrush(self.btn_color)
         painter.drawEllipse(play_btn_center, self.btn_radius, self.btn_radius)
         # 播放/暂停图标
-        painter.setBrush(QColor(30, 30, 30, 200))
-        icon_size = 8
+        painter.setBrush(QColor(30, 30, 30, 220))
+        icon_size = 9
         if self.is_playing:
             pause_width = 3
-            gap = 2
+            gap = 3
             left_x = play_btn_center.x() - pause_width - gap//2
             right_x = play_btn_center.x() + gap//2
             painter.drawRect(left_x - pause_width//2, btn_y - icon_size//2, pause_width, icon_size)
@@ -160,20 +176,20 @@ class ControlOverlay(QWidget):
         painter.setBrush(self.btn_color)
         painter.drawEllipse(volume_btn_center, self.btn_radius, self.btn_radius)
         # 音量图标
-        painter.setBrush(QColor(30, 30, 30, 200))
+        painter.setBrush(QColor(30, 30, 30, 220))
         # 绘制扬声器图标
-        speaker_width = 8
-        speaker_height = 6
+        speaker_width = 9
+        speaker_height = 7
         speaker_x = volume_btn_center.x() - speaker_width//2
         speaker_y = btn_y - speaker_height//2
         # 扬声器主体
-        painter.drawRect(speaker_x, speaker_y, 3, speaker_height)
+        painter.drawRect(speaker_x, speaker_y, 4, speaker_height)
         # 音量条
         volume_bar_x = volume_btn_center.x() + 20
-        volume_bar_width = 60
-        volume_bar_height = 4
+        volume_bar_width = 80
+        volume_bar_height = 5
         # 音量条背景
-        painter.setBrush(self.bg_color)
+        painter.setBrush(QColor(100, 100, 100, 150))
         painter.drawRect(volume_bar_x, btn_y - volume_bar_height//2, volume_bar_width, volume_bar_height)
         # 音量条
         volume_width = int(volume_bar_width * (self.current_volume / 100))
@@ -182,13 +198,13 @@ class ControlOverlay(QWidget):
         # 音量点
         volume_point_x = volume_bar_x + volume_width
         painter.setBrush(self.point_color)
-        painter.drawEllipse(QPoint(volume_point_x, btn_y), 4, 4)
+        painter.drawEllipse(QPoint(volume_point_x, btn_y), 5, 5)
         # 全屏按钮
         painter.setBrush(self.btn_color)
         painter.drawEllipse(fullscreen_btn_center, self.btn_radius, self.btn_radius)
         # 全屏图标
-        painter.setBrush(QColor(30, 30, 30, 200))
-        arrow_size = 6
+        painter.setBrush(QColor(30, 30, 30, 220))
+        arrow_size = 7
         # 左上箭头
         points1 = [
             QPoint(fullscreen_btn_center.x() - arrow_size, fullscreen_btn_center.y() - arrow_size),
@@ -212,10 +228,15 @@ class ControlOverlay(QWidget):
             return
         pos = event.position().toPoint()
         self.pending_click_pos = pos
+        in_back_btn = self._is_in_back_button(pos)
         in_play_btn = self._is_in_play_button(pos)
         in_volume_area = self._is_in_volume_area(pos)
         in_fullscreen_btn = self._is_in_fullscreen_button(pos)
         in_progress_bar = self._is_in_progress_bar(pos)
+        if in_back_btn:
+            self.click_timer.stop()
+            self.back_requested.emit()
+            return
         if in_play_btn:
             self.click_timer.stop()
             self.play_pause_requested.emit()
@@ -243,13 +264,21 @@ class ControlOverlay(QWidget):
     def _handle_single_click(self):
         """处理单击事件"""
         if self.pending_click_pos:
-            self.play_pause_requested.emit()
+            if self._is_in_control_area(self.pending_click_pos):
+                self.play_pause_requested.emit()
             self.pending_click_pos = None
 
     def _handle_double_click(self):
         """处理双击事件"""
         self.fullscreen_requested.emit()
         self.pending_click_pos = None
+
+    def _is_in_back_button(self, pos):
+        """检查是否在返回按钮内"""
+        if not hasattr(self, 'back_btn_center'):
+            return False
+        distance = (pos - self.back_btn_center).manhattanLength()
+        return distance <= self.btn_radius
 
     def _is_in_play_button(self, pos):
         """检查是否在播放按钮内"""
@@ -266,10 +295,10 @@ class ControlOverlay(QWidget):
         if btn_distance <= self.btn_radius:
             return True
         volume_bar_x = self.volume_btn_center.x() + 20
-        volume_bar_width = 60
+        volume_bar_width = 80
         volume_bar_rect = QRect(volume_bar_x,
                                self.volume_btn_center.y() - 2,
-                               volume_bar_width, 4)
+                               volume_bar_width, 5)
         return volume_bar_rect.contains(pos)
 
     def _is_in_fullscreen_button(self, pos):
@@ -282,12 +311,19 @@ class ControlOverlay(QWidget):
     def _is_in_progress_bar(self, pos):
         """检查是否在进度条内"""
         h = self.height()
-        control_y = h - 60
-        bar_y = control_y + 10
+        control_y = h - 80
+        bar_y = control_y + 30
         bar_x_start = 20
         bar_width = self.width() - 40
-        bar_rect = QRect(bar_x_start, bar_y - 3, bar_width, 6)
+        bar_rect = QRect(bar_x_start, bar_y - 6, bar_width, 12)
         return bar_rect.contains(pos)
+
+    def _is_in_control_area(self, pos):
+        """检查是否在控制面板区域"""
+        h = self.height()
+        control_y = h - 80
+        control_rect = QRect(0, control_y, self.width(), 80)
+        return control_rect.contains(pos)
 
     def mouseMoveEvent(self, event: QMouseEvent):
         """鼠标移动事件"""
@@ -308,8 +344,8 @@ class ControlOverlay(QWidget):
     def update_position(self, mouse_pos):
         """根据鼠标位置更新播放进度"""
         h = self.height()
-        control_y = h - 60
-        bar_y = control_y + 10
+        control_y = h - 80
+        bar_y = control_y + 30
         bar_x_start = 20
         bar_width = self.width() - 40
         rel_x = mouse_pos.x() - bar_x_start
@@ -323,7 +359,7 @@ class ControlOverlay(QWidget):
         if not hasattr(self, 'volume_btn_center'):
             return
         volume_bar_x = self.volume_btn_center.x() + 20
-        volume_bar_width = 60
+        volume_bar_width = 80
         rel_x = mouse_pos.x() - volume_bar_x
         new_volume = max(0, min(100, int((rel_x / volume_bar_width) * 100)))
         if new_volume != self.current_volume:
