@@ -1,18 +1,18 @@
 from PySide6.QtCore import Qt, QPoint, QTimer
 from PySide6.QtWidgets import QMainWindow, QWidget
-from src.player.player import setup_video_player
-from ui.choice_ui import Ui_choicePage
+from src.player.player_ui import setup_video_player
 from ui.main_ui import Ui_MainWindow
 from ui.search_ui import Ui_SearchPage
 from ui.detail_ui import Ui_DetailPage
-from ui.episode_ui import Ui_EpisodePage
+from ui.choice_ui import Ui_choicePage
+from ui.player_ui import Ui_EpisodePage
 from ui.settings_ui import Ui_SettingsPage
 from src.main_page import MainPageManager
 from src.detail_page import DetailManager
 from src.episode_page import EpisodeManager
-from src.player.choice_episode import ChoiceEpisodeManager
 from src.search_page import SearchPageManager
 from src.settings_page import SettingsPageManager
+from src.player.choice_episode import ChoiceEpisodeManager
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):

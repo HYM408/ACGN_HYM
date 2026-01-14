@@ -1,9 +1,9 @@
+from PySide6.QtGui import QFont
 from PySide6.QtCore import QThreadPool, Signal, QObject, Qt
 from PySide6.QtWidgets import QPushButton, QVBoxLayout, QLabel, QFrame, QHBoxLayout, QSpacerItem, QSizePolicy
-from PySide6.QtGui import QFont
 from src.player.css import VideoCrawler
-from src.player.player import play_video_in_player
 from src.sqlite import get_by_subject_id
+from src.player.player_ui import play_video_in_player
 
 
 class SiteSearchRunner(QObject):
