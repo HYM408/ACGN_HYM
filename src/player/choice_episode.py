@@ -55,7 +55,6 @@ class SiteWidgetFactory:
         # 状态/标题信息
         status_label = QLabel(card)
         status_label.setStyleSheet("color: #666; font-size: 13px;")
-        status_label.setWordWrap(False)
         status_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         if status == 'loading':
             status_label.setText("搜索中...")
