@@ -42,6 +42,11 @@ class ControlOverlay(QWidget):
         self.click_timer.setSingleShot(True)
         self.click_timer.timeout.connect(self._handle_single_click)
         self.pending_click_pos = None
+        # 音量防抖
+        self.volume_debounce_timer = QTimer(self)
+        self.volume_debounce_timer.setSingleShot(True)
+        self.volume_debounce_timer.timeout.connect(self._emit_debounced_volume)
+        self.debounced_volume = 50
 
     def set_play_state(self, playing):
         """设置播放状态"""
@@ -227,7 +232,6 @@ class ControlOverlay(QWidget):
         if event.button() != Qt.LeftButton:
             return
         pos = event.position().toPoint()
-        self.pending_click_pos = pos
         in_back_btn = self._is_in_back_button(pos)
         in_play_btn = self._is_in_play_button(pos)
         in_volume_area = self._is_in_volume_area(pos)
@@ -253,25 +257,34 @@ class ControlOverlay(QWidget):
             self.dragging = True
             self.update_position(pos)
             return
+        if self._is_in_control_area(pos):
+            return
         current_time = event.timestamp()
-        if current_time - self.last_click_time < 300:
+        if current_time - self.last_click_time < 200:
             self.click_timer.stop()
             self._handle_double_click()
         else:
             self.last_click_time = current_time
-            self.click_timer.start(300)
+            self.pending_click_pos = pos
+            self.click_timer.start(200)
 
     def _handle_single_click(self):
         """处理单击事件"""
         if self.pending_click_pos:
-            if self._is_in_control_area(self.pending_click_pos):
-                self.play_pause_requested.emit()
-            self.pending_click_pos = None
+            self.play_pause_requested.emit()
+        self.pending_click_pos = None
 
     def _handle_double_click(self):
         """处理双击事件"""
         self.fullscreen_requested.emit()
         self.pending_click_pos = None
+
+    def _is_in_control_area(self, pos):
+        """检查是否在控制面板区域"""
+        h = self.height()
+        control_y = h - 80
+        control_rect = QRect(0, control_y, self.width(), 80)
+        return control_rect.contains(pos)
 
     def _is_in_back_button(self, pos):
         """检查是否在返回按钮内"""
@@ -339,6 +352,9 @@ class ControlOverlay(QWidget):
         """鼠标释放事件"""
         if event.button() == Qt.LeftButton and self.dragging:
             self.dragging = False
+            if self.volume_debounce_timer.isActive():
+                self.volume_debounce_timer.stop()
+                self._emit_debounced_volume()
             self.hide_timer.start(3000)
 
     def update_position(self, mouse_pos):
@@ -364,4 +380,10 @@ class ControlOverlay(QWidget):
         new_volume = max(0, min(100, int((rel_x / volume_bar_width) * 100)))
         if new_volume != self.current_volume:
             self.set_volume(new_volume)
-            self.volume_changed.emit(new_volume / 100.0)
+        self.debounced_volume = new_volume
+        self.volume_debounce_timer.start(300)
+
+    def _emit_debounced_volume(self):
+        """发送防抖后的音量值"""
+        volume_int = max(0, min(100, int(self.debounced_volume)))
+        self.volume_changed.emit(volume_int)

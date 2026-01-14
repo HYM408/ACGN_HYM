@@ -280,7 +280,7 @@ class VideoPlayerWidget(QWidget):
     def _adjust_volume_from_ui(self, volume):
         """UI调整音量"""
         if self.vlc_player and self.vlc_player.player:
-            new_volume = int(volume * 100)
+            new_volume = int(volume)
             self.vlc_player.player.audio_set_volume(new_volume)
             print(f"音量: {new_volume}%")
 
