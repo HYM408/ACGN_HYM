@@ -138,6 +138,8 @@ class RSSUpdateTask(BaseTask):
                 self.result_holder.rss_update_finished.emit(True, "RSS更新完成")
             else:
                 self.result_holder.rss_update_finished.emit(False, "无新内容")
+        except httpx.TimeoutException as e:
+            self.result_holder.rss_update_finished.emit(False, f"RSS更新超时: {str(e)}")
         except Exception as e:
             self.result_holder.rss_update_finished.emit(False, f"RSS更新失败: {str(e)}")
 
@@ -145,6 +147,8 @@ class RSSUpdateTask(BaseTask):
         """更新RSS GUID"""
         old_guid = get_config_item("rss_guid")
         rss_content = self._get_user_rss()
+        if not rss_content:
+            return False
         new_guid = self._extract_first_guid_number(rss_content)
         if old_guid is None:
             set_config_items(rss_guid=str(new_guid))
@@ -161,7 +165,7 @@ class RSSUpdateTask(BaseTask):
         base_url = get_config_item("bangumi_base_url")
         url = f"{base_url}feed/user/{user_id}/timeline?type=subject"
         try:
-            response = httpx.get(url, headers={"User-Agent": "ACGN_HYM/1.0"}, timeout=30.0)
+            response = httpx.get(url, headers={"User-Agent": "ACGN_HYM/1.0"}, timeout=20.0)
             response.raise_for_status()
             return response.text
         except Exception as e:
