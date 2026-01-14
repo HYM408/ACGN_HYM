@@ -24,7 +24,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.MainPageManager = MainPageManager(self)
         self.setup_connections()
         self.setup_titlebar()
-        QTimer.singleShot(1000, self.initialize_all_pages)
+        QTimer.singleShot(500, self.initialize_all_pages)
 
     def initialize_all_pages(self):
         """初始化所有页面"""
@@ -41,6 +41,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         settings_ui = Ui_SettingsPage()
         settings_ui.setupUi(settings_widget)
         settings_ui.back_Button_2.clicked.connect(self.go_back_history)
+        settings_widget.ui = settings_ui
         self.SettingsPageManager = SettingsPageManager(settings_widget)
         settings_ui.login_Button.clicked.connect(self.start_bangumi_auth)
         settings_ui.collection_Button.clicked.connect(self.get_collections_action)

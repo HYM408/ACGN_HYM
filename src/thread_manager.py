@@ -16,7 +16,7 @@ class TaskResult(QObject):
     mark_finished = Signal(bool)
     search_finished = Signal(list)
     search_error = Signal(str)
-    auth_success = Signal(str)
+    auth_success = Signal()
     auth_error = Signal(str)
     collection_ready = Signal(list)
     collection_error = Signal()
@@ -287,9 +287,7 @@ class AuthWorker(BaseTask):
                 return
             token_data = oauth.exchange_code_for_token(code=code)
             if token_data:
-                user_id = token_data.get('user_id', '未知')
-                message = f"授权成功！用户ID: {user_id}"
-                self.result_holder.auth_success.emit(message)
+                self.result_holder.auth_success.emit()
             else:
                 self.result_holder.auth_error.emit("授权失败")
         except Exception as e:
@@ -365,7 +363,7 @@ class ThreadManager(QObject):
     episodes_marked = Signal(bool)
     search_finished = Signal(list)
     search_error = Signal(str)
-    auth_success = Signal(str)
+    auth_success = Signal()
     auth_error = Signal(str)
     collection_ready = Signal(list)
     collection_error = Signal()

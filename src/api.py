@@ -205,13 +205,14 @@ class BangumiOAuth:
                 parsed_url = urlparse(self.path)
                 query_params = parse_qs(parsed_url.query)
                 code_list = query_params.get('code', [])
+                self.send_response(200)
                 self.send_header('Content-type', 'text/html; charset=utf-8')
                 self.end_headers()
                 if code_list:
                     self.server.code = code_list[0]
-                    html_content = """<html><head><title>授权成功</title></head></html>"""
+                    html_content = """<html><head><title>授权成功</title></head><body style="text-align: center; padding-top: 50px;"><p>授权成功，您可以关闭此窗口</p></body></html>"""
                 else:
-                    html_content = """<html><head><title>授权失败</title></head></html>"""
+                    html_content = """<html><head><title>授权失败</title></head><body style="text-align: center; padding-top: 50px;"><p>授权失败，请重试</p></body></html>"""
                 self.wfile.write(html_content.encode('utf-8'))
             def log_message(self, format, *args):
                 pass
@@ -235,13 +236,13 @@ class BangumiOAuth:
                     server.shutdown()
                     server_thread.join()
                     return server.code
-                time.sleep(0.5)
+                time.sleep(0.1)
             server.shutdown()
-            server_thread.join()
+            server.server_close()
             return None
         except (KeyboardInterrupt, Exception):
             server.shutdown()
-            server_thread.join()
+            server.server_close()
             return None
 
     def exchange_code_for_token(self, code=None, refresh_token=None):
