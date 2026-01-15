@@ -4,3 +4,4 @@ python-vlc
 lxml
 cssselect
 playwright
+pikpakapi
