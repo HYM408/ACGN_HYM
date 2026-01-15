@@ -111,7 +111,7 @@ class ChoiceEpisodeManager:
 
     def show_player_page(self, episode_data: Dict[str, Any]):
         """显示播放器页面"""
-        print(f"显示播放器页面: {episode_data}")
+        print(episode_data)
         current_index = self.main_window.main_stackedWidget.currentIndex()
         self.main_window.page_history.append(current_index)
 
