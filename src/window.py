@@ -36,8 +36,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         settings_ui.back_Button_2.clicked.connect(self.go_back_history)
         settings_widget.ui = settings_ui
         self.SettingsPageManager = SettingsPageManager(settings_widget)
-        settings_ui.login_Button.clicked.connect(self.start_bangumi_auth)
-        settings_ui.collection_Button.clicked.connect(self.get_collections_action)
         self.loaded_pages["settings"] = settings_widget
         self.main_stackedWidget.addWidget(settings_widget)
         # 详情页面
@@ -239,11 +237,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.page_history.append(current_index)
         self.main_stackedWidget.setCurrentWidget(self.loaded_pages["detail"])
         self.DetailPageManager.detail_page_data(collection_data)
-
-    def start_bangumi_auth(self):
-        """登录bangumi"""
-        self.SettingsPageManager.login_action()
-
-    def get_collections_action(self):
-        """获取收藏"""
-        self.SettingsPageManager.get_collections_action()

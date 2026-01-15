@@ -1,4 +1,5 @@
 import httpx
+import asyncio
 import threading
 import webbrowser
 import xml.etree.ElementTree as ET
@@ -25,6 +26,8 @@ class TaskResult(QObject):
     rss_update_finished = Signal(bool, str)
     site_search_completed = Signal(dict)
     video_fetched = Signal(str)
+    pikpak_login_success = Signal(str)
+    pikpak_login_error = Signal(str)
 
 
 class BaseTask(QRunnable):
@@ -360,6 +363,31 @@ class SubjectDataFetcher(BaseTask):
             self.result_holder.subject_data_fetched.emit({})
 
 
+# ====================PikPak登录任务====================
+class PikpakLoginTask(BaseTask):
+    """PikPak登录任务"""
+    def __init__(self, username: str, password: str):
+        super().__init__()
+        self.username = username
+        self.password = password
+
+    def run(self):
+        try:
+            encoded_token = asyncio.run(self._login())
+            if not self._is_cancelled:
+                self.result_holder.pikpak_login_success.emit(encoded_token)
+        except Exception as e:
+            if not self._is_cancelled:
+                self.result_holder.pikpak_login_error.emit(str(e))
+
+    async def _login(self):
+        """执行PikPak登录"""
+        from pikpakapi import PikPakApi
+        pikpak = PikPakApi(username=self.username, password=self.password)
+        await pikpak.login()
+        return pikpak.encoded_token
+
+
 # ====================线程管理器====================
 class ThreadManager(QObject):
     """统一的线程管理器，使用线程池处理短任务"""
@@ -377,6 +405,8 @@ class ThreadManager(QObject):
     refresh_main_page = Signal()
     site_search_completed = Signal(dict)
     video_fetched = Signal(str)
+    pikpak_login_success = Signal(str)
+    pikpak_login_error = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -478,6 +508,13 @@ class ThreadManager(QObject):
         connection = task.result_holder.video_fetched.connect(on_video_fetched)
         self.video_fetch_connections.add((task, connection))
         self.current_video_fetch_task = task
+        self.thread_pool.start(task)
+
+    def login_pikpak(self, username: str, password: str):
+        """启动PikPak登录"""
+        task = PikpakLoginTask(username, password)
+        task.result_holder.pikpak_login_success.connect(self.pikpak_login_success)
+        task.result_holder.pikpak_login_error.connect(self.pikpak_login_error)
         self.thread_pool.start(task)
 
     def cancel_video_fetch(self):

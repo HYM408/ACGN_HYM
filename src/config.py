@@ -12,6 +12,7 @@ def create_config():
     if not os.path.exists(config_path):
         with open(config_path, 'w', encoding='utf-8') as f:
             json.dump({
+                # Bangumi
                 "user_id": "",
                 "client_id": "",
                 "client_secret": "",
@@ -20,7 +21,12 @@ def create_config():
                 "refresh_token": "",
                 "expires_at": 0,
                 "bangumi_base_url": "https://chii.in/",
-                "rss_guid": "0"
+                # RSS
+                "rss_guid": "0",
+                # Pikpak
+                "username": "",
+                "password": "",
+                "encoded_token": ""
             }, f, ensure_ascii=False, indent=2)
     return True
 
