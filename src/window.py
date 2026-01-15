@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt, QPoint, QTimer
-from PySide6.QtWidgets import QMainWindow, QWidget
+from PySide6.QtWidgets import QMainWindow, QWidget, QGraphicsOpacityEffect
 from ui.main_ui import Ui_MainWindow
 from src.main_page import MainPageManager
 
@@ -173,18 +173,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         from src.episode_page import EpisodeManager
         self.episode_overlay = QWidget(self)
         self.episode_overlay.setGeometry(0, 0, self.width(), self.height())
-        self.episode_overlay.setStyleSheet("background-color: rgba(0, 0, 0, 50);")
+        self.episode_overlay.setStyleSheet("#episode_overlay { background-color: rgba(0, 0, 0, 50); }")
+        self.episode_overlay.setObjectName("episode_overlay")
+        self.episode_overlay.mousePressEvent = self.close_episode_overlay
         self.episode_container = QWidget(self.episode_overlay)
         self.episode_container.setObjectName("episode_container")
-        self.episode_overlay.mousePressEvent = self.close_episode_overlay
+        self.episode_container.setStyleSheet("#episode_container { background-color: white; }")
+        default_height = 180
+        self.episode_container.setFixedSize(600, default_height)
+        self.episode_container.move((self.width() - 600) // 2, (self.height() - default_height) // 2)
         episode_ui = Ui_EpisodePage()
         episode_ui.setupUi(self.episode_container)
+        episode_ui.pushButton_14.clicked.connect(lambda: self.close_episode_overlay())
         self.episode_manager = EpisodeManager(episode_ui, self)
         self.episode_manager.episodes_layout_updated.connect(self.update_episode_container_position)
         self.episode_manager.episode_page_data(collection_data)
-        episode_ui.pushButton_14.clicked.connect(lambda: self.close_episode_overlay())
         self.episode_overlay.show()
-        self.update_episode_container_position()
 
     def update_episode_container_position(self):
         """更新选集容器位置"""
@@ -192,31 +196,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         button_height = 40
         row_spacing = 5
         title_height = 60
-        top_margin = 31
-        bottom_margin = 31
+        top_margin = 40
+        bottom_margin = 40
         container_height = title_height + top_margin + bottom_margin
         if total_rows > 0:
-            buttons_height = button_height * total_rows + row_spacing * (total_rows - 1)
-            container_height += buttons_height
+            container_height += total_rows * button_height + (total_rows - 1) * row_spacing
         container_width = 600
         self.episode_container.setFixedSize(container_width, container_height)
-        x = (self.width() - container_width) // 2
-        y = (self.height() - container_height) // 2
-        self.episode_container.move(x, y)
+        self.episode_container.move((self.width() - container_width) // 2, (self.height() - container_height) // 2)
 
     def close_episode_overlay(self, event=None):
         """关闭选集遮罩层"""
-        if not hasattr(self, 'episode_overlay'):
-            return
-        if event and hasattr(self, 'episode_container'):
-            pos = event.pos()
-            container_rect = self.episode_container.geometry()
-            if container_rect.contains(pos):
-                return
-        self.episode_overlay.deleteLater()
-        delattr(self, 'episode_overlay')
-        if hasattr(self, 'episode_container'):
-            delattr(self, 'episode_container')
+        if event is None or not self.episode_container.geometry().contains(event.pos()):
+            if hasattr(self, 'episode_overlay'):
+                self.episode_overlay.deleteLater()
+                attrs = ['episode_overlay', 'episode_container', 'episode_manager']
+                for attr in attrs:
+                    if hasattr(self, attr):
+                        delattr(self, attr)
 
     def show_search_page(self):
         """跳转搜索页面"""

@@ -95,17 +95,8 @@ class Ui_MainWindow(object):
         self.verticalLayout_3 = QVBoxLayout(self.toolbar_frame)
         self.verticalLayout_3.setSpacing(0)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.verticalLayout_3.setContentsMargins(0, 9, 0, 9)
-        self.searchinto_frame = QFrame(self.toolbar_frame)
-        self.searchinto_frame.setObjectName(u"searchinto_frame")
-        self.searchinto_frame.setMinimumSize(QSize(80, 100))
-        self.searchinto_frame.setMaximumSize(QSize(80, 80))
-        self.searchinto_frame.setFrameShape(QFrame.Shape.NoFrame)
-        self.verticalLayout_5 = QVBoxLayout(self.searchinto_frame)
-        self.verticalLayout_5.setSpacing(6)
-        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.verticalLayout_5.setContentsMargins(-1, 9, 9, 0)
-        self.search_Button = QPushButton(self.searchinto_frame)
+        self.verticalLayout_3.setContentsMargins(0, 40, 0, -1)
+        self.search_Button = QPushButton(self.toolbar_frame)
         self.search_Button.setObjectName(u"search_Button")
         sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
         sizePolicy1.setHorizontalStretch(0)
@@ -128,8 +119,7 @@ class Ui_MainWindow(object):
         self.search_Button.setIcon(icon3)
         self.search_Button.setIconSize(QSize(20, 20))
         self.search_Button.setCheckable(True)
-        self.verticalLayout_5.addWidget(self.search_Button, 0, Qt.AlignmentFlag.AlignHCenter)
-        self.verticalLayout_3.addWidget(self.searchinto_frame)
+        self.verticalLayout_3.addWidget(self.search_Button, 0, Qt.AlignmentFlag.AlignHCenter)
         self.acgnselect_frame = QFrame(self.toolbar_frame)
         self.acgnselect_frame.setObjectName(u"acgnselect_frame")
         self.acgnselect_frame.setMinimumSize(QSize(80, 0))
@@ -138,7 +128,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_4 = QVBoxLayout(self.acgnselect_frame)
         self.verticalLayout_4.setSpacing(40)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.verticalLayout_4.setContentsMargins(-1, 9, -1, 9)
+        self.verticalLayout_4.setContentsMargins(-1, 15, -1, -1)
         self.animation_Button = QPushButton(self.acgnselect_frame)
         self.buttonGroup = QButtonGroup(MainWindow)
         self.buttonGroup.setObjectName(u"buttonGroup")
@@ -511,7 +501,16 @@ class Ui_MainWindow(object):
         self.page_frame.setObjectName(u"page_frame")
         self.page_frame.setMinimumSize(QSize(0, 45))
         self.page_frame.setMaximumSize(QSize(16777215, 45))
-        self.page_frame.setStyleSheet(u"background-color: white;")
+        self.page_frame.setStyleSheet(u"QFrame {\n"
+"    background-color: white\n"
+"}\n"
+"\n"
+"QPushButton {\n"
+"    border-width: 1px;\n"
+"    border-style: solid; \n"
+"    border-color: rgba(0,0,0,100);\n"
+"    border-radius: 4px;\n"
+"}")
         self.page_frame.setFrameShape(QFrame.Shape.NoFrame)
         self.horizontalLayout_3 = QHBoxLayout(self.page_frame)
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
@@ -519,13 +518,26 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.addItem(self.horizontalSpacer_3)
         self.previous_Button = QPushButton(self.page_frame)
         self.previous_Button.setObjectName(u"previous_Button")
-        self.previous_Button.setStyleSheet(u"")
+        self.previous_Button.setMinimumSize(QSize(75, 20))
+        self.previous_Button.setMaximumSize(QSize(75, 20))
+        self.previous_Button.setStyleSheet(u"QPushButton:pressed {\n"
+"   background-color: rgba(0,0,0,20)\n"
+"}")
+        self.previous_Button.setCheckable(True)
         self.horizontalLayout_3.addWidget(self.previous_Button)
         self.pages_Button = QPushButton(self.page_frame)
         self.pages_Button.setObjectName(u"pages_Button")
+        self.pages_Button.setMinimumSize(QSize(75, 20))
+        self.pages_Button.setMaximumSize(QSize(75, 20))
+        self.pages_Button.setStyleSheet(u"")
         self.horizontalLayout_3.addWidget(self.pages_Button)
         self.next_Button = QPushButton(self.page_frame)
         self.next_Button.setObjectName(u"next_Button")
+        self.next_Button.setMinimumSize(QSize(75, 20))
+        self.next_Button.setMaximumSize(QSize(75, 20))
+        self.next_Button.setStyleSheet(u"QPushButton:pressed {\n"
+"   background-color: rgba(0,0,0,20)\n"
+"}")
         self.horizontalLayout_3.addWidget(self.next_Button)
         self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         self.horizontalLayout_3.addItem(self.horizontalSpacer_2)

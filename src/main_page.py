@@ -48,16 +48,14 @@ class MainPageManager(QObject):
         # 刷新
         self.main_window.refresh_Button.clicked.connect(lambda: self.load_collections(self.current_subject_type, self.current_status_type, force_refresh=True))
         # 状态
-        self.main_window.pushButton_3.clicked.connect(lambda: self.load_collections(self.current_subject_type, 1))
-        self.main_window.pushButton_4.clicked.connect(lambda: self.load_collections(self.current_subject_type, 3))
-        self.main_window.pushButton_5.clicked.connect(lambda: self.load_collections(self.current_subject_type, 2))
-        self.main_window.pushButton_6.clicked.connect(lambda: self.load_collections(self.current_subject_type, 4))
-        self.main_window.pushButton_7.clicked.connect(lambda: self.load_collections(self.current_subject_type, 5))
+        status_buttons = [(self.main_window.pushButton_3, 1), (self.main_window.pushButton_4, 3), (self.main_window.pushButton_5, 2),(self.main_window.pushButton_6, 4), (self.main_window.pushButton_7, 5)]
+        for btn, status in status_buttons:
+            btn.clicked.connect(lambda _, s=status: self.load_collections(self.current_subject_type, s))
         # 类别
-        self.main_window.animation_Button.clicked.connect(lambda: self.load_collections_and_switch(2, self.current_status_type))
-        self.main_window.novel_Button.clicked.connect(lambda: self.load_collections_and_switch(7, self.current_status_type))
-        self.main_window.game_Button.clicked.connect(lambda: self.load_collections_and_switch(4, self.current_status_type))
-        self.main_window.comic_Button.clicked.connect(lambda: self.load_collections_and_switch(8, self.current_status_type))
+        category_buttons = [(self.main_window.animation_Button, 2, "动画"),
+            (self.main_window.novel_Button, 7, "小说"), (self.main_window.game_Button, 4, "游戏"), (self.main_window.comic_Button, 8, "漫画")]
+        for btn, subject_type, title in category_buttons:
+            btn.clicked.connect(lambda _, st=subject_type: self.load_collections_and_switch(st, self.current_status_type))
         # 下载
         self.main_window.pushButton_9.clicked.connect(self.show_download_page)
         # 分页
@@ -133,30 +131,22 @@ class MainPageManager(QObject):
         """显示当前页数据"""
         self.clear_display_area()
         self.setup_fixed_layout_constraints()
-        self._layout_constraints_set = True
         display_collections = self.filtered_collections
         start_idx = (self.current_page - 1) * self.items_per_page
         end_idx = min(start_idx + self.items_per_page, len(display_collections))
         current_page_data = display_collections[start_idx:end_idx]
-        row, col = 0, 0
-        for collection in current_page_data:
+        for i, collection in enumerate(current_page_data):
+            row, col = divmod(i, 3)
             card = self.create_collection_card(collection)
             self.main_window.gridLayout_2.addWidget(card, row, col, Qt.AlignCenter)
-            col += 1
-            if col >= 3:
-                col = 0
-                row += 1
         total_cards = len(current_page_data)
         rows_needed = (total_cards + 2) // 3
-        for i in range(rows_needed * 3 - total_cards):
+        for i in range(total_cards, rows_needed * 3):
+            row, col = divmod(i, 3)
             placeholder = QFrame()
             placeholder.setFixedSize(QSize(420, 170))
             placeholder.setStyleSheet("background: transparent;")
             self.main_window.gridLayout_2.addWidget(placeholder, row, col)
-            col += 1
-            if col >= 3:
-                col = 0
-                row += 1
         self.update_page_info()
 
     def show_download_page(self):
@@ -169,12 +159,7 @@ class MainPageManager(QObject):
         card = QFrame()
         card.setObjectName(f"animationdata_frame_{id(card)}")
         card.setFixedSize(QSize(420, 170))
-        card.setStyleSheet("""
-            QFrame{
-                background-color: rgb(242, 236, 244);
-                border-radius: 15px;
-            }
-        """)
+        card.setStyleSheet("QFrame{background-color: rgb(242, 236, 244);border-radius: 15px}")
         card.setCursor(QCursor(Qt.PointingHandCursor))
         # 水平布局
         horizontal_layout = QHBoxLayout(card)
@@ -183,11 +168,7 @@ class MainPageManager(QObject):
         # 封面
         cover_label = QLabel(card)
         cover_label.setFixedSize(QSize(125, 170))
-        cover_label.setStyleSheet("""
-            background-color: rgb(242, 236, 244);
-            border-top-left-radius: 15px;
-            border-bottom-left-radius: 15px;
-        """)
+        cover_label.setStyleSheet("background-color: rgb(242, 236, 244);border-top-left-radius: 15px;border-bottom-left-radius: 15px")
         cover_label.setAlignment(Qt.AlignCenter)
         # 图片
         image_url = collection.get('subject_images_common')
@@ -196,12 +177,30 @@ class MainPageManager(QObject):
         else:
             cover_label.setText("暂无封面")
         horizontal_layout.addWidget(cover_label)
+        # 信息框架
+        info_frame = self._create_info_frame(collection, card)
+        horizontal_layout.addWidget(info_frame)
+        card.cover_label = cover_label
+        card.collection_data = collection
+        # 连接详情页
+        def on_card_clicked(event):
+            if event.button() == Qt.LeftButton:
+                self.show_detail_page(card.collection_data)
+        card.mousePressEvent = on_card_clicked
+        cover_label.setCursor(Qt.PointingHandCursor)
+        cover_label.mousePressEvent = on_card_clicked
+        return card
+
+    def _create_info_frame(self, collection, card):
+        """创建信息框架"""
+        info_frame = QFrame()
+        info_frame.setStyleSheet("background-color: transparent;")
         # 垂直布局
-        info_layout = QVBoxLayout()
+        info_layout = QVBoxLayout(info_frame)
         info_layout.setSpacing(8)
         info_layout.setContentsMargins(5, 5, -1, -1)
         # 标题
-        title_label = QLabel(card)
+        title_label = QLabel(info_frame)
         title_label.setMinimumSize(QSize(0, 30))
         title_label.setMaximumSize(QSize(16777215, 30))
         font = QFont()
@@ -213,7 +212,7 @@ class MainPageManager(QObject):
         title_label.setText(title)
         info_layout.addWidget(title_label)
         # 进度
-        progress_label = QLabel(card)
+        progress_label = QLabel(info_frame)
         font = QFont()
         font.setFamilies(["微软雅黑"])
         font.setPointSize(10)
@@ -234,7 +233,7 @@ class MainPageManager(QObject):
         left_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         button_layout.addItem(left_spacer)
         # 状态按钮
-        more_button = QPushButton(card)
+        more_button = QPushButton(info_frame)
         more_button.setFixedSize(QSize(40, 40))
         more_button.setStyleSheet("""
             QPushButton {
@@ -249,9 +248,10 @@ class MainPageManager(QObject):
             }
         """)
         more_button.setIcon(QIcon("icons/more.png"))
+        more_button.clicked.connect(lambda: self.on_more_button_clicked(more_button, collection))
         button_layout.addWidget(more_button)
         # 选集
-        episode_button = QPushButton(card)
+        episode_button = QPushButton(info_frame)
         episode_button.setFixedSize(QSize(60, 40))
         font = QFont()
         font.setFamilies(["微软雅黑"])
@@ -270,24 +270,13 @@ class MainPageManager(QObject):
             }
         """)
         episode_button.setText("选集")
+        episode_button.clicked.connect(lambda: self.show_episode_page(card.collection_data))
         button_layout.addWidget(episode_button, 0, Qt.AlignRight)
         info_layout.addLayout(button_layout)
-        horizontal_layout.addLayout(info_layout)
-        card.cover_label = cover_label
-        card.collection_data = collection
-        # 连接选集页
-        episode_button.clicked.connect(lambda: self.show_episode_page(card.collection_data))
-        # 连接详情页
-        def on_card_clicked(event):
-            if event.button() == Qt.LeftButton:
-                self.show_detail_page(card.collection_data)
-        card.mousePressEvent = on_card_clicked
-        cover_label.setCursor(Qt.PointingHandCursor)
-        cover_label.mousePressEvent = on_card_clicked
-        more_button.clicked.connect(lambda: self.on_more_button_clicked(more_button, collection))
-        return card
+        return info_frame
 
     def on_more_button_clicked(self, button, collection):
+        """更多按钮点击处理"""
         selector = show_status_selector(parent_button=button,on_status_selected=lambda status_text: self.on_status_selected(status_text, collection))
         button.status_selector = selector
 
