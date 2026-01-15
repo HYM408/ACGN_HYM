@@ -39,9 +39,7 @@ class Ui_DetailPage(object):
         icon.addFile(u"icons/back.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.pushButton_19.setIcon(icon)
         self.pushButton_19.setIconSize(QSize(25, 25))
-
         self.horizontalLayout_11.addWidget(self.pushButton_19, 0, Qt.AlignLeft)
-
         self.pushButton_20 = QPushButton(self.frame_3)
         self.pushButton_20.setObjectName(u"pushButton_20")
         self.pushButton_20.setMinimumSize(QSize(45, 45))
@@ -59,12 +57,8 @@ class Ui_DetailPage(object):
         icon1.addFile(u"../../../../Python/Project/ACGN_HYM/icons/openUrl.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.pushButton_20.setIcon(icon1)
         self.pushButton_20.setIconSize(QSize(20, 20))
-
         self.horizontalLayout_11.addWidget(self.pushButton_20, 0, Qt.AlignRight)
-
-
         self.verticalLayout_11.addWidget(self.frame_3)
-
         self.frame_4 = QFrame(DetailPage)
         self.frame_4.setObjectName(u"frame_4")
         self.frame_4.setMinimumSize(QSize(0, 310))
@@ -85,9 +79,7 @@ class Ui_DetailPage(object):
         self.cover_label_3.setMaximumSize(QSize(220, 310))
         self.cover_label_3.setStyleSheet(u"border-radius: 15px;")
         self.cover_label_3.setAlignment(Qt.AlignCenter)
-
         self.horizontalLayout_14.addWidget(self.cover_label_3)
-
         self.verticalLayout_13 = QVBoxLayout()
         self.verticalLayout_13.setSpacing(13)
         self.verticalLayout_13.setObjectName(u"verticalLayout_13")
@@ -104,9 +96,7 @@ class Ui_DetailPage(object):
         self.textEdit.setContextMenuPolicy(Qt.CustomContextMenu)
         self.textEdit.setFrameShape(QFrame.NoFrame)
         self.textEdit.setReadOnly(True)
-
         self.verticalLayout_13.addWidget(self.textEdit)
-
         self.pushButton_23 = QPushButton(self.frame_4)
         self.pushButton_23.setObjectName(u"pushButton_23")
         self.pushButton_23.setMinimumSize(QSize(80, 35))
@@ -117,9 +107,7 @@ class Ui_DetailPage(object):
         self.pushButton_23.setFont(font1)
         self.pushButton_23.setStyleSheet(u"border: 1px solid gray;\n"
 "border-radius:8px;")
-
         self.verticalLayout_13.addWidget(self.pushButton_23, 0, Qt.AlignLeft)
-
         self.pushButton_24 = QPushButton(self.frame_4)
         self.pushButton_24.setObjectName(u"pushButton_24")
         font2 = QFont()
@@ -127,32 +115,24 @@ class Ui_DetailPage(object):
         font2.setPointSize(15)
         self.pushButton_24.setFont(font2)
         self.pushButton_24.setStyleSheet(u"border: none;")
-
         self.verticalLayout_13.addWidget(self.pushButton_24, 0, Qt.AlignLeft)
-
         self.pushButton_21 = QPushButton(self.frame_4)
         self.pushButton_21.setObjectName(u"pushButton_21")
         self.pushButton_21.setFont(font2)
         self.pushButton_21.setStyleSheet(u"border: none;")
-
         self.verticalLayout_13.addWidget(self.pushButton_21, 0, Qt.AlignLeft)
-
         self.pushButton_25 = QPushButton(self.frame_4)
         self.pushButton_25.setObjectName(u"pushButton_25")
         self.pushButton_25.setFont(font2)
         self.pushButton_25.setStyleSheet(u"border: none;")
-
         self.verticalLayout_13.addWidget(self.pushButton_25, 0, Qt.AlignLeft)
-
         self.pushButton_26 = QPushButton(self.frame_4)
         self.pushButton_26.setObjectName(u"pushButton_26")
         self.pushButton_26.setMinimumSize(QSize(80, 35))
         self.pushButton_26.setFont(font2)
         self.pushButton_26.setStyleSheet(u"border: 1px solid gray;\n"
 "border-radius:15px")
-
         self.verticalLayout_13.addWidget(self.pushButton_26, 0, Qt.AlignLeft)
-
         self.pushButton_27 = QPushButton(self.frame_4)
         self.pushButton_27.setObjectName(u"pushButton_27")
         font3 = QFont()
@@ -160,19 +140,11 @@ class Ui_DetailPage(object):
         font3.setPointSize(14)
         self.pushButton_27.setFont(font3)
         self.pushButton_27.setStyleSheet(u"border: none;")
-
         self.verticalLayout_13.addWidget(self.pushButton_27, 0, Qt.AlignLeft)
-
-
         self.horizontalLayout_14.addLayout(self.verticalLayout_13)
-
         self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
         self.horizontalLayout_14.addItem(self.horizontalSpacer_6)
-
-
         self.verticalLayout_11.addWidget(self.frame_4)
-
         self.tabWidget = QTabWidget(DetailPage)
         self.tabWidget.setObjectName(u"tabWidget")
         self.tabWidget.setMinimumSize(QSize(0, 100))
@@ -195,9 +167,7 @@ class Ui_DetailPage(object):
         self.frame_5.setStyleSheet(u"border: none;")
         self.frame_5.setFrameShape(QFrame.StyledPanel)
         self.frame_5.setFrameShadow(QFrame.Raised)
-
         self.verticalLayout_14.addWidget(self.frame_5, 0, Qt.AlignTop)
-
         self.textEdit_2 = QTextEdit(self.tab)
         self.textEdit_2.setObjectName(u"textEdit_2")
         font5 = QFont()
@@ -209,9 +179,7 @@ class Ui_DetailPage(object):
         self.textEdit_2.setStyleSheet(u"")
         self.textEdit_2.setFrameShape(QFrame.NoFrame)
         self.textEdit_2.setReadOnly(True)
-
         self.verticalLayout_14.addWidget(self.textEdit_2)
-
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QWidget()
         self.tab_2.setObjectName(u"tab_2")
@@ -222,17 +190,10 @@ class Ui_DetailPage(object):
         self.tab_4 = QWidget()
         self.tab_4.setObjectName(u"tab_4")
         self.tabWidget.addTab(self.tab_4, "")
-
         self.verticalLayout_11.addWidget(self.tabWidget)
-
-
         self.retranslateUi(DetailPage)
-
         self.tabWidget.setCurrentIndex(0)
-
-
         QMetaObject.connectSlotsByName(DetailPage)
-    # setupUi
 
     def retranslateUi(self, DetailPage):
         self.pushButton_19.setText("")
@@ -249,5 +210,3 @@ class Ui_DetailPage(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QCoreApplication.translate("DetailPage", u"\u76f8\u5173\u6761\u76ee", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), QCoreApplication.translate("DetailPage", u"\u5236\u4f5c\u4eba\u5458", None))
         pass
-    # retranslateUi
-

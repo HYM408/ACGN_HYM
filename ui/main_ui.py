@@ -26,9 +26,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
         self.horizontalLayout.addItem(self.horizontalSpacer_5)
-
         self.pushButton = QPushButton(self.titlebar_frame)
         self.pushButton.setObjectName(u"pushButton")
         self.pushButton.setMinimumSize(QSize(45, 25))
@@ -40,11 +38,9 @@ class Ui_MainWindow(object):
 "    background-color:rgb(229, 229, 229)\n"
 "}")
         icon = QIcon()
-        icon.addFile(u"../../../../Python/Project/ACGN_HYM/icons/title3.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon.addFile(u"icons/title3.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.pushButton.setIcon(icon)
-
         self.horizontalLayout.addWidget(self.pushButton)
-
         self.pushButton_8 = QPushButton(self.titlebar_frame)
         self.pushButton_8.setObjectName(u"pushButton_8")
         self.pushButton_8.setMinimumSize(QSize(45, 25))
@@ -56,12 +52,10 @@ class Ui_MainWindow(object):
 "    background-color:rgb(229, 229, 229)\n"
 "}")
         icon1 = QIcon()
-        icon1.addFile(u"../../../../Python/Project/ACGN_HYM/icons/title2.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon1.addFile(u"icons/title2.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.pushButton_8.setIcon(icon1)
         self.pushButton_8.setIconSize(QSize(13, 13))
-
         self.horizontalLayout.addWidget(self.pushButton_8, 0, Qt.AlignRight)
-
         self.pushButton_2 = QPushButton(self.titlebar_frame)
         self.pushButton_2.setObjectName(u"pushButton_2")
         self.pushButton_2.setMinimumSize(QSize(45, 25))
@@ -73,15 +67,11 @@ class Ui_MainWindow(object):
 "    background-color:rgb(232, 17, 35)\n"
 "}")
         icon2 = QIcon()
-        icon2.addFile(u"../../../../Python/Project/ACGN_HYM/icons/title1.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon2.addFile(u"icons/title1.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.pushButton_2.setIcon(icon2)
         self.pushButton_2.setIconSize(QSize(14, 14))
-
         self.horizontalLayout.addWidget(self.pushButton_2, 0, Qt.AlignRight)
-
-
         self.verticalLayout.addWidget(self.titlebar_frame)
-
         self.main_stackedWidget = QStackedWidget(self.centralwidget)
         self.main_stackedWidget.setObjectName(u"main_stackedWidget")
         self.main_stackedWidget.setStyleSheet(u"")
@@ -138,12 +128,8 @@ class Ui_MainWindow(object):
         self.search_Button.setIcon(icon3)
         self.search_Button.setIconSize(QSize(20, 20))
         self.search_Button.setCheckable(True)
-
         self.verticalLayout_5.addWidget(self.search_Button, 0, Qt.AlignHCenter)
-
-
         self.verticalLayout_3.addWidget(self.searchinto_frame)
-
         self.acgnselect_frame = QFrame(self.toolbar_frame)
         self.acgnselect_frame.setObjectName(u"acgnselect_frame")
         self.acgnselect_frame.setMinimumSize(QSize(80, 0))
@@ -159,7 +145,7 @@ class Ui_MainWindow(object):
         self.buttonGroup.addButton(self.animation_Button)
         self.animation_Button.setObjectName(u"animation_Button")
         self.animation_Button.setMinimumSize(QSize(0, 50))
-        self.animation_Button.setMaximumSize(QSize(80, 100))
+        self.animation_Button.setMaximumSize(QSize(80, 50))
         font = QFont()
         font.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
         font.setPointSize(15)
@@ -183,14 +169,12 @@ class Ui_MainWindow(object):
 "    background-color: rgb(216, 207, 232);\n"
 "}")
         self.animation_Button.setCheckable(True)
-
         self.verticalLayout_4.addWidget(self.animation_Button)
-
         self.novel_Button = QPushButton(self.acgnselect_frame)
         self.buttonGroup.addButton(self.novel_Button)
         self.novel_Button.setObjectName(u"novel_Button")
         self.novel_Button.setMinimumSize(QSize(0, 50))
-        self.novel_Button.setMaximumSize(QSize(80, 100))
+        self.novel_Button.setMaximumSize(QSize(80, 50))
         self.novel_Button.setFont(font)
         self.novel_Button.setStyleSheet(u"QPushButton {\n"
 "	background-color: rgb(242, 236, 244);\n"
@@ -210,14 +194,12 @@ class Ui_MainWindow(object):
 "    background-color: rgb(216, 207, 232);\n"
 "}")
         self.novel_Button.setCheckable(True)
-
         self.verticalLayout_4.addWidget(self.novel_Button)
-
         self.game_Button = QPushButton(self.acgnselect_frame)
         self.buttonGroup.addButton(self.game_Button)
         self.game_Button.setObjectName(u"game_Button")
         self.game_Button.setMinimumSize(QSize(0, 50))
-        self.game_Button.setMaximumSize(QSize(80, 100))
+        self.game_Button.setMaximumSize(QSize(80, 50))
         self.game_Button.setFont(font)
         self.game_Button.setStyleSheet(u"QPushButton {\n"
 "	background-color: rgb(242, 236, 244);\n"
@@ -237,14 +219,12 @@ class Ui_MainWindow(object):
 "    background-color: rgb(216, 207, 232);\n"
 "}")
         self.game_Button.setCheckable(True)
-
         self.verticalLayout_4.addWidget(self.game_Button)
-
         self.comic_Button = QPushButton(self.acgnselect_frame)
         self.buttonGroup.addButton(self.comic_Button)
         self.comic_Button.setObjectName(u"comic_Button")
         self.comic_Button.setMinimumSize(QSize(0, 50))
-        self.comic_Button.setMaximumSize(QSize(80, 100))
+        self.comic_Button.setMaximumSize(QSize(80, 50))
         self.comic_Button.setFont(font)
         self.comic_Button.setStyleSheet(u"QPushButton {\n"
 "	background-color: rgb(242, 236, 244);\n"
@@ -264,16 +244,35 @@ class Ui_MainWindow(object):
 "    background-color: rgb(216, 207, 232);\n"
 "}")
         self.comic_Button.setCheckable(True)
-
         self.verticalLayout_4.addWidget(self.comic_Button)
-
-
+        self.pushButton_9 = QPushButton(self.acgnselect_frame)
+        self.buttonGroup.addButton(self.pushButton_9)
+        self.pushButton_9.setObjectName(u"pushButton_9")
+        self.pushButton_9.setMinimumSize(QSize(0, 50))
+        self.pushButton_9.setMaximumSize(QSize(80, 50))
+        self.pushButton_9.setFont(font)
+        self.pushButton_9.setStyleSheet(u"QPushButton {\n"
+"	background-color: rgb(242, 236, 244);\n"
+"    border: none;\n"
+"	border-radius:15px\n"
+"}\n"
+"\n"
+"QPushButton:checked {\n"
+"    background-color: rgb(233, 221, 255);\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: rgb(225, 219, 228);\n"
+"}\n"
+"\n"
+"QPushButton:checked:hover {\n"
+"    background-color: rgb(216, 207, 232);\n"
+"}")
+        self.pushButton_9.setCheckable(True)
+        self.verticalLayout_4.addWidget(self.pushButton_9)
         self.verticalLayout_3.addWidget(self.acgnselect_frame)
-
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-
         self.verticalLayout_3.addItem(self.verticalSpacer)
-
         self.settings_Button = QPushButton(self.toolbar_frame)
         self.settings_Button.setObjectName(u"settings_Button")
         self.settings_Button.setMinimumSize(QSize(50, 50))
@@ -291,19 +290,17 @@ class Ui_MainWindow(object):
         icon4.addFile(u"icons/settings.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.settings_Button.setIcon(icon4)
         self.settings_Button.setCheckable(False)
-
         self.verticalLayout_3.addWidget(self.settings_Button, 0, Qt.AlignHCenter)
-
-
         self.horizontalLayout_6.addWidget(self.toolbar_frame)
-
-        self.showmain_frame = QFrame(self.showmain_page)
-        self.showmain_frame.setObjectName(u"showmain_frame")
-        self.verticalLayout_2 = QVBoxLayout(self.showmain_frame)
+        self.showmain_stackedWidget = QStackedWidget(self.showmain_page)
+        self.showmain_stackedWidget.setObjectName(u"showmain_stackedWidget")
+        self.showmain_stackedWidgetPage1 = QWidget()
+        self.showmain_stackedWidgetPage1.setObjectName(u"showmain_stackedWidgetPage1")
+        self.verticalLayout_2 = QVBoxLayout(self.showmain_stackedWidgetPage1)
         self.verticalLayout_2.setSpacing(0)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.header_frame = QFrame(self.showmain_frame)
+        self.header_frame = QFrame(self.showmain_stackedWidgetPage1)
         self.header_frame.setObjectName(u"header_frame")
         self.header_frame.setMinimumSize(QSize(0, 100))
         self.header_frame.setMaximumSize(QSize(16777215, 100))
@@ -347,9 +344,7 @@ class Ui_MainWindow(object):
 "    background-color: rgb(237, 237, 238);\n"
 "}")
         self.pushButton_3.setCheckable(True)
-
         self.horizontalLayout_2.addWidget(self.pushButton_3)
-
         self.pushButton_4 = QPushButton(self.statu_frame)
         self.buttonGroup_2.addButton(self.pushButton_4)
         self.pushButton_4.setObjectName(u"pushButton_4")
@@ -375,9 +370,7 @@ class Ui_MainWindow(object):
 "    background-color: rgb(237, 237, 238);\n"
 "}")
         self.pushButton_4.setCheckable(True)
-
         self.horizontalLayout_2.addWidget(self.pushButton_4)
-
         self.pushButton_5 = QPushButton(self.statu_frame)
         self.buttonGroup_2.addButton(self.pushButton_5)
         self.pushButton_5.setObjectName(u"pushButton_5")
@@ -403,9 +396,7 @@ class Ui_MainWindow(object):
 "    background-color: rgb(237, 237, 238);\n"
 "}")
         self.pushButton_5.setCheckable(True)
-
         self.horizontalLayout_2.addWidget(self.pushButton_5)
-
         self.pushButton_6 = QPushButton(self.statu_frame)
         self.buttonGroup_2.addButton(self.pushButton_6)
         self.pushButton_6.setObjectName(u"pushButton_6")
@@ -431,9 +422,7 @@ class Ui_MainWindow(object):
 "    background-color: rgb(237, 237, 238);\n"
 "}")
         self.pushButton_6.setCheckable(True)
-
         self.horizontalLayout_2.addWidget(self.pushButton_6)
-
         self.pushButton_7 = QPushButton(self.statu_frame)
         self.buttonGroup_2.addButton(self.pushButton_7)
         self.pushButton_7.setObjectName(u"pushButton_7")
@@ -459,12 +448,8 @@ class Ui_MainWindow(object):
 "    background-color: rgb(237, 237, 238);\n"
 "}")
         self.pushButton_7.setCheckable(True)
-
         self.horizontalLayout_2.addWidget(self.pushButton_7, 0, Qt.AlignVCenter)
-
-
         self.gridLayout.addWidget(self.statu_frame, 2, 0, 4, 1)
-
         self.project_Button = QPushButton(self.header_frame)
         self.project_Button.setObjectName(u"project_Button")
         self.project_Button.setMinimumSize(QSize(105, 35))
@@ -478,22 +463,16 @@ class Ui_MainWindow(object):
 "    border: none;\n"
 "}\n"
 "")
-
         self.gridLayout.addWidget(self.project_Button, 0, 0, 1, 1, Qt.AlignLeft)
-
         self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
         self.gridLayout.addItem(self.horizontalSpacer, 4, 2, 1, 1)
-
         self.searchlist_lineEdit = QLineEdit(self.header_frame)
         self.searchlist_lineEdit.setObjectName(u"searchlist_lineEdit")
         self.searchlist_lineEdit.setMinimumSize(QSize(200, 25))
         self.searchlist_lineEdit.setMaximumSize(QSize(200, 25))
         self.searchlist_lineEdit.setContextMenuPolicy(Qt.NoContextMenu)
         self.searchlist_lineEdit.setStyleSheet(u"")
-
         self.gridLayout.addWidget(self.searchlist_lineEdit, 4, 4, 1, 1)
-
         self.refresh_Button = QPushButton(self.header_frame)
         self.refresh_Button.setObjectName(u"refresh_Button")
         self.refresh_Button.setMinimumSize(QSize(50, 50))
@@ -516,13 +495,9 @@ class Ui_MainWindow(object):
         icon5.addFile(u"icons/refresh.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.refresh_Button.setIcon(icon5)
         self.refresh_Button.setIconSize(QSize(20, 20))
-
         self.gridLayout.addWidget(self.refresh_Button, 3, 1, 1, 1)
-
-
         self.verticalLayout_2.addWidget(self.header_frame)
-
-        self.animationdata_frame = QFrame(self.showmain_frame)
+        self.animationdata_frame = QFrame(self.showmain_stackedWidgetPage1)
         self.animationdata_frame.setObjectName(u"animationdata_frame")
         self.animationdata_frame.setStyleSheet(u"background-color: white;")
         self.animationdata_frame.setFrameShape(QFrame.NoFrame)
@@ -553,9 +528,7 @@ class Ui_MainWindow(object):
 "border-top-left-radius: 15px;\n"
 "border-bottom-left-radius: 15px;")
         self.cover_label_1.setAlignment(Qt.AlignCenter)
-
         self.horizontalLayout_frame_1.addWidget(self.cover_label_1)
-
         self.verticalLayout_info_1 = QVBoxLayout()
         self.verticalLayout_info_1.setSpacing(8)
         self.verticalLayout_info_1.setObjectName(u"verticalLayout_info_1")
@@ -571,9 +544,7 @@ class Ui_MainWindow(object):
         self.title_label_1.setFont(font2)
         self.title_label_1.setStyleSheet(u"")
         self.title_label_1.setWordWrap(False)
-
         self.verticalLayout_info_1.addWidget(self.title_label_1)
-
         self.progress_label_1 = QLabel(self.animationdata_frame_1)
         self.progress_label_1.setObjectName(u"progress_label_1")
         font3 = QFont()
@@ -582,21 +553,15 @@ class Ui_MainWindow(object):
         font3.setBold(False)
         self.progress_label_1.setFont(font3)
         self.progress_label_1.setStyleSheet(u"")
-
         self.verticalLayout_info_1.addWidget(self.progress_label_1)
-
         self.verticalSpacer_info_1 = QSpacerItem(20, 13, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-
         self.verticalLayout_info_1.addItem(self.verticalSpacer_info_1)
-
         self.episode_horizontalLayout = QHBoxLayout()
         self.episode_horizontalLayout.setSpacing(0)
         self.episode_horizontalLayout.setObjectName(u"episode_horizontalLayout")
         self.episode_horizontalLayout.setContentsMargins(-1, 0, 15, 15)
         self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
         self.episode_horizontalLayout.addItem(self.horizontalSpacer_4)
-
         self.pushButton_16 = QPushButton(self.animationdata_frame_1)
         self.pushButton_16.setObjectName(u"pushButton_16")
         self.pushButton_16.setMinimumSize(QSize(40, 40))
@@ -615,9 +580,7 @@ class Ui_MainWindow(object):
         icon6 = QIcon()
         icon6.addFile(u"icons/more.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.pushButton_16.setIcon(icon6)
-
         self.episode_horizontalLayout.addWidget(self.pushButton_16)
-
         self.episode_pushButton_1 = QPushButton(self.animationdata_frame_1)
         self.episode_pushButton_1.setObjectName(u"episode_pushButton_1")
         self.episode_pushButton_1.setMinimumSize(QSize(60, 40))
@@ -637,22 +600,12 @@ class Ui_MainWindow(object):
 "	border:none;\n"
 "	border-radius:20px\n"
 "}")
-
         self.episode_horizontalLayout.addWidget(self.episode_pushButton_1, 0, Qt.AlignRight)
-
-
         self.verticalLayout_info_1.addLayout(self.episode_horizontalLayout)
-
-
         self.horizontalLayout_frame_1.addLayout(self.verticalLayout_info_1)
-
-
         self.gridLayout_2.addWidget(self.animationdata_frame_1, 0, 0, 1, 1)
-
-
         self.verticalLayout_2.addWidget(self.animationdata_frame)
-
-        self.page_frame = QFrame(self.showmain_frame)
+        self.page_frame = QFrame(self.showmain_stackedWidgetPage1)
         self.page_frame.setObjectName(u"page_frame")
         self.page_frame.setMinimumSize(QSize(0, 45))
         self.page_frame.setMaximumSize(QSize(16777215, 45))
@@ -661,60 +614,28 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3 = QHBoxLayout(self.page_frame)
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
         self.horizontalLayout_3.addItem(self.horizontalSpacer_3)
-
         self.previous_Button = QPushButton(self.page_frame)
         self.previous_Button.setObjectName(u"previous_Button")
         self.previous_Button.setStyleSheet(u"")
-
         self.horizontalLayout_3.addWidget(self.previous_Button)
-
         self.pages_Button = QPushButton(self.page_frame)
         self.pages_Button.setObjectName(u"pages_Button")
-
         self.horizontalLayout_3.addWidget(self.pages_Button)
-
         self.next_Button = QPushButton(self.page_frame)
         self.next_Button.setObjectName(u"next_Button")
-
         self.horizontalLayout_3.addWidget(self.next_Button)
-
         self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
         self.horizontalLayout_3.addItem(self.horizontalSpacer_2)
-
-
         self.verticalLayout_2.addWidget(self.page_frame)
-
-
-        self.horizontalLayout_6.addWidget(self.showmain_frame)
-
+        self.showmain_stackedWidget.addWidget(self.showmain_stackedWidgetPage1)
+        self.horizontalLayout_6.addWidget(self.showmain_stackedWidget)
         self.main_stackedWidget.addWidget(self.showmain_page)
-        self.settings_page = QWidget()
-        self.settings_page.setObjectName(u"settings_page")
-        self.main_stackedWidget.addWidget(self.settings_page)
-        self.search_page = QWidget()
-        self.search_page.setObjectName(u"search_page")
-        self.main_stackedWidget.addWidget(self.search_page)
-        self.episode_page = QWidget()
-        self.episode_page.setObjectName(u"episode_page")
-        self.main_stackedWidget.addWidget(self.episode_page)
-        self.detail_page = QWidget()
-        self.detail_page.setObjectName(u"detail_page")
-        self.main_stackedWidget.addWidget(self.detail_page)
-
         self.verticalLayout.addWidget(self.main_stackedWidget)
-
         MainWindow.setCentralWidget(self.centralwidget)
-
         self.retranslateUi(MainWindow)
-
         self.main_stackedWidget.setCurrentIndex(0)
-
-
         QMetaObject.connectSlotsByName(MainWindow)
-    # setupUi
 
     def retranslateUi(self, MainWindow):
         self.pushButton.setText("")
@@ -724,6 +645,7 @@ class Ui_MainWindow(object):
         self.novel_Button.setText(QCoreApplication.translate("MainWindow", u"\u5c0f\u8bf4", None))
         self.game_Button.setText(QCoreApplication.translate("MainWindow", u"\u6e38\u620f", None))
         self.comic_Button.setText(QCoreApplication.translate("MainWindow", u"\u6f2b\u753b", None))
+        self.pushButton_9.setText(QCoreApplication.translate("MainWindow", u"\u4e0b\u8f7d", None))
         self.settings_Button.setText("")
         self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"\u60f3\u770b", None))
         self.pushButton_4.setText(QCoreApplication.translate("MainWindow", u"\u5728\u770b", None))
@@ -742,5 +664,3 @@ class Ui_MainWindow(object):
         self.pages_Button.setText(QCoreApplication.translate("MainWindow", u"--/--", None))
         self.next_Button.setText(QCoreApplication.translate("MainWindow", u"\u4e0b\u4e00\u9875", None))
         pass
-    # retranslateUi
-

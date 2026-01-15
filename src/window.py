@@ -1,18 +1,7 @@
 from PySide6.QtCore import Qt, QPoint, QTimer
 from PySide6.QtWidgets import QMainWindow, QWidget
 from ui.main_ui import Ui_MainWindow
-from ui.search_ui import Ui_SearchPage
-from ui.detail_ui import Ui_DetailPage
-from ui.player_ui import Ui_choicePage
-from ui.episode_ui import Ui_EpisodePage
-from ui.settings_ui import Ui_SettingsPage
 from src.main_page import MainPageManager
-from src.detail_page import DetailManager
-from src.episode_page import EpisodeManager
-from src.search_page import SearchPageManager
-from src.player.player_ui_manager import setup_video_player
-from src.settings_page import SettingsPageManager
-from src.player.choice_episode import ChoiceEpisodeManager
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -29,6 +18,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def initialize_all_pages(self):
         """初始化所有页面"""
         # 搜索页面
+        from ui.search_ui import Ui_SearchPage
+        from src.search_page import SearchPageManager
         search_widget = QWidget()
         search_ui = Ui_SearchPage()
         search_ui.setupUi(search_widget)
@@ -37,6 +28,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.loaded_pages["search"] = search_widget
         self.main_stackedWidget.addWidget(search_widget)
         # 设置页面
+        from ui.settings_ui import Ui_SettingsPage
+        from src.settings_page import SettingsPageManager
         settings_widget = QWidget()
         settings_ui = Ui_SettingsPage()
         settings_ui.setupUi(settings_widget)
@@ -48,6 +41,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.loaded_pages["settings"] = settings_widget
         self.main_stackedWidget.addWidget(settings_widget)
         # 详情页面
+        from ui.detail_ui import Ui_DetailPage
+        from src.detail_page import DetailManager
         detail_widget = QWidget()
         detail_ui = Ui_DetailPage()
         detail_ui.setupUi(detail_widget)
@@ -58,6 +53,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.loaded_pages["detail"] = detail_widget
         self.main_stackedWidget.addWidget(detail_widget)
         # 播放器页面
+        from ui.player_ui import Ui_choicePage
+        from src.player.choice_episode import ChoiceEpisodeManager
+        from src.player.player_ui_manager import setup_video_player
         player_widget = QWidget()
         player_ui = Ui_choicePage()
         player_ui.setupUi(player_widget)
@@ -67,6 +65,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.video_player = setup_video_player(player_widget)
         self.PlayerManager = ChoiceEpisodeManager(self)
         self.video_player.back_requested.connect(self.on_player_back_requested)
+        # 下载页面
+        from ui.download_ui import Ui_DownloaderPage
+        download_widget = QWidget()
+        download_ui = Ui_DownloaderPage()
+        download_ui.setupUi(download_widget)
+        self.loaded_pages["download"] = download_widget
+        self.showmain_stackedWidget.addWidget(download_widget)
 
     def on_player_back_requested(self):
         """播放器返回"""
@@ -139,6 +144,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.search_Button.clicked.connect(self.show_search_page)
         self.settings_Button.clicked.connect(self.show_settings_page)
 
+    def switch_to_main_page(self):
+        """切换到主页面"""
+        self.showmain_stackedWidget.setCurrentIndex(0)
+
     def go_back_history(self):
         """返回上一个页面"""
         if not self.page_history:
@@ -162,6 +171,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def show_episode_page(self, collection_data):
         """显示选集遮罩层"""
+        from ui.episode_ui import Ui_EpisodePage
+        from src.episode_page import EpisodeManager
         self.episode_overlay = QWidget(self)
         self.episode_overlay.setGeometry(0, 0, self.width(), self.height())
         self.episode_overlay.setStyleSheet("background-color: rgba(0, 0, 0, 50);")

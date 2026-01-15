@@ -43,9 +43,7 @@ class Ui_EpisodePage(object):
         self.pushButton_14.setIcon(icon)
         self.pushButton_14.setIconSize(QSize(25, 25))
         self.pushButton_14.setCheckable(True)
-
         self.horizontalLayout_9.addWidget(self.pushButton_14)
-
         self.pushButton_12 = QPushButton(self.frame_2)
         self.pushButton_12.setObjectName(u"pushButton_12")
         self.pushButton_12.setMinimumSize(QSize(500, 0))
@@ -56,13 +54,9 @@ class Ui_EpisodePage(object):
         font.setBold(True)
         self.pushButton_12.setFont(font)
         self.pushButton_12.setStyleSheet(u"border:none;")
-
         self.horizontalLayout_9.addWidget(self.pushButton_12)
-
         self.horizontalSpacer_7 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
         self.horizontalLayout_9.addItem(self.horizontalSpacer_7)
-
         self.pushButton_15 = QPushButton(self.frame_2)
         self.pushButton_15.setObjectName(u"pushButton_15")
         font1 = QFont()
@@ -70,12 +64,8 @@ class Ui_EpisodePage(object):
         font1.setPointSize(10)
         font1.setBold(True)
         self.pushButton_15.setFont(font1)
-
         self.horizontalLayout_9.addWidget(self.pushButton_15)
-
-
         self.verticalLayout_9.addLayout(self.horizontalLayout_9)
-
         self.pushButton_13 = QPushButton(self.frame_2)
         self.pushButton_13.setObjectName(u"pushButton_13")
         font2 = QFont()
@@ -84,9 +74,7 @@ class Ui_EpisodePage(object):
         font2.setBold(True)
         self.pushButton_13.setFont(font2)
         self.pushButton_13.setStyleSheet(u"border:none;")
-
         self.verticalLayout_9.addWidget(self.pushButton_13)
-
         self.scrollArea = QScrollArea(self.frame_2)
         self.scrollArea.setObjectName(u"scrollArea")
         self.scrollArea.setStyleSheet(u"border:none")
@@ -97,21 +85,12 @@ class Ui_EpisodePage(object):
         self.gridLayout_3 = QGridLayout(self.scrollAreaWidgetContents_2)
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.verticalSpacer_5 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-
         self.gridLayout_3.addItem(self.verticalSpacer_5, 0, 0, 1, 1)
-
         self.scrollArea.setWidget(self.scrollAreaWidgetContents_2)
-
         self.verticalLayout_9.addWidget(self.scrollArea)
-
-
         self.horizontalLayout_5.addWidget(self.frame_2, 0, Qt.AlignLeft)
-
-
         self.retranslateUi(EpisodePage)
-
         QMetaObject.connectSlotsByName(EpisodePage)
-    # setupUi
 
     def retranslateUi(self, EpisodePage):
         self.pushButton_14.setText("")
@@ -119,5 +98,3 @@ class Ui_EpisodePage(object):
         self.pushButton_15.setText(QCoreApplication.translate("EpisodePage", u"\u5168\u90e8\u5df2\u770b", None))
         self.pushButton_13.setText(QCoreApplication.translate("EpisodePage", u"\u6807\u9898", None))
         pass
-    # retranslateUi
-

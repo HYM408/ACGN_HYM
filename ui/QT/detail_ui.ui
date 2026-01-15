@@ -127,7 +127,7 @@ QPushButton:hover {
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>../../../../Python/Project/ACGN_HYM/icons/openUrl.png</normaloff>../../../../Python/Project/ACGN_HYM/icons/openUrl.png</iconset>
+          <normaloff>icons/openUrl.png</normaloff>icons/openUrl.png</iconset>
         </property>
         <property name="iconSize">
          <size>

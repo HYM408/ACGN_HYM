@@ -54,10 +54,12 @@ class MainPageManager(QObject):
         self.main_window.pushButton_6.clicked.connect(lambda: self.load_collections(self.current_subject_type, 4))
         self.main_window.pushButton_7.clicked.connect(lambda: self.load_collections(self.current_subject_type, 5))
         # 类别
-        self.main_window.animation_Button.clicked.connect(lambda: self.load_collections(2, self.current_status_type))
-        self.main_window.novel_Button.clicked.connect(lambda: self.load_collections(7, self.current_status_type))
-        self.main_window.game_Button.clicked.connect(lambda: self.load_collections(4, self.current_status_type))
-        self.main_window.comic_Button.clicked.connect(lambda: self.load_collections(8, self.current_status_type))
+        self.main_window.animation_Button.clicked.connect(lambda: self.load_collections_and_switch(2, self.current_status_type))
+        self.main_window.novel_Button.clicked.connect(lambda: self.load_collections_and_switch(7, self.current_status_type))
+        self.main_window.game_Button.clicked.connect(lambda: self.load_collections_and_switch(4, self.current_status_type))
+        self.main_window.comic_Button.clicked.connect(lambda: self.load_collections_and_switch(8, self.current_status_type))
+        # 下载
+        self.main_window.pushButton_9.clicked.connect(self.show_download_page)
         # 分页
         self.main_window.previous_Button.clicked.connect(self.previous_page)
         self.main_window.next_Button.clicked.connect(self.next_page)
@@ -95,6 +97,11 @@ class MainPageManager(QObject):
             self.main_window.pushButton_3.setText(status_names[1])
             self.main_window.pushButton_4.setText(status_names[3])
             self.main_window.pushButton_5.setText(status_names[2])
+
+    def load_collections_and_switch(self, subject_type, status_type):
+        """回到主页面并加载收藏"""
+        self.main_window.switch_to_main_page()
+        self.load_collections(subject_type, status_type)
 
     def load_collections(self, subject_type=None, status_type=None, force_refresh=False):
         """加载或刷新对应类别和状态的数据"""
@@ -151,6 +158,10 @@ class MainPageManager(QObject):
                 col = 0
                 row += 1
         self.update_page_info()
+
+    def show_download_page(self):
+        """显示下载页面"""
+        self.main_window.showmain_stackedWidget.setCurrentWidget(self.main_window.loaded_pages["download"])
 
     def create_collection_card(self, collection):
         """创建收藏卡片"""
