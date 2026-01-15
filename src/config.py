@@ -20,7 +20,7 @@ def create_config():
                 "redirect_uri": "",
                 "refresh_token": "",
                 "expires_at": 0,
-                "bangumi_base_url": "https://chii.in/",
+                "bangumi_base_url": "https://bangumi.tv/",
                 # RSS
                 "rss_guid": "0",
                 # Pikpak

@@ -18,6 +18,8 @@ class SettingsPageManager:
         thread_manager.pikpak_login_error.connect(self.on_pikpak_login_error)
         self.update_token_display()
         self.setup_sidebar_connections()
+        # Bangumi域名
+        self.set_bangumi_base_url()
         # 默认选中
         self.set_default_page()
 
@@ -31,6 +33,7 @@ class SettingsPageManager:
         self.settings_page.ui.login_Button.clicked.connect(self.login_action)
         self.settings_page.ui.collection_Button.clicked.connect(self.get_collections_action)
         self.settings_page.ui.login_Button_2.clicked.connect(self.pikpak_login_action)
+        self.settings_page.ui.comboBox.currentIndexChanged.connect(self.on_bangumi_url_changed)
 
     def setup_sidebar_connections(self):
         """设置侧边栏按钮连接"""
@@ -47,6 +50,16 @@ class SettingsPageManager:
         self.settings_page.ui.pushButton_6.setText(f"username: {get_config_item('username')}")
         self.settings_page.ui.pushButton_10.setText(f"password: {get_config_item('password')}")
         self.settings_page.ui.pushButton_11.setText(f"encoded token: {get_config_item('encoded_token')[:30]}")
+
+    def set_bangumi_base_url(self):
+        """根据配置文件设置Bangumi域名"""
+        url_to_index = {'https://bangumi.tv/': 0, 'https://bgm.tv/': 1, 'https://chii.in/': 2}
+        self.settings_page.ui.comboBox.setCurrentIndex(url_to_index[get_config_item('bangumi_base_url')])
+
+    def on_bangumi_url_changed(self, index):
+        """改变Bangumi域名"""
+        index_to_url = {0: 'https://bangumi.tv/', 1: 'https://bgm.tv/', 2: 'https://chii.in/'}
+        set_config_items(bangumi_base_url=index_to_url[index])
 
     # ==========Bangumi==========
     def show_client_credential_dialog(self):
