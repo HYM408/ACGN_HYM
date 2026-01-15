@@ -13,7 +13,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.MainPageManager = MainPageManager(self)
         self.setup_connections()
         self.setup_titlebar()
-        QTimer.singleShot(500, self.initialize_all_pages)
+        QTimer.singleShot(0, self.initialize_all_pages)
 
     def initialize_all_pages(self):
         """初始化所有页面"""
@@ -126,7 +126,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.showNormal()
                 self.is_maximized = False
                 cursor_pos = event.globalPos()
-                screen_center = self.screen().geometry().center()
+                self.screen().geometry().center()
                 self.move(cursor_pos - QPoint(self.width() // 2, 50))
                 self.drag_position = QPoint(self.width() // 2, 50)
             else:

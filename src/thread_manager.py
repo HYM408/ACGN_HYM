@@ -108,6 +108,7 @@ class RSSWorker(QObject):
 
     def execute_update(self):
         """执行RSS更新"""
+        print("RSS: 启动")
         with self._lock:
             if self.is_running:
                 return
@@ -395,7 +396,7 @@ class ThreadManager(QObject):
         self.rss_timer = QTimer()
         self.rss_timer.setInterval(5 * 60 * 1000)
         self.rss_timer.timeout.connect(self.rss_worker.execute_update)
-        QTimer.singleShot(1000, self.rss_worker.execute_update)
+        QTimer.singleShot(5000, self.rss_worker.execute_update)
         self.rss_timer.start()
 
     def stop_rss_service(self):

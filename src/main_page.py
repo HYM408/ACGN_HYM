@@ -21,7 +21,7 @@ class MainPageManager(QObject):
         self.all_collections = []
         self.filtered_collections = []
         # 字体预热
-        QTimer.singleShot(50, self._warmup_music_symbols)
+        QTimer.singleShot(0, self._warmup_music_symbols)
         # 缓存管理器
         self._cache_manager = CacheManager(self.main_window)
         # 状态映射
@@ -29,7 +29,7 @@ class MainPageManager(QObject):
         # 刷新信号
         thread_manager.refresh_main_page.connect(self._refresh_in_main_thread)
         # 链接
-        self.setup_connections()
+        QTimer.singleShot(0, self.setup_connections)
 
     def _refresh_in_main_thread(self):
         """在主线程中刷新页面"""
