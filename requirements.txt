@@ -1,7 +1,6 @@
-PySide6
-httpx
-python-vlc
 lxml
-cssselect
-playwright
+httpx
+PySide6
 pikpakapi
+cssselect
+python-vlc

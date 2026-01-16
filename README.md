@@ -10,8 +10,6 @@
 ## 安装使用
 python 3.11+  
 
-安装依赖：`pip install -r requirements.txt`  
-
-安装Playwright：`playwright install chromium`  
+安装依赖：`pip install -r requirements.txt`
 
 运行程序：`python main.py`

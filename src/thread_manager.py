@@ -25,7 +25,6 @@ class TaskResult(QObject):
     subject_data_fetched = Signal(dict)
     rss_update_finished = Signal(bool, str)
     site_search_completed = Signal(dict)
-    video_fetched = Signal(str)
     pikpak_login_success = Signal(str)
     pikpak_login_error = Signal(str)
 
@@ -45,36 +44,6 @@ class BaseTask(QRunnable):
     def cancel(self):
         """取消任务"""
         self._is_cancelled = True
-
-
-# ====================获取视频链接====================
-class VideoFetchTask(BaseTask):
-    """获取视频链接"""
-    def __init__(self, episode_url: str, site_id: str, crawler: VideoCrawler):
-        super().__init__()
-        self.episode_url = episode_url
-        self.site_id = site_id
-        self.crawler = crawler
-
-    def run(self):
-        try:
-            if self._is_cancelled:
-                return
-            video_url = self.crawler.find_video_stream(self.episode_url, self.site_id)
-            if video_url and not self._is_cancelled:
-                if 'url=' in video_url:
-                    start = video_url.find('url=') + 4
-                    end = video_url.find('&', start)
-                    if end == -1:
-                        end = len(video_url)
-                    video_url = video_url[start:end]
-                self.result_holder.video_fetched.emit(video_url)
-            elif not self._is_cancelled:
-                self.result_holder.video_fetched.emit("")
-        except Exception as e:
-            print(f"获取视频链接失败: {e}")
-            if not self._is_cancelled:
-                self.result_holder.video_fetched.emit("")
 
 
 # ====================站点搜索====================
@@ -406,7 +375,6 @@ class ThreadManager(QObject):
     subject_data_fetched = Signal(dict)
     refresh_main_page = Signal()
     site_search_completed = Signal(dict)
-    video_fetched = Signal(str)
     pikpak_login_success = Signal(str)
     pikpak_login_error = Signal(str)
 
@@ -417,8 +385,6 @@ class ThreadManager(QObject):
         self.thread_pool.setExpiryTimeout(30000)
         self.rss_timer = None
         self.rss_worker = None
-        self.current_video_fetch_task = None
-        self.video_fetch_connections = set()
 
     def setup_rss_timer(self):
         """设置RSS定时器"""
@@ -496,22 +462,6 @@ class ThreadManager(QObject):
             task.result_holder.site_search_completed.connect(self.site_search_completed)
             self.thread_pool.start(task)
 
-    def fetch_video_url(self, episode_url: str, site_id: str, crawler: VideoCrawler, callback: Callable):
-        """获取视频链接"""
-        self._cleanup_video_fetch_connections()
-        if self.current_video_fetch_task:
-            self.current_video_fetch_task.cancel()
-            self.current_video_fetch_task = None
-        task = VideoFetchTask(episode_url, site_id, crawler)
-
-        def on_video_fetched(url):
-            callback(url)
-            self._cleanup_video_fetch_connections()
-        connection = task.result_holder.video_fetched.connect(on_video_fetched)
-        self.video_fetch_connections.add((task, connection))
-        self.current_video_fetch_task = task
-        self.thread_pool.start(task)
-
     def login_pikpak(self, username: str, password: str):
         """启动PikPak登录"""
         task = PikpakLoginTask(username, password)
@@ -519,26 +469,9 @@ class ThreadManager(QObject):
         task.result_holder.pikpak_login_error.connect(self.pikpak_login_error)
         self.thread_pool.start(task)
 
-    def cancel_video_fetch(self):
-        """取消当前的视频获取任务"""
-        if self.current_video_fetch_task:
-            self.current_video_fetch_task.cancel()
-            self.current_video_fetch_task = None
-        self._cleanup_video_fetch_connections()
-
-    def _cleanup_video_fetch_connections(self):
-        """清理视频获取信号连接"""
-        for task, connection in self.video_fetch_connections:
-            try:
-                task.result_holder.video_fetched.disconnect(connection)
-            except:
-                pass
-        self.video_fetch_connections.clear()
-
     def cleanup(self):
         """清理资源"""
         self.stop_rss_service()
-        self.cancel_video_fetch()
         self.thread_pool.clear()
         self.thread_pool.waitForDone(3000)
 

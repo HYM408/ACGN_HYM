@@ -239,16 +239,3 @@ class VideoPlayerWidget(QWidget):
             self.control_overlay.set_play_state(True)
         else:
             self.control_overlay.set_play_state(False)
-
-    def closeEvent(self, event):
-        """关闭事件"""
-        if self.is_fullscreen_mode:
-            self._exit_fullscreen()
-        self.stop_video()
-        if self.vlc_player:
-            self.vlc_player.cleanup()
-        if self.update_timer.isActive():
-            self.update_timer.stop()
-        if self.right_key_timer.isActive():
-            self.right_key_timer.stop()
-        super().closeEvent(event)
