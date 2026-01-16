@@ -8,7 +8,7 @@
       "route_tabs": ".anthology-tab .swiper-slide",
       "episode_containers": ".anthology-list-box",
       "episode_items": ".anthology-list-play a",
-      "video_patterns": [".m3u8"]
+      "video_patterns": ["playlist.m3u8"]
     },
     "NT": {
       "base_url": "https://www.ntdm8.com",
@@ -28,7 +28,7 @@
       "route_tabs": ".con_c2_title .tab-switch",
       "episode_containers": ".tab-content",
       "episode_items": ".con_c2_list li a",
-      "video_patterns": ["tiktokcdn", ".m3u8"]
+      "video_patterns": ["tiktokcdn","index.m3u8"]
     },
     "稀饭动漫": {
       "base_url": "https://dm.xifanacg.com",
@@ -38,7 +38,7 @@
       "route_tabs": ".anthology-tab .swiper-slide",
       "episode_containers": ".anthology-list-box",
       "episode_items": ".anthology-list-play a",
-      "video_patterns": ["hydownload", ".mp4"]
+      "video_patterns": [".mp4"]
     },
     "omofun": {
       "base_url": "https://omofun.icu",
@@ -48,7 +48,7 @@
       "route_tabs": ".module-tab-item.tab-item",
       "episode_containers": ".module-list.sort-list.tab-list.his-tab-list",
       "episode_items": ".module-play-list-link",
-      "video_patterns": ["sns-video-hw", ".mp4", "tiktokcdn"]
+      "video_patterns": ["tiktokcdn",".m3u8"]
     },
     "饭团动漫": {
       "base_url": "https://acgfta.com",
@@ -108,6 +108,16 @@
       "route_tabs": ".stui-pannel-box.b.playlist .stui-pannel__head h3.title",
       "episode_containers": ".stui-pannel-box.b.playlist .stui-pannel_bd",
       "episode_items": ".stui-content__playlist li a",
+      "video_patterns": ["index.m3u8"]
+    },
+    "中国动漫网(验证码问题)": {
+      "base_url": "https://zgacgn.com",
+      "search_path": "/search.php?searchword={keyword}",
+      "title": "#cont_pub .tit a",
+      "link": "#cont_pub .tit a",
+      "route_tabs": "div.playAsc h2.rightTitle",
+      "episode_containers": "div.playAsc ul.playList.clearfix",
+      "episode_items": "li a",
       "video_patterns": [".m3u8"]
     },
     "七色动漫": {
