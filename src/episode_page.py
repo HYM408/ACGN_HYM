@@ -57,7 +57,7 @@ class EpisodeManager(QObject):
         self.clear_buttons()
         if not episodes:
             no_episodes_label = QLabel("暂无剧集数据")
-            no_episodes_label.setAlignment(Qt.AlignCenter)
+            no_episodes_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             no_episodes_label.setFont(QFont(["微软雅黑"], 12))
             no_episodes_label.setStyleSheet("color: #888")
             layout.addWidget(no_episodes_label, 0, 0, 1, 12)
@@ -66,41 +66,48 @@ class EpisodeManager(QObject):
             return
         cols_per_row, row, col = 12, 0, 0
         normal_eps, sp_eps = [], []
-        for ep in episodes:
-            ep_type = ep.get('episode_type', 0) if 'episode' not in ep else ep.get('episode', {}).get('type', 0)
-            sort_num = ep.get('sort') or ep.get('episode', {}).get('sort')
-            col_type = ep.get('collection_type', 0) or ep.get('type', 0)
-            if sort_num:
-                item = (sort_num, col_type)
+        for episode in episodes:
+            ep_type = episode.get('episode_type', 0) if 'episode' not in episode else episode.get('episode', {}).get(
+                'type', 0)
+            sort_val = episode.get('sort') or episode.get('episode', {}).get('sort')
+            col_val = episode.get('collection_type', 0) or episode.get('type', 0)
+            if sort_val:
+                item = (sort_val, col_val)
                 (normal_eps if ep_type == 0 else sp_eps).append(item)
-
-        def create_buttons(ep_list, prefix=""):
-            nonlocal row, col
-            for sort_num, col_type in ep_list:
-                btn = QPushButton(f"{prefix}{sort_num}")
-                btn.setFixedSize(40, 40)
-                btn.setFont(QFont(["微软雅黑"], 10, QFont.Bold))
-                color = "rgb(76, 175, 80)" if col_type == 2 else "white"
-                btn.setStyleSheet(f"background-color: {color}; border: 1px solid #ddd; border-radius: 4px;")
-                episode_data = next((ep for ep in episodes if (ep.get('sort') or ep.get('episode', {}).get('sort')) == sort_num),None)
-                btn.clicked.connect(lambda checked, ep=episode_data: self.on_episode_clicked(ep))
-                layout.addWidget(btn, row, col)
-                col += 1
-                if col >= cols_per_row:
-                    col = 0
-                    row += 1
-        create_buttons(sorted(normal_eps))
+        for sort_val, col_val in sorted(normal_eps):
+            self._create_single_button(layout, episodes, sort_val, col_val, row, col)
+            col += 1
+            if col >= cols_per_row:
+                col = 0
+                row += 1
         if sp_eps:
             if col != 0:
                 col, row = 0, row + 1
             sp_label = QLabel("SP")
-            sp_label.setFont(QFont(["微软雅黑"], 10, QFont.Bold))
+            sp_label.setFont(QFont(["微软雅黑"], 10, QFont.Weight.Bold))
             layout.addWidget(sp_label, row, 0, 1, 12)
             row += 1
-            create_buttons(sorted(sp_eps))
+            for sort_val, col_val in sorted(sp_eps):
+                self._create_single_button(layout, episodes, sort_val, col_val, row, col)
+                col += 1
+                if col >= cols_per_row:
+                    col = 0
+                    row += 1
         self.total_rows = row + 1
         layout.addItem(self.episode_page.verticalSpacer_5, row + 1, 0, 1, cols_per_row)
         self.episodes_layout_updated.emit()
+
+    def _create_single_button(self, layout, episodes, sort_val, col_val, row, col):
+        """创建剧集按钮"""
+        btn = QPushButton(str(sort_val))
+        btn.setFixedSize(40, 40)
+        btn.setFont(QFont(["微软雅黑"], 10, QFont.Weight.Bold))
+        color = "rgb(76, 175, 80)" if col_val == 2 else "white"
+        btn.setStyleSheet(f"background-color: {color}; border: 1px solid #ddd; border-radius: 4px;")
+        episode_data = next((ep for ep in episodes if (ep.get('sort') or ep.get('episode', {}).get('sort')) == sort_val), None)
+        if episode_data:
+            btn.clicked.connect(lambda checked, ep=episode_data: self.on_episode_clicked(ep))
+        layout.addWidget(btn, row, col)
 
     def get_total_rows(self):
         """获取总行数"""

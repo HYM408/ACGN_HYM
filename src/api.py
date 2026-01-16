@@ -9,19 +9,17 @@ from src.config import get_config_item, set_config_items
 
 class BangumiAPI:
     def __init__(self):
-        self.load_config()
-        self.base_url = "https://api.bgm.tv"
-
-    def load_config(self):
-        """加载配置文件"""
         self.user_id = get_config_item("user_id")
         self.token = get_config_item("access_token")
         self.refresh_token = get_config_item("refresh_token")
+        self.base_url = "https://api.bgm.tv"
 
     def refresh_and_reload(self):
         """刷新token"""
         BangumiOAuth().exchange_code_for_token(refresh_token=self.refresh_token)
-        self.load_config()
+        self.user_id = get_config_item("user_id")
+        self.token = get_config_item("access_token")
+        self.refresh_token = get_config_item("refresh_token")
 
     def _create_client(self):
         """创建httpx客户端"""
@@ -82,6 +80,7 @@ class BangumiAPI:
                         response = client.get(url, params=params)
                         if response.status_code == 401:
                             self.refresh_and_reload()
+                            continue
                         response.raise_for_status()
                         items = response.json().get("data", [])
                         if not items:
@@ -204,7 +203,7 @@ class BangumiOAuth:
             def do_GET(self):
                 parsed_url = urlparse(self.path)
                 query_params = parse_qs(parsed_url.query)
-                code_list = query_params.get('code', [])
+                code_list = query_params.get('code')
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html; charset=utf-8')
                 self.end_headers()
@@ -214,7 +213,7 @@ class BangumiOAuth:
                 else:
                     html_content = """<html><head><title>授权失败</title></head><body style="text-align: center; padding-top: 50px;"><p>授权失败，请重试</p></body></html>"""
                 self.wfile.write(html_content.encode('utf-8'))
-            def log_message(self, format, *args):
+            def log_message(self, format_str, *args):
                 pass
         return CallbackHandler
 

@@ -27,7 +27,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     # 创建主窗口
     window = MainWindow()
-    window.setGeometry(QStyle.alignedRect(Qt.LeftToRight,Qt.AlignCenter,window.size(),QApplication.primaryScreen().availableGeometry()))
+    window.setGeometry(QStyle.alignedRect(Qt.LayoutDirection.LeftToRight,Qt.AlignmentFlag.AlignCenter,window.size(),QApplication.primaryScreen().availableGeometry()))
     window.show()
     # 设置RSS定时器
     rss_manager.setup_rss_timer()

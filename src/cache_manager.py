@@ -32,13 +32,13 @@ class CacheManager(QObject):
         self.pending_callbacks[url_hash].append(callback)
         if len(self.pending_callbacks[url_hash]) == 1:
             request = QNetworkRequest(QUrl(url))
-            request.setAttribute(QNetworkRequest.User, url_hash)
+            request.setAttribute(QNetworkRequest.Attribute.User, url_hash)
             self.network_manager.get(request)
 
     def _on_download_finished(self, reply):
         """下载完成处理"""
-        url_hash = reply.request().attribute(QNetworkRequest.User)
-        if reply.error() == QNetworkReply.NoError:
+        url_hash = reply.request().attribute(QNetworkRequest.Attribute.User)
+        if reply.error() == QNetworkReply.NetworkError.NoError:
             image_data = reply.readAll()
             pixmap = QPixmap()
             if pixmap.loadFromData(image_data):

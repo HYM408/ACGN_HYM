@@ -7,10 +7,10 @@ def create_rounded_pixmap(pixmap: QPixmap, radius: int, all_corners: bool = Fals
     """图片圆角处理工具函数"""
     try:
         result = QPixmap(pixmap.size())
-        result.fill(Qt.transparent)
+        result.fill(Qt.GlobalColor.transparent)
         painter = QPainter(result)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.setRenderHint(QPainter.SmoothPixmapTransform)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
         path = QPainterPath()
         width = pixmap.width()
         height = pixmap.height()
@@ -44,13 +44,13 @@ def load_image_with_cache(cache_manager, url, cover_label, radius: int = 0, all_
             width = pixmap.width()
             height = pixmap.height()
             if width >= height:
-                scaled_pixmap = pixmap.scaledToWidth(label.width(), Qt.SmoothTransformation)
+                scaled_pixmap = pixmap.scaledToWidth(label.width(), Qt.TransformationMode.SmoothTransformation)
             else:
                 if radius > 0:
                     rounded_pixmap = create_rounded_pixmap(pixmap, radius, all_corners)
                 else:
                     rounded_pixmap = pixmap
-                scaled_pixmap = rounded_pixmap.scaled(label.width(),label.height(),Qt.IgnoreAspectRatio,Qt.SmoothTransformation)
+                scaled_pixmap = rounded_pixmap.scaled(label.width(),label.height(),Qt.AspectRatioMode.IgnoreAspectRatio,Qt.TransformationMode.SmoothTransformation)
             label.setPixmap(scaled_pixmap)
             label.setText("")
         else:

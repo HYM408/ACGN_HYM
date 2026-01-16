@@ -56,7 +56,8 @@ class SettingsPageManager:
         url_to_index = {'https://bangumi.tv/': 0, 'https://bgm.tv/': 1, 'https://chii.in/': 2}
         self.settings_page.ui.comboBox.setCurrentIndex(url_to_index[get_config_item('bangumi_base_url')])
 
-    def on_bangumi_url_changed(self, index):
+    @staticmethod
+    def on_bangumi_url_changed(index):
         """改变Bangumi域名"""
         index_to_url = {0: 'https://bangumi.tv/', 1: 'https://bgm.tv/', 2: 'https://chii.in/'}
         set_config_items(bangumi_base_url=index_to_url[index])
@@ -118,15 +119,18 @@ class SettingsPageManager:
         """认证成功处理"""
         self.update_token_display()
 
-    def on_auth_error(self, message):
+    @staticmethod
+    def on_auth_error(message):
         """认证错误处理"""
         print(message)
 
-    def get_collections_action(self):
+    @staticmethod
+    def get_collections_action():
         """获取收藏"""
         thread_manager.fetch_collections()
 
-    def on_collection_data_ready(self, collections):
+    @staticmethod
+    def on_collection_data_ready(collections):
         """在主线程中处理收藏数据"""
         try:
             clear_table()
@@ -135,7 +139,8 @@ class SettingsPageManager:
         except Exception as e:
             print(f"处理收藏数据失败: {e}")
 
-    def on_collection_error(self):
+    @staticmethod
+    def on_collection_error():
         """获取收藏错误处理"""
         print("获取收藏失败")
 

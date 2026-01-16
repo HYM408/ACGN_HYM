@@ -6,7 +6,7 @@ def create_status_selector(parent_button, on_status_selected=None):
     """状态下拉菜单"""
     status_list = ["想看", "在看", "看过", "搁置", "抛弃", "取消追番"]
     selector_widget = QWidget()
-    selector_widget.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
+    selector_widget.setWindowFlags(Qt.WindowType.Popup | Qt.WindowType.FramelessWindowHint)
     selector_widget.setFixedWidth(120)
     main_layout = QVBoxLayout(selector_widget)
     main_layout.setSpacing(0)

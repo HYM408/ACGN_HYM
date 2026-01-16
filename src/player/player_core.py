@@ -27,23 +27,19 @@ class VideoFrameRenderer:
         VideoUnlockCb = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p))
         VideoDisplayCb = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p)
 
-        def lock_cb(opaque, planes):
+        def lock_cb(_, planes):
             if not self.buffer:
                 self.buffer = (ctypes.c_uint8 * (self.width * self.height * 4))()
                 self.current_frame = None
             planes[0] = ctypes.addressof(self.buffer)
             return None
 
-        def unlock_cb(opaque, picture, planes):
+        def unlock_cb(_, __, _planes):
             self.frame_ready = True
-
-        def display_cb(opaque, picture):
-            pass
 
         self._callbacks['lock'] = VideoLockCb(lock_cb)
         self._callbacks['unlock'] = VideoUnlockCb(unlock_cb)
-        self._callbacks['display'] = VideoDisplayCb(display_cb)
-        player.video_set_callbacks(self._callbacks['lock'], self._callbacks['unlock'], self._callbacks['display'], None)
+        player.video_set_callbacks(self._callbacks['lock'], self._callbacks['unlock'], None, None)
         player.video_set_format("RV32", self.width, self.height, self.stride)
 
     def get_frame(self) -> Optional[memoryview]:
@@ -154,13 +150,13 @@ class VideoDisplayWidget(QWidget):
         self.video_height = 1080
         self.current_qimage = None
         self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.StrongFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
     def update_frame(self, buffer):
         """更新视频帧"""
         if buffer:
             if self.current_qimage is None:
-                self.current_qimage = QImage(buffer, self.video_width, self.video_height, self.video_width * 4, QImage.Format_ARGB32)
+                self.current_qimage = QImage(buffer, self.video_width, self.video_height, self.video_width * 4, QImage.Format.Format_ARGB32)
             self.update()
 
     def paintEvent(self, event):
@@ -168,16 +164,9 @@ class VideoDisplayWidget(QWidget):
         if not self.current_qimage:
             return
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.setRenderHint(QPainter.SmoothPixmapTransform)
-
-        scaled = self.current_qimage.scaled(self.size(),Qt.KeepAspectRatio,Qt.SmoothTransformation)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
+        scaled = self.current_qimage.scaled(self.size(),Qt.AspectRatioMode.KeepAspectRatio,Qt.TransformationMode.SmoothTransformation)
         x = (self.width() - scaled.width()) // 2
         y = (self.height() - scaled.height()) // 2
         painter.drawImage(x, y, scaled)
-
-    def mouseDoubleClickEvent(self, event):
-        """双击全屏"""
-        event.accept()
-        if self.parent() and hasattr(self.parent(), '_toggle_fullscreen'):
-            self.parent()._toggle_fullscreen()

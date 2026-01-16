@@ -1,6 +1,6 @@
-from typing import Dict, Any, Optional
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
+from typing import Dict, Any, Optional
 from PySide6.QtWidgets import QPushButton, QVBoxLayout, QLabel, QFrame, QHBoxLayout, QSpacerItem, QSizePolicy, QWidget
 from src.player.css import VideoCrawler
 from src.sqlite import get_by_subject_id
@@ -15,13 +15,15 @@ class EpisodeData:
         self.subject_id = self._extract_subject_id(data)
         self.sort = self._extract_sort(data)
 
-    def _extract_subject_id(self, data: Dict[str, Any]) -> Optional[int]:
+    @staticmethod
+    def _extract_subject_id(data: Dict[str, Any]) -> Optional[int]:
         """提取subject_id"""
         if 'episode' in data and isinstance(data['episode'], dict):
             return data['episode'].get('subject_id')
         return data.get('subject_id')
 
-    def _extract_sort(self, data: Dict[str, Any]) -> Optional[int]:
+    @staticmethod
+    def _extract_sort(data: Dict[str, Any]) -> Optional[int]:
         """提取sort值"""
         if 'sort' in data:
             return data['sort']
@@ -48,14 +50,14 @@ class SiteWidgetFactory:
         top_layout.setSpacing(10)
         # 站点名称
         site_label = QLabel(site_id, card)
-        site_label.setFont(QFont("", 14, QFont.Bold))
+        site_label.setFont(QFont("", 14, QFont.Weight.Bold))
         site_label.setStyleSheet("color: #333;")
-        site_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
+        site_label.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
         top_layout.addWidget(site_label)
         # 状态/标题信息
         status_label = QLabel(card)
         status_label.setStyleSheet("color: #666; font-size: 13px;")
-        status_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        status_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         if status == 'loading':
             status_label.setText("搜索中...")
         elif status == 'success' and result:
@@ -133,11 +135,12 @@ class ChoiceEpisodeManager:
             widget = SiteWidgetFactory.create_site_card(site_id, 'loading')
             self.site_widgets[site_id] = widget
             container.layout().addWidget(widget)
-        container.layout().addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        container.layout().addItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         thread_manager.site_search_completed.connect(self._update_site_widget)
         thread_manager.search_sites(site_ids, keyword, self.crawler)
 
-    def _clear_container_layout(self, container: QWidget):
+    @staticmethod
+    def _clear_container_layout(container: QWidget):
         """清空容器布局"""
         if layout := container.layout():
             QWidget().setLayout(layout)

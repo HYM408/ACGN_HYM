@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt, QPoint, QTimer
-from PySide6.QtWidgets import QMainWindow, QWidget, QGraphicsOpacityEffect
+from PySide6.QtWidgets import QMainWindow, QWidget
 from ui.main_ui import Ui_MainWindow
 from src.main_page import MainPageManager
 
@@ -62,7 +62,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.main_stackedWidget.addWidget(player_widget)
         self.video_player = setup_video_player(player_widget)
         self.PlayerManager = ChoiceEpisodeManager(self)
-        self.video_player.back_requested.connect(self.on_player_back_requested)
+        self.video_player.back_requested.connect(self.go_back_history)
         # 下载页面
         from ui.download_ui import Ui_DownloaderPage
         download_widget = QWidget()
@@ -70,12 +70,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         download_ui.setupUi(download_widget)
         self.loaded_pages["download"] = download_widget
         self.showmain_stackedWidget.addWidget(download_widget)
-
-    def on_player_back_requested(self):
-        """播放器返回"""
-        if self.video_player and self.video_player.is_fullscreen_mode:
-            self.video_player._exit_fullscreen()
-        self.go_back_history()
 
     def setup_titlebar(self):
         """设置标题栏功能"""
@@ -108,18 +102,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def titlebar_double_click(self, event):
         """标题栏双击事件 - 切换最大化/最小化"""
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.toggle_maximize_window()
 
     def titlebar_mouse_press(self, event):
         """标题栏鼠标按下事件 - 开始拖动"""
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.drag_position = event.globalPos() - self.frameGeometry().topLeft()
             event.accept()
 
     def titlebar_mouse_move(self, event):
         """标题栏鼠标移动事件 - 拖动窗口"""
-        if event.buttons() == Qt.LeftButton and self.drag_position:
+        if event.buttons() == Qt.MouseButton.LeftButton and self.drag_position:
             if self.is_maximized:
                 self.showNormal()
                 self.is_maximized = False
@@ -133,7 +127,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def titlebar_mouse_release(self, event):
         """标题栏鼠标释放事件 - 停止拖动"""
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.drag_position = None
             event.accept()
 

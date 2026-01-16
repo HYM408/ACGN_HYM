@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget
-from .player_widget import VideoPlayerWidget
+from src.player.player_widget import VideoPlayerWidget
 
 
 def setup_video_player(player_widget: QWidget) -> VideoPlayerWidget:

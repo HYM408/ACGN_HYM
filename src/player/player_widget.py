@@ -39,7 +39,7 @@ class VideoPlayerWidget(QWidget):
         self.control_overlay = ControlOverlay(self.video_display)
         self.video_display.resizeEvent = self._resize_control_overlay
         self.setStyleSheet("QWidget { background-color: #000000; }")
-        self.setFocusPolicy(Qt.StrongFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
     def _resize_control_overlay(self, event):
         """调整控制面板大小"""
@@ -54,8 +54,6 @@ class VideoPlayerWidget(QWidget):
         self.control_overlay.back_requested.connect(self._on_back_button_clicked)
         self.control_overlay.volume_changed.connect(self._adjust_volume)
         self.control_overlay.seek_requested.connect(self.seek_video)
-        # 显示视频
-        self.video_display.seek_requested.connect(self.seek_video)
 
     def _setup_timers(self):
         """设置定时器"""
@@ -143,28 +141,28 @@ class VideoPlayerWidget(QWidget):
         """键盘控制"""
         key = event.key()
         # 空格键 - 播放/暂停
-        if key == Qt.Key_Space:
+        if key == Qt.Key.Key_Space:
             self.toggle_play_pause()
         # ESC键 - 退出全屏
-        elif key == Qt.Key_Escape:
+        elif key == Qt.Key.Key_Escape:
             self._exit_fullscreen()
         # F键 - 切换全屏
-        elif key == Qt.Key_F:
+        elif key == Qt.Key.Key_F:
             self._toggle_fullscreen()
         # 左方向键 - 后退5秒
-        elif key == Qt.Key_Left:
+        elif key == Qt.Key.Key_Left:
             self._jump_backward(5)
         # 右方向键 - 前进5秒或快进
-        elif key == Qt.Key_Right:
+        elif key == Qt.Key.Key_Right:
             if not event.isAutoRepeat():
                 self.right_key_pressed = True
                 self.right_key_timer.start(500)
                 self._jump_forward(5)
         # 上方向键 - 音量增加
-        elif key == Qt.Key_Up:
+        elif key == Qt.Key.Key_Up:
             self._adjust_volume_delta(5)
         # 下方向键 - 音量减少
-        elif key == Qt.Key_Down:
+        elif key == Qt.Key.Key_Down:
             self._adjust_volume_delta(-5)
 
     def keyReleaseEvent(self, event):
@@ -172,7 +170,7 @@ class VideoPlayerWidget(QWidget):
         if not self.vlc_player:
             return
         key = event.key()
-        if key == Qt.Key_Right:
+        if key == Qt.Key.Key_Right:
             if not event.isAutoRepeat():
                 self.right_key_pressed = False
                 self.right_key_timer.stop()
@@ -194,17 +192,23 @@ class VideoPlayerWidget(QWidget):
     def _jump_backward(self, seconds: int):
         """后退指定秒数"""
         if self.vlc_player:
-            current_time, _ = self.vlc_player.get_time_info()
-            if current_time > 0:
+            current_time, total_time = self.vlc_player.get_time_info()
+            if current_time > 0 and total_time > 0:
                 new_time = max(0, current_time - seconds * 1000)
+                new_position = new_time / total_time
+                self.vlc_player.set_position(new_position)
                 self.control_overlay.show_controls()
 
     def _jump_forward(self, seconds: int):
         """前进指定秒数"""
         if self.vlc_player:
-            current_time, _ = self.vlc_player.get_time_info()
-            new_time = current_time + seconds * 1000
-            self.control_overlay.show_controls()
+            current_time, total_time = self.vlc_player.get_time_info()
+            if total_time > 0:
+                new_time = current_time + seconds * 1000
+                new_time = min(new_time, total_time)
+                new_position = new_time / total_time
+                self.vlc_player.set_position(new_position)
+                self.control_overlay.show_controls()
 
     def _adjust_volume_delta(self, delta: int):
         """调整音量增量"""

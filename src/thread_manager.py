@@ -2,7 +2,7 @@ import httpx
 import asyncio
 import threading
 import webbrowser
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree
 from typing import Optional, Callable
 from PySide6.QtCore import QThreadPool, QRunnable, QObject, Signal, QTimer
 from src.player.css import VideoCrawler
@@ -163,7 +163,8 @@ class RSSUpdateTask(BaseTask):
         self._sync_collections()
         return True
 
-    def _get_user_rss(self) -> Optional[str]:
+    @staticmethod
+    def _get_user_rss() -> Optional[str]:
         """获取用户RSS"""
         user_id = get_config_item("user_id")
         base_url = get_config_item("bangumi_base_url")
@@ -176,12 +177,13 @@ class RSSUpdateTask(BaseTask):
             print(f"获取RSS失败: {e}")
             return None
 
-    def _extract_first_guid_number(self, rss_content: str) -> Optional[str]:
+    @staticmethod
+    def _extract_first_guid_number(rss_content: str) -> Optional[str]:
         """提取GUID"""
         if not rss_content:
             return None
         try:
-            root = ET.fromstring(rss_content)
+            root = xml.etree.ElementTree.fromstring(rss_content)
             first_item = root.find('.//item')
             if first_item is None:
                 return None

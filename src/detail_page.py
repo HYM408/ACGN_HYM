@@ -40,7 +40,7 @@ class DetailManager(QObject):
 
     def on_status_button_clicked(self):
         """状态下拉菜单"""
-        self.status_selector = show_status_selector(parent_button=self.detail_page.pushButton_26,on_status_selected=self.on_status_selected)
+        show_status_selector(parent_button=self.detail_page.pushButton_26, on_status_selected=self.on_status_selected)
 
     def on_open_bangumi_page(self):
         """跳转Bangumi"""
@@ -60,7 +60,8 @@ class DetailManager(QObject):
         self.status_show()
         thread_manager.update_status(self.collection_data.get('subject_id'),old_type,new_type,self.on_status_update_complete)
 
-    def on_status_update_complete(self, success, error_msg):
+    @staticmethod
+    def on_status_update_complete(success, error_msg):
         """状态更新完成回调"""
         if not success:
             print(f"状态更新失败: {error_msg}")
@@ -128,7 +129,8 @@ class DetailManager(QObject):
             time_tag = self.extract_time_from_date(date_str)
             self.detail_page.pushButton_23.setText(time_tag)
 
-    def find_time_tag(self, tags_list):
+    @staticmethod
+    def find_time_tag(tags_list):
         """从tags中查找时间"""
         time_pattern = re.compile(r'\d{4}年\d{1,2}月')
         for tag in tags_list:
@@ -139,7 +141,8 @@ class DetailManager(QObject):
                     return match.group()
         return None
 
-    def extract_time_from_date(self, date_str):
+    @staticmethod
+    def extract_time_from_date(date_str):
         """从date中提取时间"""
         if not date_str:
             return "TBA"
@@ -197,7 +200,7 @@ class DetailManager(QObject):
                 background-color: #f0f0f0;
             }
         """)
-        tag_label.setCursor(Qt.PointingHandCursor)
+        tag_label.setCursor(Qt.CursorShape.PointingHandCursor)
         tag_label.setProperty("tag_name", tag_name)
         tag_label.setProperty("tag_count", tag_count)
         tag_label.mousePressEvent = lambda event: self.on_tag_clicked_handler(tag_label, event)
@@ -205,7 +208,7 @@ class DetailManager(QObject):
 
     def on_tag_clicked_handler(self, tag_label, event):
         """标签点击事件处理"""
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             tag_name = tag_label.property("tag_name")
             self.tag_clicked.emit(tag_name)
 

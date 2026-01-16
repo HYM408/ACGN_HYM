@@ -45,7 +45,6 @@ class SearchPageManager:
         """执行tag搜索"""
         if not tag:
             return
-        # 清空搜索框，避免混淆
         self.ui.search_lineEdit.setText(tag)
         self._do_search(tag=tag)
 
@@ -67,7 +66,7 @@ class SearchPageManager:
     def on_search_error(self, error_msg):
         """搜索错误处理"""
         self.clear_search_results()
-        self.show_search_status("搜索失败")
+        self.show_search_status(f"搜索失败: {error_msg}")
 
     def display_search_results(self, results):
         """显示搜索结果"""
@@ -83,14 +82,10 @@ class SearchPageManager:
         animation_frame = QFrame()
         animation_frame.setMinimumSize(0, 130)
         animation_frame.setMaximumSize(450, 130)
-        animation_frame.setStyleSheet("""
-            QFrame{
-                background-color: rgb(242, 236, 244);
-            }
-        """)
-        animation_frame.setFrameShape(QFrame.StyledPanel)
-        animation_frame.setFrameShadow(QFrame.Raised)
-        animation_frame.setCursor(QCursor(Qt.PointingHandCursor))
+        animation_frame.setStyleSheet("QFrame{background-color: rgb(242, 236, 244)}")
+        animation_frame.setFrameShape(QFrame.Shape.StyledPanel)
+        animation_frame.setFrameShadow(QFrame.Shadow.Raised)
+        animation_frame.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         # 传入数据
         subject_id = result.get('id')
         collection_data = get_by_subject_id(subject_id)
@@ -101,11 +96,11 @@ class SearchPageManager:
                 'subject_id': subject_id,
                 'subject_name': result.get('name'),
                 'subject_name_cn': result.get('name_cn'),
-                'subject_images_common': result.get('images', {}).get('common', ''),
+                'subject_images_common': result.get('images').get('common'),
                 'type': 0,
             }
         def on_frame_clicked(event):
-            if event.button() == Qt.LeftButton:
+            if event.button() == Qt.MouseButton.LeftButton:
                 current_index = self.main_window.main_stackedWidget.currentIndex()
                 self.main_window.page_history.append(current_index)
                 self.main_window.show_detail_page(animation_frame.result_data)
@@ -117,14 +112,10 @@ class SearchPageManager:
         # 封面
         cover_label = QLabel(animation_frame)
         cover_label.setFixedSize(100, 130)
-        cover_label.setStyleSheet("""
-            background-color: rgb(242, 236, 244);
-            border-top-left-radius: 15px;
-            border-bottom-left-radius: 15px;
-        """)
+        cover_label.setStyleSheet("background-color: rgb(242, 236, 244);border-top-left-radius: 15px;border-bottom-left-radius: 15px")
         cover_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cover_label.setText("加载中...")
-        cover_label.setCursor(QCursor(Qt.PointingHandCursor))
+        cover_label.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         cover_label.mousePressEvent = on_frame_clicked
         # 加载图片
         image_url = result.get('images', {}).get('common', '')
@@ -164,7 +155,7 @@ class SearchPageManager:
         layout = self.ui.verticalLayout_10
         if not self.status_label:
             self.status_label = QLabel()
-            self.status_label.setAlignment(Qt.AlignCenter)
+            self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             font = QFont()
             font.setFamilies(["微软雅黑"])
             font.setPointSize(14)
@@ -172,8 +163,8 @@ class SearchPageManager:
             self.status_label.setStyleSheet("color: #666; padding: 20px;")
         self.status_label.setText(text)
         layout.addWidget(self.status_label)
-        layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Policy.Expanding))
-        layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Policy.Expanding))
+        layout.addItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        layout.addItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
     def clear_search_results(self):
         """清空布局和状态标签"""
@@ -192,4 +183,4 @@ class SearchPageManager:
                     sub_item = sub_layout.takeAt(0)
                     if sub_item.widget():
                         sub_item.widget().deleteLater()
-        layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Policy.Expanding))
+        layout.addItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))

@@ -108,7 +108,7 @@ class ControlOverlay(QWidget):
         if not self.progress_visible:
             return
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         w, h = self.width(), self.height()
         # 返回按钮
         self._draw_back_button(painter)
@@ -124,12 +124,12 @@ class ControlOverlay(QWidget):
         """返回按钮"""
         center = QPoint(30, 30)
         self.button_positions['back'] = (center, self.style.BUTTON_RADIUS)
-        painter.setPen(Qt.NoPen)
+        painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(self.style.BG_COLOR)
         painter.drawEllipse(center, self.style.BUTTON_RADIUS, self.style.BUTTON_RADIUS)
         # 图标
         icon_size = int(self.style.BUTTON_RADIUS * 1.4)
-        scaled_pixmap = self.back_icon.scaled(icon_size, icon_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        scaled_pixmap = self.back_icon.scaled(icon_size, icon_size, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         painter.drawPixmap(center.x() - icon_size//2,
                           center.y() - icon_size//2,
                           scaled_pixmap)
@@ -176,7 +176,7 @@ class ControlOverlay(QWidget):
             elif key == 'volume':
                 self._draw_volume_icon(painter, center, btn_y)
             elif key == 'fullscreen':
-                self._draw_fullscreen_icon(painter, center, btn_y)
+                self._draw_fullscreen_icon(painter, center)
 
     def _draw_play_icon(self, painter: QPainter, center: QPoint, btn_y: int):
         """播放/暂停"""
@@ -217,7 +217,8 @@ class ControlOverlay(QWidget):
         painter.setBrush(QColor(255, 255, 255, 220))
         painter.drawEllipse(QPoint(volume_point_x, btn_y), 5, 5)
 
-    def _draw_fullscreen_icon(self, painter: QPainter, center: QPoint, btn_y: int):
+    @staticmethod
+    def _draw_fullscreen_icon(painter: QPainter, center: QPoint):
         """全屏图标"""
         arrow_size = 7
         # 左上箭头
@@ -285,7 +286,7 @@ class ControlOverlay(QWidget):
 
     def mousePressEvent(self, event: QMouseEvent):
         """鼠标按下事件"""
-        if event.button() != Qt.LeftButton:
+        if event.button() != Qt.MouseButton.LeftButton:
             return
         pos = event.position().toPoint()
         # 检查按钮点击
@@ -333,7 +334,7 @@ class ControlOverlay(QWidget):
 
     def mouseReleaseEvent(self, event: QMouseEvent):
         """鼠标释放事件"""
-        if event.button() == Qt.LeftButton and self.dragging:
+        if event.button() == Qt.MouseButton.LeftButton and self.dragging:
             self.dragging = False
             if self.volume_debounce_timer.isActive():
                 self.volume_debounce_timer.stop()
@@ -342,19 +343,15 @@ class ControlOverlay(QWidget):
 
     def _handle_single_click(self):
         """处理单击事件"""
-        if self.pending_click_pos:
-            self.play_pause_requested.emit()
+        self.play_pause_requested.emit()
         self.pending_click_pos = None
 
     def _update_progress_from_pos(self, mouse_pos: QPoint):
         """根据鼠标位置更新进度"""
-        h = self.height()
-        control_y = h - self.style.CONTROL_HEIGHT
-        bar_y = control_y + 30
         bar_x_start = 20
         bar_width = self.width() - 40
         rel_x = mouse_pos.x() - bar_x_start
-        new_pos = max(0, min(1, rel_x / bar_width))
+        new_pos = max(0.0, min(1.0, rel_x / bar_width))
         self.set_progress(new_pos)
         self.seek_requested.emit(new_pos)
 
@@ -373,5 +370,5 @@ class ControlOverlay(QWidget):
 
     def _emit_volume_change(self):
         """发送音量变化信号"""
-        volume_int = max(0, min(100, int(self.debounced_volume)))
+        volume_int = int(max(0, min(100, self.debounced_volume)))
         self.volume_changed.emit(volume_int)

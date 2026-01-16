@@ -265,7 +265,6 @@ def get_episodes_by_subject_id(subject_id):
         SELECT * 
         FROM episode_collection 
         WHERE subject_id = ? 
-        ORDER BY sort ASC
     ''', (subject_id,))
     rows = cursor.fetchall()
     return [dict(row) for row in rows]
