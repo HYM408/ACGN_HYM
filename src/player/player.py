@@ -1,7 +1,6 @@
-from typing import Optional
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt, QTimer, Signal, QPoint, QSize
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QSlider
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QSlider, QMenu
 from src.player.player_core import VideoDisplayWidget, VlcPlayer
 
 
@@ -57,6 +56,7 @@ class ControlOverlay(QWidget):
     back_requested = Signal()
     volume_changed = Signal(int)
     seek_requested = Signal(float)
+    playback_rate_changed = Signal(float)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -75,6 +75,8 @@ class ControlOverlay(QWidget):
         self.total_time = 0
         self.last_click_time = 0
         self.progress_max_value = 10000
+        self.playback_rates = [3.0, 2.0, 1.5, 1.25, 1.0, 0.75, 0.5]
+        self.current_playback_rate_index = 4
 
     def _init_ui(self):
         """初始化UI组件"""
@@ -157,10 +159,74 @@ class ControlOverlay(QWidget):
         # 音量区域
         controls_layout.addLayout(self._create_volume_controls())
         controls_layout.addStretch()
+        # 播放速度按钮
+        self.playback_rate_button = self._create_playback_rate_button()
+        controls_layout.addWidget(self.playback_rate_button)
         # 全屏按钮
         self.fullscreen_button = self._create_control_button("icons/full.png", 20, self.fullscreen_requested.emit)
         controls_layout.addWidget(self.fullscreen_button)
         parent_layout.addLayout(controls_layout)
+
+    def _create_playback_rate_button(self) -> QPushButton:
+        """创建播放速度选择按钮"""
+        button = QPushButton()
+        button.setFixedSize(40, 28)
+        button.setStyleSheet("QPushButton {border: 1px solid rgba(255, 255, 255, 150); border-radius: 4px; background-color: rgba(0, 0, 0, 120); color: rgba(255, 255, 255, 220); font-size: 12px; padding: 2px}"
+                             "QPushButton:hover {background-color: rgba(50, 50, 50, 150)}")
+        self._update_playback_rate_button_text(button)
+        button.clicked.connect(self._show_playback_rate_menu)
+        return button
+
+    def _update_playback_rate_button_text(self, button):
+        """更新播放速度按钮文本"""
+        rate = self.playback_rates[self.current_playback_rate_index]
+        rate_str = str(rate).rstrip('0').rstrip('.')
+        button.setText(f"{rate_str}x")
+
+    def _show_playback_rate_menu(self):
+        """显示播放速度选择菜单"""
+        menu = QMenu(self)
+        menu.setStyleSheet("QMenu {background-color: rgba(40, 40, 40, 240); border: 1px solid rgba(100, 100, 100, 200)}"
+                           "QMenu::item {color: white; padding: 6px 16px; font-size: 12px}"
+                           "QMenu::item:selected {background-color: rgba(80, 80, 80, 255)}")
+        for i, rate in enumerate(self.playback_rates):
+            rate_str = str(rate).rstrip('0').rstrip('.')
+            action = menu.addAction(f"{rate_str}x")
+            action.setCheckable(True)
+            action.setChecked(i == self.current_playback_rate_index)
+            action.triggered.connect(lambda checked, idx=i: self._on_playback_rate_selected(idx))
+        button_rect = self.playback_rate_button.rect()
+        button_pos = self.playback_rate_button.mapToGlobal(button_rect.topLeft())
+        menu_size = menu.sizeHint()
+        x = button_pos.x() + (button_rect.width() - menu_size.width()) // 2
+        y = button_pos.y() - menu_size.height()
+        menu.exec(QPoint(x, y))
+
+    def _on_playback_rate_selected(self, index):
+        """播放速度选项被选中"""
+        if index != self.current_playback_rate_index:
+            self.current_playback_rate_index = index
+            rate = self.playback_rates[index]
+            self._update_playback_rate_button_text(self.playback_rate_button)
+            self.playback_rate_changed.emit(rate)
+            self.show_controls()
+
+    def get_current_playback_rate(self) -> float:
+        """获取当前播放速度"""
+        return self.playback_rates[self.current_playback_rate_index]
+
+    def set_playback_rate(self, rate: float):
+        """设置播放速度并更新按钮显示"""
+        closest_index = 0
+        min_diff = abs(rate - self.playback_rates[0])
+        for i, available_rate in enumerate(self.playback_rates):
+            diff = abs(rate - available_rate)
+            if diff < min_diff:
+                min_diff = diff
+                closest_index = i
+        if closest_index != self.current_playback_rate_index:
+            self.current_playback_rate_index = closest_index
+            self._update_playback_rate_button_text(self.playback_rate_button)
 
     def _create_volume_controls(self) -> QHBoxLayout:
         """创建音量控制区域"""
@@ -194,7 +260,6 @@ class ControlOverlay(QWidget):
         self.hide_timer = QTimer()
         self.hide_timer.setSingleShot(True)
         self.hide_timer.timeout.connect(self.hide_controls)
-        # 单击检测定时器
         self.click_timer = QTimer()
         self.click_timer.setSingleShot(True)
         self.click_timer.timeout.connect(self.play_pause_requested.emit)
@@ -207,9 +272,9 @@ class ControlOverlay(QWidget):
         self._update_play_button_icon()
         self.hide_timer.stop()
         if self.is_playing:
-            self.hide_timer.start(3000)
-        else:
             self.show_controls()
+        else:
+            self.show_controls(False)
 
     def set_progress(self, position: float):
         """设置进度位置 (0.0-1.0)"""
@@ -228,13 +293,13 @@ class ControlOverlay(QWidget):
         if not self.dragging_volume:
             self.volume_slider.setValue(volume)
 
-    def show_controls(self):
+    def show_controls(self, start_timer=True):
         """显示控制面板"""
         if not self.is_visible:
             self.is_visible = True
             self.top_widget.show()
             self.bottom_widget.show()
-        if self.is_playing:
+        if start_timer and self.is_playing:
             self.hide_timer.start(3000)
         self.setCursor(Qt.CursorShape.ArrowCursor)
 
@@ -250,14 +315,17 @@ class ControlOverlay(QWidget):
         """鼠标移动事件"""
         super().mouseMoveEvent(event)
         pos = event.position().toPoint()
+        progress_rect = self.progress_slider.geometry()
+        self.hovering_progress = progress_rect.contains(pos)
         if not self._is_in_control_area(pos):
             if not self.is_visible:
                 self.show_controls()
             elif self.is_playing and not (self.dragging_progress or self.dragging_volume):
                 self.hide_timer.start(3000)
         else:
-            self.hide_timer.stop()
-            self.show_controls()
+            if not self.hovering_progress:
+                self.hide_timer.stop()
+                self.show_controls(False)
 
     def mousePressEvent(self, event):
         """鼠标点击事件"""
@@ -265,7 +333,7 @@ class ControlOverlay(QWidget):
         self.setCursor(Qt.CursorShape.ArrowCursor)
         pos = event.position().toPoint()
         if self._is_in_control_area(pos):
-            self.show_controls()
+            self.show_controls(False)
         elif event.button() == Qt.MouseButton.LeftButton:
             current_time = event.timestamp()
             if current_time - self.last_click_time < 200:
@@ -315,8 +383,11 @@ class ControlOverlay(QWidget):
             tooltip_y = max(10, tooltip_y)
             self.time_tooltip.move(tooltip_x, tooltip_y)
             self.time_tooltip.show()
+            self.hide_timer.stop()
         else:
             self.time_tooltip.hide()
+            if self.is_playing and not self._is_in_control_area(self.mapFromGlobal(self.cursor().pos())):
+                self.hide_timer.start(3000)
 
     def _on_progress_clicked(self, value):
         """进度条点击"""
@@ -338,8 +409,9 @@ class ControlOverlay(QWidget):
         position = self.progress_slider.value() / self.progress_max_value
         self.seek_requested.emit(position)
         if self.is_playing:
-            self.hide_timer.start(3000)
-        self.setCursor(Qt.CursorShape.ArrowCursor)
+            self.show_controls()
+        else:
+            self.show_controls(False)
 
     def _on_progress_changed(self, value):
         """进度条值改变"""
@@ -358,8 +430,9 @@ class ControlOverlay(QWidget):
         """音量条释放"""
         self.dragging_volume = False
         if self.is_playing:
-            self.hide_timer.start(3000)
-        self.setCursor(Qt.CursorShape.ArrowCursor)
+            self.show_controls()
+        else:
+            self.show_controls(False)
 
 
 class VideoPlayerWidget(QWidget):
@@ -376,14 +449,14 @@ class VideoPlayerWidget(QWidget):
 
     def _init_state(self):
         """初始化状态"""
-        self.vlc_player: Optional[VlcPlayer] = None
+        self.vlc_player: VlcPlayer | None = None
         self.is_fullscreen_mode = False
         self.normal_play_rate = 1.0
         self.is_fast_forward = False
         self.right_key_pressed = False
-        # 全屏恢复
         self.original_parent = None
         self.original_layout = None
+        self.hovering_progress = False
 
     def _init_ui(self):
         """初始化UI"""
@@ -395,7 +468,7 @@ class VideoPlayerWidget(QWidget):
         layout.addWidget(self.video_display)
         self.control_overlay = ControlOverlay(self.video_display)
         self.video_display.resizeEvent = self._resize_control_overlay
-        self.setStyleSheet("QWidget { background-color: #000000; }")
+        self.setStyleSheet("QWidget { background-color: #000000}")
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
     def _resize_control_overlay(self, event):
@@ -410,6 +483,7 @@ class VideoPlayerWidget(QWidget):
         self.control_overlay.back_requested.connect(self._on_back_button_clicked)
         self.control_overlay.volume_changed.connect(self._adjust_volume)
         self.control_overlay.seek_requested.connect(self.seek_video)
+        self.control_overlay.playback_rate_changed.connect(self._set_playback_rate)
 
     def _setup_timers(self):
         """设置定时器"""
@@ -457,6 +531,14 @@ class VideoPlayerWidget(QWidget):
         if self.vlc_player:
             self.vlc_player.set_volume(volume)
 
+    def _set_playback_rate(self, rate: float):
+        """设置播放速度"""
+        if self.vlc_player:
+            self.vlc_player.set_playback_rate(rate)
+            if not self.is_fast_forward:
+                self.normal_play_rate = rate
+            self.control_overlay.show_controls()
+
     def _toggle_fullscreen(self):
         """切换全屏状态"""
         if not self.is_fullscreen_mode:
@@ -466,8 +548,6 @@ class VideoPlayerWidget(QWidget):
 
     def _enter_fullscreen(self):
         """进入全屏模式"""
-        if self.is_fullscreen_mode:
-            return
         self.is_fullscreen_mode = True
         self.original_parent = self.parent()
         self.original_layout = self.parent().layout() if self.parent() and self.parent().layout() else None
@@ -477,8 +557,6 @@ class VideoPlayerWidget(QWidget):
 
     def _exit_fullscreen(self):
         """退出全屏模式"""
-        if not self.is_fullscreen_mode:
-            return
         self.is_fullscreen_mode = False
         self.showNormal()
         if self.original_parent and self.original_layout:
@@ -505,12 +583,11 @@ class VideoPlayerWidget(QWidget):
         # 左方向键 - 后退5秒
         elif key == Qt.Key.Key_Left:
             self._jump_backward(5)
-        # 右方向键 - 前进5秒或快进
+        # 右方向键 - 前进5秒/3倍速
         elif key == Qt.Key.Key_Right:
             if not event.isAutoRepeat():
                 self.right_key_pressed = True
-                self.right_key_timer.start(500)
-                self._jump_forward(5)
+                self.right_key_timer.start(200)
         # 上方向键 - 音量增加
         elif key == Qt.Key.Key_Up:
             self._adjust_volume_delta(5)
@@ -520,25 +597,24 @@ class VideoPlayerWidget(QWidget):
 
     def keyReleaseEvent(self, event):
         """键盘释放事件"""
-        if not self.vlc_player:
-            return
         if event.key() == Qt.Key.Key_Right and not event.isAutoRepeat():
             self.right_key_pressed = False
             self.right_key_timer.stop()
             if self.is_fast_forward:
-                self._set_playback_rate(self.normal_play_rate)
+                current_rate = self.control_overlay.get_current_playback_rate()
+                self._set_playback_rate(current_rate)
                 self.is_fast_forward = False
+            else:
+                self._jump_forward(5)
 
     def _on_right_key_held(self):
         """右方向键长按处理"""
-        if self.right_key_pressed and self.vlc_player:
-            if not self.is_fast_forward:
-                current_rate = self.normal_play_rate
-                if current_rate != 3.0:
-                    self.normal_play_rate = current_rate
-                    self._set_playback_rate(3.0)
-                    self.is_fast_forward = True
-            self._jump_forward(1)
+        if self.right_key_pressed and self.vlc_player and not self.is_fast_forward:
+            current_rate = self.control_overlay.get_current_playback_rate()
+            if current_rate != 3.0:
+                self.normal_play_rate = current_rate
+                self._set_playback_rate(3.0)
+                self.is_fast_forward = True
 
     def _jump_backward(self, seconds: int):
         """后退指定秒数"""
@@ -568,11 +644,6 @@ class VideoPlayerWidget(QWidget):
             self.vlc_player.set_volume(new_volume)
             self.control_overlay.set_volume(new_volume)
             self.control_overlay.show_controls()
-
-    def _set_playback_rate(self, rate: float):
-        """设置播放速度"""
-        if self.vlc_player:
-            self.vlc_player.set_playback_rate(rate)
 
     def _update_video_display(self):
         """更新视频显示"""
