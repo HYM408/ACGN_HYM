@@ -1,19 +1,44 @@
-from PySide6.QtWidgets import QWidget
-from PySide6.QtCore import Qt, QTimer, QRect, QPoint, Signal
-from PySide6.QtGui import QPainter, QColor, QPaintEvent, QMouseEvent, QFont, QPixmap
+from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Qt, QTimer, Signal, QPoint, QSize
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QSlider
 
 
-class ControlStyle:
-    """控制面板样式"""
-    BG_COLOR = QColor(0, 0, 0, 180)
-    PROGRESS_COLOR = QColor(220, 50, 50, 220)
-    BUTTON_COLOR = QColor(255, 255, 255, 220)
-    TEXT_COLOR = QColor(255, 255, 255, 220)
+class ClickableSlider(QSlider):
+    """自定义进度条"""
+    clicked = Signal(int)
 
-    CONTROL_HEIGHT = 80
-    BUTTON_RADIUS = 14
-    PROGRESS_BAR_HEIGHT = 8
-    VOLUME_BAR_WIDTH = 80
+    def __init__(self, orientation=Qt.Orientation.Horizontal, threshold_percent=2):
+        super().__init__(orientation)
+        self.setMouseTracking(True)
+        self.threshold_percent = threshold_percent
+
+    def mousePressEvent(self, event):
+        """鼠标点击事件"""
+        if event.button() == Qt.MouseButton.LeftButton:
+            pos = event.position().toPoint()
+            available_width = max(1, (self.width() - 20))
+            value = (pos.x() - 10) / available_width * self.maximum()
+            value = int(max(0, min(self.maximum(), value)))
+            current_value = self.value()
+            threshold = self.maximum() * self.threshold_percent / 100
+            if abs(value - current_value) <= threshold:
+                super().mousePressEvent(event)
+            else:
+                self.setValue(value)
+                self.clicked.emit(value)
+                self.sliderPressed.emit()
+                self.sliderReleased.emit()
+
+    def mouseMoveEvent(self, event):
+        """鼠标移动事件"""
+        super().mouseMoveEvent(event)
+        pos = event.position().toPoint()
+        available_width = max(1, (self.width() - 20))
+        value = (pos.x() - 10) / available_width * self.maximum()
+        value = max(0, min(self.maximum(), value))
+        position = value / self.maximum()
+        if hasattr(self.parent(), '_on_hover_time'):
+            self.parent()._on_hover_time(position, pos.x())
 
 
 class ControlOverlay(QWidget):
@@ -26,220 +51,233 @@ class ControlOverlay(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.style = ControlStyle()
         self._init_state()
         self._init_ui()
         self._setup_timers()
-        self.setMouseTracking(True)
 
     def _init_state(self):
         """初始化状态"""
-        self.progress_visible = True
-        self.progress_position = 0.0
-        self.dragging = False
-        self.is_playing = True
+        self.is_visible = True
+        self.dragging_progress = False
+        self.dragging_volume = False
+        self.is_playing = False
         self.current_volume = 50
-        # 按钮位置
-        self.button_positions = {}
-        # 时间
         self.current_time = 0
         self.total_time = 0
-        # 双击
         self.last_click_time = 0
-        self.pending_click_pos = None
+        self.progress_max_value = 10000
 
     def _init_ui(self):
-        """初始化图片资源"""
-        self.back_icon = QPixmap("icons/back2.png")
+        """初始化UI组件"""
+        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, False)
+        # 主布局
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+        # 顶部区域
+        self.top_widget = QWidget()
+        self.top_widget.setFixedHeight(60)
+        self.top_widget.setStyleSheet("background-color: transparent;")
+        top_layout = QHBoxLayout(self.top_widget)
+        top_layout.setContentsMargins(10, 10, 10, 10)
+        # 返回按钮
+        self.back_button = QPushButton()
+        self.back_button.setFixedSize(28, 28)
+        self.back_button.setStyleSheet("QPushButton {border: none; border-radius: 14px; background-color: rgba(0, 0, 0, 180)}"
+                                       "QPushButton:hover {background-color: rgba(0, 0, 0, 200)}")
+        self.back_button.setIcon(QPixmap("icons/back2.png"))
+        self.back_button.setIconSize(QSize(20, 20))
+        self.back_button.clicked.connect(self.back_requested.emit)
+        top_layout.addWidget(self.back_button)
+        top_layout.addStretch()
+        main_layout.addWidget(self.top_widget)
+        main_layout.addStretch()
+        # 底部控制面板
+        self.bottom_widget = QWidget()
+        self.bottom_widget.setFixedHeight(80)
+        self.bottom_widget.setStyleSheet("background-color: transparent")
+        bottom_layout = QVBoxLayout(self.bottom_widget)
+        bottom_layout.setContentsMargins(20, 10, 20, 10)
+        # 进度条区域
+        progress_layout = QHBoxLayout()
+        self.time_label = QLabel("00:00 / 00:00")
+        self.time_label.setStyleSheet("color: rgba(255, 255, 255, 220); font-size: 11px; background-color: transparent")
+        progress_layout.addWidget(self.time_label)
+        # 时间提示标签
+        self.time_tooltip = QLabel(self)
+        self.time_tooltip.setStyleSheet("background-color: rgba(0, 0, 0, 180);color: white; border-radius: 4px; padding: 4px 8px; font-size: 12px; border: 1px solid rgba(255, 255, 255, 60)")
+        self.time_tooltip.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.time_tooltip.hide()
+        # 进度条
+        self.progress_slider = ClickableSlider(Qt.Orientation.Horizontal, threshold_percent=2)
+        self.progress_slider.setFixedHeight(40)
+        self.progress_slider.setRange(0, self.progress_max_value)
+        self.progress_slider.setStyleSheet("QSlider {background-color: transparent}"
+                                           "QSlider::groove:horizontal {height: 8px; background: rgba(100, 100, 100, 150); border-radius: 4px}"
+                                           "QSlider::sub-page:horizontal {height: 8px; background: #dc3232; border-radius: 4px}"
+                                           "QSlider::handle:horizontal {background: rgba(255, 255, 255, 220); width: 16px; height: 16px; margin: -4px 0; border-radius: 8px}")
+        self.progress_slider.sliderPressed.connect(self._on_progress_pressed)
+        self.progress_slider.sliderReleased.connect(self._on_progress_released)
+        self.progress_slider.valueChanged.connect(self._on_progress_changed)
+        self.progress_slider.clicked.connect(self._on_progress_clicked)
+        progress_layout.addWidget(self.progress_slider, 1)
+        bottom_layout.addLayout(progress_layout)
+        # 控制按钮区域
+        controls_layout = QHBoxLayout()
+        controls_layout.setSpacing(10)
+        # 播放/暂停按钮
+        self.play_button = QPushButton()
+        self.play_button.setFixedSize(28, 28)
+        self.play_button.setStyleSheet("QPushButton {border: none; border-radius: 14px; background-color: transparent}")
+        self.play_button.clicked.connect(self.play_pause_requested.emit)
+        self._update_play_button_icon()
+        controls_layout.addWidget(self.play_button)
+        # 音量区域
+        volume_container = QHBoxLayout()
+        volume_container.setSpacing(8)
+        volume_container.setContentsMargins(0, 0, 0, 0)
+        # 声音图标
+        self.volume_icon_label = QLabel()
+        self.volume_icon_label.setFixedSize(20, 20)
+        self.volume_icon_label.setPixmap(QPixmap("icons/sound.png").scaled(20, 20, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        self.volume_icon_label.setStyleSheet("background-color: transparent;")
+        volume_container.addWidget(self.volume_icon_label)
+        # 音量控制
+        self.volume_slider = ClickableSlider(Qt.Orientation.Horizontal, threshold_percent=10)
+        self.volume_slider.setFixedSize(80, 20)
+        self.volume_slider.setRange(0, 100)
+        self.volume_slider.setValue(self.current_volume)
+        self.volume_slider.setStyleSheet("QSlider {background: transparent}"
+                                         "QSlider::groove:horizontal {height: 4px; background: rgba(100, 100, 100, 150); border-radius: 2px}"
+                                         "QSlider::sub-page:horizontal {height: 4px; background: #dc3232; border-radius: 2px}"
+                                         "QSlider::handle:horizontal {background: rgba(255, 255, 255, 220); width: 12px; height: 12px; margin: -4px 0px; border-radius: 6px}")
+        self.volume_slider.valueChanged.connect(self.volume_changed.emit)
+        self.volume_slider.sliderPressed.connect(self._on_volume_pressed)
+        self.volume_slider.sliderReleased.connect(self._on_volume_released)
+        self.volume_slider.clicked.connect(lambda v: self.volume_changed.emit(v))
+        volume_container.addWidget(self.volume_slider)
+        controls_layout.addLayout(volume_container)
+        controls_layout.addStretch()
+        # 全屏按钮
+        self.fullscreen_button = QPushButton()
+        self.fullscreen_button.setFixedSize(28, 28)
+        self.fullscreen_button.setStyleSheet("QPushButton {border: none; border-radius: 14px; background-color: transparent}")
+        self.fullscreen_button.setIcon(QPixmap("icons/full.png"))
+        self.fullscreen_button.setIconSize(QSize(20, 20))
+        self.fullscreen_button.clicked.connect(self.fullscreen_requested.emit)
+        controls_layout.addWidget(self.fullscreen_button)
+        bottom_layout.addLayout(controls_layout)
+        main_layout.addWidget(self.bottom_widget)
+        self.setMouseTracking(True)
 
     def _setup_timers(self):
         """设置定时器"""
-        # 自动隐藏定时器
-        self.hide_timer = QTimer(self)
-        self.hide_timer.timeout.connect(self.hide_controls)
+        self.hide_timer = QTimer()
         self.hide_timer.setSingleShot(True)
+        self.hide_timer.timeout.connect(self.hide_controls)
         # 单击检测定时器
-        self.click_timer = QTimer(self)
+        self.click_timer = QTimer()
         self.click_timer.setSingleShot(True)
-        self.click_timer.timeout.connect(self._handle_single_click)
-        # 音量防抖定时器
-        self.volume_debounce_timer = QTimer(self)
-        self.volume_debounce_timer.setSingleShot(True)
-        self.volume_debounce_timer.timeout.connect(self._emit_volume_change)
-        self.debounced_volume = 50
+        self.click_timer.timeout.connect(self.play_pause_requested.emit)
 
     def set_play_state(self, playing: bool):
         """设置播放状态"""
         self.is_playing = playing
-        if self.progress_visible:
-            self.update()
+        self._update_play_button_icon()
+        if self.is_playing:
+            self.hide_timer.start(3000)
+        else:
+            self.hide_timer.stop()
+            self.show_controls()
 
     def set_progress(self, position: float):
         """设置进度位置 (0.0-1.0)"""
-        self.progress_position = max(0.0, min(1.0, position))
-        if self.progress_visible:
-            self.update()
+        if not self.dragging_progress:
+            self.progress_slider.setValue(int(position * self.progress_max_value))
 
     def set_time(self, current_seconds: float, total_seconds: float):
         """设置当前时间和总时间"""
-        self.current_time = current_seconds
-        self.total_time = total_seconds
-        if self.progress_visible:
-            self.update()
+        if not self.dragging_progress:
+            self.current_time = current_seconds
+            self.total_time = total_seconds
+            self.time_label.setText(f"{self._format_time(current_seconds)} / {self._format_time(total_seconds)}")
 
     def set_volume(self, volume: int):
         """设置音量 (0-100)"""
-        self.current_volume = max(0, min(100, volume))
-        if self.progress_visible:
-            self.update()
+        if not self.dragging_volume:
+            self.volume_slider.setValue(volume)
 
     def show_controls(self):
         """显示控制面板"""
-        self.progress_visible = True
-        self.update()
-        self.hide_timer.start(3000)
+        if not self.is_visible:
+            self.is_visible = True
+            self.top_widget.show()
+            self.bottom_widget.show()
+        if self.is_playing:
+            self.hide_timer.start(3000)
+        self.setCursor(Qt.CursorShape.ArrowCursor)
+
     def hide_controls(self):
         """隐藏控制面板"""
-        self.progress_visible = False
-        self.update()
+        if self.is_visible and self.is_playing and not self.dragging_progress and not self.dragging_volume:
+            self.is_visible = False
+            self.top_widget.hide()
+            self.bottom_widget.hide()
+            self.setCursor(Qt.CursorShape.BlankCursor)
 
-    def paintEvent(self, event: QPaintEvent):
-        """控制面板"""
-        if not self.progress_visible:
-            return
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        w, h = self.width(), self.height()
-        # 返回按钮
-        self._draw_back_button(painter)
-        # 底部控制面板
-        control_y = h - self.style.CONTROL_HEIGHT
-        painter.fillRect(0, control_y, w, self.style.CONTROL_HEIGHT, self.style.BG_COLOR)
-        # 进度条
-        self._draw_progress_bar(painter, control_y)
-        # 控制按钮
-        self._draw_control_buttons(painter, control_y)
-
-    def _draw_back_button(self, painter: QPainter):
-        """返回按钮"""
-        center = QPoint(30, 30)
-        self.button_positions['back'] = (center, self.style.BUTTON_RADIUS)
-        painter.setPen(Qt.PenStyle.NoPen)
-        painter.setBrush(self.style.BG_COLOR)
-        painter.drawEllipse(center, self.style.BUTTON_RADIUS, self.style.BUTTON_RADIUS)
-        # 图标
-        icon_size = int(self.style.BUTTON_RADIUS * 1.4)
-        scaled_pixmap = self.back_icon.scaled(icon_size, icon_size, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        painter.drawPixmap(center.x() - icon_size//2,
-                          center.y() - icon_size//2,
-                          scaled_pixmap)
-
-    def _draw_progress_bar(self, painter: QPainter, control_y: int):
-        """进度条"""
-        bar_y = control_y + 30
-        bar_x_start = 20
-        bar_width = self.width() - 40
-        # 进度条背景
-        painter.setBrush(QColor(100, 100, 100, 150))
-        painter.drawRect(bar_x_start, bar_y, bar_width, self.style.PROGRESS_BAR_HEIGHT)
-        # 进度条前景
-        if self.progress_position > 0:
-            prog_width = int(bar_width * self.progress_position)
-            painter.setBrush(self.style.PROGRESS_COLOR)
-            painter.drawRect(bar_x_start, bar_y, prog_width, self.style.PROGRESS_BAR_HEIGHT)
-            # 进度点
-            point_x = bar_x_start + prog_width
-            painter.setBrush(QColor(255, 255, 255, 220))
-            painter.drawEllipse(QPoint(point_x, bar_y + self.style.PROGRESS_BAR_HEIGHT//2), 8, 8)
-        # 时间显示
-        time_font = QFont("Arial", 11)
-        painter.setFont(time_font)
-        painter.setPen(self.style.TEXT_COLOR)
-        current_str = self._format_time(self.current_time)
-        total_str = self._format_time(self.total_time)
-        painter.drawText(bar_x_start, bar_y - 8, f"{current_str} / {total_str}")
-
-    def _draw_control_buttons(self, painter: QPainter, control_y: int):
-        """控制按钮"""
-        btn_y = control_y + 65
-        w = self.width()
-        positions = {'play': QPoint(30, btn_y), 'volume': QPoint(70, btn_y), 'fullscreen': QPoint(w - 30, btn_y)}
-        for key, center in positions.items():
-            self.button_positions[key] = (center, self.style.BUTTON_RADIUS)
-            # 按钮背景
-            painter.setBrush(self.style.BUTTON_COLOR)
-            painter.drawEllipse(center, self.style.BUTTON_RADIUS, self.style.BUTTON_RADIUS)
-            # 图标
-            painter.setBrush(QColor(30, 30, 30, 220))
-            if key == 'play':
-                self._draw_play_icon(painter, center, btn_y)
-            elif key == 'volume':
-                self._draw_volume_icon(painter, center, btn_y)
-            elif key == 'fullscreen':
-                self._draw_fullscreen_icon(painter, center)
-
-    def _draw_play_icon(self, painter: QPainter, center: QPoint, btn_y: int):
-        """播放/暂停"""
-        icon_size = 9
-        if self.is_playing:
-            pause_width = 3
-            gap = 3
-            left_x = center.x() - pause_width - gap//2
-            right_x = center.x() + gap//2
-            painter.drawRect(left_x - pause_width//2, btn_y - icon_size//2, pause_width, icon_size)
-            painter.drawRect(right_x - pause_width//2, btn_y - icon_size//2, pause_width, icon_size)
+    def mouseMoveEvent(self, event):
+        """鼠标移动事件"""
+        super().mouseMoveEvent(event)
+        pos = event.position().toPoint()
+        if not self._is_in_control_area(pos):
+            if not self.is_visible:
+                self.show_controls()
+            elif self.is_playing and not self.dragging_progress and not self.dragging_volume:
+                self.hide_timer.start(3000)
         else:
-            points = [
-                QPoint(center.x() - icon_size//2, btn_y - icon_size),
-                QPoint(center.x() - icon_size//2, btn_y + icon_size),
-                QPoint(center.x() + icon_size, btn_y)
-            ]
-            painter.drawPolygon(points)
+            self.hide_timer.stop()
+            self.is_visible = True
+            self.top_widget.show()
+            self.bottom_widget.show()
+            self.setCursor(Qt.CursorShape.ArrowCursor)
 
-    def _draw_volume_icon(self, painter: QPainter, center: QPoint, btn_y: int):
-        """音量图标和滑块"""
-        # 扬声器图标
-        speaker_width = 9
-        speaker_height = 7
-        painter.drawRect(center.x() - speaker_width//2, btn_y - speaker_height//2, 4, speaker_height)
-        # 音量滑块
-        volume_bar_x = center.x() + 20
-        volume_bar_width = self.style.VOLUME_BAR_WIDTH
-        # 背景
-        painter.setBrush(QColor(100, 100, 100, 150))
-        painter.drawRect(volume_bar_x, btn_y - 2, volume_bar_width, 5)
-        # 前景
-        volume_width = int(volume_bar_width * (self.current_volume / 100))
-        painter.setBrush(self.style.PROGRESS_COLOR)
-        painter.drawRect(volume_bar_x, btn_y - 2, volume_width, 5)
-        # 滑块点
-        volume_point_x = volume_bar_x + volume_width
-        painter.setBrush(QColor(255, 255, 255, 220))
-        painter.drawEllipse(QPoint(volume_point_x, btn_y), 5, 5)
+    def mousePressEvent(self, event):
+        """鼠标点击事件"""
+        super().mousePressEvent(event)
+        self.setCursor(Qt.CursorShape.ArrowCursor)
+        pos = event.position().toPoint()
+        if self._is_in_control_area(pos):
+            self.show_controls()
+        else:
+            if event.button() == Qt.MouseButton.LeftButton:
+                current_time = event.timestamp()
+                if current_time - self.last_click_time < 200:
+                    self.click_timer.stop()
+                    self.fullscreen_requested.emit()
+                else:
+                    self.last_click_time = current_time
+                    self.click_timer.start(200)
 
-    @staticmethod
-    def _draw_fullscreen_icon(painter: QPainter, center: QPoint):
-        """全屏图标"""
-        arrow_size = 7
-        # 左上箭头
-        points1 = [
-            QPoint(center.x() - arrow_size, center.y() - arrow_size),
-            QPoint(center.x() - arrow_size, center.y() - arrow_size//2),
-            QPoint(center.x() - arrow_size//2, center.y() - arrow_size//2),
-            QPoint(center.x() - arrow_size//2, center.y() - arrow_size)
-        ]
-        painter.drawPolygon(points1)
-        # 右下箭头
-        points2 = [
-            QPoint(center.x() + arrow_size, center.y() + arrow_size),
-            QPoint(center.x() + arrow_size, center.y() + arrow_size//2),
-            QPoint(center.x() + arrow_size//2, center.y() + arrow_size//2),
-            QPoint(center.x() + arrow_size//2, center.y() + arrow_size)
-        ]
-        painter.drawPolygon(points2)
+    def mouseDoubleClickEvent(self, event):
+        """双击事件"""
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.click_timer.stop()
+            self.fullscreen_requested.emit()
 
-    @staticmethod
-    def _format_time(seconds: float) -> str:
+    def _is_in_control_area(self, pos: QPoint) -> bool:
+        """检查点是否在控制面板区域"""
+        return pos.y() <= 60 or pos.y() >= self.height() - 80
+
+    def _update_play_button_icon(self):
+        """更新播放按钮图标"""
+        if self.is_playing:
+            self.play_button.setIcon(QPixmap("icons/stop.png"))
+            self.play_button.setIconSize(QSize(25, 25))
+        else:
+            self.play_button.setIcon(QPixmap("icons/play.png"))
+            self.play_button.setIconSize(QSize(25, 25))
+
+    def _format_time(self, seconds: float) -> str:
         """格式化时间显示"""
         hours = int(seconds // 3600)
         minutes = int((seconds % 3600) // 60)
@@ -248,127 +286,62 @@ class ControlOverlay(QWidget):
             return f"{hours:02d}:{minutes:02d}:{secs:02d}"
         return f"{minutes:02d}:{secs:02d}"
 
-    def _is_point_in_button(self, pos: QPoint, button_name: str) -> bool:
-        """检查点是否在按钮内"""
-        if button_name not in self.button_positions:
-            return False
-        center, radius = self.button_positions[button_name]
-        distance = (pos - center).manhattanLength()
-        return distance <= radius
-
-    def _is_point_in_volume_slider(self, pos: QPoint) -> bool:
-        """检查点是否在音量滑块内"""
-        if 'volume' not in self.button_positions:
-            return False
-        center, radius = self.button_positions['volume']
-        if (pos - center).manhattanLength() <= radius:
-            return True
-        volume_bar_x = center.x() + 20
-        volume_bar_rect = QRect(volume_bar_x, center.y() - 2, self.style.VOLUME_BAR_WIDTH, 5)
-        return volume_bar_rect.contains(pos)
-
-    def _is_point_in_progress_bar(self, pos: QPoint) -> bool:
-        """检查点是否在进度条内"""
-        h = self.height()
-        control_y = h - self.style.CONTROL_HEIGHT
-        bar_y = control_y + 30
-        bar_x_start = 20
-        bar_width = self.width() - 40
-        bar_rect = QRect(bar_x_start, bar_y - 6, bar_width, 12)
-        return bar_rect.contains(pos)
-
-    def _is_point_in_control_area(self, pos: QPoint) -> bool:
-        """检查点是否在控制面板区域"""
-        h = self.height()
-        control_y = h - self.style.CONTROL_HEIGHT
-        control_rect = QRect(0, control_y, self.width(), self.style.CONTROL_HEIGHT)
-        return control_rect.contains(pos)
-
-    def mousePressEvent(self, event: QMouseEvent):
-        """鼠标按下事件"""
-        if event.button() != Qt.MouseButton.LeftButton:
-            return
-        pos = event.position().toPoint()
-        # 检查按钮点击
-        if self._is_point_in_button(pos, 'back'):
-            self.click_timer.stop()
-            self.back_requested.emit()
-            return
-        elif self._is_point_in_button(pos, 'play'):
-            self.click_timer.stop()
-            self.play_pause_requested.emit()
-            return
-        elif self._is_point_in_button(pos, 'fullscreen'):
-            self.click_timer.stop()
-            self.fullscreen_requested.emit()
-            return
-        elif self._is_point_in_volume_slider(pos):
-            self.dragging = True
-            self._update_volume_from_pos(pos)
-            return
-        elif self._is_point_in_progress_bar(pos):
-            self.dragging = True
-            self._update_progress_from_pos(pos)
-            return
-        elif self._is_point_in_control_area(pos):
-            return
-        # 双击检测
-        current_time = event.timestamp()
-        if current_time - self.last_click_time < 200:
-            self.click_timer.stop()
-            self.fullscreen_requested.emit()
+    def _on_hover_time(self, time_fraction: float, mouse_x: int):
+        """时间提示"""
+        if self.total_time > 0:
+            hover_seconds = time_fraction * self.total_time
+            time_text = self._format_time(hover_seconds)
+            self.time_tooltip.setText(time_text)
+            self.time_tooltip.adjustSize()
+            progress_pos = self.progress_slider.mapTo(self, QPoint(0, 0))
+            tooltip_x = progress_pos.x() + mouse_x - self.time_tooltip.width() // 2
+            tooltip_y = progress_pos.y() - self.time_tooltip.height() - 10
+            tooltip_x = max(10, min(self.width() - self.time_tooltip.width() - 10, tooltip_x))
+            tooltip_y = max(10, tooltip_y)
+            self.time_tooltip.move(tooltip_x, tooltip_y)
+            self.time_tooltip.show()
         else:
-            self.last_click_time = current_time
-            self.pending_click_pos = pos
-            self.click_timer.start(200)
+            self.time_tooltip.hide()
 
-    def mouseMoveEvent(self, event: QMouseEvent):
-        """鼠标移动事件"""
-        if self.dragging:
-            pos = event.position().toPoint()
-            if self._is_point_in_volume_slider(pos):
-                self._update_volume_from_pos(pos)
-            elif self._is_point_in_progress_bar(pos):
-                self._update_progress_from_pos(pos)
+    def _on_progress_clicked(self, value):
+        """进度条点击"""
+        position = value / self.progress_max_value
+        self.seek_requested.emit(position)
+        current_seconds = self.total_time * position
+        self.time_label.setText(f"{self._format_time(current_seconds)} / {self._format_time(self.total_time)}")
         self.show_controls()
 
-    def mouseReleaseEvent(self, event: QMouseEvent):
-        """鼠标释放事件"""
-        if event.button() == Qt.MouseButton.LeftButton and self.dragging:
-            self.dragging = False
-            if self.volume_debounce_timer.isActive():
-                self.volume_debounce_timer.stop()
-                self._emit_volume_change()
+    def _on_progress_pressed(self):
+        """进度条按下"""
+        self.dragging_progress = True
+        self.hide_timer.stop()
+        self.setCursor(Qt.CursorShape.ArrowCursor)
+
+    def _on_progress_released(self):
+        """进度条释放"""
+        self.dragging_progress = False
+        position = self.progress_slider.value() / self.progress_max_value
+        self.seek_requested.emit(position)
+        if self.is_playing:
             self.hide_timer.start(3000)
+        self.setCursor(Qt.CursorShape.ArrowCursor)
 
-    def _handle_single_click(self):
-        """处理单击事件"""
-        self.play_pause_requested.emit()
-        self.pending_click_pos = None
+    def _on_progress_changed(self, value):
+        """进度条值改变"""
+        if self.dragging_progress:
+            position = value / self.progress_max_value
+            current_seconds = self.total_time * position
+            self.time_label.setText(f"{self._format_time(current_seconds)} / {self._format_time(self.total_time)}")
 
-    def _update_progress_from_pos(self, mouse_pos: QPoint):
-        """根据鼠标位置更新进度"""
-        bar_x_start = 20
-        bar_width = self.width() - 40
-        rel_x = mouse_pos.x() - bar_x_start
-        new_pos = max(0.0, min(1.0, rel_x / bar_width))
-        self.set_progress(new_pos)
-        self.seek_requested.emit(new_pos)
+    def _on_volume_pressed(self):
+        """音量条按下"""
+        self.dragging_volume = True
+        self.hide_timer.stop()
+        self.setCursor(Qt.CursorShape.ArrowCursor)
 
-    def _update_volume_from_pos(self, mouse_pos: QPoint):
-        """根据鼠标位置更新音量"""
-        if 'volume' not in self.button_positions:
-            return
-        center, _ = self.button_positions['volume']
-        volume_bar_x = center.x() + 20
-        rel_x = mouse_pos.x() - volume_bar_x
-        new_volume = max(0, min(100, int((rel_x / self.style.VOLUME_BAR_WIDTH) * 100)))
-        if new_volume != self.current_volume:
-            self.set_volume(new_volume)
-        self.debounced_volume = new_volume
-        self.volume_debounce_timer.start(300)
-
-    def _emit_volume_change(self):
-        """发送音量变化信号"""
-        volume_int = int(max(0, min(100, self.debounced_volume)))
-        self.volume_changed.emit(volume_int)
+    def _on_volume_released(self):
+        """音量条释放"""
+        self.dragging_volume = False
+        if self.is_playing:
+            self.hide_timer.start(3000)
+        self.setCursor(Qt.CursorShape.ArrowCursor)
