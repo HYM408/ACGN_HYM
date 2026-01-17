@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QL
 class ClickableSlider(QSlider):
     """自定义进度条"""
     clicked = Signal(int)
+    hover_time = Signal(float, int)
 
     def __init__(self, orientation=Qt.Orientation.Horizontal, threshold_percent=2):
         super().__init__(orientation)
@@ -36,9 +37,12 @@ class ClickableSlider(QSlider):
         available_width = max(1, (self.width() - 20))
         value = (pos.x() - 10) / available_width * self.maximum()
         value = max(0, min(self.maximum(), value))
-        position = value / self.maximum()
-        if hasattr(self.parent(), '_on_hover_time'):
-            self.parent()._on_hover_time(position, pos.x())
+        self.hover_time.emit(value / self.maximum(), pos.x())
+
+    def leaveEvent(self, event):
+        """鼠标离开事件"""
+        super().leaveEvent(event)
+        self.hover_time.emit(-1, -1)
 
 
 class ControlOverlay(QWidget):
@@ -77,14 +81,13 @@ class ControlOverlay(QWidget):
         # 顶部区域
         self.top_widget = QWidget()
         self.top_widget.setFixedHeight(60)
-        self.top_widget.setStyleSheet("background-color: transparent;")
+        self.top_widget.setStyleSheet("background-color: transparent")
         top_layout = QHBoxLayout(self.top_widget)
         top_layout.setContentsMargins(10, 10, 10, 10)
         # 返回按钮
         self.back_button = QPushButton()
         self.back_button.setFixedSize(28, 28)
-        self.back_button.setStyleSheet("QPushButton {border: none; border-radius: 14px; background-color: rgba(0, 0, 0, 180)}"
-                                       "QPushButton:hover {background-color: rgba(0, 0, 0, 200)}")
+        self.back_button.setStyleSheet("QPushButton {border: none; border-radius: 14px; background-color: transparent}")
         self.back_button.setIcon(QPixmap("icons/back2.png"))
         self.back_button.setIconSize(QSize(20, 20))
         self.back_button.clicked.connect(self.back_requested.emit)
@@ -95,9 +98,9 @@ class ControlOverlay(QWidget):
         # 底部控制面板
         self.bottom_widget = QWidget()
         self.bottom_widget.setFixedHeight(80)
-        self.bottom_widget.setStyleSheet("background-color: transparent")
+        self.bottom_widget.setStyleSheet("background-color: rgba(0, 0, 0, 100); border: none")
         bottom_layout = QVBoxLayout(self.bottom_widget)
-        bottom_layout.setContentsMargins(20, 10, 20, 10)
+        bottom_layout.setContentsMargins(20, 0, 20, 10)
         # 进度条区域
         progress_layout = QHBoxLayout()
         self.time_label = QLabel("00:00 / 00:00")
@@ -105,12 +108,12 @@ class ControlOverlay(QWidget):
         progress_layout.addWidget(self.time_label)
         # 时间提示标签
         self.time_tooltip = QLabel(self)
-        self.time_tooltip.setStyleSheet("background-color: rgba(0, 0, 0, 180);color: white; border-radius: 4px; padding: 4px 8px; font-size: 12px; border: 1px solid rgba(255, 255, 255, 60)")
+        self.time_tooltip.setStyleSheet("background-color: rgba(0, 0, 0, 100);color: white; padding: 4px 8px; font-size: 12px")
         self.time_tooltip.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.time_tooltip.hide()
         # 进度条
         self.progress_slider = ClickableSlider(Qt.Orientation.Horizontal, threshold_percent=2)
-        self.progress_slider.setFixedHeight(40)
+        self.progress_slider.setFixedHeight(30)
         self.progress_slider.setRange(0, self.progress_max_value)
         self.progress_slider.setStyleSheet("QSlider {background-color: transparent}"
                                            "QSlider::groove:horizontal {height: 8px; background: rgba(100, 100, 100, 150); border-radius: 4px}"
@@ -120,6 +123,7 @@ class ControlOverlay(QWidget):
         self.progress_slider.sliderReleased.connect(self._on_progress_released)
         self.progress_slider.valueChanged.connect(self._on_progress_changed)
         self.progress_slider.clicked.connect(self._on_progress_clicked)
+        self.progress_slider.hover_time.connect(self._on_hover_time)
         progress_layout.addWidget(self.progress_slider, 1)
         bottom_layout.addLayout(progress_layout)
         # 控制按钮区域
@@ -182,12 +186,14 @@ class ControlOverlay(QWidget):
 
     def set_play_state(self, playing: bool):
         """设置播放状态"""
+        if self.is_playing == playing:
+            return
         self.is_playing = playing
         self._update_play_button_icon()
+        self.hide_timer.stop()
         if self.is_playing:
             self.hide_timer.start(3000)
         else:
-            self.hide_timer.stop()
             self.show_controls()
 
     def set_progress(self, position: float):
@@ -288,14 +294,14 @@ class ControlOverlay(QWidget):
 
     def _on_hover_time(self, time_fraction: float, mouse_x: int):
         """时间提示"""
-        if self.total_time > 0:
+        if time_fraction >= 0 and self.total_time > 0:
             hover_seconds = time_fraction * self.total_time
             time_text = self._format_time(hover_seconds)
             self.time_tooltip.setText(time_text)
             self.time_tooltip.adjustSize()
             progress_pos = self.progress_slider.mapTo(self, QPoint(0, 0))
             tooltip_x = progress_pos.x() + mouse_x - self.time_tooltip.width() // 2
-            tooltip_y = progress_pos.y() - self.time_tooltip.height() - 10
+            tooltip_y = progress_pos.y() - self.time_tooltip.height()
             tooltip_x = max(10, min(self.width() - self.time_tooltip.width() - 10, tooltip_x))
             tooltip_y = max(10, tooltip_y)
             self.time_tooltip.move(tooltip_x, tooltip_y)
