@@ -65,11 +65,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.video_player.back_requested.connect(self.go_back_history)
         # 下载页面
         from ui.download_ui import Ui_DownloaderPage
+        from src.download_page import DownloadPageManager
         download_widget = QWidget()
         download_ui = Ui_DownloaderPage()
         download_ui.setupUi(download_widget)
+        self.DownloadPageManager = DownloadPageManager(download_ui)
+        download_widget.ui = download_ui
         self.loaded_pages["download"] = download_widget
         self.showmain_stackedWidget.addWidget(download_widget)
+        self.showmain_stackedWidget.currentChanged.connect(self.show_download_page)
 
     def setup_titlebar(self):
         """设置标题栏功能"""
@@ -214,6 +218,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.main_stackedWidget.setCurrentWidget(self.loaded_pages["search"])
         current_type = self.MainPageManager.current_subject_type
         self.SearchPageManager.update_combo_box_by_type(current_type)
+
+    def show_download_page(self, index):
+        """跳转下载页面"""
+        self.showmain_stackedWidget.widget(index)
+        self.DownloadPageManager.load_recent_files()
 
     def on_tag_clicked(self, tag_name):
         """tag搜索"""

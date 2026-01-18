@@ -276,7 +276,7 @@ QStackedWidget &gt; QWidget {
 }</string>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="login_page">
       <property name="styleSheet">
@@ -572,7 +572,7 @@ QStackedWidget &gt; QWidget {
              <font>
               <family>微软雅黑</family>
               <pointsize>13</pointsize>
-              <bold>true</bold>
+              <bold>false</bold>
              </font>
             </property>
             <property name="styleSheet">
@@ -589,7 +589,7 @@ QStackedWidget &gt; QWidget {
              <font>
               <family>微软雅黑</family>
               <pointsize>13</pointsize>
-              <bold>true</bold>
+              <bold>false</bold>
              </font>
             </property>
             <property name="styleSheet">
@@ -606,7 +606,7 @@ QStackedWidget &gt; QWidget {
              <font>
               <family>微软雅黑</family>
               <pointsize>13</pointsize>
-              <bold>true</bold>
+              <bold>false</bold>
              </font>
             </property>
             <property name="styleSheet">
@@ -629,7 +629,7 @@ QStackedWidget &gt; QWidget {
              <font>
               <family>微软雅黑</family>
               <pointsize>13</pointsize>
-              <bold>true</bold>
+              <bold>false</bold>
              </font>
             </property>
             <property name="styleSheet">

@@ -3,6 +3,7 @@ import asyncio
 import threading
 import webbrowser
 import xml.etree.ElementTree
+from pikpakapi import PikPakApi
 from typing import Optional, Callable
 from PySide6.QtCore import QThreadPool, QRunnable, QObject, Signal, QTimer
 from src.player.css import VideoCrawler
@@ -27,6 +28,8 @@ class TaskResult(QObject):
     site_search_completed = Signal(dict)
     pikpak_login_success = Signal(str)
     pikpak_login_error = Signal(str)
+    pikpak_events_loaded = Signal(list)
+    pikpak_download_url_loaded = Signal(dict)
 
 
 class BaseTask(QRunnable):
@@ -359,6 +362,58 @@ class PikpakLoginTask(BaseTask):
         return pikpak.encoded_token
 
 
+# ====================Pikpak====================
+class PikpakEventsTask(BaseTask):
+    """Pikpak最近添加"""
+    def __init__(self):
+        super().__init__()
+        self.username = get_config_item("username")
+        self.password = get_config_item("password")
+        self.encoded_token = get_config_item("encoded_token")
+
+    def run(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            if not self.encoded_token and not (self.username and self.password):
+                print("未登录Pikpak")
+                self.result_holder.pikpak_events_loaded.emit([])
+                return
+            pikpak = PikPakApi(username=self.username, password=self.password, encoded_token=self.encoded_token)
+            events_data = loop.run_until_complete(pikpak.events(size=20))
+            events = events_data.get('events', []) if events_data else []
+            self.result_holder.pikpak_events_loaded.emit(events)
+        except Exception as e:
+            print(f"获取Pikpak最近添加列表失败: {str(e)}")
+            self.result_holder.pikpak_events_loaded.emit([])
+        finally:
+            loop.close()
+
+
+class PikpakDownloadUrlTask(BaseTask):
+    """Pikpak下载链接获取任务"""
+
+    def __init__(self, file_id: str):
+        super().__init__()
+        self.file_id = file_id
+        self.username = get_config_item("username")
+        self.password = get_config_item("password")
+        self.encoded_token = get_config_item("encoded_token")
+
+    def run(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            pikpak = PikPakApi(username=self.username, password=self.password, encoded_token=self.encoded_token)
+            pikpak.user_id = "user_id"
+            result = loop.run_until_complete(pikpak.get_download_url(self.file_id))
+            self.result_holder.pikpak_download_url_loaded.emit(result)
+        except Exception as e:
+            print(f"获取下载链接失败: {str(e)}")
+            self.result_holder.pikpak_download_url_loaded.emit({})
+        finally:
+            loop.close()
+
 # ====================线程管理器====================
 class ThreadManager(QObject):
     """统一的线程管理器，使用线程池处理短任务"""
@@ -377,6 +432,8 @@ class ThreadManager(QObject):
     site_search_completed = Signal(dict)
     pikpak_login_success = Signal(str)
     pikpak_login_error = Signal(str)
+    pikpak_events_loaded = Signal(list)
+    pikpak_download_url_loaded = Signal(dict)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -467,6 +524,18 @@ class ThreadManager(QObject):
         task = PikpakLoginTask(username, password)
         task.result_holder.pikpak_login_success.connect(self.pikpak_login_success)
         task.result_holder.pikpak_login_error.connect(self.pikpak_login_error)
+        self.thread_pool.start(task)
+
+    def fetch_pikpak_events(self):
+        """获取Pikpak最近添加事件"""
+        task = PikpakEventsTask()
+        task.result_holder.pikpak_events_loaded.connect(self.pikpak_events_loaded)
+        self.thread_pool.start(task)
+
+    def fetch_pikpak_download_url(self, file_id: str):
+        """获取Pikpak文件下载链接"""
+        task = PikpakDownloadUrlTask(file_id)
+        task.result_holder.pikpak_download_url_loaded.connect(self.pikpak_download_url_loaded)
         self.thread_pool.start(task)
 
     def cleanup(self):
