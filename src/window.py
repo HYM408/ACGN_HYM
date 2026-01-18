@@ -52,7 +52,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.main_stackedWidget.addWidget(detail_widget)
         # 播放器页面
         from ui.player_ui import Ui_choicePage
-        from src.player.choice_episode import ChoiceEpisodeManager
+        from src.player.player_page import ChoiceEpisodeManager
         from src.player.player_ui_manager import setup_video_player
         player_widget = QWidget()
         player_ui = Ui_choicePage()

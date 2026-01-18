@@ -506,12 +506,13 @@ class VideoPlayerWidget(QWidget):
     def stop_video(self):
         """停止播放"""
         if self.vlc_player:
-            self.vlc_player.stop()
+            self.video_display.current_qimage = None
+            self.video_display.update()
+            self.vlc_player.cleanup()
+            self.vlc_player = None
             self.control_overlay.set_play_state(False)
             self.control_overlay.set_progress(0)
             self.control_overlay.set_time(0, 0)
-            self.video_display.current_qimage = None
-            self.video_display.update()
 
     def toggle_play_pause(self):
         """切换播放/暂停"""
