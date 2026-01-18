@@ -73,7 +73,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         download_widget.ui = download_ui
         self.loaded_pages["download"] = download_widget
         self.showmain_stackedWidget.addWidget(download_widget)
-        self.showmain_stackedWidget.currentChanged.connect(self.show_download_page)
 
     def setup_titlebar(self):
         """设置标题栏功能"""
@@ -139,6 +138,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """设置连接槽"""
         self.search_Button.clicked.connect(self.show_search_page)
         self.settings_Button.clicked.connect(self.show_settings_page)
+        self.pushButton_9.clicked.connect(self.switch_to_download_page)
 
     def switch_to_main_page(self):
         """切换到主页面"""
@@ -219,9 +219,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         current_type = self.MainPageManager.current_subject_type
         self.SearchPageManager.update_combo_box_by_type(current_type)
 
-    def show_download_page(self, index):
-        """跳转下载页面"""
-        self.showmain_stackedWidget.widget(index)
+    def switch_to_download_page(self):
+        """切换到下载页面"""
+        download_widget = self.loaded_pages["download"]
+        self.showmain_stackedWidget.setCurrentWidget(download_widget)
         self.DownloadPageManager.load_recent_files()
 
     def on_tag_clicked(self, tag_name):

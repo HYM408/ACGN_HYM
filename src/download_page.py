@@ -1,7 +1,8 @@
 from PySide6.QtCore import QObject, Qt
-from PySide6.QtWidgets import QLabel, QFrame, QVBoxLayout, QHBoxLayout, QPushButton, QSpacerItem, QSizePolicy
+from PySide6.QtWidgets import QLabel, QFrame, QVBoxLayout, QHBoxLayout, QPushButton, QSpacerItem, QSizePolicy, QFileDialog
 from src.thread_manager import thread_manager
 from src.downloader.downloader import DownloadTask
+from src.config import get_config_item, set_config_items
 
 
 class DownloadPageManager(QObject):
@@ -13,24 +14,44 @@ class DownloadPageManager(QObject):
         thread_manager.pikpak_events_loaded.connect(self.display_events)
         thread_manager.pikpak_download_url_loaded.connect(self.handle_download_url)
         self.setup_download_list()
+        self.setup_download_path_ui()
 
     def setup_download_list(self):
         """设置下载列表UI"""
-        layout = self.download_ui.verticalLayout_3
+        layout = self.download_ui.verticalLayout_4
         layout.setSpacing(5)
         layout.setContentsMargins(5, 5, 5, 5)
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
-    @staticmethod
-    def load_recent_files():
+    def setup_download_path_ui(self):
+        """设置下载路径相关UI"""
+        download_path = get_config_item("download_path") or "data/download"
+        self.download_ui.lineEdit.setText(download_path)
+        self.download_ui.pushButton.clicked.connect(self._select_download_path)
+        self.download_ui.lineEdit.textChanged.connect(self._update_download_path_from_lineedit)
+
+    def _select_download_path(self):
+        """选择下载路径"""
+        current_path = self.download_ui.lineEdit.text()
+        dir_path = QFileDialog.getExistingDirectory(None, "选择下载路径", current_path)
+        if dir_path:
+            self.download_ui.lineEdit.setText(dir_path)
+            set_config_items(download_path=dir_path)
+
+    def _update_download_path_from_lineedit(self):
+        """从输入框更新下载路径配置"""
+        dir_path = self.download_ui.lineEdit.text()
+        if dir_path and dir_path != get_config_item("download_path", ""):
+            set_config_items(download_path=dir_path)
+
+    def load_recent_files(self):
         """加载最近添加的文件列表"""
+        self._safe_clear_layout()
         thread_manager.fetch_pikpak_events()
 
     def display_events(self, events):
         """在UI中显示事件列表"""
         layout = self.download_ui.verticalLayout_2
-        while layout.count():
-            layout.takeAt(0).widget().deleteLater()
         if not events:
             label = QLabel("暂无最近添加的文件")
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -39,6 +60,16 @@ class DownloadPageManager(QObject):
         for event in events:
             self._create_event_item(event, layout)
         layout.addStretch()
+
+    def _safe_clear_layout(self):
+        """清理布局"""
+        layout = self.download_ui.verticalLayout_2
+        while layout.count():
+            item = layout.takeAt(0)
+            if item is not None:
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
 
     def _create_event_item(self, event, parent_layout):
         """创建单个事件项"""
@@ -101,12 +132,13 @@ class DownloadPageManager(QObject):
 
     def add_download_task(self, url, file_name):
         """添加下载任务并显示在UI中"""
-        task = DownloadTask(url, file_name)
+        download_path = get_config_item("download_path", "data/download")
+        task = DownloadTask(url, file_name, download_path)
         self.download_tasks[file_name] = task
         task_widget = self._create_download_item(file_name)
         task.progress_changed.connect(lambda progress, downloaded, total, w=task_widget: self._update_download_progress(w, progress, downloaded, total))
         task.status_changed.connect(lambda status, w=task_widget: self._update_download_status(w, status))
-        layout = self.download_ui.verticalLayout_3
+        layout = self.download_ui.verticalLayout_4
         if layout.count() > 0:
             layout.takeAt(layout.count() - 1)
         layout.addWidget(task_widget)

@@ -2,6 +2,7 @@ import os
 import httpx
 import threading
 from PySide6.QtCore import QObject, Signal
+from src.config import get_config_item
 
 
 class DownloadTask(QObject):
@@ -9,10 +10,12 @@ class DownloadTask(QObject):
     progress_changed = Signal(int, int, int)
     status_changed = Signal(str)
 
-    def __init__(self, url, file_name, save_dir="data/download"):
+    def __init__(self, url, file_name, save_dir=None):
         super().__init__()
         self.url = url
         self.file_name = file_name
+        if save_dir is None:
+            save_dir = get_config_item("download_path", "data/download")
         self.save_path = os.path.join(save_dir, file_name)
         self.total_size = 0
         self.downloaded = 0

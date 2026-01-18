@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox, QFileDialog
 from src.thread_manager import thread_manager
 from src.sqlite import insert_many_data, clear_table
 from src.config import get_config_item, set_config_items
@@ -20,6 +20,8 @@ class SettingsPageManager:
         self.setup_sidebar_connections()
         # Bangumi域名
         self.set_bangumi_base_url()
+        # 设置下载路径
+        self.setup_download_path_ui()
         # 默认选中
         self.set_default_page()
 
@@ -41,6 +43,22 @@ class SettingsPageManager:
         self.settings_page.ui.pushButton_3.clicked.connect(lambda: self.settings_page.ui.stackedWidget_2.setCurrentWidget(self.settings_page.ui.login_page))
         # PikPak
         self.settings_page.ui.pushButton_4.clicked.connect(lambda: self.settings_page.ui.stackedWidget_2.setCurrentWidget(self.settings_page.ui.pikpak_page))
+        # 下载
+        self.settings_page.ui.pushButton_13.clicked.connect(lambda: self.settings_page.ui.stackedWidget_2.setCurrentWidget(self.settings_page.ui.download_page))
+
+    def setup_download_path_ui(self):
+        """设置下载路径相关UI"""
+        download_path = get_config_item("download_path") or "data/download"
+        self.settings_page.ui.lineEdit.setText(download_path)
+        self.settings_page.ui.login_Button_3.clicked.connect(self._select_download_path)
+
+    def _select_download_path(self):
+        """选择下载路径"""
+        current_path = self.settings_page.ui.lineEdit.text()
+        dir_path = QFileDialog.getExistingDirectory(self.settings_page, "选择下载路径", current_path)
+        if dir_path:
+            self.settings_page.ui.lineEdit.setText(dir_path)
+            set_config_items(download_path=dir_path)
 
     def update_token_display(self):
         """显示token"""
@@ -147,7 +165,7 @@ class SettingsPageManager:
     # ==========PikPak==========
     def show_pikpak_login_dialog(self):
         dialog = QDialog(self.settings_page)
-        dialog.setWindowTitle("PikPak登录")
+        dialog.setWindowTitle("PikPak登录(ip不能在中国大陆)")
         dialog.setFixedSize(400, 200)
         layout = QVBoxLayout()
         layout.addWidget(QLabel("用户名:"))

@@ -26,7 +26,9 @@ def create_config():
                 # Pikpak
                 "username": "",
                 "password": "",
-                "encoded_token": ""
+                "encoded_token": "",
+                # 下载
+                "download_path": "data/download"
             }, f, ensure_ascii=False, indent=2)
     return True
 

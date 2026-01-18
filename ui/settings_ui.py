@@ -1,7 +1,6 @@
 from PySide6.QtGui import QFont, QIcon
 from PySide6.QtCore import QCoreApplication, QMetaObject, QSize, Qt
-from PySide6.QtWidgets import QFrame, QHBoxLayout, QPushButton, QSizePolicy, QSpacerItem, QStackedWidget, QVBoxLayout, QWidget, QButtonGroup, QComboBox
-
+from PySide6.QtWidgets import QButtonGroup, QComboBox, QFrame, QHBoxLayout, QLineEdit, QPushButton, QSizePolicy, QSpacerItem, QStackedWidget, QVBoxLayout, QWidget
 
 class Ui_SettingsPage(object):
     def setupUi(self, SettingsPage):
@@ -113,6 +112,26 @@ class Ui_SettingsPage(object):
 "}")
         self.pushButton_4.setCheckable(True)
         self.verticalLayout_2.addWidget(self.pushButton_4)
+        self.pushButton_13 = QPushButton(self.Frame_2)
+        self.buttonGroup.addButton(self.pushButton_13)
+        self.pushButton_13.setObjectName(u"pushButton_13")
+        self.pushButton_13.setMinimumSize(QSize(0, 50))
+        self.pushButton_13.setMaximumSize(QSize(16777215, 50))
+        self.pushButton_13.setFont(font2)
+        self.pushButton_13.setStyleSheet(u"QPushButton:hover {\n"
+"    background-color: rgba(0, 0, 0,20);\n"
+"}\n"
+"\n"
+"QPushButton:checked {\n"
+"    background-color: rgb(233, 221, 255);\n"
+"}\n"
+"\n"
+"QPushButton {\n"
+"    border:none;\n"
+"	border-radius: 10px;\n"
+"}")
+        self.pushButton_13.setCheckable(True)
+        self.verticalLayout_2.addWidget(self.pushButton_13)
         self.verticalLayout.addWidget(self.Frame_2)
         self.verticalSpacer = QSpacerItem(20, 866, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         self.verticalLayout.addItem(self.verticalSpacer)
@@ -128,7 +147,6 @@ class Ui_SettingsPage(object):
 "}")
         self.login_page = QWidget()
         self.login_page.setObjectName(u"login_page")
-        self.login_page.setStyleSheet(u"")
         self.verticalLayout_7 = QVBoxLayout(self.login_page)
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.pushButton = QPushButton(self.login_page)
@@ -236,32 +254,63 @@ class Ui_SettingsPage(object):
         self.verticalLayout_9.setObjectName(u"verticalLayout_9")
         self.pushButton_6 = QPushButton(self.frame_2)
         self.pushButton_6.setObjectName(u"pushButton_6")
-        self.pushButton_6.setFont(font4)
+        self.pushButton_6.setFont(font5)
         self.pushButton_6.setStyleSheet(u"border:none;")
         self.verticalLayout_9.addWidget(self.pushButton_6, 0, Qt.AlignmentFlag.AlignLeft)
         self.pushButton_10 = QPushButton(self.frame_2)
         self.pushButton_10.setObjectName(u"pushButton_10")
-        self.pushButton_10.setFont(font4)
+        self.pushButton_10.setFont(font5)
         self.pushButton_10.setStyleSheet(u"border:none;")
         self.verticalLayout_9.addWidget(self.pushButton_10, 0, Qt.AlignmentFlag.AlignLeft)
         self.pushButton_11 = QPushButton(self.frame_2)
         self.pushButton_11.setObjectName(u"pushButton_11")
-        self.pushButton_11.setFont(font4)
+        self.pushButton_11.setFont(font5)
         self.pushButton_11.setStyleSheet(u"border:none;")
         self.verticalLayout_9.addWidget(self.pushButton_11, 0, Qt.AlignmentFlag.AlignLeft)
         self.login_Button_2 = QPushButton(self.frame_2)
         self.login_Button_2.setObjectName(u"login_Button_2")
         self.login_Button_2.setMinimumSize(QSize(0, 30))
-        self.login_Button_2.setFont(font4)
+        self.login_Button_2.setFont(font5)
         self.login_Button_2.setStyleSheet(u"")
         self.verticalLayout_9.addWidget(self.login_Button_2, 0, Qt.AlignmentFlag.AlignLeft)
         self.verticalLayout_3.addWidget(self.frame_2)
         self.verticalSpacer_2 = QSpacerItem(20, 759, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         self.verticalLayout_3.addItem(self.verticalSpacer_2)
         self.stackedWidget_2.addWidget(self.pikpak_page)
+        self.download_page = QWidget()
+        self.download_page.setObjectName(u"download_page")
+        self.verticalLayout_5 = QVBoxLayout(self.download_page)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.pushButton_14 = QPushButton(self.download_page)
+        self.pushButton_14.setObjectName(u"pushButton_14")
+        self.pushButton_14.setMinimumSize(QSize(0, 0))
+        self.pushButton_14.setMaximumSize(QSize(16777215, 16777215))
+        self.pushButton_14.setFont(font3)
+        self.pushButton_14.setStyleSheet(u"border:none;")
+        self.verticalLayout_5.addWidget(self.pushButton_14, 0, Qt.AlignmentFlag.AlignLeft)
+        self.frame_3 = QFrame(self.download_page)
+        self.frame_3.setObjectName(u"frame_3")
+        self.frame_3.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame_3.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_3 = QHBoxLayout(self.frame_3)
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.lineEdit = QLineEdit(self.frame_3)
+        self.lineEdit.setObjectName(u"lineEdit")
+        self.lineEdit.setReadOnly(True)
+        self.horizontalLayout_3.addWidget(self.lineEdit)
+        self.login_Button_3 = QPushButton(self.frame_3)
+        self.login_Button_3.setObjectName(u"login_Button_3")
+        self.login_Button_3.setMinimumSize(QSize(0, 30))
+        self.login_Button_3.setFont(font5)
+        self.login_Button_3.setStyleSheet(u"")
+        self.horizontalLayout_3.addWidget(self.login_Button_3)
+        self.verticalLayout_5.addWidget(self.frame_3)
+        self.verticalSpacer_4 = QSpacerItem(20, 829, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.verticalLayout_5.addItem(self.verticalSpacer_4)
+        self.stackedWidget_2.addWidget(self.download_page)
         self.horizontalLayout_8.addWidget(self.stackedWidget_2)
         self.retranslateUi(SettingsPage)
-        self.stackedWidget_2.setCurrentIndex(0)
+        self.stackedWidget_2.setCurrentIndex(2)
         QMetaObject.connectSlotsByName(SettingsPage)
 
     def retranslateUi(self, SettingsPage):
@@ -269,6 +318,7 @@ class Ui_SettingsPage(object):
         self.setting_Button.setText(QCoreApplication.translate("SettingsPage", u"\u8bbe\u7f6e", None))
         self.pushButton_3.setText(QCoreApplication.translate("SettingsPage", u"Bangumi", None))
         self.pushButton_4.setText(QCoreApplication.translate("SettingsPage", u"PikPak", None))
+        self.pushButton_13.setText(QCoreApplication.translate("SettingsPage", u"\u4e0b\u8f7d", None))
         self.pushButton.setText(QCoreApplication.translate("SettingsPage", u"Bangumi", None))
         self.pushButton_7.setText(QCoreApplication.translate("SettingsPage", u"Bangumi \u6388\u6743", None))
         self.pushButton_2.setText(QCoreApplication.translate("SettingsPage", u"ID", None))
@@ -285,4 +335,6 @@ class Ui_SettingsPage(object):
         self.pushButton_10.setText(QCoreApplication.translate("SettingsPage", u"password", None))
         self.pushButton_11.setText(QCoreApplication.translate("SettingsPage", u"encoded token", None))
         self.login_Button_2.setText(QCoreApplication.translate("SettingsPage", u"\u5f00\u59cb\u767b\u5f55", None))
+        self.pushButton_14.setText(QCoreApplication.translate("SettingsPage", u"\u4e0b\u8f7d\u8def\u5f84", None))
+        self.login_Button_3.setText(QCoreApplication.translate("SettingsPage", u"\u9009\u62e9\u8def\u5f84", None))
         pass
