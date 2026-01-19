@@ -68,12 +68,12 @@ class SiteSearchTask(BaseTask):
             if not self.should_continue():
                 return
             search_completed = False
-            search_result = None
+            search_results = []
             search_exception = None
             def do_search():
-                nonlocal search_completed, search_result, search_exception
+                nonlocal search_completed, search_results, search_exception
                 try:
-                    search_result = self.crawler.search_site(self.keyword, self.site_id)
+                    search_results = self.crawler.search_site(self.keyword, self.site_id)
                 except Exception as ex:
                     search_exception = ex
                 finally:
@@ -89,14 +89,14 @@ class SiteSearchTask(BaseTask):
                 return
             if search_exception is not None:
                 print(f"站点 {self.site_id} 搜索失败: {search_exception}")
-                self.result_holder.site_search_completed.emit({'site_id': self.site_id, 'status': 'failed', 'result': None})
+                self.result_holder.site_search_completed.emit({'site_id': self.site_id, 'status': 'failed', 'result': []})
             else:
-                status = 'success' if search_result is not None and isinstance(search_result, dict) and search_result.get('routes') else 'failed'
-                self.result_holder.site_search_completed.emit({'site_id': self.site_id, 'status': status, 'result': search_result})
+                status = 'success' if search_results and isinstance(search_results, list) else 'failed'
+                self.result_holder.site_search_completed.emit({'site_id': self.site_id, 'status': status, 'result': search_results if search_results else []})
         except Exception as e:
             if self.should_continue():
                 print(f"站点 {self.site_id} 搜索任务执行失败: {e}")
-                self.result_holder.site_search_completed.emit({'site_id': self.site_id, 'status': 'failed', 'result': None})
+                self.result_holder.site_search_completed.emit({'site_id': self.site_id, 'status': 'failed', 'result': []})
 
 
 # ====================RSS====================
@@ -471,7 +471,7 @@ class ThreadManager(QObject):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.thread_pool = QThreadPool.globalInstance()
-        self.thread_pool.setMaxThreadCount(5)
+        self.thread_pool.setMaxThreadCount(20)
         self.thread_pool.setExpiryTimeout(30000)
         self.rss_timer = None
         self.rss_worker = None

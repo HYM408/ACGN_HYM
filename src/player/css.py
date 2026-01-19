@@ -58,6 +58,7 @@ class VideoStreamDetector:
 
 
 class VideoCrawler:
+    """网站源"""
     def __init__(self, config_file="css.json"):
         """初始化爬虫"""
         config_path = Path(__file__).parent / config_file
@@ -88,11 +89,11 @@ class VideoCrawler:
         url = site_config["base_url"] + site_config["search_path"].replace("{keyword}", keyword)
         tree = self._make_request(url)
         if tree is None:
-            return None
+            return []
         titles = tree.cssselect(site_config["title"])
         links = tree.cssselect(site_config["link"])
         if not titles or not links:
-            return None
+            return []
         results = []
         for title_elem, link_elem in zip(titles, links):
             title = title_elem.text_content().strip()
@@ -101,9 +102,17 @@ class VideoCrawler:
                 link = link.replace("http://", "https://", 1)
             similarity = SequenceMatcher(None, keyword, title).ratio()
             results.append({'title': title, 'link': link, 'similarity': similarity})
-        best_result = max(results, key=lambda x: x['similarity'])
-        routes = self.get_routes(best_result['link'], site_id)
-        return {'title': best_result['title'], 'link': best_result['link'], 'similarity': best_result['similarity'], 'site': site_id, 'routes': routes}
+        sorted_results = sorted(results, key=lambda x: x['similarity'], reverse=True)
+        final_results = []
+        for result in sorted_results:
+            try:
+                routes = self.get_routes(result['link'], site_id)
+                if routes:
+                    final_results.append({'title': result['title'], 'link': result['link'], 'similarity': result['similarity'], 'site': site_id, 'routes': routes})
+            except Exception as e:
+                print(f"获取线路失败: {e}")
+                continue
+        return final_results
 
     def get_routes(self, page_url, site_id):
         """获取视频线路和集数"""
