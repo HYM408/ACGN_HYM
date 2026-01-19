@@ -172,9 +172,11 @@ class RSSUpdateTask(BaseTask):
         """获取用户RSS"""
         user_id = get_config_item("user_id")
         base_url = get_config_item("bangumi_base_url")
+        token = get_config_item("access_token")
         url = f"{base_url}feed/user/{user_id}/timeline?type=subject"
         try:
-            response = httpx.get(url, headers={"User-Agent": "ACGN_HYM/1.0"}, timeout=20.0)
+            headers = {"User-Agent": "ACGN_HYM/1.0", "Authorization": f"Bearer {token}"}
+            response = httpx.get(url, headers=headers, timeout=10.0)
             response.raise_for_status()
             return response.text
         except Exception as e:
