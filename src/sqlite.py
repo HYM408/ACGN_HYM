@@ -172,6 +172,23 @@ def get_by_subject_type_and_type(subject_type, type_value):
         results.append(result)
     return results
 
+def get_status_counts_by_subject_type(subject_type):
+    """根据subject_type获取各状态总数"""
+    conn = _get_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+                   SELECT type, COUNT(*) as count
+                   FROM collection
+                   WHERE subject_type = ?
+                   GROUP BY type
+                   ORDER BY type
+                   ''', (subject_type,))
+    rows = cursor.fetchall()
+    status_counts = {}
+    for row in rows:
+        status_counts[row['type']] = row['count']
+    return status_counts
+
 def clear_table():
     """清空整个表"""
     conn = _get_connection()

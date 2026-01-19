@@ -1,13 +1,12 @@
 from PySide6.QtGui import QFont, QIcon
 from PySide6.QtCore import QCoreApplication, QMetaObject, QSize, Qt
-from PySide6.QtWidgets import QButtonGroup, QFrame, QGridLayout,QHBoxLayout, QLabel, QLineEdit, QPushButton, QSizePolicy, QSpacerItem, QStackedWidget,QVBoxLayout, QWidget
+from PySide6.QtWidgets import QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLineEdit, QPushButton, QSizePolicy, QSpacerItem, QStackedWidget, QVBoxLayout, QWidget
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(1525, 942)
-        MainWindow.setWindowFlags(Qt.FramelessWindowHint)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout = QVBoxLayout(self.centralwidget)
@@ -296,151 +295,19 @@ class Ui_MainWindow(object):
         self.header_frame.setMaximumSize(QSize(16777215, 100))
         self.header_frame.setStyleSheet(u"background-color: white;")
         self.header_frame.setFrameShape(QFrame.Shape.NoFrame)
-        self.gridLayout = QGridLayout(self.header_frame)
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.statu_frame = QFrame(self.header_frame)
-        self.statu_frame.setObjectName(u"statu_frame")
-        self.statu_frame.setMinimumSize(QSize(0, 60))
-        self.statu_frame.setMaximumSize(QSize(16777215, 50))
-        self.statu_frame.setFrameShape(QFrame.Shape.NoFrame)
-        self.horizontalLayout_2 = QHBoxLayout(self.statu_frame)
-        self.horizontalLayout_2.setSpacing(0)
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.horizontalLayout_2.setContentsMargins(0, 0, 20, 0)
-        self.pushButton_3 = QPushButton(self.statu_frame)
-        self.buttonGroup_2 = QButtonGroup(MainWindow)
-        self.buttonGroup_2.setObjectName(u"buttonGroup_2")
-        self.buttonGroup_2.addButton(self.pushButton_3)
-        self.pushButton_3.setObjectName(u"pushButton_3")
-        self.pushButton_3.setMinimumSize(QSize(80, 40))
-        self.pushButton_3.setMaximumSize(QSize(80, 40))
-        self.pushButton_3.setFont(font)
-        self.pushButton_3.setStyleSheet(u"QPushButton {\n"
-"	border-bottom-color: rgb(24, 59, 255);\n"
-"	background-color: white;\n"
-"	border:none;\n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"    background-color: rgb(237, 237, 238);\n"
-"}\n"
-"\n"
-"QPushButton:checked {\n"
-"	background-color: #ffffff;\n"
-"	border-bottom: 3px solid rgb(103, 79, 165); \n"
-"}\n"
-"\n"
-"QPushButton:checked:hover {\n"
-"    background-color: rgb(237, 237, 238);\n"
-"}")
-        self.pushButton_3.setCheckable(True)
-        self.horizontalLayout_2.addWidget(self.pushButton_3)
-        self.pushButton_4 = QPushButton(self.statu_frame)
-        self.buttonGroup_2.addButton(self.pushButton_4)
-        self.pushButton_4.setObjectName(u"pushButton_4")
-        self.pushButton_4.setMinimumSize(QSize(80, 40))
-        self.pushButton_4.setMaximumSize(QSize(80, 40))
-        self.pushButton_4.setFont(font)
-        self.pushButton_4.setStyleSheet(u"QPushButton {\n"
-"	border-bottom-color: rgb(24, 59, 255);\n"
-"	background-color: white;\n"
-"	border:none;\n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"    background-color: rgb(237, 237, 238);\n"
-"}\n"
-"\n"
-"QPushButton:checked {\n"
-"	background-color: #ffffff;\n"
-"	border-bottom: 3px solid rgb(103, 79, 165); \n"
-"}\n"
-"\n"
-"QPushButton:checked:hover {\n"
-"    background-color: rgb(237, 237, 238);\n"
-"}")
-        self.pushButton_4.setCheckable(True)
-        self.horizontalLayout_2.addWidget(self.pushButton_4)
-        self.pushButton_5 = QPushButton(self.statu_frame)
-        self.buttonGroup_2.addButton(self.pushButton_5)
-        self.pushButton_5.setObjectName(u"pushButton_5")
-        self.pushButton_5.setMinimumSize(QSize(80, 40))
-        self.pushButton_5.setMaximumSize(QSize(80, 40))
-        self.pushButton_5.setFont(font)
-        self.pushButton_5.setStyleSheet(u"QPushButton {\n"
-"	border-bottom-color: rgb(24, 59, 255);\n"
-"	background-color: white;\n"
-"	border:none;\n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"    background-color: rgb(237, 237, 238);\n"
-"}\n"
-"\n"
-"QPushButton:checked {\n"
-"	background-color: #ffffff;\n"
-"	border-bottom: 3px solid rgb(103, 79, 165); \n"
-"}\n"
-"\n"
-"QPushButton:checked:hover {\n"
-"    background-color: rgb(237, 237, 238);\n"
-"}")
-        self.pushButton_5.setCheckable(True)
-        self.horizontalLayout_2.addWidget(self.pushButton_5)
-        self.pushButton_6 = QPushButton(self.statu_frame)
-        self.buttonGroup_2.addButton(self.pushButton_6)
-        self.pushButton_6.setObjectName(u"pushButton_6")
-        self.pushButton_6.setMinimumSize(QSize(80, 40))
-        self.pushButton_6.setMaximumSize(QSize(80, 40))
-        self.pushButton_6.setFont(font)
-        self.pushButton_6.setStyleSheet(u"QPushButton {\n"
-"	border-bottom-color: rgb(24, 59, 255);\n"
-"	background-color: white;\n"
-"	border:none;\n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"    background-color: rgb(237, 237, 238);\n"
-"}\n"
-"\n"
-"QPushButton:checked {\n"
-"	background-color: #ffffff;\n"
-"	border-bottom: 3px solid rgb(103, 79, 165); \n"
-"}\n"
-"\n"
-"QPushButton:checked:hover {\n"
-"    background-color: rgb(237, 237, 238);\n"
-"}")
-        self.pushButton_6.setCheckable(True)
-        self.horizontalLayout_2.addWidget(self.pushButton_6)
-        self.pushButton_7 = QPushButton(self.statu_frame)
-        self.buttonGroup_2.addButton(self.pushButton_7)
-        self.pushButton_7.setObjectName(u"pushButton_7")
-        self.pushButton_7.setMinimumSize(QSize(80, 40))
-        self.pushButton_7.setMaximumSize(QSize(80, 40))
-        self.pushButton_7.setFont(font)
-        self.pushButton_7.setStyleSheet(u"QPushButton {\n"
-"	border-bottom-color: rgb(24, 59, 255);\n"
-"	background-color: white;\n"
-"	border:none;\n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"    background-color: rgb(237, 237, 238);\n"
-"}\n"
-"\n"
-"QPushButton:checked {\n"
-"	background-color: #ffffff;\n"
-"	border-bottom: 3px solid rgb(103, 79, 165); \n"
-"}\n"
-"\n"
-"QPushButton:checked:hover {\n"
-"    background-color: rgb(237, 237, 238);\n"
-"}")
-        self.pushButton_7.setCheckable(True)
-        self.horizontalLayout_2.addWidget(self.pushButton_7, 0, Qt.AlignmentFlag.AlignVCenter)
-        self.gridLayout.addWidget(self.statu_frame, 2, 0, 4, 1)
-        self.project_Button = QPushButton(self.header_frame)
+        self.verticalLayout_5 = QVBoxLayout(self.header_frame)
+        self.verticalLayout_5.setSpacing(0)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.verticalLayout_5.setContentsMargins(-1, 0, -1, 0)
+        self.frame = QFrame(self.header_frame)
+        self.frame.setObjectName(u"frame")
+        self.frame.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_4 = QHBoxLayout(self.frame)
+        self.horizontalLayout_4.setSpacing(0)
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.horizontalLayout_4.setContentsMargins(-1, 0, -1, 0)
+        self.project_Button = QPushButton(self.frame)
         self.project_Button.setObjectName(u"project_Button")
         self.project_Button.setMinimumSize(QSize(105, 35))
         self.project_Button.setMaximumSize(QSize(16777215, 25))
@@ -453,17 +320,145 @@ class Ui_MainWindow(object):
 "    border: none;\n"
 "}\n"
 "")
-        self.gridLayout.addWidget(self.project_Button, 0, 0, 1, 1, Qt.AlignmentFlag.AlignLeft)
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-        self.gridLayout.addItem(self.horizontalSpacer, 4, 2, 1, 1)
-        self.searchlist_lineEdit = QLineEdit(self.header_frame)
-        self.searchlist_lineEdit.setObjectName(u"searchlist_lineEdit")
-        self.searchlist_lineEdit.setMinimumSize(QSize(200, 25))
-        self.searchlist_lineEdit.setMaximumSize(QSize(200, 25))
-        self.searchlist_lineEdit.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
-        self.searchlist_lineEdit.setStyleSheet(u"")
-        self.gridLayout.addWidget(self.searchlist_lineEdit, 4, 4, 1, 1)
-        self.refresh_Button = QPushButton(self.header_frame)
+        self.horizontalLayout_4.addWidget(self.project_Button, 0, Qt.AlignmentFlag.AlignLeft)
+        self.verticalLayout_5.addWidget(self.frame)
+        self.frame_2 = QFrame(self.header_frame)
+        self.frame_2.setObjectName(u"frame_2")
+        self.frame_2.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame_2.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_5 = QHBoxLayout(self.frame_2)
+        self.horizontalLayout_5.setSpacing(20)
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.horizontalLayout_5.setContentsMargins(-1, 0, -1, 0)
+        self.frame_3 = QFrame(self.frame_2)
+        self.frame_3.setObjectName(u"frame_3")
+        self.frame_3.setMinimumSize(QSize(90, 0))
+        self.frame_3.setMaximumSize(QSize(90, 16777215))
+        self.frame_3.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame_3.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_7 = QHBoxLayout(self.frame_3)
+        self.horizontalLayout_7.setSpacing(0)
+        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
+        self.horizontalLayout_7.setContentsMargins(0, 0, 0, 0)
+        self.pushButton_3 = QPushButton(self.frame_3)
+        self.pushButton_3.setObjectName(u"pushButton_3")
+        self.pushButton_3.setFont(font)
+        self.pushButton_3.setStyleSheet(u"border:none")
+        self.horizontalLayout_7.addWidget(self.pushButton_3)
+        self.pushButton_10 = QPushButton(self.frame_3)
+        self.pushButton_10.setObjectName(u"pushButton_10")
+        self.pushButton_10.setMinimumSize(QSize(30, 30))
+        self.pushButton_10.setMaximumSize(QSize(30, 30))
+        font2 = QFont()
+        font2.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
+        self.pushButton_10.setFont(font2)
+        self.pushButton_10.setStyleSheet(u"border:none;\n"
+"border-radius:15px;\n"
+"background-color: rgb(242, 236, 244)")
+        self.horizontalLayout_7.addWidget(self.pushButton_10)
+        self.horizontalLayout_5.addWidget(self.frame_3)
+        self.frame_5 = QFrame(self.frame_2)
+        self.frame_5.setObjectName(u"frame_5")
+        self.frame_5.setMinimumSize(QSize(90, 0))
+        self.frame_5.setMaximumSize(QSize(90, 16777215))
+        self.frame_5.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame_5.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_8 = QHBoxLayout(self.frame_5)
+        self.horizontalLayout_8.setSpacing(0)
+        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
+        self.horizontalLayout_8.setContentsMargins(0, 0, 0, 0)
+        self.pushButton_4 = QPushButton(self.frame_5)
+        self.pushButton_4.setObjectName(u"pushButton_4")
+        self.pushButton_4.setFont(font)
+        self.pushButton_4.setStyleSheet(u"border:none")
+        self.horizontalLayout_8.addWidget(self.pushButton_4)
+        self.pushButton_11 = QPushButton(self.frame_5)
+        self.pushButton_11.setObjectName(u"pushButton_11")
+        self.pushButton_11.setMinimumSize(QSize(30, 30))
+        self.pushButton_11.setMaximumSize(QSize(30, 30))
+        self.pushButton_11.setFont(font2)
+        self.pushButton_11.setStyleSheet(u"border:none;\n"
+"border-radius:15px;\n"
+"background-color: rgb(242, 236, 244)")
+        self.horizontalLayout_8.addWidget(self.pushButton_11)
+        self.horizontalLayout_5.addWidget(self.frame_5)
+        self.frame_7 = QFrame(self.frame_2)
+        self.frame_7.setObjectName(u"frame_7")
+        self.frame_7.setMinimumSize(QSize(90, 0))
+        self.frame_7.setMaximumSize(QSize(90, 16777215))
+        self.frame_7.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame_7.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_9 = QHBoxLayout(self.frame_7)
+        self.horizontalLayout_9.setSpacing(0)
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.horizontalLayout_9.setContentsMargins(0, 0, 0, 0)
+        self.pushButton_5 = QPushButton(self.frame_7)
+        self.pushButton_5.setObjectName(u"pushButton_5")
+        self.pushButton_5.setFont(font)
+        self.pushButton_5.setStyleSheet(u"border:none")
+        self.horizontalLayout_9.addWidget(self.pushButton_5)
+        self.pushButton_12 = QPushButton(self.frame_7)
+        self.pushButton_12.setObjectName(u"pushButton_12")
+        self.pushButton_12.setMinimumSize(QSize(30, 30))
+        self.pushButton_12.setMaximumSize(QSize(30, 30))
+        self.pushButton_12.setFont(font2)
+        self.pushButton_12.setStyleSheet(u"border:none;\n"
+"border-radius:15px;\n"
+"background-color: rgb(242, 236, 244)")
+        self.horizontalLayout_9.addWidget(self.pushButton_12)
+        self.horizontalLayout_5.addWidget(self.frame_7)
+        self.frame_9 = QFrame(self.frame_2)
+        self.frame_9.setObjectName(u"frame_9")
+        self.frame_9.setMinimumSize(QSize(90, 0))
+        self.frame_9.setMaximumSize(QSize(90, 16777215))
+        self.frame_9.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame_9.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_10 = QHBoxLayout(self.frame_9)
+        self.horizontalLayout_10.setSpacing(0)
+        self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
+        self.horizontalLayout_10.setContentsMargins(0, 0, 0, 0)
+        self.pushButton_6 = QPushButton(self.frame_9)
+        self.pushButton_6.setObjectName(u"pushButton_6")
+        self.pushButton_6.setFont(font)
+        self.pushButton_6.setStyleSheet(u"border:none")
+        self.horizontalLayout_10.addWidget(self.pushButton_6)
+        self.pushButton_13 = QPushButton(self.frame_9)
+        self.pushButton_13.setObjectName(u"pushButton_13")
+        self.pushButton_13.setMinimumSize(QSize(30, 30))
+        self.pushButton_13.setMaximumSize(QSize(30, 30))
+        self.pushButton_13.setFont(font2)
+        self.pushButton_13.setStyleSheet(u"border:none;\n"
+"border-radius:15px;\n"
+"background-color: rgb(242, 236, 244)")
+        self.horizontalLayout_10.addWidget(self.pushButton_13)
+        self.horizontalLayout_5.addWidget(self.frame_9)
+        self.frame_11 = QFrame(self.frame_2)
+        self.frame_11.setObjectName(u"frame_11")
+        self.frame_11.setMinimumSize(QSize(90, 0))
+        self.frame_11.setMaximumSize(QSize(90, 16777215))
+        self.frame_11.setStyleSheet(u"")
+        self.frame_11.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame_11.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_2 = QHBoxLayout(self.frame_11)
+        self.horizontalLayout_2.setSpacing(0)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.pushButton_7 = QPushButton(self.frame_11)
+        self.pushButton_7.setObjectName(u"pushButton_7")
+        self.pushButton_7.setFont(font)
+        self.pushButton_7.setStyleSheet(u"border:none")
+        self.horizontalLayout_2.addWidget(self.pushButton_7)
+        self.pushButton_14 = QPushButton(self.frame_11)
+        self.pushButton_14.setObjectName(u"pushButton_14")
+        self.pushButton_14.setMinimumSize(QSize(30, 30))
+        self.pushButton_14.setMaximumSize(QSize(30, 30))
+        self.pushButton_14.setFont(font2)
+        self.pushButton_14.setStyleSheet(u"border:none;\n"
+"border-radius:15px;\n"
+"background-color: rgb(242, 236, 244)")
+        self.horizontalLayout_2.addWidget(self.pushButton_14, 0, Qt.AlignmentFlag.AlignRight)
+        self.horizontalLayout_5.addWidget(self.frame_11)
+        self.refresh_Button = QPushButton(self.frame_2)
         self.refresh_Button.setObjectName(u"refresh_Button")
         self.refresh_Button.setMinimumSize(QSize(50, 50))
         self.refresh_Button.setMaximumSize(QSize(50, 50))
@@ -485,7 +480,17 @@ class Ui_MainWindow(object):
         icon5.addFile(u"icons/refresh.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.refresh_Button.setIcon(icon5)
         self.refresh_Button.setIconSize(QSize(20, 20))
-        self.gridLayout.addWidget(self.refresh_Button, 3, 1, 1, 1)
+        self.horizontalLayout_5.addWidget(self.refresh_Button)
+        self.horizontalSpacer = QSpacerItem(774, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalLayout_5.addItem(self.horizontalSpacer)
+        self.searchlist_lineEdit = QLineEdit(self.frame_2)
+        self.searchlist_lineEdit.setObjectName(u"searchlist_lineEdit")
+        self.searchlist_lineEdit.setMinimumSize(QSize(200, 25))
+        self.searchlist_lineEdit.setMaximumSize(QSize(200, 25))
+        self.searchlist_lineEdit.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
+        self.searchlist_lineEdit.setStyleSheet(u"")
+        self.horizontalLayout_5.addWidget(self.searchlist_lineEdit)
+        self.verticalLayout_5.addWidget(self.frame_2)
         self.verticalLayout_2.addWidget(self.header_frame)
         self.animationdata_frame = QFrame(self.showmain_stackedWidgetPage1)
         self.animationdata_frame.setObjectName(u"animationdata_frame")
@@ -561,14 +566,19 @@ class Ui_MainWindow(object):
         self.comic_Button.setText(QCoreApplication.translate("MainWindow", u"\u6f2b\u753b", None))
         self.pushButton_9.setText(QCoreApplication.translate("MainWindow", u"\u4e0b\u8f7d", None))
         self.settings_Button.setText("")
-        self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"\u60f3\u770b", None))
-        self.pushButton_4.setText(QCoreApplication.translate("MainWindow", u"\u5728\u770b", None))
-        self.pushButton_5.setText(QCoreApplication.translate("MainWindow", u"\u770b\u8fc7", None))
-        self.pushButton_6.setText(QCoreApplication.translate("MainWindow", u"\u6401\u7f6e", None))
-        self.pushButton_7.setText(QCoreApplication.translate("MainWindow", u"\u629b\u5f03", None))
         self.project_Button.setText(QCoreApplication.translate("MainWindow", u"\u52a8\u753b", None))
-        self.searchlist_lineEdit.setPlaceholderText(QCoreApplication.translate("MainWindow", u"\u641c\u7d22\u5f53\u524d\u5217\u8868", None))
+        self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"\u60f3\u770b", None))
+        self.pushButton_10.setText("")
+        self.pushButton_4.setText(QCoreApplication.translate("MainWindow", u"\u5728\u770b", None))
+        self.pushButton_11.setText("")
+        self.pushButton_5.setText(QCoreApplication.translate("MainWindow", u"\u770b\u8fc7", None))
+        self.pushButton_12.setText("")
+        self.pushButton_6.setText(QCoreApplication.translate("MainWindow", u"\u6401\u7f6e", None))
+        self.pushButton_13.setText("")
+        self.pushButton_7.setText(QCoreApplication.translate("MainWindow", u"\u629b\u5f03", None))
+        self.pushButton_14.setText("")
         self.refresh_Button.setText("")
+        self.searchlist_lineEdit.setPlaceholderText(QCoreApplication.translate("MainWindow", u"\u641c\u7d22\u5f53\u524d\u5217\u8868", None))
         self.previous_Button.setText(QCoreApplication.translate("MainWindow", u"\u4e0a\u4e00\u9875", None))
         self.pages_Button.setText(QCoreApplication.translate("MainWindow", u"--/--", None))
         self.next_Button.setText(QCoreApplication.translate("MainWindow", u"\u4e0b\u4e00\u9875", None))
