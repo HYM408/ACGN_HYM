@@ -2,6 +2,7 @@ from PySide6.QtCore import Qt, QPoint, QTimer
 from PySide6.QtWidgets import QMainWindow, QWidget
 from ui.main_ui import Ui_MainWindow
 from src.main_page import MainPageManager
+from src.cache_manager import CacheManager
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -10,6 +11,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.page_history = []
         self.loaded_pages = {}
+        self.cache_manager = CacheManager(self)
         self.MainPageManager = MainPageManager(self)
         self.setup_connections()
         self.setup_titlebar()

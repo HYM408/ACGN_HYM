@@ -1,6 +1,7 @@
 {
   "site_configs": {
     "girigirilove": {
+      "icon": "https://bgm.girigirilove.com/upload/anime.girigirilove.com_.png",
       "base_url": "https://bgm.girigirilove.com",
       "search_path": "/search/-------------/?wd={keyword}",
       "title": ".slide-info-title",
@@ -11,6 +12,7 @@
       "video_patterns": ["playlist.m3u8"]
     },
     "NT": {
+      "icon": "https://cdn.yinghuazy.xyz/webjs/ntdm8/image/favicon.ico",
       "base_url": "https://www.ntdm8.com",
       "search_path": "/search/-------------.html?wd={keyword}",
       "title": ".cell_imform_name",
@@ -21,6 +23,7 @@
       "video_patterns": ["tiktokcdn"]
     },
     "wedm": {
+      "icon": "https://vdm10.com/template/a_0001/images/favicon.png",
       "base_url": "https://vdm10.com",
       "search_path": "/search/-------------.html?wd={keyword}",
       "title": ".result_title a",
@@ -31,6 +34,7 @@
       "video_patterns": ["tiktokcdn","index.m3u8"]
     },
     "稀饭动漫": {
+      "icon": "https://dm.xifanacg.com/template/dsn2/static/img/fav.png",
       "base_url": "https://dm.xifanacg.com",
       "search_path": "/search.html?wd={keyword}",
       "title": ".slide-info-title.hide",
@@ -41,6 +45,7 @@
       "video_patterns": [".mp4"]
     },
     "omofun": {
+      "icon": "https://omofun.icu/template/mxpro/mxtheme/images/favicon.png",
       "base_url": "https://omofun.icu",
       "search_path": "/vod/search.html?wd={keyword}",
       "title": ".module-card-item-title a",
@@ -51,6 +56,7 @@
       "video_patterns": ["tiktokcdn",".m3u8"]
     },
     "饭团动漫": {
+      "icon": "https://acgfta.com/template/ft-v2/icon/acgfantuan-icon-72.png",
       "base_url": "https://acgfta.com",
       "search_path": "/search.html?wd={keyword}",
       "title": ".anime-card .stretched-link",
@@ -61,6 +67,7 @@
       "video_patterns": [".m3u8"]
     },
     "番茄动漫": {
+      "icon": "https://www.fqdm.cc/upload/mxprocms/20240530-1/3d17fab3cb763e6ad7031974bf87f322.jpg",
       "base_url": "https://www.fqdm.cc",
       "search_path": "/index.php/vod/search.html?wd={keyword}",
       "title": ".module-card-item-title a",
@@ -71,6 +78,7 @@
       "video_patterns": ["index.m3u8"]
     },
     "风车动漫": {
+      "icon": "https://cdn.yinghuazy.xyz/webjs/stui_tpl/statics/img/favicon.ico",
       "base_url": "https://www.dmla4.com",
       "search_path": "/search/-------------.html?wd={keyword}",
       "title": "h3.title a",
@@ -81,6 +89,7 @@
       "video_patterns": ["tiktokcdn"]
     },
     "AGE动漫": {
+      "icon": "https://cdn.aiqingyu1314.com/age/statics/images/avatar.jpg?v=2024042101",
       "base_url": "https://www.agedm.io",
       "search_path": "/search?query={keyword}&page=1",
       "title": ".card-title a",
@@ -91,6 +100,7 @@
       "video_patterns": ["video"]
     },
     "动漫蛋": {
+      "icon": "https://cdn.jsdelivr.net/gh/zkk7/jsku@master/statics/img/favicon.ico",
       "base_url": "https://www.dmdan8.com",
       "search_path": "/search/-------------.html?wd={keyword}",
       "title": ".stui-vodlist__media .detail h3.title a",
@@ -101,6 +111,7 @@
       "video_patterns": ["tiktokcdn"]
     },
     "樱花动漫": {
+      "icon": "https://www.yinghua14.com/statics/img/favicon.ico",
       "base_url": "https://www.yinghua14.com",
       "search_path": "/index.php/vod/search.html?wd={keyword}",
       "title": ".stui-vodlist__media .detail h3.title a",
@@ -111,6 +122,7 @@
       "video_patterns": ["index.m3u8"]
     },
     "中国动漫网(验证码问题)": {
+      "icon": "https://zgacgn.com/favicon.ico",
       "base_url": "https://zgacgn.com",
       "search_path": "/search.php?searchword={keyword}",
       "title": "#cont_pub .tit a",
@@ -121,6 +133,7 @@
       "video_patterns": [".m3u8"]
     },
     "七色动漫": {
+      "icon": "https://www.7sefun.top/favicon.ico",
       "base_url": "https://www.7sefun.top",
       "search_path": "/vodsearch/-------------.html?wd={keyword}",
       "title": ".video-by",
@@ -129,6 +142,11 @@
       "episode_containers": ".chat-stream .chat .message-container.vod-play-list-container",
       "episode_items": "span a",
       "video_patterns": ["tiktokcdn"]
+    }
+  },
+
+  "bt_configs": {
+    "": {
     }
   }
 }

@@ -71,6 +71,16 @@ class ChoiceEpisodeManager:
         layout.setContentsMargins(15, 15, 15, 15)
         layout.setSpacing(10)
         top_layout = QHBoxLayout()
+        top_layout.setSpacing(8)  # 设置图标和站点名称之间的间距
+        # 图标
+        icon_label = QLabel(card)
+        icon_label.setFixedSize(20, 20)
+        icon_label.setScaledContents(True)
+        site_config = self.crawler.site_configs.get(site_id, {})
+        if icon_url := site_config.get('icon'):
+            self.main_window.cache_manager.get_image_async(icon_url, lambda pixmap: self._set_icon(icon_label, pixmap))
+        top_layout.addWidget(icon_label)
+
         # 站点名称
         site_label = QLabel(site_id, card)
         site_label.setFont(QFont("", 14, QFont.Weight.Bold))
@@ -101,6 +111,11 @@ class ChoiceEpisodeManager:
                 routes_layout.addWidget(button)
             layout.addLayout(routes_layout)
         return card
+
+    def _set_icon(self, label, pixmap):
+        """设置图标到标签"""
+        if not pixmap.isNull():
+            label.setPixmap(pixmap)
 
     def _update_site_widget(self, site_data):
         """更新站点组件"""

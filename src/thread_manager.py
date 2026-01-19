@@ -71,12 +71,11 @@ class SiteSearchTask(BaseTask):
             search_result = None
             search_exception = None
             def do_search():
-                print(1)
                 nonlocal search_completed, search_result, search_exception
                 try:
                     search_result = self.crawler.search_site(self.keyword, self.site_id)
-                except Exception as e:
-                    search_exception = e
+                except Exception as ex:
+                    search_exception = ex
                 finally:
                     search_completed = True
             search_thread = threading.Thread(target=do_search)
@@ -92,7 +91,7 @@ class SiteSearchTask(BaseTask):
                 print(f"站点 {self.site_id} 搜索失败: {search_exception}")
                 self.result_holder.site_search_completed.emit({'site_id': self.site_id, 'status': 'failed', 'result': None})
             else:
-                status = 'success' if search_result and search_result.get('routes') else 'failed'
+                status = 'success' if search_result is not None and isinstance(search_result, dict) and search_result.get('routes') else 'failed'
                 self.result_holder.site_search_completed.emit({'site_id': self.site_id, 'status': status, 'result': search_result})
         except Exception as e:
             if self.should_continue():

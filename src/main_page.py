@@ -1,7 +1,6 @@
 from PySide6.QtGui import QIcon, QFont, QCursor
 from PySide6.QtCore import Qt, QSize, QTimer, QObject, Signal
 from PySide6.QtWidgets import QLabel, QFrame, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QPushButton
-from src.cache_manager import CacheManager
 from src.thread_manager import thread_manager
 from src.menu_utils import show_status_selector
 from src.image_utils import load_image_with_cache
@@ -22,8 +21,6 @@ class MainPageManager(QObject):
         self.filtered_collections = []
         # 字体预热
         QTimer.singleShot(0, self._warmup_music_symbols)
-        # 缓存管理器
-        self._cache_manager = CacheManager(self.main_window)
         # 状态映射
         self.status_reverse_map = {"取消追番": 0, "想看": 1, "看过": 2, "在看": 3, "搁置": 4, "抛弃": 5}
         self.status_names_map = {2: {1: "想看", 2: "看过", 3: "在看"}, 4: {1: "想玩", 2: "玩过", 3: "在玩"}, 7: {1: "想读", 2: "读过", 3: "在读"}, 8: {1: "想读", 2: "读过", 3: "在读"}}
@@ -115,7 +112,7 @@ class MainPageManager(QObject):
             self.current_status_type = status_type
             needs_update = True
         if needs_update or force_refresh or not self.all_collections:
-            self._cache_manager.clear_pending_downloads()
+            self.main_window.cache_manager.clear_pending_downloads()
             self.all_collections = get_by_subject_type_and_type(subject_type, status_type)
             self.filtered_collections = self.all_collections.copy()
             self.current_page = 1
@@ -176,7 +173,7 @@ class MainPageManager(QObject):
         # 图片
         image_url = collection.get('subject_images_common')
         if image_url:
-            load_image_with_cache(self._cache_manager, image_url, cover_label, 40, False)
+            load_image_with_cache(self.main_window.cache_manager, image_url, cover_label, 40, False)
         else:
             cover_label.setText("暂无封面")
         horizontal_layout.addWidget(cover_label)
@@ -306,7 +303,7 @@ class MainPageManager(QObject):
     def previous_page(self):
         """上一页"""
         if self.current_page > 1:
-            self._cache_manager.clear_pending_downloads()
+            self.main_window.cache_manager.clear_pending_downloads()
             self.current_page -= 1
             self.display_current_page()
 
@@ -315,7 +312,7 @@ class MainPageManager(QObject):
         total_items = len(self.filtered_collections)
         total_pages = (total_items + self.items_per_page - 1) // self.items_per_page
         if self.current_page < total_pages:
-            self._cache_manager.clear_pending_downloads()
+            self.main_window.cache_manager.clear_pending_downloads()
             self.current_page += 1
             self.display_current_page()
 
