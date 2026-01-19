@@ -1,3 +1,4 @@
+import time
 import httpx
 import asyncio
 import threading
@@ -48,6 +49,10 @@ class BaseTask(QRunnable):
         """取消任务"""
         self._is_cancelled = True
 
+    def should_continue(self) -> bool:
+        """检查是否应该继续执行任务"""
+        return not self._is_cancelled
+
 
 # ====================站点搜索====================
 class SiteSearchTask(BaseTask):
@@ -60,12 +65,39 @@ class SiteSearchTask(BaseTask):
 
     def run(self):
         try:
-            result = self.crawler.search_site(self.keyword, self.site_id)
-            status = 'success' if result and result.get('routes') else 'failed'
-            self.result_holder.site_search_completed.emit({'site_id': self.site_id, 'status': status, 'result': result})
+            if not self.should_continue():
+                return
+            search_completed = False
+            search_result = None
+            search_exception = None
+            def do_search():
+                print(1)
+                nonlocal search_completed, search_result, search_exception
+                try:
+                    search_result = self.crawler.search_site(self.keyword, self.site_id)
+                except Exception as e:
+                    search_exception = e
+                finally:
+                    search_completed = True
+            search_thread = threading.Thread(target=do_search)
+            search_thread.daemon = True
+            search_thread.start()
+            while not search_completed:
+                time.sleep(0.5)
+                if not self.should_continue():
+                    return
+            if not self.should_continue():
+                return
+            if search_exception is not None:
+                print(f"站点 {self.site_id} 搜索失败: {search_exception}")
+                self.result_holder.site_search_completed.emit({'site_id': self.site_id, 'status': 'failed', 'result': None})
+            else:
+                status = 'success' if search_result and search_result.get('routes') else 'failed'
+                self.result_holder.site_search_completed.emit({'site_id': self.site_id, 'status': status, 'result': search_result})
         except Exception as e:
-            print(f"站点 {self.site_id} 搜索失败: {e}")
-            self.result_holder.site_search_completed.emit({'site_id': self.site_id, 'status': 'failed', 'result': None})
+            if self.should_continue():
+                print(f"站点 {self.site_id} 搜索任务执行失败: {e}")
+                self.result_holder.site_search_completed.emit({'site_id': self.site_id, 'status': 'failed', 'result': None})
 
 
 # ====================RSS====================
@@ -442,6 +474,7 @@ class ThreadManager(QObject):
         self.thread_pool.setExpiryTimeout(30000)
         self.rss_timer = None
         self.rss_worker = None
+        self.running_site_tasks = []
 
     def setup_rss_timer(self):
         """设置RSS定时器"""
@@ -516,8 +549,20 @@ class ThreadManager(QObject):
         """搜索站点"""
         for site_id in site_ids:
             task = SiteSearchTask(site_id, keyword, crawler)
-            task.result_holder.site_search_completed.connect(self.site_search_completed)
+            task.result_holder.site_search_completed.connect(self._on_site_search_completed)
+            self.running_site_tasks.append(task)
             self.thread_pool.start(task)
+
+    def _on_site_search_completed(self, site_data):
+        """站点搜索完成处理"""
+        self.running_site_tasks = [task for task in self.running_site_tasks if task.site_id != site_data['site_id']]
+        self.site_search_completed.emit(site_data)
+
+    def cancel_all_site_searches(self):
+        """取消所有站点搜索"""
+        for task in self.running_site_tasks:
+            task.cancel()
+        self.running_site_tasks.clear()
 
     def login_pikpak(self, username: str, password: str):
         """启动PikPak登录"""
@@ -540,9 +585,12 @@ class ThreadManager(QObject):
 
     def cleanup(self):
         """清理资源"""
+        for task in self.running_site_tasks:
+            task.cancel()
+        self.running_site_tasks.clear()
         self.stop_rss_service()
         self.thread_pool.clear()
-        self.thread_pool.waitForDone(3000)
+        self.thread_pool.waitForDone(1000)
 
 
 thread_manager = ThreadManager()

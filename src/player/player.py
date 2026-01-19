@@ -2,6 +2,7 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt, QTimer, Signal, QPoint, QSize
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QSlider, QMenu
 from src.player.player_core import VideoDisplayWidget, VlcPlayer
+from src.thread_manager import thread_manager
 
 
 class ClickableSlider(QSlider):
@@ -568,6 +569,7 @@ class VideoPlayerWidget(QWidget):
     def _on_back_button_clicked(self):
         """处理返回按钮点击"""
         self.stop_video()
+        thread_manager.cancel_all_site_searches()
         if self.is_fullscreen_mode:
             self._exit_fullscreen()
         self.back_requested.emit()
