@@ -1,3 +1,4 @@
+import re
 import time
 import httpx
 import asyncio
@@ -7,8 +8,8 @@ import xml.etree.ElementTree
 from pikpakapi import PikPakApi
 from typing import Optional, Callable
 from PySide6.QtCore import QThreadPool, QRunnable, QObject, Signal, QTimer
-from src.player.css import VideoCrawler, BTCrawler
 from src.api import BangumiAPI, BangumiOAuth
+from src.player.css import VideoCrawler, BTCrawler
 from src.config import get_config_item, set_config_items
 from src.sqlite import insert_many_data, insert_many_episodes, update_all_episodes_status, update_field
 
@@ -31,6 +32,7 @@ class TaskResult(QObject):
     pikpak_login_error = Signal(str)
     pikpak_events_loaded = Signal(list)
     pikpak_download_url_loaded = Signal(dict)
+    pikpak_save_completed = Signal(str)
 
 
 class BaseTask(QRunnable):
@@ -372,7 +374,7 @@ class SubjectDataFetcher(BaseTask):
             self.result_holder.subject_data_fetched.emit({})
 
 
-# ====================PikPak登录任务====================
+# ====================PikPak====================
 class PikpakLoginTask(BaseTask):
     """PikPak登录任务"""
     def __init__(self, username: str, password: str):
@@ -397,7 +399,6 @@ class PikpakLoginTask(BaseTask):
         return pikpak.encoded_token
 
 
-# ====================Pikpak====================
 class PikpakEventsTask(BaseTask):
     """Pikpak最近添加"""
     def __init__(self):
@@ -447,6 +448,42 @@ class PikpakDownloadUrlTask(BaseTask):
             self.result_holder.pikpak_download_url_loaded.emit({})
         finally:
             loop.close()
+
+
+class PikpakSaveShareTask(BaseTask):
+    """Pikpak保存分享链接"""
+    def __init__(self, share_url: str):
+        super().__init__()
+        self.share_url = share_url
+        self.username = get_config_item("username")
+        self.password = get_config_item("password")
+        self.encoded_token = get_config_item("encoded_token")
+
+    def run(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            pikpak = PikPakApi(username=self.username, password=self.password, encoded_token=self.encoded_token)
+            match = re.search(r"/s/([^/]+)", self.share_url)
+            share_id = match.group(1) if match else None
+            share_info = loop.run_until_complete(pikpak.get_share_info(self.share_url))
+            pass_code_token = share_info.get("pass_code_token", "")
+            file_ids = []
+            for file_info in share_info.get("files", []):
+                file_ids.append(file_info.get("id"))
+            result = loop.run_until_complete(pikpak.restore(share_id, pass_code_token, file_ids))
+            if "error" not in result:
+                self.result_holder.pikpak_save_completed.emit("success")
+                print(f"保存分享成功: {result}")
+            else:
+                self.result_holder.pikpak_save_completed.emit("error")
+                print(f"保存分享失败: {result}")
+        except Exception as e:
+            print(f"保存分享失败: {str(e)}")
+            self.result_holder.pikpak_save_completed.emit("error")
+        finally:
+            loop.close()
+
 
 # ====================线程管理器====================
 class ThreadManager(QObject):
@@ -592,6 +629,13 @@ class ThreadManager(QObject):
         """获取Pikpak文件下载链接"""
         task = PikpakDownloadUrlTask(file_id)
         task.result_holder.pikpak_download_url_loaded.connect(self.pikpak_download_url_loaded)
+        self.thread_pool.start(task)
+
+    def save_pikpak_share(self, share_url: str, callback=None):
+        """保存Pikpak分享链接"""
+        task = PikpakSaveShareTask(share_url)
+        if callback:
+            task.result_holder.pikpak_save_completed.connect(callback)
         self.thread_pool.start(task)
 
     def cleanup(self):

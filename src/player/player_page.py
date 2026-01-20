@@ -345,9 +345,7 @@ class ChoiceEpisodeManager:
             except Exception as e:
                 error_msg = f"重定向失败: {e}"
                 redirect_label.setText(error_msg)
-                redirect_url[0] = error_msg
                 pikpak_btn.setEnabled(False)
-        # 启动重定向线程
         thread = threading.Thread(target=detect_redirect, daemon=True)
         thread.start()
         button_layout = QHBoxLayout()
@@ -356,9 +354,22 @@ class ChoiceEpisodeManager:
         download_btn.clicked.connect(lambda: print(f"BT链接: {result.get('magnet_link')}"))
         button_layout.addWidget(download_btn)
         # PikPak按钮
-        pikpak_btn = QPushButton("保存到PikPak并下载")
+        pikpak_btn = QPushButton("保存到PikPak并下载(ip不能在中国大陆)")
+        pikpak_btn.setFixedWidth(250)
         pikpak_btn.setEnabled(False)
-        pikpak_btn.clicked.connect(lambda: print(f"重定向链接: {redirect_url[0] if redirect_url[0] else '重定向失败'}"))
+        def save_to_pikpak():
+            """保存到PikPak"""
+            pikpak_btn.setText("保存中...")
+            pikpak_btn.setEnabled(False)
+            thread_manager.save_pikpak_share(redirect_url[0], on_save_completed)
+        def on_save_completed(status):
+            """保存完成回调"""
+            if status == "success":
+                pikpak_btn.setText("保存成功")
+            else:
+                pikpak_btn.setText("保存失败")
+                pikpak_btn.setEnabled(True)
+        pikpak_btn.clicked.connect(save_to_pikpak)
         button_layout.addWidget(pikpak_btn)
         # 重新重定向按钮
         redetect_btn = QPushButton("重定向")
