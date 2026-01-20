@@ -1,9 +1,11 @@
+import httpx
+import threading
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QFont, QIcon, QTransform
-from PySide6.QtWidgets import QPushButton, QVBoxLayout, QFrame, QHBoxLayout, QSpacerItem, QSizePolicy, QTabWidget, QScrollArea
-from src.player.css import VideoCrawler
+from PySide6.QtWidgets import QPushButton, QVBoxLayout, QFrame, QHBoxLayout, QSpacerItem, QSizePolicy, QTabWidget, QScrollArea, QLabel, QDialog
 from src.sqlite import get_by_subject_id
 from src.thread_manager import thread_manager
+from src.player.css import VideoCrawler, BTCrawler
 
 
 class ChoiceEpisodeManager:
@@ -13,6 +15,7 @@ class ChoiceEpisodeManager:
         self.site_widgets = {}
         self.current_episode = None
         self.crawler = VideoCrawler()
+        self.bt_crawler = BTCrawler()
         self.detail_tab_widget = None
         thread_manager.site_search_completed.connect(self._update_site_widget)
 
@@ -53,18 +56,19 @@ class ChoiceEpisodeManager:
             container.setLayout(QVBoxLayout())
         container.layout().setContentsMargins(10, 10, 10, 10)
         self._init_detail_tab()
-        # 创建站点卡片
-        site_ids = sorted(self.crawler.site_configs.keys())
+        # 创建所有站点卡片
+        all_site_ids = sorted(self.crawler.site_configs.keys()) + sorted(self.bt_crawler.bt_configs.keys())
         self.site_widgets = {}
         self.site_detail_tabs = {}
-        for site_id in site_ids:
+        for site_id in all_site_ids:
             widget = self._create_site_card(site_id, 'loading', None)
             self.site_widgets[site_id] = widget
             container.layout().addWidget(widget)
             self._create_site_detail_tab(site_id)
         container.layout().addItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         # 开始搜索
-        thread_manager.search_sites(site_ids, keyword, self.crawler)
+        thread_manager.search_sites(sorted(self.crawler.site_configs.keys()), keyword, self.crawler)
+        thread_manager.search_bt_sites(sorted(self.bt_crawler.bt_configs.keys()), keyword)
 
     def _init_detail_tab(self):
         """初始化详细标签页"""
@@ -104,18 +108,18 @@ class ChoiceEpisodeManager:
         content_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         loading_btn = QPushButton("搜索中...")
         loading_btn.setFlat(True)
-        loading_btn.setStyleSheet("color: #666; padding: 5px; text-align: left; border: none;")
+        loading_btn.setStyleSheet("color: #666; padding: 5px; text-align: left; border: none")
         content_layout.addWidget(loading_btn)
         content_layout.addItem(QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         scroll_area.setWidget(content_frame)
         tab_index = self.detail_tab_widget.addTab(scroll_area, "")
-        site_config = self.crawler.site_configs.get(site_id, {})
+        site_config = self.crawler.site_configs.get(site_id) or self.bt_crawler.bt_configs.get(site_id)
         if icon_url := site_config.get('icon'):
             self.main_window.cache_manager.get_image_async(icon_url, lambda pixmap, idx=tab_index: self._set_tab_icon(idx, pixmap))
         else:
             self.detail_tab_widget.setTabText(tab_index, site_id[0].upper())
         self.detail_tab_widget.setTabToolTip(tab_index, site_id)
-        self.site_detail_tabs[site_id] = {'content_frame': content_frame,'content_layout': content_layout}
+        self.site_detail_tabs[site_id] = {'content_frame': content_frame, 'content_layout': content_layout}
 
     def _set_tab_icon(self, tab_index, pixmap):
         """设置标签图标"""
@@ -136,7 +140,7 @@ class ChoiceEpisodeManager:
         icon_btn = QPushButton()
         icon_btn.setFixedSize(20, 20)
         icon_btn.setFlat(True)
-        site_config = self.crawler.site_configs.get(site_id, {})
+        site_config = self.crawler.site_configs.get(site_id) or self.bt_crawler.bt_configs.get(site_id)
         if icon_url := site_config.get('icon'):
             self.main_window.cache_manager.get_image_async(icon_url, lambda pixmap: self._set_button_icon(icon_btn, pixmap))
         top_layout.addWidget(icon_btn)
@@ -149,8 +153,11 @@ class ChoiceEpisodeManager:
         # 状态/标题信息
         if status == 'loading':
             status_text = "搜索中..."
-        elif status == 'success' and result:
-            status_text = result.get('title', '')
+        elif status == 'success':
+            if site_id in self.bt_crawler.bt_configs:
+                status_text = f"{len(result)}个结果" if result else "无结果"
+            else:
+                status_text = result.get('title', '') if result else ""
         else:
             status_text = "✗"
         status_btn = QPushButton(status_text)
@@ -159,7 +166,7 @@ class ChoiceEpisodeManager:
         top_layout.addWidget(status_btn, 1)
         layout.addLayout(top_layout)
         # 线路
-        if status == 'success' and result is not None and result.get('routes'):
+        if site_id not in self.bt_crawler.bt_configs and status == 'success' and result is not None and result.get('routes'):
             routes_layout = QHBoxLayout()
             routes_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
             routes_layout.setSpacing(5)
@@ -185,8 +192,11 @@ class ChoiceEpisodeManager:
         status = site_data['status']
         results = site_data['result']
         if site_id in self.site_widgets:
-            best_result = results[0] if status == 'success' and results else None
-            new_widget = self._create_site_card(site_id, status, best_result)
+            if site_id in self.bt_crawler.bt_configs:
+                card_result = results
+            else:
+                card_result = results[0] if results else None
+            new_widget = self._create_site_card(site_id, status, card_result)
             if layout := self.site_widgets[site_id].parent().layout():
                 index = layout.indexOf(self.site_widgets[site_id])
                 if index >= 0:
@@ -200,12 +210,17 @@ class ChoiceEpisodeManager:
                 if widget := content_layout.takeAt(0).widget():
                     widget.deleteLater()
             if status == 'success' and results:
-                for result in results:
-                    routes = result.get('routes', [])
-                    title = result.get('title', '')
-                    for route in routes:
-                        route_widget = self._create_route_component(site_id, route, title)
-                        content_layout.addWidget(route_widget)
+                if site_id in self.bt_crawler.bt_configs:
+                    for result in results:
+                        bt_widget = self._create_bt_result_component(result)
+                        content_layout.addWidget(bt_widget)
+                else:
+                    for result in results:
+                        routes = result.get('routes', [])
+                        title = result.get('title', '')
+                        for route in routes:
+                            route_widget = self._create_route_component(site_id, route, title)
+                            content_layout.addWidget(route_widget)
             else:
                 error_btn = QPushButton("搜索失败或无结果")
                 error_btn.setFlat(True)
@@ -216,27 +231,58 @@ class ChoiceEpisodeManager:
     def _create_route_component(self, site_id, route, title):
         """创建路线组件"""
         route_frame = QFrame()
-        route_frame.setCursor(Qt.CursorShape.PointingHandCursor)
-        route_frame.mousePressEvent = lambda event, s=site_id, r=route: self._on_route_selected(s, r)
+
+        def on_route_clicked(_):
+            self._on_route_selected(site_id, route)
+        route_frame.mousePressEvent = on_route_clicked
         route_layout = QVBoxLayout(route_frame)
         route_layout.setContentsMargins(10, 10, 10, 10)
         route_layout.setSpacing(2)
         route_frame.setStyleSheet("QFrame {border: 1px solid #e0e0e0; border-radius: 4px; margin: 2px; background-color: white}"
                                   "QFrame:hover {border: 1px solid #4da6ff; background-color: #e8f4ff}")
-        # 名字
-        title_btn = QPushButton(title)
-        title_btn.setFlat(True)
-        title_btn.setFont(QFont("", 10))
-        title_btn.setStyleSheet("color: #333; background-color: transparent; border: none; text-align: left;")
-        route_layout.addWidget(title_btn)
-        # 线路
+        route_frame.setMaximumWidth(310)
+        if title:
+            title_label = QLabel(title)
+            title_label.setFont(QFont("微软雅黑", 13, QFont.Weight.Bold))
+            title_label.setStyleSheet("color: black; background-color: transparent; border: none; text-align: left")
+            route_layout.addWidget(title_label)
         route_name = route.get('route')
-        route_btn = QPushButton(route_name)
-        route_btn.setFlat(True)
-        route_btn.setFont(QFont("", 9, QFont.Weight.Bold))
-        route_btn.setStyleSheet("color: #666; background-color: transparent; border: none; text-align: left;")
-        route_layout.addWidget(route_btn)
+        if route_name:
+            route_label = QLabel(route_name)
+            route_label.setFont(QFont("微软雅黑", 10, QFont.Weight.Bold))
+            route_label.setStyleSheet("color: #333; background-color: transparent; border: none; text-align: left")
+            route_layout.addWidget(route_label)
         return route_frame
+
+    def _create_bt_result_component(self, result):
+        """创建BT结果组件"""
+        bt_frame = QFrame()
+        def on_bt_clicked(_):
+            self._on_bt_result_clicked(result)
+        bt_frame.mousePressEvent = on_bt_clicked
+        bt_layout = QVBoxLayout(bt_frame)
+        bt_layout.setContentsMargins(10, 10, 10, 10)
+        bt_layout.setSpacing(5)
+        bt_frame.setStyleSheet("QFrame {border: 1px solid #e0e0e0; border-radius: 4px; margin: 2px; background-color: white}"
+                               "QFrame:hover {border: 1px solid #4caf50; background-color: #e8f5e9}")
+        bt_frame.setMaximumWidth(310)
+        # 文件名
+        name = result.get('name')
+        if name:
+            name_label = QLabel(name)
+            name_label.setFont(QFont("微软雅黑", 13, QFont.Weight.Bold))
+            name_label.setStyleSheet("color: black; border: none; background: transparent")
+            name_label.setWordWrap(True)
+            name_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+            bt_layout.addWidget(name_label)
+        # 文件大小
+        size = result.get('size')
+        if size:
+            size_label = QLabel(f"大小: {size}")
+            size_label.setFont(QFont("微软雅黑", 10, QFont.Weight.Bold))
+            size_label.setStyleSheet("color: #666; border: none; background: transparent")
+            bt_layout.addWidget(size_label)
+        return bt_frame
 
     def _on_route_selected(self, site_id, route):
         """处理线路选择"""
@@ -266,3 +312,57 @@ class ChoiceEpisodeManager:
                 print("获取视频链接失败")
         except Exception as e:
             print(f"错误: {e}")
+
+    def _on_bt_result_clicked(self, result):
+        """BT结果点击"""
+        dialog = QDialog(self.main_window)
+        dialog.setWindowTitle(result.get('name'))
+        dialog.setFixedSize(600, 150)
+        layout = QVBoxLayout(dialog)
+        # BT
+        layout.addWidget(QLabel(f"BT: {result.get('magnet_link')}"))
+        # keepshare
+        play_label = QLabel(f"<a href='{result.get('play_link')}'>keepshare: {result.get('play_link')}</a>")
+        play_label.setTextFormat(Qt.TextFormat.RichText)
+        play_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
+        play_label.setOpenExternalLinks(True)
+        layout.addWidget(play_label)
+        # 重定向
+        redirect_label = QLabel("重定向中...")
+        layout.addWidget(redirect_label)
+        redirect_url = [None]
+        def detect_redirect():
+            """重定向检测"""
+            redirect_label.setText("重定向中...")
+            try:
+                response = httpx.get(result.get('play_link'), follow_redirects=True, timeout=15)
+                final_url = str(response.url)
+                if '?act=play' in final_url:
+                    final_url = final_url.split('?act=play')[0]
+                redirect_url[0] = final_url
+                redirect_label.setText(f"PikPak链接: {final_url}")
+                pikpak_btn.setEnabled(True)
+            except Exception as e:
+                error_msg = f"重定向失败: {e}"
+                redirect_label.setText(error_msg)
+                redirect_url[0] = error_msg
+                pikpak_btn.setEnabled(False)
+        # 启动重定向线程
+        thread = threading.Thread(target=detect_redirect, daemon=True)
+        thread.start()
+        button_layout = QHBoxLayout()
+        # BT按钮
+        download_btn = QPushButton("BT下载")
+        download_btn.clicked.connect(lambda: print(f"BT链接: {result.get('magnet_link')}"))
+        button_layout.addWidget(download_btn)
+        # PikPak按钮
+        pikpak_btn = QPushButton("保存到PikPak并下载")
+        pikpak_btn.setEnabled(False)
+        pikpak_btn.clicked.connect(lambda: print(f"重定向链接: {redirect_url[0] if redirect_url[0] else '重定向失败'}"))
+        button_layout.addWidget(pikpak_btn)
+        # 重新重定向按钮
+        redetect_btn = QPushButton("重定向")
+        redetect_btn.clicked.connect(lambda: threading.Thread(target=detect_redirect, daemon=True).start())
+        button_layout.addWidget(redetect_btn)
+        layout.addLayout(button_layout)
+        dialog.exec()

@@ -10,6 +10,32 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWebEngineCore import QWebEngineUrlRequestInterceptor
 
 
+class BaseCrawler:
+    """爬虫基类"""
+    def __init__(self, config_file="css.json"):
+        """初始化爬虫"""
+        config_path = Path(__file__).parent / config_file
+        self.config = json.loads(config_path.read_text(encoding='utf-8'))
+        self.headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1'
+        }
+
+    def _make_request(self, url):
+        """统一请求处理"""
+        try:
+            response = httpx.get(url, headers=self.headers, timeout=10, follow_redirects=True)
+            response.encoding = 'utf-8'
+            return html.fromstring(response.text)
+        except Exception as e:
+            print(f"请求失败: {url} - {e}")
+            return None
+
+
 class VideoStreamDetector:
     """视频流检测器"""
     def __init__(self, video_patterns):
@@ -57,31 +83,12 @@ class VideoStreamDetector:
         self.event_loop = None
 
 
-class VideoCrawler:
+class VideoCrawler(BaseCrawler):
     """网站源"""
     def __init__(self, config_file="css.json"):
         """初始化爬虫"""
-        config_path = Path(__file__).parent / config_file
-        self.config = json.loads(config_path.read_text(encoding='utf-8'))
+        super().__init__(config_file)
         self.site_configs = self.config.get("site_configs", {})
-        self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1'
-        }
-
-    def _make_request(self, url):
-        """统一请求处理"""
-        try:
-            response = httpx.get(url, headers=self.headers, timeout=10, follow_redirects=True)
-            response.encoding = 'utf-8'
-            return html.fromstring(response.text)
-        except Exception as e:
-            print(f"失败: {url} - {e}")
-            return None
 
     def search_site(self, keyword, site_id):
         """搜索指定站点的视频"""
@@ -152,3 +159,40 @@ class VideoCrawler:
         detector = VideoStreamDetector(site_config["video_patterns"])
         video_url = self._video_url_processing(detector.detect(episode_url))
         return video_url
+
+
+class BTCrawler(BaseCrawler):
+    """BT源"""
+    def __init__(self, config_file="css.json"):
+        """初始化爬虫"""
+        super().__init__(config_file)
+        self.bt_configs = self.config.get("bt_configs", {})
+
+    def search_bt(self, keyword, site_id):
+        """搜索BT资源"""
+        site_config = self.bt_configs.get(site_id)
+        url = site_config["base_url"] + site_config["search_path"].replace("{keyword}", keyword)
+        tree = self._make_request(url)
+        if tree is None:
+            return []
+        results = []
+        rows = tree.cssselect(site_config.get("row_selector"))
+        for row in rows:
+            try:
+                name_elem = row.cssselect(site_config.get("name_selector"))
+                size_elem = row.cssselect(site_config.get("size_selector"))
+                magnet_elem = row.cssselect(site_config.get("magnet_selector"))
+                play_elem = row.cssselect(site_config.get("play_selector"))
+                if not name_elem:
+                    continue
+                name = name_elem[0].text_content().strip()
+                size = size_elem[0].text_content().strip() if size_elem else ""
+                magnet_attr = site_config.get("magnet_attr")
+                magnet_link = magnet_elem[0].get(magnet_attr) if magnet_elem and magnet_attr else ""
+                play_attr = site_config.get("play_attr")
+                play_link = play_elem[0].get(play_attr) if play_elem and play_attr else ""
+                results.append({'name': name, 'size': size, 'play_link': play_link, 'magnet_link': magnet_link})
+            except Exception as e:
+                print(f"获BT资源失败: {e}")
+                continue
+        return results

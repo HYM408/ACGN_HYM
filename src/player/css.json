@@ -144,9 +144,30 @@
       "video_patterns": ["tiktokcdn"]
     }
   },
-
   "bt_configs": {
-    "": {
-    }
+    "蜜柑计划": {
+      "icon": "https://mikanani.kas.pub/images/mikan-pic.png",
+      "base_url": "https://mikanani.kas.pub",
+      "search_path": "/Home/Search?searchstr={keyword}",
+      "row_selector": "tr.js-search-results-row",
+      "name_selector": "a.magnet-link-wrap",
+      "size_selector": "td:nth-child(3)",
+      "play_selector": "a[href*='keepshare.org']",
+      "magnet_selector": "input.js-episode-select",
+      "magnet_attr": "data-magnet",
+      "play_attr": "href"
+  },
+    "动漫花园": {
+      "icon": "https://dmhy.org/favicon.ico",
+      "base_url": "https://dmhy.org",
+      "search_path": "/topics/list/page/1?keyword={keyword}",
+      "row_selector": "#topic_list tbody tr",
+      "name_selector": "td.title a[target='_blank']",
+      "size_selector": "td:nth-child(5)",
+      "magnet_selector": "td:nth-child(4) a[href^='magnet:']",
+      "play_selector": "td:nth-child(4) a[href*='keepshare.org']",
+      "magnet_attr": "href",
+      "play_attr": "href"
+  }
   }
 }

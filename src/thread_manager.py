@@ -7,7 +7,7 @@ import xml.etree.ElementTree
 from pikpakapi import PikPakApi
 from typing import Optional, Callable
 from PySide6.QtCore import QThreadPool, QRunnable, QObject, Signal, QTimer
-from src.player.css import VideoCrawler
+from src.player.css import VideoCrawler, BTCrawler
 from src.api import BangumiAPI, BangumiOAuth
 from src.config import get_config_item, set_config_items
 from src.sqlite import insert_many_data, insert_many_episodes, update_all_episodes_status, update_field
@@ -55,13 +55,14 @@ class BaseTask(QRunnable):
 
 
 # ====================站点搜索====================
-class SiteSearchTask(BaseTask):
-    """站点搜索任务"""
-    def __init__(self, site_id: str, keyword: str, crawler: VideoCrawler):
+class SearchTask(BaseTask):
+    """搜索任务"""
+    def __init__(self, site_id: str, keyword: str, crawler, search_func_name: str):
         super().__init__()
         self.site_id = site_id
         self.keyword = keyword
         self.crawler = crawler
+        self.search_func_name = search_func_name
 
     def run(self):
         try:
@@ -73,7 +74,8 @@ class SiteSearchTask(BaseTask):
             def do_search():
                 nonlocal search_completed, search_results, search_exception
                 try:
-                    search_results = self.crawler.search_site(self.keyword, self.site_id)
+                    search_func = getattr(self.crawler, self.search_func_name)
+                    search_results = search_func(self.keyword, self.site_id)
                 except Exception as ex:
                     search_exception = ex
                 finally:
@@ -425,7 +427,6 @@ class PikpakEventsTask(BaseTask):
 
 class PikpakDownloadUrlTask(BaseTask):
     """Pikpak下载链接获取任务"""
-
     def __init__(self, file_id: str):
         super().__init__()
         self.file_id = file_id
@@ -476,6 +477,7 @@ class ThreadManager(QObject):
         self.rss_timer = None
         self.rss_worker = None
         self.running_site_tasks = []
+        self.bt_crawler = BTCrawler()
 
     def setup_rss_timer(self):
         """设置RSS定时器"""
@@ -549,7 +551,15 @@ class ThreadManager(QObject):
     def search_sites(self, site_ids: list, keyword: str, crawler: VideoCrawler):
         """搜索站点"""
         for site_id in site_ids:
-            task = SiteSearchTask(site_id, keyword, crawler)
+            task = SearchTask(site_id, keyword, crawler, "search_site")
+            task.result_holder.site_search_completed.connect(self._on_site_search_completed)
+            self.running_site_tasks.append(task)
+            self.thread_pool.start(task)
+
+    def search_bt_sites(self, bt_site_ids: list, keyword: str):
+        """搜索BT站点"""
+        for bt_site_id in bt_site_ids:
+            task = SearchTask(bt_site_id, keyword, self.bt_crawler, "search_bt")
             task.result_holder.site_search_completed.connect(self._on_site_search_completed)
             self.running_site_tasks.append(task)
             self.thread_pool.start(task)
