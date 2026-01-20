@@ -354,7 +354,7 @@ class ChoiceEpisodeManager:
         download_btn.clicked.connect(lambda: print(f"BT链接: {result.get('magnet_link')}"))
         button_layout.addWidget(download_btn)
         # PikPak按钮
-        pikpak_btn = QPushButton("保存到PikPak并下载(ip不能在中国大陆)")
+        pikpak_btn = QPushButton("保存到PikPak(ip不能在中国大陆)")
         pikpak_btn.setFixedWidth(250)
         pikpak_btn.setEnabled(False)
         def save_to_pikpak():
