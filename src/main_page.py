@@ -2,8 +2,8 @@ from PySide6.QtGui import QIcon, QFont, QCursor
 from PySide6.QtCore import Qt, QSize, QTimer, QObject, Signal
 from PySide6.QtWidgets import QLabel, QFrame, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QPushButton
 from src.thread_manager import thread_manager
-from src.menu_utils import show_status_selector
-from src.image_utils import load_image_with_cache
+from src.utils.menu_utils import show_status_selector
+from src.utils.image_utils import load_image_with_cache
 from src.sqlite import get_by_subject_type_and_type, get_status_counts_by_subject_type
 
 

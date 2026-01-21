@@ -5,7 +5,7 @@ from src.api import BangumiAPI
 from src.sqlite import get_by_subject_id
 from src.cache_manager import CacheManager
 from src.thread_manager import thread_manager
-from src.image_utils import load_image_with_cache
+from src.utils.image_utils import load_image_with_cache
 
 
 class SearchPageManager:

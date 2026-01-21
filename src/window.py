@@ -67,7 +67,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.video_player.back_requested.connect(self.go_back_history)
         # 下载页面
         from ui.download_ui import Ui_DownloaderPage
-        from src.download_page import DownloadPageManager
+        from src.download.download_page import DownloadPageManager
         download_widget = QWidget()
         download_ui = Ui_DownloaderPage()
         download_ui.setupUi(download_widget)

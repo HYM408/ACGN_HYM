@@ -5,8 +5,8 @@ from PySide6.QtCore import QObject, Signal, QUrl, Qt
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget, QHBoxLayout
 from src.cache_manager import CacheManager
 from src.thread_manager import thread_manager
-from src.menu_utils import show_status_selector
-from src.image_utils import load_image_with_cache
+from src.utils.menu_utils import show_status_selector
+from src.utils.image_utils import load_image_with_cache
 from src.sqlite import get_subject_by_id, insert_subject_from_api
 
 

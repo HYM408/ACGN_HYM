@@ -5,7 +5,7 @@ from PySide6.QtGui import QFont, QIcon, QTransform
 from PySide6.QtWidgets import QPushButton, QVBoxLayout, QFrame, QHBoxLayout, QSpacerItem, QSizePolicy, QTabWidget, QScrollArea, QLabel, QDialog
 from src.sqlite import get_by_subject_id
 from src.thread_manager import thread_manager
-from src.player.css import VideoCrawler, BTCrawler
+from src.css.css import VideoCrawler, BTCrawler
 
 
 class ChoiceEpisodeManager:

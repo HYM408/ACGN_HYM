@@ -1,7 +1,7 @@
 from PySide6.QtCore import QObject, Qt
 from PySide6.QtWidgets import QLabel, QFrame, QVBoxLayout, QHBoxLayout, QPushButton, QSpacerItem, QSizePolicy, QFileDialog
 from src.thread_manager import thread_manager
-from src.downloader.downloader import DownloadTask
+from src.download.downloader import DownloadTask
 from src.config import get_config_item, set_config_items
 
 

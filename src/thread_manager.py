@@ -9,7 +9,7 @@ from pikpakapi import PikPakApi
 from typing import Optional, Callable
 from PySide6.QtCore import QThreadPool, QRunnable, QObject, Signal, QTimer
 from src.api import BangumiAPI, BangumiOAuth
-from src.player.css import VideoCrawler, BTCrawler
+from src.css.css import VideoCrawler, BTCrawler
 from src.config import get_config_item, set_config_items
 from src.sqlite import insert_many_data, insert_many_episodes, update_all_episodes_status, update_field
 
