@@ -167,6 +167,7 @@ class MainPageManager(QObject):
             placeholder.setFixedSize(QSize(420, 170))
             placeholder.setStyleSheet("background: transparent")
             self.main_window.gridLayout_2.addWidget(placeholder, row, col)
+        self.update_page_info()
 
     def create_collection_card(self, collection):
         """创建收藏卡片"""
