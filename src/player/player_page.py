@@ -1,6 +1,6 @@
 import httpx
 import threading
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, QTimer
 from PySide6.QtGui import QFont, QIcon, QTransform
 from PySide6.QtWidgets import QPushButton, QVBoxLayout, QFrame, QHBoxLayout, QSpacerItem, QSizePolicy, QTabWidget, QScrollArea, QLabel, QDialog
 from src.sqlite import get_by_subject_id
@@ -67,8 +67,8 @@ class ChoiceEpisodeManager:
             self._create_site_detail_tab(site_id)
         container.layout().addItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         # 开始搜索
-        thread_manager.search_sites(sorted(self.crawler.site_configs.keys()), keyword, self.crawler)
-        thread_manager.search_bt_sites(sorted(self.bt_crawler.bt_configs.keys()), keyword)
+        QTimer.singleShot(0, lambda: thread_manager.search_sites(sorted(self.crawler.site_configs.keys()), keyword, self.crawler))
+        QTimer.singleShot(0, lambda: thread_manager.search_bt_sites(sorted(self.bt_crawler.bt_configs.keys()), keyword))
 
     def _init_detail_tab(self):
         """初始化详细标签页"""
