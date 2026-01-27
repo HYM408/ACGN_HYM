@@ -288,6 +288,7 @@ class MainPageManager(QObject):
         """显示选集页面"""
         current_index = self.main_window.main_stackedWidget.currentIndex()
         self.main_window.page_history.append(current_index)
+        self.main_window.repaint()
         self.main_window.show_episode_page(collection_data)
 
     def show_detail_page(self, collection_data):
