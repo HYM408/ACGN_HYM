@@ -29,14 +29,15 @@ class BangumiAPI:
     def get_user_collections(self, max_retries=3, get_all=True):
         """获取Bangumi收藏"""
         all_items, offset = [], 0
-        with self._create_client() as client:
-            while True:
-                for retry in range(max_retries):
-                    try:
-                        response = client.get(f"{self.base_url}/v0/users/{self.user_id}/collections",params={"limit": 50, "offset": offset})
+        while True:
+            for retry in range(max_retries):
+                try:
+                    with self._create_client() as client:
+                        response = client.get(
+                            f"{self.base_url}/v0/users/{self.user_id}/collections", params={"limit": 50, "offset": offset})
                         if response.status_code == 401:
                             self.refresh_and_reload()
-                            continue
+                            raise Exception("token过期")
                         response.raise_for_status()
                         data = response.json()
                         items = data.get("data", [])
@@ -47,11 +48,12 @@ class BangumiAPI:
                             return all_items
                         offset += 50
                         break
-                    except Exception:
-                        if retry < max_retries - 1:
-                            time.sleep(10)
-                        else:
-                            return None
+                except Exception as e:
+                    print(f"获取收藏失败: {e}")
+                    if retry < max_retries - 1:
+                        time.sleep(10)
+                    else:
+                        return None
 
     def get_user_collection(self, subject_id, max_retries=3):
         """获取Bangumi单个收藏"""
@@ -61,9 +63,11 @@ class BangumiAPI:
                     response = client.get(f"{self.base_url}/v0/users/{self.user_id}/collections/{subject_id}")
                     if response.status_code == 401:
                         self.refresh_and_reload()
+                        raise Exception("token过期")
                     response.raise_for_status()
                     return response.json()
-            except Exception:
+            except Exception as e:
+                print(f"获取单个收藏失败: {e}")
                 if retry < max_retries - 1:
                     time.sleep(10)
         return None
@@ -72,15 +76,15 @@ class BangumiAPI:
         """获取Bangumi章节收藏"""
         for retry in range(max_retries):
             try:
-                with self._create_client() as client:
-                    all_items, offset = [], 0
-                    while True:
+                all_items, offset = [], 0
+                while True:
+                    with self._create_client() as client:
                         params = {"limit": 1000, "offset": offset}
                         url = f"{self.base_url}/v0/users/-/collections/{subject_id}/episodes"
                         response = client.get(url, params=params)
                         if response.status_code == 401:
                             self.refresh_and_reload()
-                            continue
+                            raise Exception("token过期")
                         response.raise_for_status()
                         items = response.json().get("data", [])
                         if not items:
@@ -89,7 +93,8 @@ class BangumiAPI:
                         if not items or len(items) < 1000:
                             return all_items
                         offset += 1000
-            except Exception:
+            except Exception as e:
+                print(f"获取章节收藏失败: {e}")
                 if retry < max_retries - 1:
                     time.sleep(10)
         return None
@@ -106,10 +111,11 @@ class BangumiAPI:
                     response = client.post(f"{self.base_url}/v0/search/subjects?limit=20",json=params)
                     if response.status_code == 401:
                         self.refresh_and_reload()
-                        continue
+                        raise Exception("token过期")
                     response.raise_for_status()
                     return response.json().get("data", [])
-            except Exception:
+            except Exception as e:
+                print(f"搜索失败: {e}")
                 if retry < max_retries - 1:
                     time.sleep(10)
         return None
@@ -122,10 +128,11 @@ class BangumiAPI:
                     response = client.get(f"{self.base_url}/v0/subjects/{subject_id}")
                     if response.status_code == 401:
                         self.refresh_and_reload()
-                        continue
+                        raise Exception("token过期")
                     response.raise_for_status()
                     return response.json()
-            except Exception:
+            except Exception as e:
+                print(f"获取条目信息失败: {e}")
                 if retry < max_retries - 1:
                     time.sleep(10)
         return None
@@ -135,12 +142,14 @@ class BangumiAPI:
         for retry in range(max_retries):
             try:
                 with self._create_client() as client:
-                    response = client.post(f"{self.base_url}/v0/users/-/collections/{subject_id}",json=collection_data)
+                    response = client.post(f"{self.base_url}/v0/users/-/collections/{subject_id}", json=collection_data)
                     if response.status_code == 401:
                         self.refresh_and_reload()
+                        raise Exception("token过期")
                     response.raise_for_status()
                     return response
-            except Exception:
+            except Exception as e:
+                print(f"新增收藏失败: {e}")
                 if retry < max_retries - 1:
                     time.sleep(10)
         return None
@@ -153,9 +162,11 @@ class BangumiAPI:
                     response = client.patch(f"{self.base_url}/v0/users/-/collections/{subject_id}",json=collection_data)
                     if response.status_code == 401:
                         self.refresh_and_reload()
+                        raise Exception("token过期")
                     response.raise_for_status()
                     return response
-            except Exception:
+            except Exception as e:
+                print(f"修改收藏失败: {e}")
                 if retry < max_retries - 1:
                     time.sleep(10)
         return None
@@ -168,9 +179,11 @@ class BangumiAPI:
                     response = client.patch(f"{self.base_url}/v0/users/-/collections/{subject_id}/episodes",json=episodes_data)
                     if response.status_code == 401:
                         self.refresh_and_reload()
+                        raise Exception("token过期")
                     response.raise_for_status()
                     return response
-            except Exception:
+            except Exception as e:
+                print(f"更新章节收藏失败: {e}")
                 if retry < max_retries - 1:
                     time.sleep(10)
         return None
@@ -268,5 +281,5 @@ class BangumiOAuth:
             set_config_items(**config_updates)
             return token_data
         except Exception as e:
-            print(f"失败: {e}")
+            print(f"token获取失败: {e}")
             return None
