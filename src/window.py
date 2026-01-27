@@ -173,12 +173,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         from src.episode_page import EpisodeManager
         self.episode_overlay = QWidget(self)
         self.episode_overlay.setGeometry(0, 0, self.width(), self.height())
-        self.episode_overlay.setStyleSheet("#episode_overlay { background-color: rgba(0, 0, 0, 50); }")
         self.episode_overlay.setObjectName("episode_overlay")
+        self.episode_overlay.setStyleSheet("#episode_overlay{background-color: rgba(0, 0, 0, 50)}")
         self.episode_overlay.mousePressEvent = self.close_episode_overlay
         self.episode_container = QWidget(self.episode_overlay)
         self.episode_container.setObjectName("episode_container")
-        self.episode_container.setStyleSheet("#episode_container { background-color: white; }")
+        self.episode_container.setStyleSheet("#episode_container{background-color: white}")
         default_height = 180
         self.episode_container.setFixedSize(600, default_height)
         self.episode_container.move((self.width() - 600) // 2, (self.height() - default_height) // 2)
@@ -198,10 +198,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         title_height = 60
         top_margin = 40
         bottom_margin = 40
+        container_width = 600
         container_height = title_height + top_margin + bottom_margin
         if total_rows > 0:
             container_height += total_rows * button_height + (total_rows - 1) * row_spacing
-        container_width = 600
         self.episode_container.setFixedSize(container_width, container_height)
         self.episode_container.move((self.width() - container_width) // 2, (self.height() - container_height) // 2)
 
