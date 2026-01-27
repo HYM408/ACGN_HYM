@@ -54,10 +54,11 @@ class MainPageManager(QObject):
         for status_type, (frame, btn, count_btn) in self.status_frames.items():
             frame.installEventFilter(self)
             frame.setProperty("status_type", status_type)
-            frame.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-            btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-            count_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+            frame.enterEvent = lambda event, f=frame, st=status_type: self.on_status_frame_enter(f, st)
+            frame.leaveEvent = lambda event, f=frame, st=status_type: self.on_status_frame_leave(f, st)
+            btn.setStyleSheet("QPushButton { background-color: transparent; border: none}")
             btn.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+            count_btn.setStyleSheet("QPushButton { background-color: transparent; border: none}")
             count_btn.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
         # 类别
         for button, (subject_type, title) in self.category_buttons.items():
@@ -70,6 +71,20 @@ class MainPageManager(QObject):
         # 默认选中
         self.main_window.animation_Button.setChecked(True)
         self.load_collections(2, 3)
+
+    def on_status_frame_enter(self, frame, status_type):
+        """鼠标进入状态框架事件"""
+        if status_type == self.current_status_type:
+            frame.setStyleSheet("QFrame{background-color: rgba(103, 79, 165, 30); border-bottom: 3px solid rgb(103, 79, 165)}")
+        else:
+            frame.setStyleSheet("QFrame{background-color: rgba(103, 79, 165, 30)}")
+
+    def on_status_frame_leave(self, frame, status_type):
+        """鼠标离开状态框架事件"""
+        if status_type == self.current_status_type:
+            frame.setStyleSheet("QFrame{background-color: transparent; border-bottom: 3px solid rgb(103, 79, 165)}")
+        else:
+            frame.setStyleSheet("QFrame{background-color: transparent}")
 
     def eventFilter(self, obj, event):
         """事件过滤器，捕获鼠标点击事件"""
@@ -141,11 +156,11 @@ class MainPageManager(QObject):
     def update_selection(self, status_type):
         """更新所有选中状态"""
         for frame, btn, _ in self.status_frames.values():
-            frame.setStyleSheet("QFrame { background-color: transparent; border-bottom: transparent}")
+            frame.setStyleSheet("QFrame{background-color: transparent}")
             btn.setChecked(False)
         if status_type in self.status_frames:
             frame, btn, _ = self.status_frames[status_type]
-            frame.setStyleSheet("QFrame {border-bottom: 3px solid rgb(103, 79, 165)}")
+            frame.setStyleSheet("QFrame{background-color: transparent; border-bottom: 3px solid rgb(103, 79, 165)}")
             btn.setChecked(True)
 
     def display_current_page(self):
