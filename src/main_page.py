@@ -58,7 +58,6 @@ class MainPageManager(QObject):
             frame.leaveEvent = lambda event, f=frame, st=status_type: self.on_status_frame_leave(f, st)
             btn.setStyleSheet("QPushButton { background-color: transparent; border: none}")
             btn.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
-            count_btn.setStyleSheet("QPushButton { background-color: transparent; border: none}")
             count_btn.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
         # 类别
         for button, (subject_type, title) in self.category_buttons.items():
@@ -162,6 +161,7 @@ class MainPageManager(QObject):
             frame, btn, _ = self.status_frames[status_type]
             frame.setStyleSheet("QFrame{background-color: transparent; border-bottom: 3px solid rgb(103, 79, 165)}")
             btn.setChecked(True)
+            frame.setStyleSheet("QFrame{background-color: rgba(103, 79, 165, 30); border-bottom: 3px solid rgb(103, 79, 165)}")
 
     def display_current_page(self):
         """显示当前页数据"""
