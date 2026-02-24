@@ -26,15 +26,10 @@
   * 多端适配
   </details>
 
-## 安装使用
-python 3.11+  
-
-安装依赖：`pip install -r requirements.txt`
-
-运行程序：`python main.py`
-
 ## 技术
-- UI 使用 [Qt for Python](https://doc.qt.io/qtforpython-6/) pyside6
+- C++ 17+
+- UI 使用 [Qt 6.10.2](https://doc.qt.io/qt-6)
+- XPath选择器 使用 [libxml2](https://github.com/GNOME/libxml2)
 - 视频播放器 使用 [VLC](https://www.videolan.org/vlc)
 
 ## 参与开发
