@@ -1,6 +1,0 @@
-lxml
-httpx
-PySide6
-pikpakapi
-cssselect
-python-vlc

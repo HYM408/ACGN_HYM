@@ -1,0 +1,129 @@
+{
+  "site_configs": {
+    "girigirilove": {
+      "icon": "https://bgm.girigirilove.com/upload/anime.girigirilove.com_.png",
+      "base_url": "https://bgm.girigirilove.com",
+      "search_path": "/search/-------------/?wd={keyword}",
+      "title": "//h3[@class='slide-info-title hide']",
+      "link": "//a[contains(@href,'/GV')]/@href",
+      "route_tabs": "//div[contains(@class, 'anthology-tab')]//div[contains(@class, 'swiper-wrapper')]/a[contains(@class, 'swiper-slide')]",
+      "episode_containers": "//div[contains(@class, 'anthology-list') and contains(@class, 'top20')]//div[contains(@class, 'anthology-list-box')]",
+      "episode_items": ".//ul[contains(@class, 'anthology-list-play')]/li/a[contains(@class, 'this-link')]",
+      "video_type": 1
+    },
+    "稀饭动漫": {
+      "icon": "https://dm.xifanacg.com/template/dsn2/static/img/fav.png",
+      "base_url": "https://dm.xifanacg.com",
+      "search_path": "/search.html?wd={keyword}",
+      "title": "//h3[@class='slide-info-title hide']/text()",
+      "link": "//h3[@class='slide-info-title hide']/parent::a/@href",
+      "route_tabs": "//div[contains(@class, 'anthology-tab')]//div[contains(@class, 'swiper-wrapper')]/a[contains(@class, 'swiper-slide')]",
+      "episode_containers": "//div[contains(@class, 'anthology-list') and contains(@class, 'top20')]//div[contains(@class, 'anthology-list-box')]",
+      "episode_items": ".//ul[contains(@class, 'anthology-list-play')]/li/a[contains(@class, 'this-link')]",
+      "video_type": 0
+    },
+    "omofun": {
+      "icon": "https://omofun.icu/template/mxpro/mxtheme/images/favicon.png",
+      "base_url": "https://omofun.icu",
+      "search_path": "/vod/search.html?wd={keyword}",
+      "title": "//div[@class='module-card-item-title']/a/strong",
+      "link": "//div[@class='module-card-item-title']/a/@href",
+      "route_tabs": "//div[@id='y-playList']/div[contains(@class,'module-tab-item')]",
+      "episode_containers": "//div[contains(@class,'module-list') and contains(@class,'tab-list') and contains(@class,'his-tab-list')]",
+      "episode_items": ".//a[contains(@class,'module-play-list-link')]",
+      "video_type": 0
+    },
+    "饭团动漫": {
+      "icon": "https://acgfta.com/template/ft-v2/icon/acgfantuan-icon-72.png",
+      "base_url": "https://acgfta.com",
+      "search_path": "/search.html?wd={keyword}",
+      "title": "//a[@class='stretched-link']/text()",
+      "link": "//a[@class='stretched-link']/@href",
+      "route_tabs": "//ul[contains(@class,'nav-pills')]/li/button",
+      "episode_containers": "//div[contains(@class,'tab-pane') and contains(@class,'anime-episode')]",
+      "episode_items": ".//a[contains(@class,'btn-episode')]",
+      "video_type": 0
+    },
+    "番茄动漫": {
+      "icon": "https://www.fqdm.cc/upload/mxprocms/20240530-1/3d17fab3cb763e6ad7031974bf87f322.jpg",
+      "base_url": "https://www.fqdm.cc",
+      "search_path": "/index.php/vod/search.html?wd={keyword}",
+      "title": "//div[contains(@class,'module-card-item-title')]//strong/text()",
+      "link": "//div[contains(@class,'module-card-item-title')]/a/@href",
+      "route_tabs": "//div[@id='y-playList']//div[contains(@class,'module-tab-item') and contains(@class,'tab-item')]",
+      "episode_containers": "//div[contains(@class,'module-list') and contains(@class,'tab-list') and contains(@class,'his-tab-list')]",
+      "episode_items": ".//a[contains(@class,'module-play-list-link')]",
+      "video_type": 0
+    },
+    "88影视": {
+      "icon": "https://www.88mv.me/favicon.ico",
+      "base_url": "https://www.88mv.me",
+      "search_path": "/search/search.php?q=wd-{keyword}",
+      "title": "//li[contains(@class,'p1') and contains(@class,'m1')]//p[@class='name']/text()",
+      "link": "//li[contains(@class,'p1') and contains(@class,'m1')]/a/@href",
+      "route_tabs": "//div[contains(@class,'playfrom')]//ul/li",
+      "episode_containers": "//div[contains(@class,'playlist') and starts-with(@id,'stab')]",
+      "episode_items": ".//ul/li/a",
+      "video_type": ["video"]
+    },
+    "樱花动漫": {
+      "icon": "https://www.yinghua228.com/statics/img/favicon.ico",
+      "base_url": "https://www.yinghua228.com",
+      "search_path": "/index.php/vod/search.html?wd={keyword}",
+      "title": "//div[@class='detail']/h3[@class='title']/a",
+      "link": "//div[@class='detail']/h3[@class='title']/a/@href",
+      "route_tabs": "//div[contains(@class, 'stui-pannel-box') and contains(@class, 'playlist')]/div[@class='stui-pannel_hd']/div/h3[@class='title']",
+      "episode_containers": "//div[contains(@class, 'stui-pannel-box') and contains(@class, 'playlist')]",
+      "episode_items": ".//ul[@class='stui-content__playlist clearfix']/li/a",
+      "video_type": 0
+    },
+    "七色动漫": {
+      "icon": "https://www.7sefun.top/favicon.ico",
+      "base_url": "https://www.7sefun.top",
+      "search_path": "/vodsearch/-------------.html?wd={keyword}",
+      "title": "//div[contains(@class,'video anim')]//div[@class='video-by']",
+      "link": "//div[contains(@class,'video anim')]//a[@class='video-wrapper']/@href",
+      "route_tabs": "//div[contains(@class, 'chat-stream')]//div[contains(@class, 'chat-header')]/span[@class='chat-stream-bfq']",
+      "episode_containers": "//div[contains(@class, 'chat-stream')]//div[contains(@class, 'message-container') and contains(@class, 'vod-play-list-container')]",
+      "episode_items": ".//span/a[@href]",
+      "video_type": ["tiktokcdn"]
+    },
+    "咕咕番": {
+      "icon": "https://www.gugu3.com/upload/site/20240809-1/7128d3562abaed14571d6227e1240aab.png",
+      "base_url": "https://www.gugu3.com",
+      "search_path": "/index.php/vod/search/wd/{keyword}",
+      "title": "//h3[@class='slide-info-title hide']/text()",
+      "link": "//h3[@class='slide-info-title hide']/parent::a/@href",
+      "route_tabs": "//div[contains(@class, 'anthology-tab')]//div[contains(@class, 'swiper-wrapper')]/a[contains(@class, 'swiper-slide')]",
+      "episode_containers": "//div[contains(@class, 'anthology-list')]//div[contains(@class, 'anthology-list-box')]",
+      "episode_items": ".//ul[contains(@class, 'anthology-list-play')]/li/a[contains(@class, 'this-link')]",
+      "video_type": [".m3u8"]
+    }
+  },
+  "bt_configs": {
+    "蜜柑计划": {
+      "icon": "https://mikanani.kas.pub/images/mikan-pic.png",
+      "base_url": "https://mikanani.kas.pub",
+      "search_path": "/Home/Search?searchstr={keyword}",
+      "row_selector": "//tr[contains(@class, 'js-search-results-row')]",
+      "name_selector": ".//a[contains(@class, 'magnet-link-wrap')]",
+      "size_selector": ".//td[position()=3]",
+      "play_selector": ".//a[contains(@href, 'keepshare.org')]",
+      "magnet_selector": ".//input[contains(@class, 'js-episode-select')]",
+      "magnet_attr": "data-magnet",
+      "play_attr": "href"
+    },
+    "动漫花园": {
+      "icon": "https://dmhy.org/favicon.ico",
+      "base_url": "https://dmhy.org",
+      "search_path": "/topics/list/page/1?keyword={keyword}",
+      "row_selector": "//table[@id='topic_list']/tbody/tr",
+      "name_selector": "//table[@id='topic_list']/tbody/tr/td[contains(@class, 'title')]/a[@target='_blank']",
+      "size_selector": "td[5]",
+      "magnet_selector": "td[4]/a[starts-with(@href, 'magnet:')]",
+      "play_selector": "td[4]/a[contains(@href, 'keepshare.org')]",
+      "magnet_attr": "href",
+      "play_attr": "href"
+    }
+  }
+}

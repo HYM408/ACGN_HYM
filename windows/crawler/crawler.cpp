@@ -1,0 +1,182 @@
+#include "crawler.h"
+#include <QFile>
+#include <QProcess>
+#include <QJsonArray>
+#include <QCoreApplication>
+#include "../utils/xml_util.h"
+#include "../utils/network_util.h"
+
+static QJsonObject loadConfig()
+{   // 加载配置文件
+    QFile configFile("XPath.json");
+    if (!configFile.open(QIODevice::ReadOnly)) return {};
+    return QJsonDocument::fromJson(configFile.readAll()).object();
+}
+
+QJsonObject Crawler::loadSiteConfig(const QString &site_id) {return loadConfig()["site_configs"].toObject()[site_id].toObject();}
+
+QStringList Crawler::getAllSiteIds() {return loadConfig()["site_configs"].toObject().keys();}
+
+QJsonObject Crawler::loadBTConfig(const QString &site_id) {return loadConfig()["bt_configs"].toObject()[site_id].toObject();}
+
+QStringList Crawler::getAllBTSiteIds() {return loadConfig()["bt_configs"].toObject().keys();}
+
+QString Crawler::sendRequest(const QString &url)
+{   // 发送请求
+    QNetworkAccessManager manager;
+    QNetworkRequest request(url);
+    request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+    return sendRequestHtml(manager, request, "GET", {}, 1, nullptr, nullptr);
+}
+
+QList<SearchResult> Crawler::extractSearchResults(const QString &site_id, const QString &html)
+{   // 提取搜索结果
+    QList<SearchResult> results;
+    QJsonObject config = loadSiteConfig(site_id);
+    QStringList titles = XmlUtil::xpath(XmlUtil::parseHtml(html).data(), config["title"].toString());
+    QStringList links = XmlUtil::xpath(XmlUtil::parseHtml(html).data(), config["link"].toString());
+    QString baseUrl = config["base_url"].toString();
+    qsizetype count = qMin(titles.size(), links.size());
+    for (int i = 0; i < count; ++i) {
+        SearchResult sr;
+        sr.title = titles[i].trimmed();
+        sr.link = XmlUtil::normalizeUrl(XmlUtil::joinUrl(baseUrl, links[i]));
+        sr.site = site_id;
+        results.append(sr);
+    }
+    return results;
+}
+
+QList<RouteInfo> Crawler::getRoutes(const QString &page_url, const QString &site_id)
+{   // 线路和集数
+    QList<RouteInfo> routes;
+    QJsonObject config = loadSiteConfig(site_id);
+    QString html = sendRequest(page_url);
+    if (html.isEmpty()) return routes;
+    auto doc = XmlUtil::parseHtml(html);
+    QStringList routeNames = XmlUtil::xpath(doc.data(), config["route_tabs"].toString());
+    QList<xmlNodePtr> containers = XmlUtil::xpathNodes(doc.data(), config["episode_containers"].toString());
+    qsizetype routeCount = qMin(routeNames.size(), containers.size());
+    for (int i = 0; i < routeCount; ++i) {
+        RouteInfo ri;
+        ri.route = routeNames[i].replace("&nbsp;", " ").trimmed();
+        QList<xmlNodePtr> episodeNodes = XmlUtil::xpathNodes(containers[i], config["episode_items"].toString());
+        for (xmlNodePtr node : episodeNodes) {
+            EpisodeInfo ep;
+            ep.name = XmlUtil::nodeContent(node).trimmed();
+            QString href = XmlUtil::nodeAttribute(node, "href");
+            if (!href.isEmpty()) ep.link = XmlUtil::normalizeUrl(XmlUtil::joinUrl(page_url, href));
+            if (!ep.name.isEmpty() && !ep.link.isEmpty()) ri.episodes.append(ep);
+        }
+        if (!ri.episodes.isEmpty()) routes.append(ri);
+    }
+    return routes;
+}
+
+QList<SearchResult> Crawler::searchSite(const QString &site_id, const QString &keyword)
+{   // 搜索
+    QList<SearchResult> results;
+    QJsonObject config = loadSiteConfig(site_id);
+    QString baseUrl = config["base_url"].toString();
+    QString searchPath = config["search_path"].toString();
+    searchPath.replace("{keyword}", keyword);
+    QString url = XmlUtil::joinUrl(baseUrl, searchPath);
+    QString html = sendRequest(url);
+    if (html.isEmpty()) return results;
+    QList<SearchResult> searchResults = extractSearchResults(site_id, html);
+    for (SearchResult &result : searchResults) {
+        QList<RouteInfo> routes = getRoutes(result.link, site_id);
+        QList<QJsonObject> routeObjs;
+        for (const RouteInfo &route : routes) {
+            QJsonObject routeObj;
+            routeObj["route"] = route.route;
+            QJsonArray epArray;
+            for (const EpisodeInfo &ep : route.episodes) {
+                QJsonObject epObj;
+                epObj["name"] = ep.name;
+                epObj["link"] = ep.link;
+                epArray.append(epObj);
+            }
+            routeObj["episodes"] = epArray;
+            routeObjs.append(routeObj);
+        }
+        result.routes = routeObjs;
+        results.append(result);
+    }
+    return results;
+}
+
+void Crawler::processVideoUrl(const QString &site_id, const QString &url, const std::function<void(const QString&)> &callback)
+{   // 获取视频链接
+    qDebug() << url;
+    QJsonValue video_type = loadSiteConfig(site_id)["video_type"];
+    if (video_type.isDouble()) {
+        int type = video_type.toInt();
+        QString videoUrl = extractVideoUrl(url);
+        if (type == 0) return callback(videoUrl);
+        if (type == 1) return callback(QUrl::fromPercentEncoding(QByteArray::fromBase64(videoUrl.toLatin1())));
+    }
+    auto wrappedCallback = [callback](const QString &rawUrl) {callback(XmlUtil::extractNestedUrl(rawUrl, "url"));};
+    videoStreamDetector(site_id, url, wrappedCallback);
+}
+
+QString Crawler::extractVideoUrl(const QString &url)
+{   // 分析视频链接(video_type整数)
+    QString html = sendRequest(url);
+    if (html.isEmpty()) return {};
+    qsizetype pos = html.indexOf("player_aaaa");
+    if (pos < 0) return {};
+    qsizetype braceStart = html.indexOf('{', pos + 11);
+    if (braceStart < 0) return {};
+    int level = 0;
+    qsizetype endPos = -1;
+    for (qsizetype i = braceStart; i < html.size(); ++i) {
+        QChar c = html[i];
+        if (c == '{') ++level;
+        else if (c == '}') { --level; if (level == 0) {endPos = i; break;}}
+    }
+    if (endPos < 0) return {};
+    QJsonParseError err;
+    QJsonObject obj = QJsonDocument::fromJson(html.mid(braceStart, endPos - braceStart + 1).toUtf8(), &err).object();
+    return err.error == QJsonParseError::NoError ? obj["url"].toString() : QString();
+}
+
+void Crawler::videoStreamDetector(const QString &site_id, const QString &url, const std::function<void(const QString&)> &onVideoUrl)
+{   // 浏览器获取视频链接
+    auto *proc = new QProcess;
+    QObject::connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), [proc, onVideoUrl](int, QProcess::ExitStatus) {
+        QByteArray output = proc->readAllStandardOutput();
+        for (const auto& line : output.split('\n')) {
+            if (line.startsWith("VIDEO_URL:")) {
+                onVideoUrl(QString::fromUtf8(line.mid(10).trimmed()));
+                break;
+            }
+        }
+        proc->deleteLater();
+    });
+    QString workerPath = QCoreApplication::applicationDirPath() + "/videoStream";
+#ifdef Q_OS_WIN
+    workerPath += ".exe";
+#endif
+    proc->start(workerPath, QStringList{url} << loadSiteConfig(site_id)["video_type"].toVariant().toStringList());
+}
+
+QList<BTResult> Crawler::searchBT(const QString &site_id, const QString &keyword)
+{   // BT搜索
+    QList<BTResult> results;
+    const QJsonObject config = loadBTConfig(site_id);
+    QString url = XmlUtil::joinUrl(config["base_url"].toString(), config["search_path"].toString().replace("{keyword}", keyword));
+    QString html = sendRequest(url);
+    if (html.isEmpty()) return results;
+    auto doc = XmlUtil::parseHtml(html);
+    QList<xmlNodePtr> rows = XmlUtil::xpathNodes(doc.data(), config["row_selector"].toString());
+    for (xmlNodePtr row : rows) {
+        BTResult res;
+        res.name = XmlUtil::nodeContent(XmlUtil::xpathNodes(row, config["name_selector"].toString())[0]).trimmed();
+        res.size = XmlUtil::nodeContent(XmlUtil::xpathNodes(row, config["size_selector"].toString())[0]).trimmed();
+        res.magnet_link = XmlUtil::nodeAttribute(XmlUtil::xpathNodes(row, config["magnet_selector"].toString())[0], qPrintable(config["magnet_attr"].toString()));
+        res.play_link = XmlUtil::nodeAttribute(XmlUtil::xpathNodes(row, config["play_selector"].toString())[0], qPrintable(config["play_attr"].toString()));
+        results.append(res);
+    }
+    return results;
+}
