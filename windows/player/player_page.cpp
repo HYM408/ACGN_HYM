@@ -59,22 +59,26 @@ void PlayerPage::fetchRoutes(const QJsonObject &collectionData, const QJsonObjec
     m_episodeData = episodeData;
     QStringList allApiIds = Crawler::getAllAPISiteIds();
     QStringList allSiteIds = Crawler::getAllSiteIds();
-    QStringList allBtIds   = Crawler::getAllBTSiteIds();
-    auto parseEnabled = [](const QString &key, const QStringList &allIds) -> QStringList {
-        QVariant value = getConfig(key, "");
-        if (value.typeId() == QMetaType::QStringList) return value.toStringList();
-        QString str = value.toString();
-        if (str == "*") {
-            setConfig(key, allIds);
-            return allIds;
-        }
-        return str.isEmpty() ? QStringList() : str.split(',', Qt::SkipEmptyParts);
-    };
-    QStringList enabledApiIds  = parseEnabled("EnabledSites/api", allApiIds);
-    QStringList enabledSiteIds = parseEnabled("EnabledSites/site", allSiteIds);
-    QStringList enabledBtIds   = parseEnabled("EnabledSites/bt", allBtIds);
-    QStringList allIds = enabledApiIds + enabledSiteIds + enabledBtIds;
+    QStringList allBtIds = Crawler::getAllBTSiteIds();
+    QStringList allIds = allApiIds + allSiteIds + allBtIds;
     if (allIds.isEmpty()) return;
+    QVariant sitesOrder = getConfig("EnabledSites/sites");
+    QStringList sortedIds;
+    if (sitesOrder.typeId() == QMetaType::QStringList)  sortedIds = sitesOrder.toStringList();
+    else {
+        QString str = sitesOrder.toString();
+        if (str.isEmpty()) return;
+        if (str == "*") {
+            setConfig("EnabledSites/sites", allIds);
+            sortedIds = allIds;
+        }
+    }
+    if (!sortedIds.isEmpty()) {
+        QSet<QString> allSet = QSet(allIds.begin(), allIds.end());
+        QStringList filtered;
+        for (const QString &id : sortedIds) filtered.append(id);
+        allIds = filtered;
+    }
     QString keyword = collectionData.value("subject_name_cn").toString();
     if (keyword.isEmpty()) keyword = collectionData.value("subject_name").toString();
     QWidget *container = ui.scrollAreaWidgetContents;
@@ -98,9 +102,9 @@ void PlayerPage::fetchRoutes(const QJsonObject &collectionData, const QJsonObjec
             QMetaObject::invokeMethod(this, slot, Qt::QueuedConnection, Q_ARG(QString, siteId), Q_ARG(decltype(results), results));});
         }
     };
-    startSearch(enabledApiIds, &Crawler::searchAPI, "handleSearchResult");
-    startSearch(enabledSiteIds, &Crawler::searchSite, "handleSearchResult");
-    startSearch(enabledBtIds, &Crawler::searchBT, "handleBTSearchResult");
+    startSearch(allApiIds, &Crawler::searchAPI, "handleSearchResult");
+    startSearch(allSiteIds, &Crawler::searchSite, "handleSearchResult");
+    startSearch(allBtIds, &Crawler::searchBT, "handleBTSearchResult");
 }
 
 QString PlayerPage::getSiteIconUrl(const QString &siteId)

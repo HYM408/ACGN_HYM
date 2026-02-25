@@ -28,9 +28,7 @@ void initConfig()
     settings.endGroup();
     // 数据源
     settings.beginGroup("EnabledSites");
-    setDefaultIfMissing(settings, "api", "*");
-    setDefaultIfMissing(settings, "site", "*");
-    setDefaultIfMissing(settings, "bt", "*");
+    setDefaultIfMissing(settings, "sites", "*");
     settings.endGroup();
 }
 
