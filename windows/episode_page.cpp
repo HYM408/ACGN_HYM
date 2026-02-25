@@ -190,6 +190,9 @@ void EpisodeOverlay::updateEpisodeView()
         auto *item = new QStandardItem();
         QJsonObject episodeObj = value.toObject();
         item->setData(QJsonDocument(episodeObj).toJson(), EpisodeDataRole);
+        QString name = episodeObj.value("name_cn").toString();
+        if (name.isEmpty()) name = episodeObj.value("name").toString();
+        item->setToolTip(name);
         episodeModel->appendRow(item);
     }
     int itemHeight = BUTTON_SIZE + SPACING;
