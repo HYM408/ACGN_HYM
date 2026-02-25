@@ -5,7 +5,7 @@
 #include <QPointer>
 #include <QJsonArray>
 #include <QPushButton>
-#include <QtConcurrentRun>
+#include <QThreadPool>
 #include "player.h"
 #include "player_core.h"
 #include "../api/pikpak_api.h"
@@ -52,9 +52,11 @@ void PlayerPage::setupControlOverlay()
     updateTimer->start(100);
 }
 
-void PlayerPage::fetchRoutes(const QJsonObject &collectionData)
+void PlayerPage::fetchRoutes(const QJsonObject &collectionData, const QJsonObject &episodeData)
 {   // 创建组件并搜索
     show();
+    m_episodeData = episodeData;
+    apiSiteIds = Crawler::getAllAPISiteIds();
     allSiteIds = Crawler::getAllSiteIds();
     btSiteIds = Crawler::getAllBTSiteIds();
     QString keyword = collectionData.value("subject_name_cn").toString();
@@ -67,7 +69,7 @@ void PlayerPage::fetchRoutes(const QJsonObject &collectionData)
     detailTabWidget->setIconSize(QSize(30, 30));
     detailTabWidget->setStyleSheet("QTabBar::tab {width: 50px; height: 50px}");
     detailTab->layout()->addWidget(detailTabWidget);
-    QStringList allIds = allSiteIds + btSiteIds;
+    QStringList allIds = apiSiteIds + btSiteIds + allSiteIds;
     for (const QString &siteId : std::as_const(allIds)) {
         QWidget *card = createSiteCard(siteId, "loading", {});
         siteWidgets[siteId] = card;
@@ -75,14 +77,22 @@ void PlayerPage::fetchRoutes(const QJsonObject &collectionData)
         createSiteDetailTab(siteId);
     }
     qobject_cast<QVBoxLayout*>(container->layout())->addStretch();
-    for (const QString &siteId : allSiteIds) {QFuture<void> future = QtConcurrent::run([this, siteId, keyword] {
-        QMetaObject::invokeMethod(this, "handleSiteSearchResult", Qt::QueuedConnection, Q_ARG(QString, siteId), Q_ARG(QList<SearchResult>, Crawler::searchSite(siteId, keyword)));});
-        Q_UNUSED(future);
-    }
-    for (const QString &siteId : btSiteIds) {QFuture<void> future = QtConcurrent::run([this, siteId, keyword] {
-        QMetaObject::invokeMethod(this, "handleBTSearchResult", Qt::QueuedConnection, Q_ARG(QString, siteId), Q_ARG(QList<BTResult>, Crawler::searchBT(siteId, keyword)));});
-        Q_UNUSED(future);
-    }
+    auto startSearch = [this, keyword](const QStringList &siteIds, auto searchFunc, const char *slot) {
+        for (const QString &siteId : siteIds) {QThreadPool::globalInstance()->start([=] {
+            auto results = searchFunc(siteId, keyword);
+            QMetaObject::invokeMethod(this, slot, Qt::QueuedConnection, Q_ARG(QString, siteId), Q_ARG(decltype(results), results));});
+        }
+    };
+    startSearch(apiSiteIds, &Crawler::searchAPI,   "handleSearchResult");
+    startSearch(allSiteIds, &Crawler::searchSite,  "handleSearchResult");
+    startSearch(btSiteIds,  &Crawler::searchBT,    "handleBTSearchResult");
+}
+
+QString PlayerPage::getSiteIconUrl(const QString &siteId) const
+{   // 图标
+    if (apiSiteIds.contains(siteId)) return Crawler::loadAPIConfig(siteId)["icon"].toString();
+    if (allSiteIds.contains(siteId)) return Crawler::loadSiteConfig(siteId)["icon"].toString();
+    return Crawler::loadBTConfig(siteId)["icon"].toString();
 }
 
 void PlayerPage::createSiteDetailTab(const QString &siteId)
@@ -108,9 +118,7 @@ void PlayerPage::createSiteDetailTab(const QString &siteId)
     int tabIndex = detailTabWidget->addTab(scrollArea, "");Q_UNUSED(tabIndex);
     QPointer tabWidgetPtr(detailTabWidget);
     siteDetailFrames[siteId] = contentFrame;
-    QString iconUrl;
-    if (btSiteIds.contains(siteId)) iconUrl = Crawler::loadBTConfig(siteId)["icon"].toString();
-    else iconUrl = Crawler::loadSiteConfig(siteId)["icon"].toString();
+    QString iconUrl = getSiteIconUrl(siteId);
     cacheImageUtil->getImageAsync(iconUrl, [tabWidgetPtr, tabIndex](const QPixmap &pixmap) {
         if (!tabWidgetPtr) return;
         if (tabIndex < 0 || tabIndex >= tabWidgetPtr->count()) return;
@@ -130,9 +138,7 @@ QWidget* PlayerPage::createSiteCard(const QString &siteId, const QString &status
     iconBtn->setFixedSize(20, 20);
     iconBtn->setFlat(true);
     topLayout->addWidget(iconBtn);
-    QString iconUrl;
-    if (btSiteIds.contains(siteId)) iconUrl = Crawler::loadBTConfig(siteId)["icon"].toString();
-    else iconUrl = Crawler::loadSiteConfig(siteId)["icon"].toString();
+    QString iconUrl = getSiteIconUrl(siteId);
     QPointer btnPtr(iconBtn);
     cacheImageUtil->getImageAsync(iconUrl, [btnPtr](const QPixmap &pixmap) {if (btnPtr) btnPtr->setIcon(QIcon(pixmap));}, false);
     // 站点名称
@@ -186,7 +192,7 @@ void PlayerPage::updateBTCardContent(const QWidget *card, const QString &status,
     card->findChild<QWidget*>("routesContainer")->setVisible(false);
 }
 
-void PlayerPage::handleSiteSearchResult(const QString &siteId, const QList<SearchResult> &results)
+void PlayerPage::handleSearchResult(const QString &siteId, const QList<SearchResult> &results)
 {   // 处理搜索结果
     if (auto *card = siteWidgets.value(siteId)) updateCardContent(card, results.isEmpty() ? "error" : "success", results);
     auto *contentFrame = siteDetailFrames.value(siteId);
@@ -293,7 +299,7 @@ void PlayerPage::onRouteSelected(const QString &siteId, const QJsonObject &route
 {   // 解析并播放
     vlcPlayer->stop();
     int episodeIndex = 0;
-    if (currentEpisode.contains("sort")) episodeIndex = currentEpisode["sort"].toInt() - 1;
+    episodeIndex = m_episodeData["sort"].toInt() - 1;
     QJsonArray episodes = route["episodes"].toArray();
     if (episodes.isEmpty() || episodeIndex >= episodes.size()) return;
     QString episodeUrl = episodes[episodeIndex].toObject()["link"].toString();

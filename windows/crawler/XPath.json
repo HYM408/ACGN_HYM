@@ -1,27 +1,13 @@
 {
-  "site_configs": {
+  "api_configs": {
     "girigirilove": {
       "icon": "https://bgm.girigirilove.com/upload/anime.girigirilove.com_.png",
       "base_url": "https://bgm.girigirilove.com",
-      "search_path": "/search/-------------/?wd={keyword}",
-      "title": "//h3[@class='slide-info-title hide']",
-      "link": "//a[contains(@href,'/GV')]/@href",
-      "route_tabs": "//div[contains(@class, 'anthology-tab')]//div[contains(@class, 'swiper-wrapper')]/a[contains(@class, 'swiper-slide')]",
-      "episode_containers": "//div[contains(@class, 'anthology-list') and contains(@class, 'top20')]//div[contains(@class, 'anthology-list-box')]",
-      "episode_items": ".//ul[contains(@class, 'anthology-list-play')]/li/a[contains(@class, 'this-link')]",
-      "video_type": 1
-    },
-    "稀饭动漫": {
-      "icon": "https://dm.xifanacg.com/template/dsn2/static/img/fav.png",
-      "base_url": "https://dm.xifanacg.com",
-      "search_path": "/search.html?wd={keyword}",
-      "title": "//h3[@class='slide-info-title hide']/text()",
-      "link": "//h3[@class='slide-info-title hide']/parent::a/@href",
-      "route_tabs": "//div[contains(@class, 'anthology-tab')]//div[contains(@class, 'swiper-wrapper')]/a[contains(@class, 'swiper-slide')]",
-      "episode_containers": "//div[contains(@class, 'anthology-list') and contains(@class, 'top20')]//div[contains(@class, 'anthology-list-box')]",
-      "episode_items": ".//ul[contains(@class, 'anthology-list-play')]/li/a[contains(@class, 'this-link')]",
-      "video_type": 0
-    },
+      "search_api": "https://m3u8.girigirilove.com/api.php/Vod/get_list?vod_name={keyword}&offset=0&limit=10",
+      "detail_api": "https://m3u8.girigirilove.com/api.php/Vod/get_detail?vod_id={vod_id}"
+    }
+  },
+  "site_configs": {
     "omofun": {
       "icon": "https://omofun.icu/template/mxpro/mxtheme/images/favicon.png",
       "base_url": "https://omofun.icu",

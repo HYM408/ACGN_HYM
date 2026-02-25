@@ -197,10 +197,10 @@ void MainWindow::onShowEpisodePageRequested(const CollectionData &collectionData
     episodeOverlay->showWithCollectionData(collectionData);
 }
 
-void MainWindow::onEpisodeClicked(const QJsonObject &collectionData)
+void MainWindow::onEpisodeClicked(const QJsonObject &collectionData, const QJsonObject &episodeData)
 {   // 切换播放器页面
     pageHistory.append(main_stackedWidget->currentIndex());
-    playerPage->fetchRoutes(collectionData);
+    playerPage->fetchRoutes(collectionData, episodeData);
     main_stackedWidget->setCurrentIndex(4);
 }
 

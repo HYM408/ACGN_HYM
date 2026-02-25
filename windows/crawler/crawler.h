@@ -31,10 +31,12 @@ class Crawler
 {
 public:
     static QString sendRequest(const QString &url);
-    static QJsonObject loadBTConfig(const QString &site_id);
     static QJsonObject loadSiteConfig(const QString &site_id);
     static QStringList getAllSiteIds();
+    static QJsonObject loadBTConfig(const QString &site_id);
     static QStringList getAllBTSiteIds();
+    static QJsonObject loadAPIConfig(const QString &site_id);
+    static QStringList getAllAPISiteIds();
     static QList<SearchResult> searchSite(const QString &site_id, const QString &keyword);
     static QList<SearchResult> extractSearchResults(const QString &site_id, const QString &html);
     static QList<RouteInfo> getRoutes(const QString &page_url, const QString &site_id);
@@ -42,6 +44,7 @@ public:
     static void processVideoUrl(const QString &site_id, const QString &url, const std::function<void(const QString&)> &callback = nullptr);
     static void videoStreamDetector(const QString &site_id, const QString &url, const std::function<void(const QString&)> &onVideoUrl = nullptr);
     static QList<BTResult> searchBT(const QString &site_id, const QString &keyword);
+    static QList<SearchResult> searchAPI(const QString &site_id, const QString &keyword);
 };
 
 #endif // CRAWLER_H

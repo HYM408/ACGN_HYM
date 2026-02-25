@@ -19,7 +19,7 @@ public:
     ~PlayerPage() override;
     void setManagers(DatabaseManager *db, CacheImageUtil *cacheImage, PikPakApi *pikpakapi);
     void setupControlOverlay();
-    void fetchRoutes(const QJsonObject &collectionData);
+    void fetchRoutes(const QJsonObject &collectionData, const QJsonObject &episodeData);
 
 signals:
     void backButtonClicked();
@@ -27,13 +27,14 @@ signals:
 private slots:
     void onRouteSelected(const QString &siteId, const QJsonObject &route);
     void onBTResultClicked(const QString &magnet, const QString &playLink);
-    void handleSiteSearchResult(const QString &siteId, const QList<SearchResult> &results);
+    void handleSearchResult(const QString &siteId, const QList<SearchResult> &results);
     void handleBTSearchResult(const QString &siteId, const QList<BTResult> &results);
     void updatePlayerInfo() const;
     void toggleFullscreen();
     void onBackButtonClicked();
 
 private:
+    [[nodiscard]] QString getSiteIconUrl(const QString &siteId) const;
     void createSiteDetailTab(const QString &siteId);
     QWidget* createSiteCard(const QString &siteId, const QString &status, const QList<SearchResult> &results);
     void updateCardContent(const QWidget *card, const QString &status, const QList<SearchResult> &results);
@@ -53,12 +54,14 @@ private:
     QMap<QString, QWidget*> siteWidgets;
     QMap<QString, QFrame*> siteDetailFrames;
     QTabWidget *detailTabWidget = nullptr;
+    QStringList apiSiteIds;
     QStringList allSiteIds;
     QStringList btSiteIds;
     QTimer *updateTimer = nullptr;
     QWidget *original_parent = nullptr;
     QLayout *original_layout = nullptr;
     bool fullscreen_mode = false;
+    QJsonObject m_episodeData;
 };
 
 #endif // PLAYER_PAGE_H

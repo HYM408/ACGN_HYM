@@ -12,7 +12,6 @@ find_package(Qt6 REQUIRED COMPONENTS
         Widgets
         Sql
         Network
-        Concurrent
         WebEngineWidgets
 )
 
@@ -81,7 +80,6 @@ target_link_libraries(appACGN_HYM
         Qt6::Widgets
         Qt6::Sql
         Qt6::Network
-        Qt6::Concurrent
         ${LIBXML2_LIBRARIES}
         ${VLC_LIBRARIES}
 )

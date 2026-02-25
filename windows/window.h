@@ -38,7 +38,7 @@ private slots:
     void onShowDetailPageRequested(const CollectionData &collectionData) const;
     void onShowDetailPageFromSearch(const QVariantMap &data);
     void onShowEpisodePageRequested(const CollectionData &collectionData);
-    void onEpisodeClicked(const QJsonObject &collectionData);
+    void onEpisodeClicked(const QJsonObject &collectionData, const QJsonObject &episodeData);
 
 private:
     void setupConnections();
