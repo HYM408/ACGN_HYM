@@ -8,6 +8,7 @@ static std::atomic abortRequests(0);
 void abortNetworkRequests()
 {   // 停止网络请求
     abortRequests.store(1);
+    QTimer::singleShot(1500, [] {abortRequests.store(0);});
 }
 
 QByteArray sendRequestUtil(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, int *statusCode, const std::function<void()> &onAuthFailure)
