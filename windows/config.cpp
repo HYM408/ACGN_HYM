@@ -1,40 +1,42 @@
 #include "config.h"
-#include <QSettings>
 
 void initConfig()
 {   // 初始化配置文件
     QSettings settings("./config.ini", QSettings::IniFormat);
-    if (settings.allKeys().isEmpty()) {
-        // Bangumi
-        settings.beginGroup("Bangumi");
-        settings.setValue("user_id", "");
-        settings.setValue("client_id", "");
-        settings.setValue("client_secret", "");
-        settings.setValue("redirect_uri", "");
-        settings.setValue("access_token", "");
-        settings.setValue("refresh_token", "");
-        settings.setValue("expires_at", 0);
-        settings.setValue("bangumi_base_url", "https://bangumi.tv/");
-        settings.setValue("rss_guid", "0");
-        settings.endGroup();
-        // PikPak
-        settings.beginGroup("PikPak");
-        settings.setValue("username", "");
-        settings.setValue("password", "");
-        settings.setValue("access_token", "");
-        settings.setValue("refresh_token", "");
-        settings.endGroup();
-        // 下载
-        settings.beginGroup("Download");
-        settings.setValue("download_path", "data/download");
-        settings.endGroup();
-        // 数据源
-        settings.beginGroup("EnabledSites");
-        settings.setValue("api", "*");
-        settings.setValue("site", "*");
-        settings.setValue("bt", "*");
-        settings.endGroup();
-    }
+    // Bangumi
+    settings.beginGroup("Bangumi");
+    setDefaultIfMissing(settings, "user_id", "");
+    setDefaultIfMissing(settings, "client_id", "");
+    setDefaultIfMissing(settings, "client_secret", "");
+    setDefaultIfMissing(settings, "redirect_uri", "");
+    setDefaultIfMissing(settings, "access_token", "");
+    setDefaultIfMissing(settings, "refresh_token", "");
+    setDefaultIfMissing(settings, "expires_at", 0);
+    setDefaultIfMissing(settings, "bangumi_base_url", "https://bangumi.tv/");
+    setDefaultIfMissing(settings, "rss_guid", "0");
+    settings.endGroup();
+    // PikPak
+    settings.beginGroup("PikPak");
+    setDefaultIfMissing(settings, "username", "");
+    setDefaultIfMissing(settings, "password", "");
+    setDefaultIfMissing(settings, "access_token", "");
+    setDefaultIfMissing(settings, "refresh_token", "");
+    settings.endGroup();
+    // 下载
+    settings.beginGroup("Download");
+    setDefaultIfMissing(settings, "download_path", "data/download");
+    settings.endGroup();
+    // 数据源
+    settings.beginGroup("EnabledSites");
+    setDefaultIfMissing(settings, "api", "*");
+    setDefaultIfMissing(settings, "site", "*");
+    setDefaultIfMissing(settings, "bt", "*");
+    settings.endGroup();
+}
+
+void setDefaultIfMissing(QSettings &settings, const QString &key, const QVariant &defaultValue)
+{   // 设置缺失键
+    if (!settings.contains(key)) settings.setValue(key, defaultValue);
 }
 
 QVariant getConfig(const QString &key, const QVariant &defaultValue)
