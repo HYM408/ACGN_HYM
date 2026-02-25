@@ -34,7 +34,7 @@ private slots:
     void onBackButtonClicked();
 
 private:
-    [[nodiscard]] QString getSiteIconUrl(const QString &siteId) const;
+    static QString getSiteIconUrl(const QString &siteId);
     void createSiteDetailTab(const QString &siteId);
     QWidget* createSiteCard(const QString &siteId, const QString &status, const QList<SearchResult> &results);
     void updateCardContent(const QWidget *card, const QString &status, const QList<SearchResult> &results);
@@ -54,9 +54,6 @@ private:
     QMap<QString, QWidget*> siteWidgets;
     QMap<QString, QFrame*> siteDetailFrames;
     QTabWidget *detailTabWidget = nullptr;
-    QStringList apiSiteIds;
-    QStringList allSiteIds;
-    QStringList btSiteIds;
     QTimer *updateTimer = nullptr;
     QWidget *original_parent = nullptr;
     QLayout *original_layout = nullptr;

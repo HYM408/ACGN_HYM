@@ -28,6 +28,12 @@ void initConfig()
         settings.beginGroup("Download");
         settings.setValue("download_path", "data/download");
         settings.endGroup();
+        // 数据源
+        settings.beginGroup("EnabledSites");
+        settings.setValue("api", "*");
+        settings.setValue("site", "*");
+        settings.setValue("bt", "*");
+        settings.endGroup();
     }
 }
 

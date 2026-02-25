@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QThreadPool>
 #include "player.h"
+#include "../config.h"
 #include "player_core.h"
 #include "../api/pikpak_api.h"
 #include "../crawler/crawler.h"
@@ -56,9 +57,24 @@ void PlayerPage::fetchRoutes(const QJsonObject &collectionData, const QJsonObjec
 {   // 创建组件并搜索
     show();
     m_episodeData = episodeData;
-    apiSiteIds = Crawler::getAllAPISiteIds();
-    allSiteIds = Crawler::getAllSiteIds();
-    btSiteIds = Crawler::getAllBTSiteIds();
+    QStringList allApiIds = Crawler::getAllAPISiteIds();
+    QStringList allSiteIds = Crawler::getAllSiteIds();
+    QStringList allBtIds   = Crawler::getAllBTSiteIds();
+    auto parseEnabled = [](const QString &key, const QStringList &allIds) -> QStringList {
+        QVariant value = getConfig(key, "");
+        if (value.typeId() == QMetaType::QStringList) return value.toStringList();
+        QString str = value.toString();
+        if (str == "*") {
+            setConfig(key, allIds);
+            return allIds;
+        }
+        return str.isEmpty() ? QStringList() : str.split(',', Qt::SkipEmptyParts);
+    };
+    QStringList enabledApiIds  = parseEnabled("EnabledSites/api", allApiIds);
+    QStringList enabledSiteIds = parseEnabled("EnabledSites/site", allSiteIds);
+    QStringList enabledBtIds   = parseEnabled("EnabledSites/bt", allBtIds);
+    QStringList allIds = enabledApiIds + enabledSiteIds + enabledBtIds;
+    if (allIds.isEmpty()) return;
     QString keyword = collectionData.value("subject_name_cn").toString();
     if (keyword.isEmpty()) keyword = collectionData.value("subject_name").toString();
     QWidget *container = ui.scrollAreaWidgetContents;
@@ -69,7 +85,6 @@ void PlayerPage::fetchRoutes(const QJsonObject &collectionData, const QJsonObjec
     detailTabWidget->setIconSize(QSize(30, 30));
     detailTabWidget->setStyleSheet("QTabBar::tab {width: 50px; height: 50px}");
     detailTab->layout()->addWidget(detailTabWidget);
-    QStringList allIds = apiSiteIds + btSiteIds + allSiteIds;
     for (const QString &siteId : std::as_const(allIds)) {
         QWidget *card = createSiteCard(siteId, "loading", {});
         siteWidgets[siteId] = card;
@@ -83,16 +98,19 @@ void PlayerPage::fetchRoutes(const QJsonObject &collectionData, const QJsonObjec
             QMetaObject::invokeMethod(this, slot, Qt::QueuedConnection, Q_ARG(QString, siteId), Q_ARG(decltype(results), results));});
         }
     };
-    startSearch(apiSiteIds, &Crawler::searchAPI,   "handleSearchResult");
-    startSearch(allSiteIds, &Crawler::searchSite,  "handleSearchResult");
-    startSearch(btSiteIds,  &Crawler::searchBT,    "handleBTSearchResult");
+    startSearch(enabledApiIds, &Crawler::searchAPI, "handleSearchResult");
+    startSearch(enabledSiteIds, &Crawler::searchSite, "handleSearchResult");
+    startSearch(enabledBtIds, &Crawler::searchBT, "handleBTSearchResult");
 }
 
-QString PlayerPage::getSiteIconUrl(const QString &siteId) const
+QString PlayerPage::getSiteIconUrl(const QString &siteId)
 {   // 图标
-    if (apiSiteIds.contains(siteId)) return Crawler::loadAPIConfig(siteId)["icon"].toString();
-    if (allSiteIds.contains(siteId)) return Crawler::loadSiteConfig(siteId)["icon"].toString();
-    return Crawler::loadBTConfig(siteId)["icon"].toString();
+    std::vector loaders = {Crawler::loadAPIConfig, Crawler::loadSiteConfig, Crawler::loadBTConfig};
+    for (auto loader : loaders) {
+        QJsonObject config = loader(siteId);
+        if (!config.isEmpty()) return config["icon"].toString();
+    }
+    return {};
 }
 
 void PlayerPage::createSiteDetailTab(const QString &siteId)
