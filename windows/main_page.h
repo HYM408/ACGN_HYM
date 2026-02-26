@@ -10,11 +10,13 @@ class DatabaseManager;
 
 struct CollectionData {
     int subject_id;
+    QString subject_date;
     QString subject_name;
     QString subject_name_cn;
     int subject_eps;
     int subject_volumes;
     QString subject_images_common;
+    int ep_status;
     int vol_status;
     int type;
     int subject_type;
@@ -67,6 +69,7 @@ private:
     void displayCurrentPage();
     void clearDisplayArea();
     void setupCardComponents(int cardIndex, const CollectionData &collection);
+    static void setProgressText(QLabel* label, const CollectionData& collection);
     bool eventFilter(QObject *obj, QEvent *event) override;
     void showDetailPage(const CollectionData &collectionData);
     void showEpisodePage(const CollectionData &collectionData);

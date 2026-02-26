@@ -58,7 +58,7 @@ void MainPageManager::initCardPool()
         auto *infoFrame = new QFrame();
         infoFrame->setStyleSheet("background-color: transparent");
         auto *infoLayout = new QVBoxLayout(infoFrame);
-        infoLayout->setSpacing(8);
+        infoLayout->setSpacing(15);
         infoLayout->setContentsMargins(5, 5, 0, 0);
         // 标题
         components.titleLabel = new QLabel();
@@ -212,11 +212,13 @@ void MainPageManager::loadCollections(int subjectType, int statusType, bool rese
         for (const auto &tagValue : row["subject_tags"].toArray()) tagsList.append(tagValue.toVariant());
         allCollections.append({
             row["subject_id"].toInt(),
+            row["subject_date"].toString(),
             row["subject_name"].toString(),
             row["subject_name_cn"].toString(),
             row["subject_eps"].toInt(),
             row["subject_volumes"].toInt(),
             row["subject_images_common"].toString(),
+            row["ep_status"].toInt(),
             row["vol_status"].toInt(),
             row["type"].toInt(),
             row["subject_type"].toInt(),
@@ -266,9 +268,24 @@ void MainPageManager::setupCardComponents(int cardIndex, const CollectionData &c
     card.card->setProperty("collectionData", QVariant::fromValue(collection));
     ImageUtil::loadImageWithCache(cacheImageUtil, collection.subject_images_common, card.coverLabel, 40, false, true);
     card.titleLabel->setText(collection.subject_name_cn.isEmpty() ? collection.subject_name : collection.subject_name_cn);
-    if (collection.subject_type == 2) return card.progressLabel->setText(collection.subject_eps > 0 ? QString("全%1话").arg(collection.subject_eps) : "全--话");
-    if (collection.subject_type == 4) return card.progressLabel->setText("");
-    if (collection.subject_type == 7 || collection.subject_type == 8) return card.progressLabel->setText(QString("全%1卷·全%2话").arg(collection.subject_volumes > 0 ? QString::number(collection.subject_volumes) : "--").arg(collection.subject_eps > 0 ? QString::number(collection.subject_eps) : "--"));
+    setProgressText(card.progressLabel, collection);
+}
+
+void MainPageManager::setProgressText(QLabel *label, const CollectionData &collection)
+{   // 设置进度
+    QString totalEps = collection.subject_eps > 0 ? QString::number(collection.subject_eps) : "--";
+    if (collection.subject_type == 2) {
+        QDate airDate = QDate::fromString(collection.subject_date, Qt::ISODate);
+        if (!airDate.isValid()) label->setText(QString("未开播 · 全 %1 话").arg(totalEps));
+        else if (airDate > QDate::currentDate()) label->setText(QString("%1 开播 · 预定全 %2 话").arg(airDate.toString(Qt::ISODate), totalEps));
+        else {
+            QString progress = (collection.ep_status >= collection.subject_eps) ? "已看完" : QString("看过 %1").arg(collection.ep_status);
+            label->setText(QString("已开播 · 全 %1 话 · %2").arg(totalEps, progress));
+        }
+    } else if (collection.subject_type == 7 || collection.subject_type == 8) {
+        QString totalVols = collection.subject_volumes > 0 ? QString::number(collection.subject_volumes) : "--";
+        label->setText(QString("全 %1 卷 · 全 %2 话").arg(totalVols, totalEps));
+    } else label->clear();
 }
 
 void MainPageManager::clearDisplayArea()
