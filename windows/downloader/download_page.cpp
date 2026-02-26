@@ -33,52 +33,71 @@ void DownloadPage::selectDownloadPath()
     downloadPath = dir;
 }
 
-void DownloadPage::loadRecentFiles()
-{   // 显示最近添加
+void DownloadPage::displayItems(const QJsonArray &items, const QString &emptyMessage)
+{   // 显示组件
     clearLayout(ui.verticalLayout_2);
-    QJsonObject result = pikpakApi->getRecentFiles();
-    QJsonArray events = result["events"].toArray();
-    if (events.isEmpty()) {
-        auto *label = new QLabel("暂无最近添加的文件");
+    if (items.isEmpty()) {
+        auto *label = new QLabel(emptyMessage);
         label->setAlignment(Qt::AlignCenter);
         label->setStyleSheet("font-size: 14px; color: #999; padding: 20px");
         ui.verticalLayout_2->addWidget(label);
+        ui.verticalLayout_2->addStretch();
         return;
     }
-    for (const auto &val : events) {
-        QJsonObject event = val.toObject();
-        QJsonObject ref = event["reference_resource"].toObject();
-        QString fileId = event["file_id"].toString();
-        QString fileName = event["file_name"].toString();
-        QString typeText;
+    for (const auto &val : items) {
+        QJsonObject obj = val.toObject();
+        QString typeText = obj["kind"].toString() == "drive#folder" ? "文件夹" : "文件";
         QString sizeText;
-        if (ref["kind"].toString() == "drive#folder") typeText = "文件夹";
-        else {
-            typeText = "文件";
-            qint64 size = ref["size"].toString().toLongLong();
-            sizeText = QLocale().formattedDataSize(size);
+        if (typeText == "文件") {
+            qint64 size = obj["size"].toString().toLongLong();
+            sizeText = " " + QLocale().formattedDataSize(size);
         }
-        QString typeSizeText = typeText + (sizeText.isEmpty() ? "" : " " + sizeText);
         auto *item = new QFrame(this);
         item->setStyleSheet("QFrame {border: 1px solid #e0e0e0}"
                             "QFrame:hover {background-color: #f0f0f0}");
         item->setProperty("type", typeText);
-        item->setProperty("file_id", fileId);
-        item->setProperty("file_name", fileName);
+        item->setProperty("file_id", obj["id"].toString());
+        item->setProperty("file_name", obj["name"].toString());
         item->installEventFilter(this);
-        auto *itemLayout = new QVBoxLayout(item);
-        auto *nameLabel = new QLabel(fileName);
+        auto *layout = new QVBoxLayout(item);
+        auto *nameLabel = new QLabel(obj["name"].toString());
         nameLabel->setStyleSheet("font-size: 14px; background: transparent; border: none");
         nameLabel->setWordWrap(true);
         nameLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
-        itemLayout->addWidget(nameLabel);
-        auto *typeLabel = new QLabel(typeSizeText);
+        layout->addWidget(nameLabel);
+        auto *typeLabel = new QLabel(typeText + sizeText);
         typeLabel->setStyleSheet("font-size: 12px; background: transparent; border: none");
         typeLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
-        itemLayout->addWidget(typeLabel);
+        layout->addWidget(typeLabel);
         ui.verticalLayout_2->addWidget(item);
     }
     ui.verticalLayout_2->addStretch();
+}
+
+void DownloadPage::loadRecentFiles()
+{   // 显示最近添加
+    QJsonObject result = pikpakApi->getRecentFiles();
+    QJsonArray events = result["events"].toArray();
+    QJsonArray items;
+    for (const auto &val : events) {
+        QJsonObject event = val.toObject();
+        QJsonObject ref = event["reference_resource"].toObject();
+        QJsonObject item;
+        item["id"] = event["file_id"].toString();
+        item["name"] = event["file_name"].toString();
+        item["kind"] = ref["kind"].toString();
+        item["size"] = ref["size"].toString();
+        items.append(item);
+    }
+    displayItems(items, "暂无最近添加的文件");
+}
+
+void DownloadPage::loadFolderContent(const QString &folderId)
+{   // 显示文件夹内容
+    QJsonObject result = pikpakApi->getFileList(folderId, 100, "");
+    QJsonArray files = result["files"].toArray();
+    displayItems(files, "文件夹为空");
+    currentFolderId = folderId;
 }
 
 bool DownloadPage::eventFilter(QObject *obj, QEvent *event)
@@ -96,7 +115,7 @@ bool DownloadPage::eventFilter(QObject *obj, QEvent *event)
             if (downloadUrl.isEmpty()) downloadUrl = fileInfo["medias"].toArray().first().toObject()["link"].toObject()["url"].toString();
             qDebug() << "下载链接:" << downloadUrl;
             addDownloadTask(downloadUrl, fileName);
-        }
+        } else if (type == "文件夹") loadFolderContent(fileId);
         return true;
     }
     return QWidget::eventFilter(obj, event);

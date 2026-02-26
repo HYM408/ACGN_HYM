@@ -193,3 +193,27 @@ bool PikPakApi::transferShareLink(const QString &shareLink, const QString &passC
     if (restoreResult.isEmpty()) return false;
     return true;
 }
+
+QJsonObject PikPakApi::getFileList(const QString &parentId, int limit, const QString &pageToken)
+{   // 获取目录下文件列表
+    QUrl url("https://api-drive.mypikpak.com/drive/v1/files");
+    QUrlQuery query;
+    query.addQueryItem("thumbnail_size", "SIZE_MEDIUM");
+    query.addQueryItem("limit", QString::number(limit));
+    query.addQueryItem("parent_id", parentId);
+    if (!pageToken.isEmpty()) query.addQueryItem("page_token", pageToken);
+    QJsonObject filters;
+    filters["trashed"] = QJsonObject{{"eq", false}};
+    filters["phase"] = QJsonObject{{"eq", "PHASE_TYPE_COMPLETE"}};
+    query.addQueryItem("filters", QString::fromUtf8(QJsonDocument(filters).toJson(QJsonDocument::Compact)));
+    url.setQuery(query);
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setRawHeader("Authorization", ("Bearer " + accessToken).toUtf8());
+    request.setRawHeader("X-Device-Id", deviceId.toUtf8());
+    request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
+    QNetworkAccessManager manager;
+    int statusCode = 0;
+    QJsonObject result = sendRequest(manager, request, "GET", QByteArray(), 3, &statusCode);
+    return statusCode == 200 ? result : QJsonObject();
+}

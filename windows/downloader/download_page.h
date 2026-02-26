@@ -24,6 +24,8 @@ private slots:
 private:
     void setupDownloadPathUI();
     void setupDownloadList() const;
+    void displayItems(const QJsonArray &items, const QString &emptyMessage);
+    void loadFolderContent(const QString &folderId);
     QFrame* createDownloadItem(const QString &fileName);
     void addDownloadTask(const QString &url, const QString &fileName);
     static void updateDownloadProgress(const QFrame *widget, int percent, qint64 downloaded, qint64 total);
@@ -32,6 +34,7 @@ private:
     Ui::DownloaderPage ui{};
     PikPakApi *pikpakApi = nullptr;
     QString downloadPath;
+    QString currentFolderId;
     QMap<QString, ChunkDownload*> downloadTasks;
     QMap<QString, QFrame*> taskWidgets;
 };

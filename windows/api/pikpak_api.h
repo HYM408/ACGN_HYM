@@ -18,6 +18,7 @@ public:
     QJsonObject getShareInfo(const QString &shareId, const QString &parentId = QString(), const QString &passCode = QString());
     QJsonObject restoreShare(const QString &shareId, const QString &passCodeToken, const QStringList &fileIds);
     bool transferShareLink(const QString &shareLink, const QString &passCode);
+    QJsonObject getFileList(const QString& parentId, int limit, const QString& pageToken);
 
 private:
     QJsonObject sendRequest(QNetworkAccessManager &manager, QNetworkRequest &request, const QString &method = "GET", const QByteArray &data = QByteArray(), int maxRetries = 3, int *statusCode = nullptr);
