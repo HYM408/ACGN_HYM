@@ -46,6 +46,23 @@ void StatusSelector::updateStatus(int statusValue)
     if (collectionType >= 1 && collectionType <= 5) success = bangumiAPI->updateCollection(subjectId, collectionData) && (DatabaseManager::updateCollectionField(subjectId, "type", statusValue), true);
     else  success = bangumiAPI->createOrUpdateCollection(subjectId, collectionData) && (DatabaseManager::insertManyCollectionData(QJsonArray{bangumiAPI->getUserCollection(subjectId)}), true);
     qDebug() << subjectId << "状态更新" << (success ? "成功" : "失败");
-    if (success) callback(statusValue);
+    if (success) {
+        callback(statusValue);
+        if (statusValue == 2) {
+            QJsonArray episodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
+            QJsonArray apiEpisodes;
+            if (episodes.isEmpty()) apiEpisodes = bangumiAPI->getSubjectEpisodes(subjectId);
+            if (!apiEpisodes.isEmpty()) {
+                DatabaseManager::insertManyEpisodes(subjectId, apiEpisodes);
+                episodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
+            }
+            QJsonArray episodeIds;
+            for (const QJsonValueRef &value : episodes) episodeIds.append(value.toObject().value("id").toInt());
+            if (!episodeIds.isEmpty()) {
+                QJsonObject apiRequestData{{"episode_id", episodeIds}, {"type", 2}};
+                if (bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData)) DatabaseManager::updateAllEpisodesStatus(subjectId, 2);
+            }
+        }
+    }
     deleteLater();
 }
