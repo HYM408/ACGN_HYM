@@ -209,6 +209,8 @@ void EpisodeOverlay::updateEpisodeView()
 
 void EpisodeOverlay::onEpisodeItemClicked(const QJsonObject &episodeData)
 {   // 点击剧集
+    int epType = episodeData.value("episode_type").toInt();
+    if (epType != 0 && epType != 1) return ;
     closeOverlay();
     emit episodeClicked(collectionData, episodeData);
 }
