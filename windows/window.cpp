@@ -121,7 +121,8 @@ void MainWindow::onCloseButtonClicked()
 {   // 关闭程序
     hide();
     abortNetworkRequests();
-    QTimer::singleShot(1500, [] {QApplication::quit();});
+    QTimer::singleShot(1000, [] {QApplication::quit();});
+    QTimer::singleShot(5000, [] {QApplication::quit();});
 }
 
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
