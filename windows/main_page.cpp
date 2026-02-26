@@ -120,11 +120,11 @@ void MainPageManager::initStatusFrames()
 void MainPageManager::setupConnections()
 {   // 连接
     initStatusFrames();
-    connect(mainWindow->animation_Button, &QPushButton::clicked, this, [this]() {switchCategory(2, "动画");});
-    connect(mainWindow->novel_Button, &QPushButton::clicked, this, [this]() {switchCategory(7, "小说");});
-    connect(mainWindow->game_Button, &QPushButton::clicked, this, [this]() {switchCategory(4, "游戏");});
-    connect(mainWindow->comic_Button, &QPushButton::clicked, this, [this]() {switchCategory(8, "漫画");});
-    connect(mainWindow->refresh_Button, &QPushButton::clicked, this, [this]() {loadCollections(currentSubjectType, currentStatusType, true);});
+    connect(mainWindow->animation_Button, &QPushButton::clicked, this, [this] {switchCategory(2, "动画");});
+    connect(mainWindow->novel_Button, &QPushButton::clicked, this, [this] {switchCategory(7, "小说");});
+    connect(mainWindow->game_Button, &QPushButton::clicked, this, [this] {switchCategory(4, "游戏");});
+    connect(mainWindow->comic_Button, &QPushButton::clicked, this, [this] {switchCategory(8, "漫画");});
+    connect(mainWindow->refresh_Button, &QPushButton::clicked, this, [this] {loadCollections(currentSubjectType, currentStatusType, true);});
     connect(mainWindow->previous_Button, &QPushButton::clicked, this, &MainPageManager::previousPage);
     connect(mainWindow->next_Button, &QPushButton::clicked, this, &MainPageManager::nextPage);
     connect(mainWindow->searchlist_lineEdit, &QLineEdit::textChanged, this, &MainPageManager::onSearchTextChanged);
@@ -215,6 +215,7 @@ void MainPageManager::loadCollections(int subjectType, int statusType, bool rese
             row["subject_name"].toString(),
             row["subject_name_cn"].toString(),
             row["subject_eps"].toInt(),
+            row["subject_volumes"].toInt(),
             row["subject_images_common"].toString(),
             row["vol_status"].toInt(),
             row["type"].toInt(),
@@ -265,7 +266,9 @@ void MainPageManager::setupCardComponents(int cardIndex, const CollectionData &c
     card.card->setProperty("collectionData", QVariant::fromValue(collection));
     ImageUtil::loadImageWithCache(cacheImageUtil, collection.subject_images_common, card.coverLabel, 40, false, true);
     card.titleLabel->setText(collection.subject_name_cn.isEmpty() ? collection.subject_name : collection.subject_name_cn);
-    card.progressLabel->setText(collection.subject_eps > 0 ? QString("全%1话").arg(collection.subject_eps) : "全--话");
+    if (collection.subject_type == 2) return card.progressLabel->setText(collection.subject_eps > 0 ? QString("全%1话").arg(collection.subject_eps) : "全--话");
+    if (collection.subject_type == 4) return card.progressLabel->setText("");
+    if (collection.subject_type == 7 || collection.subject_type == 8) return card.progressLabel->setText(QString("全%1卷·全%2话").arg(collection.subject_volumes > 0 ? QString::number(collection.subject_volumes) : "--").arg(collection.subject_eps > 0 ? QString::number(collection.subject_eps) : "--"));
 }
 
 void MainPageManager::clearDisplayArea()

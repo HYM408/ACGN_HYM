@@ -13,6 +13,7 @@ struct CollectionData {
     QString subject_name;
     QString subject_name_cn;
     int subject_eps;
+    int subject_volumes;
     QString subject_images_common;
     int vol_status;
     int type;
