@@ -26,8 +26,8 @@ private:
     void setupDownloadList() const;
     void displayItems(const QJsonArray &items, const QString &emptyMessage);
     void loadFolderContent(const QString &folderId);
+    void fetchAndDownload(const QString& fileId, const QString& fileName);
     QFrame* createDownloadItem(const QString &fileName);
-    void addDownloadTask(const QString &url, const QString &fileName);
     static void updateDownloadProgress(const QFrame *widget, int percent, qint64 downloaded, qint64 total);
     static void updateDownloadStatus(QFrame *widget, const QString &status);
     static void clearLayout(QLayout *layout);

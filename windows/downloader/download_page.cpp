@@ -92,6 +92,25 @@ void DownloadPage::loadRecentFiles()
     displayItems(items, "暂无最近添加的文件");
 }
 
+void DownloadPage::fetchAndDownload(const QString &fileId, const QString &fileName)
+{   // 获取链接并下载
+    updateDownloadStatus(taskWidgets.value(fileName, nullptr), "获取链接");
+    QJsonObject fileInfo = pikpakApi->getDownloadUrl(fileId);
+    QString downloadUrl = fileInfo["web_content_link"].toString();
+    if (downloadUrl.isEmpty()) {
+        auto medias = fileInfo["medias"].toArray();
+        if (!medias.isEmpty()) downloadUrl = medias.first().toObject()["link"].toObject()["url"].toString();
+    }
+    QString savePath = downloadPath + "/" + fileName;
+    auto *task = new ChunkDownload(downloadUrl, savePath, 4, this);
+    downloadTasks[fileName] = task;
+    connect(task, &ChunkDownload::progressChanged, this, [this, fileName](int percent, qint64 downloaded, qint64 total) {
+        if (QFrame *widget = taskWidgets.value(fileName, nullptr)) updateDownloadProgress(widget, percent, downloaded, total);});
+    connect(task, &ChunkDownload::statusChanged, this, [this, fileName](const QString &status) {
+        if (QFrame *widget = taskWidgets.value(fileName, nullptr)) updateDownloadStatus(widget, status);});
+    task->start();
+}
+
 void DownloadPage::loadFolderContent(const QString &folderId)
 {   // 显示文件夹内容
     QJsonObject result = pikpakApi->getFileList(folderId, 100, "");
@@ -109,13 +128,14 @@ bool DownloadPage::eventFilter(QObject *obj, QEvent *event)
         QString fileId = frame->property("file_id").toString();
         QString fileName = frame->property("file_name").toString();
         if (type == "文件") {
-            QJsonObject fileInfo = pikpakApi->getDownloadUrl(fileId);
-            if (fileInfo.isEmpty()) return true;
-            QString downloadUrl = fileInfo["web_content_link"].toString();
-            if (downloadUrl.isEmpty()) downloadUrl = fileInfo["medias"].toArray().first().toObject()["link"].toObject()["url"].toString();
-            qDebug() << "下载链接:" << downloadUrl;
-            addDownloadTask(downloadUrl, fileName);
-        } else if (type == "文件夹") loadFolderContent(fileId);
+            if (taskWidgets.contains(fileName) || downloadTasks.contains(fileName)) return true;
+            QFrame *widget = createDownloadItem(fileName);
+            taskWidgets[fileName] = widget;
+            ui.verticalLayout_4->insertWidget(0, widget);
+            fetchAndDownload(fileId, fileName);
+            return true;
+        }
+        loadFolderContent(fileId);
         return true;
     }
     return QWidget::eventFilter(obj, event);
@@ -139,9 +159,8 @@ QFrame* DownloadPage::createDownloadItem(const QString &fileName)
     progressFrame->lower();
     auto *layout = new QHBoxLayout(widget);
     layout->setContentsMargins(10, 5, 10, 5);
-    auto *statusLabel = new QLabel("等待");
+    auto *statusLabel = new QLabel("获取链接");
     statusLabel->setStyleSheet("font-size: 13px; font-weight: bold; background: transparent; border: none; min-width: 40px");
-    statusLabel->setFixedWidth(40);
     layout->addWidget(statusLabel);
     auto *nameLabel = new QLabel(fileName);
     nameLabel->setStyleSheet("font-size: 13px; font-weight: bold; background: transparent; border: none");
@@ -169,22 +188,6 @@ QFrame* DownloadPage::createDownloadItem(const QString &fileName)
     return widget;
 }
 
-void DownloadPage::addDownloadTask(const QString &url, const QString &fileName)
-{   // 添加下载任务
-    if (downloadTasks.contains(fileName)) return;
-    QString savePath = downloadPath + "/" + fileName;
-    auto *task = new ChunkDownload(url, savePath, 4, this);
-    downloadTasks[fileName] = task;
-    QFrame *widget = createDownloadItem(fileName);
-    taskWidgets[fileName] = widget;
-    connect(task, &ChunkDownload::progressChanged, this, [this, fileName](int percent, qint64 downloaded, qint64 total) {
-        if (QFrame *widget = taskWidgets.value(fileName, nullptr)) updateDownloadProgress(widget, percent, downloaded, total);});
-    connect(task, &ChunkDownload::statusChanged, this, [this, fileName](const QString &status) {
-        if (QFrame *widget = taskWidgets.value(fileName, nullptr)) updateDownloadStatus(widget, status);});
-    ui.verticalLayout_4->insertWidget(0, widget);
-    task->start();
-}
-
 void DownloadPage::updateDownloadProgress(const QFrame *widget, int percent, qint64 downloaded, qint64 total)
 {   // 更新下载进度
     int width = widget->width() * percent / 100;
@@ -201,7 +204,7 @@ void DownloadPage::updateDownloadStatus(QFrame *widget, const QString &status)
         {"下载中", "#4CAF50"},
         {"完成", "#2196F3"},
         {"错误", "#F44336"},
-        {"等待", "#9E9E9E"}
+        {"获取链接", "#FF9800"}
     };
     QString color = colorMap.value(status, "#9E9E9E");
     widget->setStyleSheet(QString("QFrame {border: 2px solid %1; border-radius: 4px; background: transparent}").arg(color));
