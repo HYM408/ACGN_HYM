@@ -72,7 +72,7 @@ void PlayerPage::fetchRoutes(const QJsonObject &collectionData, const QJsonObjec
         if (str == "*") {
             setConfig("EnabledSites/sites", allIds);
             sortedIds = allIds;
-        }
+        }else sortedIds = QStringList(str);
     }
     if (!sortedIds.isEmpty()) {
         QSet<QString> allSet = QSet(allIds.begin(), allIds.end());
