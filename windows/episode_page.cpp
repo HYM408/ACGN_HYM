@@ -227,7 +227,8 @@ void EpisodeOverlay::onMarkAllWatchedClicked()
     bool success = localBangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData);
     if (!success) return;
     DatabaseManager::updateAllEpisodesStatus(subjectId, 2);
-    if (guard) loadEpisodesData();
+    if (!guard) return;
+    loadEpisodesData();
     ui.pushButton_15->setText("全部已看");
     ui.pushButton_15->setEnabled(true);
 }
