@@ -12,7 +12,7 @@ static const QMap<int, QMap<int, QString>> statusNamesMap = {
     {7, {{0, "取消收藏"}, {1, "想读"}, {2, "读过"}, {3, "在读"}, {4, "搁置"}, {5, "抛弃"}}},
     {8, {{0, "取消收藏"}, {1, "想读"}, {2, "读过"}, {3, "在读"}, {4, "搁置"}, {5, "抛弃"}}}};
 
-StatusSelector::StatusSelector(const QPushButton *parentButton, int subjectType, int collectionType, int subjectId, BangumiAPI* bangumiAPI, std::function<void(int)> callback): QWidget(nullptr), subjectId(subjectId), collectionType(collectionType), bangumiAPI(bangumiAPI), callback(std::move(callback))
+StatusSelector::StatusSelector(const QPushButton *parentButton, int subjectType, int collectionType, int subjectId, BangumiAPI* bangumiAPI, std::function<void(int)> callback, int xOffset): QWidget(nullptr), subjectId(subjectId), collectionType(collectionType), bangumiAPI(bangumiAPI), callback(std::move(callback))
 {   // 下拉菜单
     setWindowFlags(Qt::Popup | Qt::FramelessWindowHint);
     setFixedWidth(120);
@@ -27,12 +27,12 @@ StatusSelector::StatusSelector(const QPushButton *parentButton, int subjectType,
         connect(btn, &QPushButton::clicked, this, [this, statusValue] {updateStatus(statusValue);});
         layout->addWidget(btn);
     }
-    move(parentButton->mapToGlobal(QPoint(-40, parentButton->height())));
+    move(parentButton->mapToGlobal(QPoint(xOffset, parentButton->height())));
 }
 
-void StatusSelector::showStatusSelector(const QPushButton *parentButton, int subjectType, int collectionType, int subjectId, BangumiAPI* bangumiAPI, std::function<void(int)> callback)
+void StatusSelector::showStatusSelector(const QPushButton *parentButton, int subjectType, int collectionType, int subjectId, BangumiAPI* bangumiAPI, std::function<void(int)> callback, int xOffset)
 {   // 显示下拉菜单
-    auto selector = new StatusSelector(parentButton, subjectType, collectionType, subjectId, bangumiAPI, std::move(callback));
+    auto selector = new StatusSelector(parentButton, subjectType, collectionType, subjectId, bangumiAPI, std::move(callback), xOffset);
     selector->setAttribute(Qt::WA_DeleteOnClose);
     selector->show();
 }

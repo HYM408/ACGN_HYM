@@ -106,7 +106,7 @@ void DetailPage::onStatusButtonClicked()
     StatusSelector::showStatusSelector(ui.pushButton_26, subjectType, currentStatus, currentData.subject_id, bangumiAPI, [this, subjectType](int selectedStatus) {
         currentData.type = selectedStatus;
         ui.pushButton_26->setText(statusNamesMap.value(subjectType).value(selectedStatus));
-    });
+    }, -20);
 }
 
 void DetailPage::updateDetailPage(const QJsonObject &subjectData)

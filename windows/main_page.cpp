@@ -93,7 +93,7 @@ void MainPageManager::initCardPool()
         // 连接信号
         connect(components.moreButton, &QPushButton::clicked, this, [this, i] {
             auto data = cardPool[i].card->property("collectionData").value<CollectionData>();
-            StatusSelector::showStatusSelector(cardPool[i].moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);});});
+            StatusSelector::showStatusSelector(cardPool[i].moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);}, -37);});
         connect(components.episodeButton, &QPushButton::clicked, this, [this, i] {showEpisodePage(cardPool[i].card->property("collectionData").value<CollectionData>());});
     }
 }
