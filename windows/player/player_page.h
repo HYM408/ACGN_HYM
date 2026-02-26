@@ -39,6 +39,7 @@ private:
     QWidget* createSiteCard(const QString &siteId, const QString &status, const QList<SearchResult> &results);
     void updateCardContent(const QWidget *card, const QString &status, const QList<SearchResult> &results);
     static void updateBTCardContent(const QWidget *card, const QString &status, const QList<BTResult> &results);
+    static void filterBTResults(const QList<BTResult> &results, QList<BTResult> &filtered, QList<BTResult> &excluded) ;
     QFrame* createRouteComponent(const QString &siteId, const QJsonObject &route, const QString &title);
     QFrame* createBTResultComponent(const BTResult &result);
     static void clearLayout(QLayout *layout);

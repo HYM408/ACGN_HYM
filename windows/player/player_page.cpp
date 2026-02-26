@@ -3,6 +3,7 @@
 #include <QLabel>
 #include <QDialog>
 #include <QPointer>
+#include <QCheckBox>
 #include <QJsonArray>
 #include <QPushButton>
 #include <QThreadPool>
@@ -232,6 +233,8 @@ void PlayerPage::handleSearchResult(const QString &siteId, const QList<SearchRes
 
 void PlayerPage::handleBTSearchResult(const QString &siteId, const QList<BTResult> &results)
 {   // 处理BT搜索结果
+    QList<BTResult> filtered, excluded;
+    filterBTResults(results, filtered, excluded);
     if (auto *card = siteWidgets.value(siteId)) updateBTCardContent(card, results.isEmpty() ? "error" : "success", results);
     auto *contentFrame = siteDetailFrames.value(siteId);
     if (!contentFrame) return;
@@ -242,8 +245,38 @@ void PlayerPage::handleBTSearchResult(const QString &siteId, const QList<BTResul
         errorBtn->setFlat(true);
         errorBtn->setStyleSheet("color: #ff4444; padding: 10px; border: none");
         contentLayout->addWidget(errorBtn);
-    } else for (const auto &result : results) contentLayout->addWidget(createBTResultComponent(result));
+    } else {
+        for (const auto &result : filtered) contentLayout->addWidget(createBTResultComponent(result));
+        if (!excluded.isEmpty()) {
+            auto *toggleCheck = new QCheckBox("显示被过滤的结果 (" + QString::number(excluded.size()) + "个)");
+            toggleCheck->setChecked(false);
+            contentLayout->addWidget(toggleCheck);
+            auto *excludedContainer = new QWidget();
+            excludedContainer->setVisible(false);
+            auto *excludedLayout = new QVBoxLayout(excludedContainer);
+            excludedLayout->setContentsMargins(0, 0, 0, 0);
+            for (const auto &result : excluded) {
+                QFrame *comp = createBTResultComponent(result);
+                for (QLabel *label : comp->findChildren<QLabel*>()) label->setStyleSheet(label->styleSheet() + " color: #666;");
+                excludedLayout->addWidget(comp);
+            }
+            excludedLayout->addStretch();
+            contentLayout->addWidget(excludedContainer);
+            connect(toggleCheck, &QCheckBox::toggled, [excludedContainer](bool checked) {excludedContainer->setVisible(checked);});
+        }
+    }
     contentLayout->addStretch();
+}
+
+void PlayerPage::filterBTResults(const QList<BTResult> &results, QList<BTResult> &filtered, QList<BTResult> &excluded)
+{   // 过滤BT搜索结果
+    filtered.clear();
+    excluded.clear();
+    for (const BTResult &result : results) {
+        QString name = result.name.toLower();
+        if (name.contains("360") || name.contains("480") || name.contains("720")) excluded.append(result);
+        else filtered.append(result);
+    }
 }
 
 QFrame* PlayerPage::createRouteComponent(const QString &siteId, const QJsonObject &route, const QString &title)
@@ -274,9 +307,7 @@ QFrame* PlayerPage::createBTResultComponent(const BTResult &result)
     frame->setAttribute(Qt::WA_Hover);
     frame->setStyleSheet("QFrame {border: 1px solid #e0e0e0; border-radius: 4px; margin: 2px; background-color: white}"
                          "QFrame:hover {border: 1px solid #4caf50; background-color: #e8f5e9}");
-    frame->setMaximumWidth(310);
     auto *layout = new QVBoxLayout(frame);
-    layout->setContentsMargins(10, 10, 10, 10);
     layout->setSpacing(5);
     auto addLabel = [layout](const QString &text, int fontSize, const QString &color, bool bold = false, bool expand = false) {
         if (text.isEmpty()) return;
