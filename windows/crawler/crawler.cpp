@@ -177,10 +177,14 @@ QList<BTResult> Crawler::searchBT(const QString &site_id, const QString &keyword
     QList<xmlNodePtr> rows = XmlUtil::xpathNodes(doc.data(), config["row_selector"].toString());
     for (xmlNodePtr row : rows) {
         BTResult res;
-        res.name = XmlUtil::nodeContent(XmlUtil::xpathNodes(row, config["name_selector"].toString())[0]).trimmed();
-        res.size = XmlUtil::nodeContent(XmlUtil::xpathNodes(row, config["size_selector"].toString())[0]).trimmed();
-        res.magnet_link = XmlUtil::nodeAttribute(XmlUtil::xpathNodes(row, config["magnet_selector"].toString())[0], qPrintable(config["magnet_attr"].toString()));
-        res.play_link = XmlUtil::nodeAttribute(XmlUtil::xpathNodes(row, config["play_selector"].toString())[0], qPrintable(config["play_attr"].toString()));
+        auto nameNodes = XmlUtil::xpathNodes(row, config["name_selector"].toString());
+        if (!nameNodes.isEmpty()) res.name = XmlUtil::nodeContent(nameNodes[0]).trimmed();
+        auto sizeNodes = XmlUtil::xpathNodes(row, config["size_selector"].toString());
+        if (!sizeNodes.isEmpty()) res.size = XmlUtil::nodeContent(sizeNodes[0]).trimmed();
+        auto magnetNodes = XmlUtil::xpathNodes(row, config["magnet_selector"].toString());
+        if (!magnetNodes.isEmpty()) res.magnet_link = XmlUtil::nodeAttribute(magnetNodes[0], qPrintable(config["magnet_attr"].toString()));
+        auto playNodes = XmlUtil::xpathNodes(row, config["play_selector"].toString());
+        if (!playNodes.isEmpty()) res.play_link = XmlUtil::nodeAttribute(playNodes[0], qPrintable(config["play_attr"].toString()));
         results.append(res);
     }
     return results;
