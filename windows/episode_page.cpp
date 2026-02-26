@@ -216,6 +216,8 @@ void EpisodeOverlay::onEpisodeItemClicked(const QJsonObject &episodeData)
 void EpisodeOverlay::onMarkAllWatchedClicked()
 {   // 标记全部已看
     if (episodes.isEmpty()) return;
+    ui.pushButton_15->setText(tr("标记中..."));
+    ui.pushButton_15->setEnabled(false);
     int subjectId = collectionData.value("subject_id").toInt();
     QJsonArray episodeIds;
     for (const QJsonValueRef &value : episodes) episodeIds.append(value.toObject().value("id").toInt());
@@ -226,6 +228,8 @@ void EpisodeOverlay::onMarkAllWatchedClicked()
     if (!success) return;
     DatabaseManager::updateAllEpisodesStatus(subjectId, 2);
     if (guard) loadEpisodesData();
+    ui.pushButton_15->setText("全部已看");
+    ui.pushButton_15->setEnabled(true);
 }
 
 void EpisodeOverlay::closeOverlay()
