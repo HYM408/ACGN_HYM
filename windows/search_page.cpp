@@ -82,6 +82,7 @@ QFrame *SearchPage::createResultFrame(const QVariantMap &result)
     resultData["subject_name"] = result["name"];
     resultData["subject_name_cn"] = result["name_cn"];
     resultData["subject_images_common"] = result["images"].toMap()["common"];
+    resultData["subject_type"] = result["type"];
     resultData["type"] = 0;
     animationFrame->setProperty("resultData", resultData);
     // 水平布局
@@ -114,7 +115,7 @@ QFrame *SearchPage::createResultFrame(const QVariantMap &result)
     infoLayout->addStretch();
     horizontalLayout->addLayout(infoLayout);
     // 点击事件
-    auto onClicked = [this, animationFrame]() {
+    auto onClicked = [this, animationFrame] {
         QVariantMap data = animationFrame->property("resultData").toMap();
         emit showDetailPage(data);
     };

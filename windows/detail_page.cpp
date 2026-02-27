@@ -25,6 +25,7 @@ DetailPage::DetailPage(QWidget *parent) : QWidget(parent)
     ui.setupUi(this);
     // 初始化状态映射
     statusNamesMap = {
+        {1, {{0, "收藏"}, {1, "想读"}, {2, "读过"}, {3, "在读"}, {4, "搁置"}, {5, "抛弃"}}},
         {2, {{0, "追番"}, {1, "想看"}, {2, "看过"}, {3, "在看"}, {4, "搁置"}, {5, "抛弃"}}},
         {4, {{0, "收藏"}, {1, "想玩"}, {2, "玩过"}, {3, "在玩"}, {4, "搁置"}, {5, "抛弃"}}},
         {7, {{0, "收藏"}, {1, "想读"}, {2, "读过"}, {3, "在读"}, {4, "搁置"}, {5, "抛弃"}}},
@@ -73,6 +74,7 @@ void DetailPage::setCollectionDataFromMap(const QVariantMap &data)
     collectionData.subject_name = data["subject_name"].toString();
     collectionData.subject_name_cn = data["subject_name_cn"].toString();
     collectionData.subject_images_common = data["subject_images_common"].toString();
+    collectionData.subject_type = data["subject_type"].toInt();
     collectionData.type = data["type"].toInt();
     setCollectionData(collectionData);
 }
