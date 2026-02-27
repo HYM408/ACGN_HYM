@@ -115,9 +115,15 @@ bool EpisodeDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, cons
     return QStyledItemDelegate::editorEvent(event, model, option, index);
 }
 
+void EpisodeOverlay::keyPressEvent(QKeyEvent *event)
+{   // 键盘事件
+    if (event->key() == Qt::Key_Escape) closeOverlay();
+}
+
 void EpisodeOverlay::showWithCollectionData(const CollectionData &collData)
 {   // 显示叠加层
     show();
+    setFocus();
     ui.pushButton_13->setText(collData.subject_name_cn.isEmpty() ? collData.subject_name : collData.subject_name_cn);
     QJsonObject jsonData;
     jsonData["subject_id"] = collData.subject_id;
