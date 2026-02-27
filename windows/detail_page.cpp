@@ -57,7 +57,10 @@ void DetailPage::setupConnections()
 void DetailPage::setCollectionData(const CollectionData &data)
 {   // 显示传入数据
     currentData = data;
-    ImageUtil::loadImageWithCache(cacheImageUtil, currentData.subject_images_common, ui.cover_label_3, 15, true, true);
+    if (currentData.subject_images_common.isEmpty()) {
+        ui.cover_label_3->setText("暂无图片");
+        ui.cover_label_3->setStyleSheet("QLabel {color: gray}");
+    } else ImageUtil::loadImageWithCache(cacheImageUtil, currentData.subject_images_common, ui.cover_label_3, 15, true, true);
     ui.textEdit->setText(currentData.subject_name_cn.isEmpty() ? currentData.subject_name : currentData.subject_name_cn);
     ui.pushButton_24->setText(QString("全%1话").arg(currentData.subject_eps > 0 ? QString::number(currentData.subject_eps) : "-"));
     ui.pushButton_26->setText(statusNamesMap.value(currentData.subject_type).value(currentData.type));

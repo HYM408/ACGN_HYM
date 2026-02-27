@@ -266,7 +266,10 @@ void MainPageManager::setupCardComponents(int cardIndex, const CollectionData &c
 {   // 设置卡片
     auto &card = cardPool[cardIndex];
     card.card->setProperty("collectionData", QVariant::fromValue(collection));
-    ImageUtil::loadImageWithCache(cacheImageUtil, collection.subject_images_common, card.coverLabel, 40, false, true);
+    if (collection.subject_images_common.isEmpty()) {
+        card.coverLabel->setText("暂无图片");
+        card.coverLabel->setStyleSheet("QLabel {color: gray}");
+    } else ImageUtil::loadImageWithCache(cacheImageUtil, collection.subject_images_common, card.coverLabel, 40, false, true);
     card.titleLabel->setText(collection.subject_name_cn.isEmpty() ? collection.subject_name : collection.subject_name_cn);
     setProgressText(card.progressLabel, collection);
 }
