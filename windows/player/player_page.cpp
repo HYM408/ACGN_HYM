@@ -154,8 +154,13 @@ QWidget* PlayerPage::createSiteCard(const QString &siteId, const QString &status
 {   // 基础标签
     auto *card = new QFrame();
     card->setProperty("siteId", siteId);
+    card->setFixedHeight(78);
     auto *layout = new QVBoxLayout(card);
+    layout->setSpacing(0);
+    layout->setContentsMargins(5, 0, 5, 0);
     auto *topLayout = new QHBoxLayout();
+    topLayout->setSpacing(10);
+    topLayout->setAlignment(Qt::AlignTop);
     // 图标
     auto *iconBtn = new QPushButton();
     iconBtn->setFixedSize(20, 20);
