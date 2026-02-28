@@ -12,7 +12,6 @@
 #include "player_core.h"
 #include "../api/pikpak_api.h"
 #include "../crawler/crawler.h"
-#include "../utils/network_util.h"
 #include "../utils/cache_image_util.h"
 
 PlayerPage::PlayerPage(QWidget *parent) : QWidget(parent)
@@ -23,6 +22,8 @@ PlayerPage::PlayerPage(QWidget *parent) : QWidget(parent)
     qobject_cast<QVBoxLayout*>(ui.video_container->layout())->addWidget(vlcPlayer);
     // 设置控制面板
     setupControlOverlay();
+    // 初始化取消标志
+    m_abortFlag = std::make_shared<std::atomic<bool>>(false);
 }
 
 PlayerPage::~PlayerPage()
@@ -54,10 +55,45 @@ void PlayerPage::setupControlOverlay()
     updateTimer->start(100);
 }
 
+void PlayerPage::setSiteLoadingState(const QString &siteId) const
+{   // 更新卡片状态
+    if (auto *card = siteWidgets.value(siteId)) {
+        if (auto *statusBtn = card->findChild<QPushButton*>("statusBtn")) statusBtn->setText("搜索中...");
+        if (auto *routesContainer = card->findChild<QWidget*>("routesContainer")) routesContainer->setVisible(false);
+    }
+    if (auto *contentFrame = siteDetailFrames.value(siteId)) {
+        auto *contentLayout = qobject_cast<QVBoxLayout*>(contentFrame->layout());
+        clearLayout(contentLayout);
+        auto *loadingBtn = new QPushButton("搜索中...");
+        loadingBtn->setStyleSheet("color: #666; padding: 5px; border: none");
+        contentLayout->addWidget(loadingBtn);
+        contentLayout->addStretch();
+    }
+}
+
+void PlayerPage::startSiteSearch(const QString &siteId)
+{   // 搜索
+    setSiteLoadingState(siteId);
+    if (Crawler::getAllAPISiteIds().contains(siteId)) {QThreadPool::globalInstance()->start([=] {
+        auto results = Crawler::searchAPI(siteId, m_keyword, m_abortFlag);
+        QMetaObject::invokeMethod(this, "handleSearchResult", Qt::QueuedConnection, Q_ARG(QString, siteId), Q_ARG(QList<SearchResult>, results));});
+    } else if (Crawler::getAllSiteIds().contains(siteId)) {QThreadPool::globalInstance()->start([=] {
+        auto results = Crawler::searchSite(siteId, m_keyword, m_abortFlag);
+        QMetaObject::invokeMethod(this, "handleSearchResult", Qt::QueuedConnection, Q_ARG(QString, siteId), Q_ARG(QList<SearchResult>, results));});
+    } else if (Crawler::getAllBTSiteIds().contains(siteId)) {QThreadPool::globalInstance()->start([=] {
+        auto results = Crawler::searchBT(siteId, m_keyword, m_abortFlag);
+        QMetaObject::invokeMethod(this, "handleBTSearchResult", Qt::QueuedConnection, Q_ARG(QString, siteId), Q_ARG(QList<BTResult>, results));});
+    }
+}
+
 void PlayerPage::fetchRoutes(const QJsonObject &collectionData, const QJsonObject &episodeData)
-{   // 创建组件并搜索
+{   // 创建组件
     show();
     m_episodeData = episodeData;
+    m_keyword = collectionData.value("subject_name_cn").toString();
+    if (m_keyword.isEmpty()) m_keyword = collectionData.value("subject_name").toString();
+    *m_abortFlag = true;
+    m_abortFlag->store(false);
     QStringList allApiIds = Crawler::getAllAPISiteIds();
     QStringList allSiteIds = Crawler::getAllSiteIds();
     QStringList allBtIds = Crawler::getAllBTSiteIds();
@@ -72,7 +108,7 @@ void PlayerPage::fetchRoutes(const QJsonObject &collectionData, const QJsonObjec
         if (str == "*") {
             setConfig("EnabledSites/sites", allIds);
             sortedIds = allIds;
-        }else sortedIds = QStringList(str);
+        } else sortedIds = QStringList(str);
     }
     if (!sortedIds.isEmpty()) {
         QSet<QString> allSet = QSet(allIds.begin(), allIds.end());
@@ -80,8 +116,6 @@ void PlayerPage::fetchRoutes(const QJsonObject &collectionData, const QJsonObjec
         for (const QString &id : sortedIds) filtered.append(id);
         allIds = filtered;
     }
-    QString keyword = collectionData.value("subject_name_cn").toString();
-    if (keyword.isEmpty()) keyword = collectionData.value("subject_name").toString();
     QWidget *container = ui.scrollAreaWidgetContents;
     container->setLayout(new QVBoxLayout());
     QWidget *detailTab = ui.tabWidget->widget(1);
@@ -91,21 +125,19 @@ void PlayerPage::fetchRoutes(const QJsonObject &collectionData, const QJsonObjec
     detailTabWidget->setStyleSheet("QTabBar::tab {width: 50px; height: 50px}");
     detailTab->layout()->addWidget(detailTabWidget);
     for (const QString &siteId : std::as_const(allIds)) {
-        QWidget *card = createSiteCard(siteId, "loading", {});
+        QWidget *card = createSiteCard(siteId);
         siteWidgets[siteId] = card;
         container->layout()->addWidget(card);
         createSiteDetailTab(siteId);
     }
     qobject_cast<QVBoxLayout*>(container->layout())->addStretch();
-    auto startSearch = [this, keyword](const QStringList &siteIds, auto searchFunc, const char *slot) {
-        for (const QString &siteId : siteIds) {QThreadPool::globalInstance()->start([=] {
-            auto results = searchFunc(siteId, keyword);
-            QMetaObject::invokeMethod(this, slot, Qt::QueuedConnection, Q_ARG(QString, siteId), Q_ARG(decltype(results), results));});
-        }
-    };
-    startSearch(allApiIds, &Crawler::searchAPI, "handleSearchResult");
-    startSearch(allSiteIds, &Crawler::searchSite, "handleSearchResult");
-    startSearch(allBtIds, &Crawler::searchBT, "handleBTSearchResult");
+    for (const QString &siteId : allIds) startSiteSearch(siteId);
+}
+
+void PlayerPage::reSearchSite(const QString &siteId)
+{   // 再次搜索
+    if (m_keyword.isEmpty()) return;
+    startSiteSearch(siteId);
 }
 
 QString PlayerPage::getSiteIconUrl(const QString &siteId)
@@ -133,28 +165,23 @@ void PlayerPage::createSiteDetailTab(const QString &siteId)
     contentLayout->setContentsMargins(5, 5, 5, 5);
     contentLayout->setSpacing(3);
     contentLayout->setAlignment(Qt::AlignTop);
-    auto *loadingBtn = new QPushButton("搜索中...");
-    loadingBtn->setStyleSheet("color: #666; padding: 5px; border: none");
-    contentLayout->addWidget(loadingBtn);
-    contentLayout->addStretch();
     scrollArea->setWidget(contentFrame);
     int tabIndex = detailTabWidget->addTab(scrollArea, "");Q_UNUSED(tabIndex);
-    QPointer tabWidgetPtr(detailTabWidget);
     siteDetailFrames[siteId] = contentFrame;
     QString iconUrl = getSiteIconUrl(siteId);
-    cacheImageUtil->getImageAsync(iconUrl, [tabWidgetPtr, tabIndex](const QPixmap &pixmap) {
-        if (!tabWidgetPtr) return;
-        if (tabIndex < 0 || tabIndex >= tabWidgetPtr->count()) return;
+    cacheImageUtil->getImageAsync(iconUrl, [this, tabIndex](const QPixmap &pixmap) {
+        if (!detailTabWidget) return;
+        if (tabIndex < 0 || tabIndex >= detailTabWidget->count()) return;
         QTransform transform;
-        tabWidgetPtr->setTabIcon(tabIndex, QIcon(pixmap.transformed(transform.rotate(90))));
+        detailTabWidget->setTabIcon(tabIndex, QIcon(pixmap.transformed(transform.rotate(90))));
     }, false);
 }
 
-QWidget* PlayerPage::createSiteCard(const QString &siteId, const QString &status, const QList<SearchResult> &results)
+QWidget* PlayerPage::createSiteCard(const QString &siteId)
 {   // 基础标签
     auto *card = new QFrame();
     card->setProperty("siteId", siteId);
-    card->setFixedHeight(78);
+    card->setFixedHeight(80);
     auto *layout = new QVBoxLayout(card);
     layout->setSpacing(0);
     layout->setContentsMargins(5, 0, 5, 0);
@@ -172,8 +199,11 @@ QWidget* PlayerPage::createSiteCard(const QString &siteId, const QString &status
     // 站点名称
     auto *siteBtn = new QPushButton(siteId);
     siteBtn->setFont(QFont("", 14, QFont::Bold));
-    siteBtn->setStyleSheet("color: #333; text-align: left; border: none");
+    siteBtn->setStyleSheet(
+        "QPushButton {color: #333; text-align: left; border: none; padding: 5px 5px}"
+        "QPushButton:hover {background-color: #f0f0f0; border-radius: 5px}");
     siteBtn->setFlat(true);
+    connect(siteBtn, &QPushButton::clicked, this, [this, siteId] {reSearchSite(siteId);});
     topLayout->addWidget(siteBtn);
     // 状态.标题
     auto *statusBtn = new QPushButton();
@@ -189,7 +219,7 @@ QWidget* PlayerPage::createSiteCard(const QString &siteId, const QString &status
     routesLayout->setAlignment(Qt::AlignLeft);
     routesContainer->setVisible(false);
     layout->addWidget(routesContainer);
-    updateCardContent(card, status, results);
+    statusBtn->setText("");
     return card;
 }
 
@@ -484,10 +514,15 @@ void PlayerPage::cleanupPage()
     siteDetailFrames.clear();
 }
 
+void PlayerPage::cancelAllSearches() const
+{   // 取消所有搜索
+    if (m_abortFlag) *m_abortFlag = true;
+}
+
 void PlayerPage::onBackButtonClicked()
 {   // 返回
     if (fullscreen_mode) toggleFullscreen();
-    abortNetworkRequests();
+    cancelAllSearches();
     cleanupPage();
     emit backButtonClicked();
 }

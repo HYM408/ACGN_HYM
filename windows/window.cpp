@@ -10,7 +10,6 @@
 #include "api/pikpak_api.h"
 #include "api/bangumi_api.h"
 #include "player/player_page.h"
-#include "utils/network_util.h"
 #include "utils/cache_image_util.h"
 #include "downloader/download_page.h"
 
@@ -85,7 +84,7 @@ void MainWindow::setupConnections()
     // 标题栏
     connect(pushButton, &QPushButton::clicked, this, &MainWindow::minimizeWindow);
     connect(pushButton_8, &QPushButton::clicked, this, &MainWindow::toggleMaximizeWindow);
-    connect(pushButton_2, &QPushButton::clicked, this, &MainWindow::onCloseButtonClicked);
+    connect(pushButton_2, &QPushButton::clicked, this, &MainWindow::close);
     // 搜索
     connect(search_Button, &QPushButton::clicked, this, &MainWindow::onSearchButtonClicked);
     connect(searchPage, &SearchPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
@@ -117,11 +116,10 @@ void MainWindow::toggleMaximizeWindow()
     isMaximized() ? showNormal() : showMaximized();
 }
 
-void MainWindow::onCloseButtonClicked()
+void MainWindow::closeEvent(QCloseEvent *event)
 {   // 关闭程序
-    hide();
-    abortNetworkRequests();
-    QTimer::singleShot(1000, [] {QApplication::quit();});
+    playerPage->cancelAllSearches();
+    QMainWindow::closeEvent(event);
 }
 
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)

@@ -1,6 +1,7 @@
 #ifndef PLAYER_PAGE_H
 #define PLAYER_PAGE_H
 
+#include <QJsonObject>
 #include "player_ui.h"
 #include "../crawler/crawler.h"
 
@@ -19,12 +20,14 @@ public:
     ~PlayerPage() override;
     void setManagers(DatabaseManager *db, CacheImageUtil *cacheImage, PikPakApi *pikpakapi);
     void setupControlOverlay();
-    void fetchRoutes(const QJsonObject &collectionData, const QJsonObject &episodeData);
+    void fetchRoutes(const QJsonObject& collectionData, const QJsonObject& episodeData);
+    void cancelAllSearches() const;
 
 signals:
     void backButtonClicked();
 
 private slots:
+    void reSearchSite(const QString &siteId);
     void onRouteSelected(const QString &siteId, const QJsonObject &route);
     void onBTResultClicked(const QString &magnet, const QString &playLink);
     void handleSearchResult(const QString &siteId, const QList<SearchResult> &results);
@@ -34,9 +37,11 @@ private slots:
     void onBackButtonClicked();
 
 private:
+    void setSiteLoadingState(const QString &siteId) const;
+    void startSiteSearch(const QString &siteId);
     static QString getSiteIconUrl(const QString &siteId);
     void createSiteDetailTab(const QString &siteId);
-    QWidget* createSiteCard(const QString &siteId, const QString &status, const QList<SearchResult> &results);
+    QWidget* createSiteCard(const QString &siteId);
     void updateCardContent(const QWidget *card, const QString &status, const QList<SearchResult> &results);
     static void updateBTCardContent(const QWidget *card, const QString &status, const QList<BTResult> &results);
     static void filterBTResults(const QList<BTResult> &results, QList<BTResult> &filtered, QList<BTResult> &excluded);
@@ -60,6 +65,8 @@ private:
     QLayout *original_layout = nullptr;
     bool fullscreen_mode = false;
     QJsonObject m_episodeData;
+    std::shared_ptr<std::atomic<bool>> m_abortFlag;
+    QString m_keyword;
 };
 
 #endif // PLAYER_PAGE_H

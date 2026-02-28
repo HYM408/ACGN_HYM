@@ -3,15 +3,7 @@
 #include <QJsonObject>
 #include <QElapsedTimer>
 
-static std::atomic abortRequests(0);
-
-void abortNetworkRequests()
-{   // 停止网络请求
-    abortRequests.store(1);
-    QTimer::singleShot(1500, [] {abortRequests.store(0);});
-}
-
-QByteArray sendRequestUtil(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, int *statusCode, const std::function<void()> &onAuthFailure)
+QByteArray sendRequestUtil(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, int *statusCode, const std::function<void()> &onAuthFailure, const AbortFlag &abortFlag)
 {   // 发送请求
     auto waitBeforeRetry = [&] {
         QEventLoop loop;
@@ -19,7 +11,7 @@ QByteArray sendRequestUtil(QNetworkAccessManager &manager, const QNetworkRequest
         QTimer exitCheckTimer;
         exitCheckTimer.start();
         QObject::connect(&exitCheckTimer, &QTimer::timeout, [&] {
-            if (abortRequests.load()) loop.quit();
+            if (abortFlag && abortFlag->load()) loop.quit();
         });
         loop.exec();
     };
@@ -43,7 +35,7 @@ QByteArray sendRequestUtil(QNetworkAccessManager &manager, const QNetworkRequest
             if (elapsed.hasExpired(15000)) {
                 timeout = true;
                 abortAndQuit();
-            } else if (abortRequests.load()) {
+            } else if (abortFlag && abortFlag->load()) {
                 aborted = true;
                 abortAndQuit();
             }
@@ -81,14 +73,14 @@ QByteArray sendRequestUtil(QNetworkAccessManager &manager, const QNetworkRequest
     return {};
 }
 
-QJsonObject sendRequestJson(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, int *statusCode, const std::function<void()> &onAuthFailure)
+QJsonObject sendRequestJson(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, int *statusCode, const std::function<void()> &onAuthFailure, const AbortFlag &abortFlag)
 {   // JSON包装
-    QByteArray raw = sendRequestUtil(manager, request, method, data, maxRetries, statusCode, onAuthFailure);
+    QByteArray raw = sendRequestUtil(manager, request, method, data, maxRetries, statusCode, onAuthFailure, abortFlag);
     return QJsonDocument::fromJson(raw).object();
 }
 
-QString sendRequestHtml(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, int *statusCode, const std::function<void()> &onAuthFailure)
+QString sendRequestHtml(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, int *statusCode, const std::function<void()> &onAuthFailure, const AbortFlag &abortFlag)
 {   // HTML包装
-    QByteArray raw = sendRequestUtil(manager, request, method, data, maxRetries, statusCode, onAuthFailure);
+    QByteArray raw = sendRequestUtil(manager, request, method, data, maxRetries, statusCode, onAuthFailure, abortFlag);
     return QString::fromUtf8(raw);
 }

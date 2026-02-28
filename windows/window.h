@@ -29,7 +29,7 @@ protected:
 private slots:
     void minimizeWindow();
     void toggleMaximizeWindow();
-    void onCloseButtonClicked();
+    void closeEvent(QCloseEvent *event) override;
     void onSearchButtonClicked() const;
     void onTagClicked(const QString &tag);
     void onSettingsButtonClicked() const;
