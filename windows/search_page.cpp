@@ -1,8 +1,8 @@
 #include "search_page.h"
 #include <QLabel>
 #include <QJsonArray>
-#include <QJsonObject>
 #include <QMouseEvent>
+#include "sql.h"
 #include "api/bangumi_api.h"
 #include "utils/image_util.h"
 
@@ -115,8 +115,9 @@ QFrame *SearchPage::createResultFrame(const QVariantMap &result)
     infoLayout->addStretch();
     horizontalLayout->addLayout(infoLayout);
     // 点击事件
-    auto onClicked = [this, animationFrame] {
+    auto onClicked = [this, animationFrame, subjectId] {
         QVariantMap data = animationFrame->property("resultData").toMap();
+        data["type"] = DatabaseManager::getCollectionBySubjectId(subjectId)["type"].toInt();
         emit showDetailPage(data);
     };
     animationFrame->installEventFilter(this);

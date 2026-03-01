@@ -154,6 +154,21 @@ QJsonObject DatabaseManager::getStatusCountsBySubjectType(int subjectType)
     return statusCounts;
 }
 
+QJsonObject DatabaseManager::getCollectionBySubjectId(int subjectId)
+{   // 根据subject_id获取单条记录
+    QJsonObject result;
+    QSqlQuery query;
+    query.prepare("SELECT * FROM collection WHERE subject_id = ?");
+    query.addBindValue(subjectId);
+    if (!executeQuery(query, "获取单条收藏失败")) return result;
+    if (query.next()) {
+        result = rowToJsonObject(query.record());
+        QString imageUrl = result["subject_images_common"].toString();
+        if (!imageUrl.isEmpty()) result["subject_images_common"] = "https://lain.bgm.tv/r/400/pic/cover/l/" + imageUrl;
+    }
+    return result;
+}
+
 bool DatabaseManager::updateCollectionFields(int subjectId, const QJsonObject &fields, bool updateTimestamp)
 {   // 更新指定subject_id的某个字段值
     QStringList setParts;
