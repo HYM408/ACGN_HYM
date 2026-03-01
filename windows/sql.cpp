@@ -255,34 +255,20 @@ bool DatabaseManager::insertOrUpdateSubject(const QJsonObject &apiData)
     return executeQuery(query, "插入subject失败");
 }
 
-SubjectsData DatabaseManager::getSubjectById(int subjectId)
+QJsonObject DatabaseManager::getSubjectById(int subjectId)
 {   // 根据ID获取subject信息
+    QJsonObject result;
     QSqlQuery query;
     query.prepare("SELECT * FROM subjects WHERE id = ?");
     query.addBindValue(subjectId);
-    if (!executeQuery(query)) return {};
+    if (!executeQuery(query)) return result;
     if (query.next()) {
-        SubjectsData result;
-        result.id = query.value("id").toInt();
-        result.name = query.value("name").toString();
-        result.name_cn = query.value("name_cn").toString();
-        result.date = query.value("date").toString();
-        result.total_episodes = query.value("total_episodes").toInt();
-        result.volumes = query.value("volumes").toInt();
-        result.summary = query.value("summary").toString();
-        result.rating_rank = query.value("rating_rank").toInt();
-        result.rating_score = query.value("rating_score").toDouble();
-        result.rating_total = query.value("rating_total").toInt();
-        result.collect = query.value("collect").toInt();
-        result.on_hold = query.value("on_hold").toInt();
-        result.dropped = query.value("dropped").toInt();
-        result.wish = query.value("wish").toInt();
-        result.doing = query.value("doing").toInt();
-        QString tagsJson = query.value("tags").toString();
+        result = rowToJsonObject(query.record());
+        QString tagsJson = result["tags"].toString();
         if (!tagsJson.isEmpty()) {
             QJsonDocument doc = QJsonDocument::fromJson(tagsJson.toUtf8());
-            if (doc.isObject()) result.tags = doc.object();
+            if (doc.isObject()) result["tags"] = doc.object();
         }
     }
-    return {};
+    return result;
 }

@@ -34,7 +34,7 @@ protected:
 
 private:
     void setupConnections();
-    void updateDetailPage(const SubjectsData &subjectData);
+    void updateDetailPage(const QJsonObject &subjectData);
     void tagsDisplay(const QList<QPair<QString, int>> &tagPairs);
     static QString getTimeInfo(const QList<QPair<QString, int>> &tagPairs, const QString &dateStr);
     void clearLayout() const;
