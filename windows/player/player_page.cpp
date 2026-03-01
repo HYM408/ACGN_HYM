@@ -22,13 +22,11 @@ PlayerPage::PlayerPage(QWidget *parent) : QWidget(parent)
     qobject_cast<QVBoxLayout*>(ui.video_container->layout())->addWidget(vlcPlayer);
     // 设置控制面板
     setupControlOverlay();
-    // 初始化取消标志
-    m_abortFlag = std::make_shared<std::atomic<bool>>(false);
 }
 
 PlayerPage::~PlayerPage()
-{   // 清理资源
-    updateTimer->stop();
+{
+    if (updateTimer) updateTimer->stop();
 }
 
 void PlayerPage::setManagers(DatabaseManager *db, CacheImageUtil *cacheImage, PikPakApi *pikpakapi)
@@ -50,9 +48,6 @@ void PlayerPage::setupControlOverlay()
     connect(controlOverlay, &ControlOverlay::playbackRateChanged, vlcPlayer, &VLCPlayer::setPlaybackRate);
     connect(controlOverlay, &ControlOverlay::fullscreenRequested, this, &PlayerPage::toggleFullscreen);
     connect(controlOverlay, &ControlOverlay::backRequested, this, &PlayerPage::onBackButtonClicked);
-    updateTimer = new QTimer(this);
-    connect(updateTimer, &QTimer::timeout, this, &PlayerPage::updatePlayerInfo);
-    updateTimer->start(100);
 }
 
 void PlayerPage::setSiteLoadingState(const QString &siteId) const
@@ -89,6 +84,10 @@ void PlayerPage::startSiteSearch(const QString &siteId)
 void PlayerPage::fetchRoutes(const QJsonObject &collectionData, const QJsonObject &episodeData)
 {   // 创建组件
     show();
+    updateTimer = new QTimer(this);
+    connect(updateTimer, &QTimer::timeout, this, &PlayerPage::updatePlayerInfo);
+    updateTimer->start(100);
+    m_abortFlag = std::make_shared<std::atomic<bool>>(false);
     m_episodeData = episodeData;
     m_keyword = collectionData.value("subject_name_cn").toString();
     if (m_keyword.isEmpty()) m_keyword = collectionData.value("subject_name").toString();

@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 }
 
 MainWindow::~MainWindow()
-{   // 清理资源
+{
     delete searchPage;
     delete settingsPage;
     delete downloadPage;
@@ -66,14 +66,10 @@ void MainWindow::setupStackedWidget()
     // 详情
     detailPage = new DetailPage();
     detailPage->setManagers(dbManager, cacheImageUtil, bangumiAPI);
-    // 播放器
-    playerPage = new PlayerPage();
-    playerPage->setManagers(dbManager, cacheImageUtil, pikpakApi);
     // 添加页面
     main_stackedWidget->addWidget(searchPage);
     main_stackedWidget->addWidget(settingsPage);
     main_stackedWidget->addWidget(detailPage);
-    main_stackedWidget->addWidget(playerPage);
     showmain_stackedWidget->addWidget(downloadPage);
     // 连接信号槽
     setupConnections();
@@ -102,8 +98,6 @@ void MainWindow::setupConnections()
     connect(detailPage, &DetailPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
     // 选集
     connect(mainPageManager, &MainPageManager::showEpisodePageRequested, this, &MainWindow::onShowEpisodePageRequested);
-    // 播放器
-    connect(playerPage, &PlayerPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
 }
 
 void MainWindow::minimizeWindow()
@@ -118,7 +112,7 @@ void MainWindow::toggleMaximizeWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {   // 关闭程序
-    playerPage->cancelAllSearches();
+    if (playerPage) playerPage->cancelAllSearches();
     QMainWindow::closeEvent(event);
 }
 
@@ -193,6 +187,17 @@ void MainWindow::onShowEpisodePageRequested(const CollectionData &collectionData
     });
     episodeOverlay->setGeometry(0, 0, width(), height());
     episodeOverlay->showWithCollectionData(collectionData);
+    if (playerPage) return;
+    if (collectionData.subject_type != 2) return;
+    QTimer::singleShot(1, this, &MainWindow::precreatePlayerPage);
+}
+
+void MainWindow::precreatePlayerPage()
+{   // 播放器页面预创建
+    playerPage = new PlayerPage(this);
+    playerPage->setManagers(dbManager, cacheImageUtil, pikpakApi);
+    main_stackedWidget->addWidget(playerPage);
+    connect(playerPage, &PlayerPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
 }
 
 void MainWindow::onEpisodeClicked(const QJsonObject &collectionData, const QJsonObject &episodeData)
