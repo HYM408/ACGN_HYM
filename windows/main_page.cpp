@@ -159,7 +159,6 @@ bool MainPageManager::eventFilter(QObject *obj, QEvent *event)
 void MainPageManager::switchCategory(int subjectType, const QString &title)
 {   // 类别切换
     emit showMainPageRequested();
-    currentSubjectType = subjectType;
     mainWindow->project_Button->setText(title);
     loadCollections(subjectType, currentStatusType, true);
 }
@@ -180,6 +179,9 @@ void MainPageManager::onSearchTextChanged(const QString &text)
 
 void MainPageManager::loadCollections(int subjectType, int statusType, bool resetToFirstPage)
 {   // 加载数据
+    bool typeChanged = subjectType != currentSubjectType || statusType != currentStatusType;
+    QString oldSearchText;
+    if (!typeChanged) oldSearchText = mainWindow->searchlist_lineEdit->text();
     currentSubjectType = subjectType;
     currentStatusType = statusType;
     const auto &statusMap = statusNamesMap[subjectType];
@@ -196,9 +198,18 @@ void MainPageManager::loadCollections(int subjectType, int statusType, bool rese
         info.statusButton->setChecked(selected);
     }
     allCollections = DatabaseManager::getCollectionBySubjectTypeAndType(subjectType, statusType);
-    filteredCollections = allCollections;
-    if (resetToFirstPage) currentPage = 1;
-    mainWindow->searchlist_lineEdit->clear();
+    if (!typeChanged) {
+        if (oldSearchText.isEmpty()) filteredCollections = allCollections;
+        else {
+            QString searchLower = oldSearchText.toLower();
+            filteredCollections.clear();
+            std::copy_if(allCollections.begin(), allCollections.end(), std::back_inserter(filteredCollections), [&searchLower](const CollectionData &collection) {return collection.subject_name_cn.toLower().contains(searchLower) || collection.subject_name.toLower().contains(searchLower);});
+        }
+    } else {
+        filteredCollections = allCollections;
+        if (resetToFirstPage) currentPage = 1;
+        mainWindow->searchlist_lineEdit->clear();
+    }
     allCollections.isEmpty() ? clearDisplayArea() : displayCurrentPage();
     updatePageInfo();
 }
