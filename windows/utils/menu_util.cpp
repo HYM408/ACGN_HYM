@@ -44,7 +44,7 @@ void StatusSelector::updateStatus(int statusValue)
     if (statusValue == 0) return deleteLater();
     QJsonObject collectionData{{"type", statusValue}};
     bool success = false;
-    if (collectionType >= 1 && collectionType <= 5) success = bangumiAPI->updateCollection(subjectId, collectionData) && (DatabaseManager::updateCollectionField(subjectId, "type", statusValue), true);
+    if (collectionType >= 1 && collectionType <= 5) success = bangumiAPI->updateCollection(subjectId, collectionData) && (DatabaseManager::updateCollectionFields(subjectId, {{"type", statusValue}}, true), true);
     else  success = bangumiAPI->createOrUpdateCollection(subjectId, collectionData) && (DatabaseManager::insertManyCollectionData(QJsonArray{bangumiAPI->getUserCollection(subjectId)}), true);
     qDebug() << subjectId << "状态更新" << (success ? "成功" : "失败");
     if (success) {

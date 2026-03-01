@@ -1,7 +1,7 @@
 #include "episode_page.h"
 #include <QLabel>
 #include <QPainter>
-#include <qpointer.h>
+#include <QPointer>
 #include <QResizeEvent>
 #include "sql.h"
 #include "api/bangumi_api.h"
@@ -31,7 +31,6 @@ EpisodeOverlay::EpisodeOverlay(QWidget *parent) : QWidget(parent)
     ui.gridLayout_3->addWidget(episodeListView, 0, 0, 1, 1);
     ui.gridLayout_3->setContentsMargins(10, 10, 10, 10);
     connect(ui.pushButton_14, &QPushButton::clicked, this, &EpisodeOverlay::closeOverlay);
-    connect(ui.pushButton_15, &QPushButton::clicked, this, &EpisodeOverlay::onMarkAllWatchedClicked);
     connect(episodeDelegate, &EpisodeDelegate::episodeClicked, this, &EpisodeOverlay::onEpisodeItemClicked);
     installEventFilter(this);
 }
@@ -129,8 +128,22 @@ void EpisodeOverlay::showWithCollectionData(const CollectionData &collData)
     jsonData["subject_id"] = collData.subject_id;
     jsonData["subject_name"] = collData.subject_name;
     jsonData["subject_name_cn"] = collData.subject_name_cn;
+    jsonData["vol_status"] = collData.vol_status;
+    jsonData["ep_status"] = collData.ep_status;
+    jsonData["subject_volumes"] = collData.subject_volumes;
+    jsonData["subject_eps"] = collData.subject_eps;
+    jsonData["subject_type"] = collData.subject_type;
     this->collectionData = jsonData;
-    loadEpisodesData();
+    ui.pushButton_15->setEnabled(true);
+    if (collData.subject_type != 2) {
+        connect(ui.pushButton_15, &QPushButton::clicked, this, &EpisodeOverlay::onUpdateClicked);
+        ui.pushButton_15->setText("更新");
+        loadVolEpData();
+    } else {
+        connect(ui.pushButton_15, &QPushButton::clicked, this, &EpisodeOverlay::onMarkAllWatchedClicked);
+        ui.pushButton_15->setText("全部已看");
+        loadEpisodesData();
+    }
 }
 
 void EpisodeOverlay::paintEvent(QPaintEvent *event)
@@ -190,6 +203,41 @@ void EpisodeOverlay::loadEpisodesData()
     }
 }
 
+void EpisodeOverlay::loadVolEpData()
+{   // 加载卷话数据
+    int subjectVolumes = collectionData.value("subject_volumes").toInt();
+    int subjectEps = collectionData.value("subject_eps").toInt();
+    int volStatus = collectionData.value("vol_status").toInt();
+    int epStatus = collectionData.value("ep_status").toInt();
+    auto *container = new QWidget(episodeContainer);
+    auto *vLayout = new QVBoxLayout(container);
+    auto createField = [&](const QString &label, int value, int total, QLineEdit* &editPtr) {
+        auto *hLayout = new QHBoxLayout;
+        hLayout->setSpacing(28);
+        auto *labelWidget = new QLabel(label);
+        labelWidget->setStyleSheet("font-weight: bold");
+        editPtr = new QLineEdit;
+        editPtr->setText(QString::number(value));
+        editPtr->setFixedWidth(50);
+        auto *totalLabel = new QLabel("/ " + QString::number(total));
+        hLayout->addWidget(labelWidget);
+        hLayout->addWidget(editPtr);
+        hLayout->addWidget(totalLabel);
+        vLayout->addLayout(hLayout);
+    };
+    createField("Vol.", volStatus, subjectVolumes, volEdit);
+    createField("Chap.", epStatus, subjectEps, epEdit);
+    auto *hBox = new QHBoxLayout;
+    hBox->addStretch();
+    hBox->addWidget(container);
+    hBox->addStretch();
+    ui.gridLayout_3->addLayout(hBox, 0, 0);
+    int contentHeight = vLayout->sizeHint().height();
+    int containerHeight = qMax(MIN_CONTAINER_HEIGHT, qMin(120 + contentHeight + 20, MAX_CONTAINER_HEIGHT));
+    episodeContainer->setFixedHeight(containerHeight);
+    resizeEvent(nullptr);
+}
+
 void EpisodeOverlay::updateEpisodeView()
 {   // 更新ui
     for (const QJsonValueRef &value : episodes) {
@@ -202,11 +250,10 @@ void EpisodeOverlay::updateEpisodeView()
         episodeModel->appendRow(item);
     }
     int itemHeight = BUTTON_SIZE + SPACING;
-    int headerHeight = 120;
     int totalItems = episodeModel->rowCount();
     int rows = (totalItems + COLUMNS - 1) / COLUMNS;
     int visibleRows = qMin(rows, 15);
-    int containerHeight = headerHeight + (visibleRows * itemHeight) + 20;
+    int containerHeight = 120 + visibleRows * itemHeight + 20;
     containerHeight = qMax(MIN_CONTAINER_HEIGHT, qMin(containerHeight, MAX_CONTAINER_HEIGHT));
     episodeContainer->setFixedHeight(containerHeight);
     ui.scrollArea->setVerticalScrollBarPolicy(rows > visibleRows ? Qt::ScrollBarAsNeeded : Qt::ScrollBarAlwaysOff);
@@ -230,14 +277,30 @@ void EpisodeOverlay::onMarkAllWatchedClicked()
     QJsonArray episodeIds;
     for (const QJsonValueRef &value : episodes) episodeIds.append(value.toObject().value("id").toInt());
     QJsonObject apiRequestData{{"episode_id", episodeIds}, {"type", 2}};
-    BangumiAPI* localBangumiAPI = bangumiAPI;
     QPointer guard(this);
-    bool success = localBangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData);
+    bool success = bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData);
     if (!success) return;
     DatabaseManager::updateAllEpisodesStatus(subjectId, 2);
     if (!guard) return;
     loadEpisodesData();
     ui.pushButton_15->setText("全部已看");
+    ui.pushButton_15->setEnabled(true);
+}
+
+void EpisodeOverlay::onUpdateClicked() const
+{   // 更新进度
+    ui.pushButton_15->setText(tr("更新中..."));
+    ui.pushButton_15->setEnabled(false);
+    int subjectId = collectionData.value("subject_id").toInt();
+    int newEpStatus  = epEdit->text().toInt();
+    int newVolStatus = volEdit->text().toInt();
+    QJsonObject apiRequestData{{"vol_status", newVolStatus}, {"ep_status", newEpStatus}};
+    QPointer guard(this);
+    bool success = bangumiAPI->updateCollection(subjectId, apiRequestData);
+    if (!success) return;
+    DatabaseManager::updateCollectionFields(subjectId, {{"vol_status", newVolStatus}, {"ep_status", newEpStatus}}, false);
+    if (!guard) return;
+    ui.pushButton_15->setText("更新");
     ui.pushButton_15->setEnabled(true);
 }
 

@@ -65,6 +65,18 @@ void DetailPage::setCollectionData(const CollectionData &data)
     ui.textEdit->setText(currentData.subject_name_cn.isEmpty() ? currentData.subject_name : currentData.subject_name_cn);
     ui.pushButton_24->setText(QString("全%1话").arg(currentData.subject_eps > 0 ? QString::number(currentData.subject_eps) : "-"));
     ui.pushButton_26->setText(statusNamesMap.value(currentData.subject_type).value(currentData.type));
+    if (currentData.subject_type == 2) {
+        ui.pushButton_27->setText("选集");
+        ui.pushButton_27->setEnabled(true);
+    }
+    else if (currentData.subject_type == 4) {
+        ui.pushButton_27->setText("");
+        ui.pushButton_27->setEnabled(false);
+    }
+    else {
+        ui.pushButton_27->setText("进度");
+        ui.pushButton_27->setEnabled(true);
+    }
 }
 
 void DetailPage::setCollectionDataFromMap(const QVariantMap &data)

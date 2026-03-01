@@ -81,12 +81,10 @@ void MainPageManager::initCardPool()
                                              "QPushButton:hover {background-color: rgb(216, 207, 232)}");
         components.moreButton->setIcon(QIcon("icons/more.png"));
         buttonLayout->addWidget(components.moreButton);
-        // 选集
-        components.episodeButton = new QPushButton("选集");
+        // 选集.进度
+        components.episodeButton = new QPushButton();
         components.episodeButton->setFixedSize(60, 40);
         components.episodeButton->setFont(QFont("Microsoft YaHei", 10));
-        components.episodeButton->setStyleSheet("QPushButton {background-color: rgb(242, 236, 244); border-radius: 20px}"
-                                                "QPushButton:hover {background-color: rgb(216, 207, 232)}");
         buttonLayout->addWidget(components.episodeButton);
         infoLayout->addLayout(buttonLayout);
         layout->addWidget(infoFrame);
@@ -94,7 +92,11 @@ void MainPageManager::initCardPool()
         connect(components.moreButton, &QPushButton::clicked, this, [this, i] {
             auto data = cardPool[i].card->property("collectionData").value<CollectionData>();
             StatusSelector::showStatusSelector(cardPool[i].moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);}, -37);});
-        connect(components.episodeButton, &QPushButton::clicked, this, [this, i] {showEpisodePage(cardPool[i].card->property("collectionData").value<CollectionData>());});
+        connect(components.episodeButton, &QPushButton::clicked, this, [this, i] {
+            auto data = cardPool[i].card->property("collectionData").value<CollectionData>();
+            if (data.subject_type == 4) showDetailPage(data);
+            else showEpisodePage(data);
+        });
     }
 }
 
@@ -272,6 +274,12 @@ void MainPageManager::setupCardComponents(int cardIndex, const CollectionData &c
     } else ImageUtil::loadImageWithCache(cacheImageUtil, collection.subject_images_common, card.coverLabel, 40, false, true);
     card.titleLabel->setText(collection.subject_name_cn.isEmpty() ? collection.subject_name : collection.subject_name_cn);
     setProgressText(card.progressLabel, collection);
+    if (collection.subject_type == 2) card.episodeButton->setText("选集");
+    else if (collection.subject_type == 4) card.episodeButton->setText("");
+    else card.episodeButton->setText("进度");
+    if (collection.subject_type == 4) card.episodeButton->setStyleSheet("QPushButton {background-color: rgb(242, 236, 244); border-radius: 20px}");
+    else card.episodeButton->setStyleSheet("QPushButton {background-color: rgb(242, 236, 244); border-radius: 20px}"
+                                          "QPushButton:hover {background-color: rgb(216, 207, 232)}");
 }
 
 void MainPageManager::setProgressText(QLabel *label, const CollectionData &collection)

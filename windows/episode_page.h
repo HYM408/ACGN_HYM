@@ -46,9 +46,11 @@ protected:
 
 private:
     void loadEpisodesData();
+    void loadVolEpData();
     void updateEpisodeView();
     void onEpisodeItemClicked(const QJsonObject &episodeData);
     void onMarkAllWatchedClicked();
+    void onUpdateClicked() const;
     Ui::EpisodePage ui{};
     DatabaseManager *dbManager = nullptr;
     BangumiAPI *bangumiAPI = nullptr;
@@ -64,6 +66,8 @@ private:
     const int COLUMNS = 12;
     const int MAX_CONTAINER_HEIGHT = 900;
     const int MIN_CONTAINER_HEIGHT = 200;
+    QLineEdit *volEdit = nullptr;
+    QLineEdit *epEdit = nullptr;
 };
 
 #endif // EPISODE_PAGE_H

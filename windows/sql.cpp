@@ -158,14 +158,21 @@ QJsonObject DatabaseManager::getCollectionBySubjectId(int subjectId)
     return result;
 }
 
-bool DatabaseManager::updateCollectionField(int subjectId, const QString &field, const QJsonValue &value)
+bool DatabaseManager::updateCollectionFields(int subjectId, const QJsonObject &fields, bool updateTimestamp)
 {   // 更新指定subject_id的某个字段值
+    QStringList setParts;
+    QVariantList values;
+    for (auto it = fields.begin(); it != fields.end(); ++it) {
+        setParts << it.key() + " = ?";
+        values << it.value().toVariant();
+    }
+    if (updateTimestamp) {
+        setParts << "updated_at = ?";
+        values << QDateTime::currentDateTime().toString(Qt::ISODate);
+    }
     QSqlQuery query;
-    query.prepare(QString("UPDATE collection SET %1 = ?, updated_at = ? WHERE subject_id = ?").arg(field));
-    if (value.isString()) query.addBindValue(value.toString());
-    else if (value.isDouble()) query.addBindValue(value.toDouble());
-    else query.addBindValue(value.toInt());
-    query.addBindValue(QDateTime::currentDateTime().toString(Qt::ISODate));
+    query.prepare(QString("UPDATE collection SET %1 WHERE subject_id = ?").arg(setParts.join(", ")));
+    for (const auto &v : values) query.addBindValue(v);
     query.addBindValue(subjectId);
     return executeQuery(query, "更新字段失败");
 }

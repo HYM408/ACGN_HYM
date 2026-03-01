@@ -17,7 +17,7 @@ public:
     static QJsonArray getCollectionBySubjectTypeAndType(int subjectType, int typeValue);
     static QJsonObject getStatusCountsBySubjectType(int subjectType);
     static QJsonObject getCollectionBySubjectId(int subjectId);
-    static bool updateCollectionField(int subjectId, const QString &field, const QJsonValue &value);
+    static bool updateCollectionFields(int subjectId, const QJsonObject &fields, bool updateTimestamp);
     void clearCollectionTable() const;
     // episode表
     static bool insertManyEpisodes(int subjectId, const QJsonArray &episodesArray);
