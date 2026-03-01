@@ -120,7 +120,7 @@ QFrame *SearchPage::createResultFrame(const QVariantMap &result)
         emit showDetailPage(data);
     };
     animationFrame->installEventFilter(this);
-    animationFrame->setProperty("clickHandler", QVariant::fromValue<void*>(new std::function<void()>(onClicked)));
+    animationFrame->setProperty("clickHandler", QVariant::fromValue<void*>(new std::function(onClicked)));
     return animationFrame;
 }
 

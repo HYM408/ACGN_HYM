@@ -1,26 +1,13 @@
 #ifndef MAIN_PAGE_H
 #define MAIN_PAGE_H
 
+#include "sql.h"
 #include "main_ui.h"
 
 class QLabel;
 class BangumiAPI;
 class CacheImageUtil;
 class DatabaseManager;
-
-struct CollectionData {
-    int subject_id;
-    QString subject_date;
-    QString subject_name;
-    QString subject_name_cn;
-    int subject_eps;
-    int subject_volumes;
-    QString subject_images_common;
-    int ep_status;
-    int vol_status;
-    int type;
-    int subject_type;
-};
 
 struct CardComponents {
     QFrame *card = nullptr;

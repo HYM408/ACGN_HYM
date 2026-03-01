@@ -4,7 +4,6 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QMouseEvent>
-#include "sql.h"
 #include "utils/menu_util.h"
 #include "utils/image_util.h"
 #include "utils/cache_image_util.h"
@@ -206,24 +205,7 @@ void MainPageManager::loadCollections(int subjectType, int statusType, bool rese
         info.frame->setStyleSheet(QString("QFrame{background-color: %1%2}").arg(backgroundColor, borderStyle));
         info.statusButton->setChecked(selected);
     }
-    allCollections.clear();
-    QJsonArray jsonArray = DatabaseManager::getCollectionBySubjectTypeAndType(subjectType, statusType);
-    for (const auto &value : jsonArray) {
-        QJsonObject row = value.toObject();
-        allCollections.append({
-            row["subject_id"].toInt(),
-            row["subject_date"].toString(),
-            row["subject_name"].toString(),
-            row["subject_name_cn"].toString(),
-            row["subject_eps"].toInt(),
-            row["subject_volumes"].toInt(),
-            row["subject_images_common"].toString(),
-            row["ep_status"].toInt(),
-            row["vol_status"].toInt(),
-            row["type"].toInt(),
-            row["subject_type"].toInt()
-        });
-    }
+    allCollections = DatabaseManager::getCollectionBySubjectTypeAndType(subjectType, statusType);
     filteredCollections = allCollections;
     if (resetToFirstPage) currentPage = 1;
     mainWindow->searchlist_lineEdit->clear();

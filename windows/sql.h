@@ -2,6 +2,41 @@
 #define SQL_H
 
 #include <QSqlQuery>
+#include <QJsonObject>
+
+struct CollectionData {
+    int subject_id;
+    int vol_status;
+    int ep_status;
+    int subject_type;
+    int type;
+    int rate;
+    QString subject_date;
+    QString subject_name;
+    QString subject_name_cn;
+    int subject_eps;
+    int subject_volumes;
+    QString subject_images_common;
+};
+
+struct SubjectsData {
+    int id;
+    QString name;
+    QString name_cn;
+    QString date;
+    int total_episodes;
+    int volumes;
+    QString summary;
+    int rating_rank;
+    double rating_score;
+    int rating_total;
+    int collect;
+    int on_hold;
+    int dropped;
+    int wish;
+    int doing;
+    QJsonObject tags;
+};
 
 class DatabaseManager : public QObject
 {
@@ -14,9 +49,8 @@ public:
     static void initTables();
     // collection表
     static bool insertManyCollectionData(const QJsonArray &jsonArray);
-    static QJsonArray getCollectionBySubjectTypeAndType(int subjectType, int typeValue);
+    static QVector<CollectionData> getCollectionBySubjectTypeAndType(int subjectType, int typeValue);
     static QJsonObject getStatusCountsBySubjectType(int subjectType);
-    static QJsonObject getCollectionBySubjectId(int subjectId);
     static bool updateCollectionFields(int subjectId, const QJsonObject &fields, bool updateTimestamp);
     void clearCollectionTable() const;
     // episode表
@@ -26,7 +60,7 @@ public:
     static bool updateAllEpisodesStatus(int subjectId, int collectionType = 2);
     // subjects表
     static bool insertOrUpdateSubject(const QJsonObject &apiData);
-    static QJsonObject getSubjectById(int subjectId);
+    static SubjectsData getSubjectById(int subjectId);
 
 private:
     QSqlDatabase database;
