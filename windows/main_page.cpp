@@ -210,8 +210,6 @@ void MainPageManager::loadCollections(int subjectType, int statusType, bool rese
     QJsonArray jsonArray = DatabaseManager::getCollectionBySubjectTypeAndType(subjectType, statusType);
     for (const auto &value : jsonArray) {
         QJsonObject row = value.toObject();
-        QVariantList tagsList;
-        for (const auto &tagValue : row["subject_tags"].toArray()) tagsList.append(tagValue.toVariant());
         allCollections.append({
             row["subject_id"].toInt(),
             row["subject_date"].toString(),
@@ -223,8 +221,7 @@ void MainPageManager::loadCollections(int subjectType, int statusType, bool rese
             row["ep_status"].toInt(),
             row["vol_status"].toInt(),
             row["type"].toInt(),
-            row["subject_type"].toInt(),
-            tagsList
+            row["subject_type"].toInt()
         });
     }
     filteredCollections = allCollections;
@@ -290,7 +287,7 @@ void MainPageManager::setProgressText(QLabel *label, const CollectionData &colle
         if (!airDate.isValid()) label->setText(QString("未开播 · 全 %1 话").arg(totalEps));
         else if (airDate > QDate::currentDate()) label->setText(QString("%1 开播 · 预定全 %2 话").arg(airDate.toString(Qt::ISODate), totalEps));
         else {
-            QString progress = (collection.ep_status >= collection.subject_eps) ? "已看完" : QString("看过 %1").arg(collection.ep_status);
+            QString progress = collection.ep_status >= collection.subject_eps ? "已看完" : QString("看过 %1").arg(collection.ep_status);
             label->setText(QString("已开播 · 全 %1 话 · %2").arg(totalEps, progress));
         }
     } else if (collection.subject_type == 7 || collection.subject_type == 8) {

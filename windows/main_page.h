@@ -20,7 +20,6 @@ struct CollectionData {
     int vol_status;
     int type;
     int subject_type;
-    QVariant subject_tags;
 };
 
 struct CardComponents {
