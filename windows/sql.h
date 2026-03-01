@@ -19,25 +19,6 @@ struct CollectionData {
     QString subject_images_common;
 };
 
-struct SubjectsData {
-    int id;
-    QString name;
-    QString name_cn;
-    QString date;
-    int total_episodes;
-    int volumes;
-    QString summary;
-    int rating_rank;
-    double rating_score;
-    int rating_total;
-    int collect;
-    int on_hold;
-    int dropped;
-    int wish;
-    int doing;
-    QJsonObject tags;
-};
-
 class DatabaseManager : public QObject
 {
     Q_OBJECT
@@ -60,7 +41,7 @@ public:
     static bool updateAllEpisodesStatus(int subjectId, int collectionType = 2);
     // subjects表
     static bool insertOrUpdateSubject(const QJsonObject &apiData);
-    static SubjectsData getSubjectById(int subjectId);
+    static QJsonObject getSubjectById(int subjectId);
 
 private:
     QSqlDatabase database;
