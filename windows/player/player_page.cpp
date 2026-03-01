@@ -29,9 +29,8 @@ PlayerPage::~PlayerPage()
     if (updateTimer) updateTimer->stop();
 }
 
-void PlayerPage::setManagers(DatabaseManager *db, CacheImageUtil *cacheImage, PikPakApi *pikpakapi)
+void PlayerPage::setManagers(CacheImageUtil *cacheImage, PikPakApi *pikpakapi)
 {   // 初始化实例
-    dbManager = db;
     cacheImageUtil = cacheImage;
     pikpakApi = pikpakapi;
 }

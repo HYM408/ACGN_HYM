@@ -24,7 +24,7 @@ class MainPageManager : public QObject
     Q_OBJECT
 
 public:
-    explicit MainPageManager(Ui::MainWindow *mainWindow, DatabaseManager *dbManager, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI);
+    explicit MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI);
     void setupConnections();
     [[nodiscard]] CacheImageUtil *getCacheImageUtil() const {return cacheImageUtil;}
     [[nodiscard]] int getCurrentSubjectType() const {return currentSubjectType;}
@@ -47,7 +47,6 @@ private:
         QPushButton *statusButton = nullptr;
         QPushButton *countButton = nullptr;
     };
-    static void warmupFonts();
     void initCardPool();
     void initStatusFrames();
     void switchCategory(int subjectType, const QString &title);

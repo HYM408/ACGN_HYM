@@ -34,9 +34,8 @@ DetailPage::DetailPage(QWidget *parent) : QWidget(parent)
     setupConnections();
 }
 
-void DetailPage::setManagers(DatabaseManager *db, CacheImageUtil *cacheImage, BangumiAPI *api)
+void DetailPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api)
 {   // 初始化实例
-    dbManager = db;
     cacheImageUtil = cacheImage;
     bangumiAPI = api;
 }

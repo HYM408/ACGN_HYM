@@ -18,7 +18,7 @@ class PlayerPage : public QWidget
 public:
     explicit PlayerPage(QWidget *parent = nullptr);
     ~PlayerPage() override;
-    void setManagers(DatabaseManager *db, CacheImageUtil *cacheImage, PikPakApi *pikpakapi);
+    void setManagers(CacheImageUtil *cacheImage, PikPakApi *pikpakapi);
     void setupControlOverlay();
     void fetchRoutes(const QJsonObject& collectionData, const QJsonObject& episodeData);
     void cancelAllSearches() const;

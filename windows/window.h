@@ -30,12 +30,12 @@ private slots:
     void minimizeWindow();
     void toggleMaximizeWindow();
     void closeEvent(QCloseEvent *event) override;
-    void onSearchButtonClicked() const;
+    void onSearchButtonClicked();
     void onTagClicked(const QString &tag);
-    void onSettingsButtonClicked() const;
-    void onDownloadButtonClicked() const;
+    void onSettingsButtonClicked();
+    void onDownloadButtonClicked();
     void onBackButtonClicked();
-    void onShowDetailPageRequested(const CollectionData &collectionData) const;
+    void onShowDetailPageRequested(const CollectionData &collectionData);
     void onShowDetailPageFromSearch(const QVariantMap &data);
     void onShowEpisodePageRequested(const CollectionData &collectionData);
     void precreatePlayerPage();
@@ -43,7 +43,8 @@ private slots:
 
 private:
     void setupConnections();
-    void setupStackedWidget();
+    void ensureSearchPage();
+    void ensureDetailPage();
     QPoint dragPosition;
     bool isDragging = false;
     DatabaseManager *dbManager = nullptr;
@@ -57,7 +58,7 @@ private:
     PlayerPage *playerPage = nullptr;
     MainPageManager *mainPageManager = nullptr;
     EpisodeOverlay *episodeOverlay = nullptr;
-    QList<int> pageHistory;
+    QList<QWidget*> pageHistory;
 };
 
 #endif // WINDOW_H

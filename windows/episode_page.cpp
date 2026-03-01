@@ -37,9 +37,8 @@ EpisodeOverlay::EpisodeOverlay(QWidget *parent) : QWidget(parent)
 
 EpisodeDelegate::EpisodeDelegate(QObject *parent): QStyledItemDelegate(parent) {}
 
-void EpisodeOverlay::setManagers(DatabaseManager *db, BangumiAPI *api)
+void EpisodeOverlay::setManagers(BangumiAPI *api)
 {   // 初始化实例
-    dbManager = db;
     bangumiAPI = api;
 }
 

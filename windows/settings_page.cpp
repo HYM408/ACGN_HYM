@@ -28,13 +28,12 @@ SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent)
 }
 
 SettingsPage::~SettingsPage()
-{   // 清理资源
+{
     delete bangumiOAuth;
 }
 
-void SettingsPage::setManagers(DatabaseManager *db, BangumiAPI *api, PikPakApi *pikpakapi)
+void SettingsPage::setManagers(BangumiAPI *api, PikPakApi *pikpakapi)
 {   // 初始化实例
-    dbManager = db;
     bangumiAPI = api;
     pikpakApi = pikpakapi;
 }

@@ -15,7 +15,7 @@ SearchPage::SearchPage(QWidget *parent) : QWidget(parent)
 }
 
 SearchPage::~SearchPage()
-{   // 清理资源
+{
     delete statusLabel;
 }
 

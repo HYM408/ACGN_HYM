@@ -17,7 +17,7 @@ public:
     explicit DetailPage(QWidget *parent = nullptr);
     void setCollectionData(const CollectionData &data);
     void setCollectionDataFromMap(const QVariantMap &data);
-    void setManagers(DatabaseManager *db, CacheImageUtil *cacheImage, BangumiAPI *api);
+    void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api);
 
 signals:
     void backButtonClicked();

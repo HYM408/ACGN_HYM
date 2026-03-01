@@ -8,10 +8,8 @@
 #include "utils/image_util.h"
 #include "utils/cache_image_util.h"
 
-MainPageManager::MainPageManager(Ui::MainWindow *mainWindow, DatabaseManager *dbManager, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI): QObject(nullptr), mainWindow(mainWindow), dbManager(dbManager), cacheImageUtil(cacheImageUtil), bangumiAPI(bangumiAPI)
+MainPageManager::MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI): QObject(nullptr), mainWindow(mainWindow), cacheImageUtil(cacheImageUtil), bangumiAPI(bangumiAPI)
 {
-    // 字体预热
-    QTimer::singleShot(0, [] {warmupFonts();});
     // 初始化状态映射
     statusNamesMap = {
         {2, {{1, "想看"}, {2, "看过"}, {3, "在看"}}},
@@ -22,14 +20,6 @@ MainPageManager::MainPageManager(Ui::MainWindow *mainWindow, DatabaseManager *db
     initCardPool();
     // 初始化连接
     setupConnections();
-}
-
-void MainPageManager::warmupFonts()
-{   // 字体预热
-    QLabel label;
-    label.hide();
-    label.setText("♭");
-    label.grab();
 }
 
 void MainPageManager::initCardPool()
