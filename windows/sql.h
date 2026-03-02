@@ -43,9 +43,13 @@ public:
     // subjects表
     static bool insertOrUpdateSubject(const QJsonObject &apiData);
     static QJsonObject getSubjectById(int subjectId);
+    // episode公共数据表
+    bool insertEpisodeAirdateFromFile(const QString& filePath);
+    [[nodiscard]] QJsonObject getEpisodeAirdates(const QList<int> &subjectIds) const;
 
 private:
     QSqlDatabase database;
+    QSqlDatabase episodePublicDate;
     static QString simplifyTags(const QJsonArray &tags);
     static int determineSubjectType(int originalType, const QJsonArray &tags);
     static QString processImageUrl(const QString &url);

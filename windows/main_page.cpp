@@ -1,10 +1,12 @@
 #include "main_page.h"
+
+#include <QJsonArray>
 #include <QLabel>
 #include "utils/menu_util.h"
 #include "utils/image_util.h"
 #include "utils/cache_image_util.h"
 
-MainPageManager::MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI): QObject(nullptr), mainWindow(mainWindow), cacheImageUtil(cacheImageUtil), bangumiAPI(bangumiAPI)
+MainPageManager::MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI, DatabaseManager *dbManager): QObject(nullptr), mainWindow(mainWindow), dbManager(dbManager), cacheImageUtil(cacheImageUtil), bangumiAPI(bangumiAPI)
 {
     // 初始化状态映射
     statusNamesMap = {
@@ -118,6 +120,13 @@ void MainPageManager::loadCollections(int subjectType, int statusType, bool rese
         info.statusButton->setChecked(selected);
     }
     allCollections = DatabaseManager::getCollectionBySubjectTypeAndType(subjectType, statusType);
+    airdatesMap.clear();
+    if (!allCollections.isEmpty()) {
+        QList<int> subjectIds;
+        for (const auto &col : allCollections) subjectIds.append(col.subject_id);
+        QJsonObject airdatesObj = dbManager->getEpisodeAirdates(subjectIds);
+        for (auto it = airdatesObj.begin(); it != airdatesObj.end(); ++it) airdatesMap[it.key().toInt()] = it.value().toArray();
+    }
     if (!typeChanged) {
         if (oldSearchText.isEmpty()) filteredCollections = allCollections;
         else {
@@ -239,19 +248,38 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
     });
 }
 
-void MainPageManager::setProgressText(QLabel *label, const CollectionData &collection)
+void MainPageManager::setProgressText(QLabel *label, const CollectionData &collection) const
 {   // 设置进度
-    QString totalEps = collection.subject_eps > 0 ? QString::number(collection.subject_eps) : "--";
     if (collection.subject_type == 2) {
-        QDate airDate = QDate::fromString(collection.subject_date, Qt::ISODate);
-        if (!airDate.isValid()) label->setText(QString("未开播 · 全 %1 话").arg(totalEps));
-        else if (airDate > QDate::currentDate()) label->setText(QString("%1 开播 · 预定全 %2 话").arg(airDate.toString(Qt::ISODate), totalEps));
-        else {
-            QString progress = collection.ep_status >= collection.subject_eps ? "已看完" : QString("看过 %1").arg(collection.ep_status);
-            label->setText(QString("已开播 · 全 %1 话 · %2").arg(totalEps, progress));
+        QDate currentDate = QDate::currentDate();
+        bool hasAirdate = false;
+        QDate earliest, latest;
+        int airedCount = 0;
+        QJsonArray episodes = airdatesMap.value(collection.subject_id);
+        qsizetype totalAirdates = episodes.size();
+        for (const auto &epVal : episodes) {
+            QJsonObject epObj = epVal.toObject();
+            QString dateStr = epObj["airdate"].toString();
+            QDate airDate = QDate::fromString(dateStr, Qt::ISODate);
+            if (!airDate.isValid()) continue;
+            hasAirdate = true;
+            if (!earliest.isValid() || airDate < earliest) earliest = airDate;
+            if (!latest.isValid() || airDate > latest) latest = airDate;
+            if (airDate <= currentDate) ++airedCount;
         }
-    } else if (collection.subject_type == 7 || collection.subject_type == 8) {
+        qsizetype actualTotalEps = totalAirdates;
+        QString totalEpsStr = actualTotalEps > 0 ? QString::number(actualTotalEps) : "--";
+        QString progress = collection.ep_status >= actualTotalEps ? "已看完" : QString("看到 %1").arg(collection.ep_status);
+        if (!hasAirdate || earliest > currentDate) {
+            if (!collection.subject_date.isEmpty()) label->setText(QString("%1 开播 · 预定全 %2 话").arg(collection.subject_date, totalEpsStr));
+            else label->setText(QString("未开播 · 预定全 %1 话").arg(totalEpsStr));
+        }
+        else if (latest < currentDate) label->setText(QString("已完结 · 全 %1 话 · %2").arg(totalEpsStr).arg(progress));
+        else label->setText(QString("连载至第 %1 话 · 全 %2 话 · %3").arg(airedCount).arg(totalEpsStr).arg(progress));
+    }
+    else if (collection.subject_type == 7 || collection.subject_type == 8) {
         QString totalVols = collection.subject_volumes > 0 ? QString::number(collection.subject_volumes) : "--";
+        QString totalEps = collection.subject_eps > 0 ? QString::number(collection.subject_eps) : "--";
         label->setText(QString("全 %1 卷 · 全 %2 话").arg(totalVols, totalEps));
     } else label->clear();
 }

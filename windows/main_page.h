@@ -22,7 +22,7 @@ class MainPageManager : public QObject
     Q_OBJECT
 
 public:
-    explicit MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI);
+    explicit MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI, DatabaseManager *dbManager);
     void setupConnections();
     [[nodiscard]] CacheImageUtil *getCacheImageUtil() const {return cacheImageUtil;}
     [[nodiscard]] int getCurrentSubjectType() const {return currentSubjectType;}
@@ -51,7 +51,7 @@ private:
     void displayCurrentPage();
     void clearDisplayArea();
     void createCardComponents(CardComponents &card, const CollectionData &collection);
-    static void setProgressText(QLabel* label, const CollectionData& collection);
+    void setProgressText(QLabel* label, const CollectionData& collection) const;
     bool eventFilter(QObject *obj, QEvent *event) override;
     void showDetailPage(const CollectionData &collectionData);
     void showEpisodePage(const CollectionData &collectionData);
@@ -68,6 +68,7 @@ private:
     QVector<QWidget*> placeholderWidgets;
     QMap<int, QMap<int, QString>> statusNamesMap;
     QMap<int, StatusFrameInfo> statusFrames;
+    QMap<int, QJsonArray> airdatesMap;
 };
 
 #endif // MAIN_PAGE_H

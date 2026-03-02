@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     QTimer::singleShot(5000, this, [this] {startRSS(bangumiAPI);});
     // 设置主页面
     setupUi(this);
-    mainPageManager = new MainPageManager(this, cacheImageUtil, bangumiAPI);
+    mainPageManager = new MainPageManager(this, cacheImageUtil, bangumiAPI, dbManager);
     // 标题栏
     setWindowFlags(Qt::FramelessWindowHint);
     titlebar_frame->installEventFilter(this);

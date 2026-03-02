@@ -8,12 +8,15 @@
 DatabaseManager::DatabaseManager(QObject* parent) : QObject(parent)
 {   // 初始化
     database = QSqlDatabase::addDatabase("QSQLITE");
+    episodePublicDate = QSqlDatabase::addDatabase("QSQLITE", "episode_public_date_connection");
     database.setDatabaseName("data/data.db");
+    episodePublicDate.setDatabaseName("data/episode_public_date.db");
 }
 
 DatabaseManager::~DatabaseManager()
-{   // 清理资源
+{
     database.close();
+    episodePublicDate.close();
 }
 
 void DatabaseManager::openDatabase()
@@ -21,6 +24,7 @@ void DatabaseManager::openDatabase()
     QDir dir("data");
     if (!dir.exists()) dir.mkpath(".");
     database.open();
+    episodePublicDate.open();
 }
 
 void DatabaseManager::initTables()
@@ -38,16 +42,17 @@ void DatabaseManager::initTables()
         "id INTEGER PRIMARY KEY, name TEXT NOT NULL, name_cn TEXT, date TEXT, total_episodes INTEGER, volumes INTEGER, summary TEXT, rating_rank INTEGER, rating_score REAL, rating_total INTEGER, collect INTEGER, on_hold INTEGER, dropped INTEGER, wish INTEGER, doing INTEGER, tags TEXT, created_at TEXT DEFAULT (datetime('now')))"
     };
     for (const auto &sql : tables) query.exec(sql);
-    const QStringList indexes = {
-        "CREATE INDEX IF NOT EXISTS idx_subject_type_type_updated ON collection (subject_type, type, updated_at DESC)",
-        "CREATE INDEX IF NOT EXISTS idx_episode_subject_id ON episode_collection (subject_id)"
-    };
-    for (const auto &sql : indexes) query.exec(sql);
+    // episode公共数据表
+    QSqlQuery queryEpisode(QSqlDatabase::database("episode_public_date_connection"));
+    queryEpisode.exec(
+        "CREATE TABLE IF NOT EXISTS episode_public_date ("
+        "subject_id INTEGER NOT NULL, id INTEGER NOT NULL, airdate TEXT NOT NULL, sort INTEGER, PRIMARY KEY (subject_id, id))"
+    );
 }
 
 QString DatabaseManager::simplifyTags(const QJsonArray &tags)
 {   // tag处理
-    if (tags.isEmpty()) return "{}";
+    if (tags.isEmpty()) return {};
     QJsonObject tagObject;
     for (const auto &tag : tags) {
         QJsonObject obj = tag.toObject();
@@ -284,6 +289,61 @@ QJsonObject DatabaseManager::getSubjectById(int subjectId)
             QJsonDocument doc = QJsonDocument::fromJson(tagsJson.toUtf8());
             if (doc.isObject()) result["tags"] = doc.object();
         }
+    }
+    return result;
+}
+
+// =============== episode公共数据表 ===============
+bool DatabaseManager::insertEpisodeAirdateFromFile(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
+    QSqlQuery query(episodePublicDate);
+    query.prepare("INSERT OR REPLACE INTO episode_public_date (subject_id, id, airdate, sort) VALUES (?, ?, ?, ?)");
+    episodePublicDate.transaction();
+    int count = 0;
+    constexpr int batchSize = 10000;
+    QTextStream stream(&file);
+    while (!stream.atEnd()) {
+        QString line = stream.readLine();
+        if (line.isEmpty()) continue;
+        QJsonDocument doc = QJsonDocument::fromJson(line.toUtf8());
+        if (!doc.isObject()) continue;
+        QJsonObject obj = doc.object();
+        QString airdate = obj["airdate"].toString();
+        if (airdate.isEmpty()) continue;
+        int subjectId = obj["subject_id"].toInt();
+        int id = obj["id"].toInt();
+        int sort = obj["sort"].toInt();
+        query.addBindValue(subjectId);
+        query.addBindValue(id);
+        query.addBindValue(airdate);
+        query.addBindValue(sort);
+        query.exec();
+        ++count;
+        if (count % batchSize == 0) {
+            episodePublicDate.commit();
+            episodePublicDate.transaction();
+        }
+    }
+    episodePublicDate.commit();
+    return true;
+}
+
+QJsonObject DatabaseManager::getEpisodeAirdates(const QList<int> &subjectIds) const
+{   // 获取播出日期
+    QSqlQuery query(episodePublicDate);
+    QStringList placeholders;
+    placeholders.fill(QString('?'), subjectIds.size());
+    query.prepare(QString("SELECT * FROM episode_public_date WHERE subject_id IN (%1)").arg(placeholders.join(", ")));
+    for (int id : subjectIds) query.addBindValue(id);
+    query.exec();
+    QJsonObject result;
+    while (query.next()) {
+        QString key = QString::number(query.value("subject_id").toInt());
+        QJsonArray arr = result[key].toArray();
+        arr.append(QJsonObject{{"id", query.value("id").toInt()}, {"airdate", query.value("airdate").toString()}, {"sort", query.value("sort").toInt()}});
+        result[key] = arr;
     }
     return result;
 }
