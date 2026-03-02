@@ -18,6 +18,7 @@ public:
     void setCollectionData(const CollectionData &data);
     void setCollectionDataFromMap(const QVariantMap &data);
     void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api);
+    void resetUI() const;
 
 signals:
     void backButtonClicked();

@@ -72,22 +72,12 @@ void MainWindow::setupConnections()
 }
 
 void MainWindow::ensureSearchPage()
-{
+{   // 确保搜索页面
     searchPage = new SearchPage();
     searchPage->setManagers(cacheImageUtil, bangumiAPI);
     main_stackedWidget->addWidget(searchPage);
     connect(searchPage, &SearchPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
-    connect(searchPage, &SearchPage::showDetailPage, this, &MainWindow::onShowDetailPageFromSearch);
-}
-
-void MainWindow::ensureDetailPage()
-{
-    detailPage = new DetailPage();
-    detailPage->setManagers(cacheImageUtil, bangumiAPI);
-    main_stackedWidget->addWidget(detailPage);
-    connect(detailPage, &DetailPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
-    connect(detailPage, &DetailPage::showEpisodePageRequested, this, &MainWindow::onShowEpisodePageRequested);
-    connect(detailPage, &DetailPage::tagClicked, this, &MainWindow::onTagClicked);
+    connect(searchPage, &SearchPage::showEpisodePageRequested, this, &MainWindow::onShowEpisodePageRequested);
 }
 
 void MainWindow::minimizeWindow()
@@ -157,16 +147,15 @@ void MainWindow::onSettingsButtonClicked()
 
 void MainWindow::onShowDetailPageRequested(const CollectionData &collectionData)
 {   // 主页面 to 详情页面
-    if (!detailPage) ensureDetailPage();
+    if (!detailPage) {
+        detailPage = new DetailPage();
+        detailPage->setManagers(cacheImageUtil, bangumiAPI);
+        main_stackedWidget->addWidget(detailPage);
+        connect(detailPage, &DetailPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
+        connect(detailPage, &DetailPage::showEpisodePageRequested, this, &MainWindow::onShowEpisodePageRequested);
+        connect(detailPage, &DetailPage::tagClicked, this, &MainWindow::onTagClicked);
+    }
     detailPage->setCollectionData(collectionData);
-    main_stackedWidget->setCurrentWidget(detailPage);
-}
-
-void MainWindow::onShowDetailPageFromSearch(const QVariantMap &data)
-{   // 搜索页面 to 详情页面
-    if (!detailPage) ensureDetailPage();
-    pageHistory.append(main_stackedWidget->currentWidget());
-    detailPage->setCollectionDataFromMap(data);
     main_stackedWidget->setCurrentWidget(detailPage);
 }
 

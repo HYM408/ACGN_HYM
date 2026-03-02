@@ -1,8 +1,7 @@
 #include "search_page.h"
-#include <QLabel>
 #include <QJsonArray>
-#include <QMouseEvent>
 #include "sql.h"
+#include "detail_page.h"
 #include "api/bangumi_api.h"
 #include "utils/image_util.h"
 
@@ -23,6 +22,15 @@ void SearchPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api)
 {   // 初始化实例
     cacheImageUtil = cacheImage;
     bangumiApi = api;
+    // 详情页
+    if (!detailPage) {
+        detailPage = new DetailPage(this);
+        detailPage->setManagers(cacheImageUtil, bangumiApi);
+        ui.stackedWidget->addWidget(detailPage);
+        connect(detailPage, &DetailPage::backButtonClicked, this, [this] {ui.stackedWidget->setCurrentIndex(0);});
+        connect(detailPage, &DetailPage::showEpisodePageRequested, this, &SearchPage::showEpisodePageRequested);
+        connect(detailPage, &DetailPage::tagClicked, this, [this](const QString &tag) {searchByTag(tag);});
+    }
 }
 
 void SearchPage::setupConnections()
@@ -42,19 +50,22 @@ void SearchPage::updateComboBoxByType(int currentType) const
 void SearchPage::searchByTag(const QString &tag)
 {   // tag搜索
     if (tag.isEmpty()) return;
-    ui.search_lineEdit->setText("tag:" + tag);
+    ui.checkBox->setChecked(true);
+    ui.search_lineEdit->setText(tag);
     doSearch("", tag);
 }
 
 void SearchPage::onSearchLineEditReturnPressed()
-{   // keyword搜索
-    QString keyword = ui.search_lineEdit->text().trimmed();
-    if (keyword.isEmpty()) return;
-    doSearch(keyword, "");
+{   // 搜索事件
+    QString input = ui.search_lineEdit->text().trimmed();
+    if (input.isEmpty()) return;
+    if (ui.checkBox->isChecked()) doSearch("", input);
+    else doSearch(input, "");
 }
 
 void SearchPage::doSearch(const QString &keyword, const QString &tag)
 {   // 搜索
+    ui.stackedWidget->setCurrentIndex(0);
     QMap<int, int> typeMapping{{1, 1}, {2, 4}};
     int searchType = typeMapping.value(ui.comboBox->currentIndex(), 2);
     showSearchStatus("搜索中...");
@@ -115,10 +126,11 @@ QFrame *SearchPage::createResultFrame(const QVariantMap &result)
     infoLayout->addStretch();
     horizontalLayout->addLayout(infoLayout);
     // 点击事件
-    auto onClicked = [this, animationFrame, subjectId] {
-        QVariantMap data = animationFrame->property("resultData").toMap();
+    auto onClicked = [this, subjectId, resultData] {
+        QVariantMap data = resultData;
         data["type"] = DatabaseManager::getCollectionBySubjectId(subjectId)["type"].toInt();
-        emit showDetailPage(data);
+        detailPage->setCollectionDataFromMap(data);
+        ui.stackedWidget->setCurrentWidget(detailPage);
     };
     animationFrame->installEventFilter(this);
     animationFrame->setProperty("clickHandler", QVariant::fromValue<void*>(new std::function(onClicked)));
@@ -170,6 +182,9 @@ void SearchPage::showSearchStatus(const QString &text)
 
 void SearchPage::onBackButtonClicked()
 {   // 返回
+    ui.stackedWidget->setCurrentIndex(0);
     clearSearchResults();
-    emit backButtonClicked();;
+    if (detailPage) detailPage->resetUI();
+    ui.checkBox->setChecked(false);
+    emit backButtonClicked();
 }

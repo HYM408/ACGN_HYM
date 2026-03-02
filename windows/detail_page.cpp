@@ -62,7 +62,6 @@ void DetailPage::setCollectionData(const CollectionData &data)
         ui.cover_label_3->setStyleSheet("QLabel {color: gray}");
     } else ImageUtil::loadImageWithCache(cacheImageUtil, currentData.subject_images_common, ui.cover_label_3, 15, true, true);
     ui.textEdit->setText(currentData.subject_name_cn.isEmpty() ? currentData.subject_name : currentData.subject_name_cn);
-    ui.pushButton_24->setText(QString("全%1话").arg(currentData.subject_eps > 0 ? QString::number(currentData.subject_eps) : "-"));
     ui.pushButton_26->setText(statusNamesMap.value(currentData.subject_type).value(currentData.type));
     if (currentData.subject_type == 2) {
         ui.pushButton_27->setText("选集");
@@ -80,6 +79,7 @@ void DetailPage::setCollectionData(const CollectionData &data)
 
 void DetailPage::setCollectionDataFromMap(const QVariantMap &data)
 {   // 数据加工
+    resetUI();
     CollectionData collectionData;
     collectionData.subject_id = data["subject_id"].toInt();
     collectionData.subject_name = data["subject_name"].toString();
@@ -88,6 +88,7 @@ void DetailPage::setCollectionDataFromMap(const QVariantMap &data)
     collectionData.subject_type = data["subject_type"].toInt();
     collectionData.type = data["type"].toInt();
     setCollectionData(collectionData);
+    loadData();
 }
 
 void DetailPage::loadData()
@@ -131,6 +132,8 @@ void DetailPage::updateDetailPage(const QJsonObject &subjectData)
     QString total = QString::number(subjectData.value("rating_total").toInt());
     QString rank = QString::number(subjectData.value("rating_rank").toInt());
     ui.pushButton_21->setText(QString("%1|%2人评|#%3").arg(score, total, rank));
+    int eps = subjectData.value("total_episodes").toInt();
+    ui.pushButton_24->setText(QString("全%1话").arg(eps > 0 ? QString::number(eps) : "-"));
     int collect = subjectData.value("collect").toInt();
     int onHold = subjectData.value("on_hold").toInt();
     int dropped = subjectData.value("dropped").toInt();
@@ -183,7 +186,7 @@ void DetailPage::tagsDisplay(const QList<QPair<QString, int>> &tagPairs)
                                 "QLabel:hover {background-color: #f0f0f0}");
         QString tagName = tagPairs[i].first;
         tagLabel->setProperty("tagName", tagName);
-        connect(tagLabel, &ClickableLabel::clicked, this, [this, tagName]() {emit tagClicked(tagName);});
+        connect(tagLabel, &ClickableLabel::clicked, this, [this, tagName] {emit tagClicked(tagName);});
         currentLayout->insertWidget(currentLayout->count() - 1, tagLabel);
         currentWidth += data.second + 10;
     }
@@ -213,12 +216,20 @@ void DetailPage::clearLayout() const
     }
 }
 
-void DetailPage::onBackButtonClicked()
-{   // 返回
+void DetailPage::resetUI() const
+{   // 重置ui
     clearLayout();
+    ui.textEdit->clear();
     ui.textEdit_2->clear();
+    ui.cover_label_3->clear();
+    ui.pushButton_24->setText("全-话");
     ui.pushButton_23->setText("TBA");
     ui.pushButton_21->setText("|人评|#");
     ui.pushButton_25->setText("收藏/在看/抛弃");
+}
+
+void DetailPage::onBackButtonClicked()
+{   // 返回
+    resetUI();
     emit backButtonClicked();
 }

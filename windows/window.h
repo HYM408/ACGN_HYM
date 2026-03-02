@@ -36,7 +36,6 @@ private slots:
     void onDownloadButtonClicked();
     void onBackButtonClicked();
     void onShowDetailPageRequested(const CollectionData &collectionData);
-    void onShowDetailPageFromSearch(const QVariantMap &data);
     void onShowEpisodePageRequested(const CollectionData &collectionData);
     void precreatePlayerPage();
     void onEpisodeClicked(const QJsonObject &collectionData, const QJsonObject &episodeData);
@@ -44,7 +43,6 @@ private slots:
 private:
     void setupConnections();
     void ensureSearchPage();
-    void ensureDetailPage();
     QPoint dragPosition;
     bool isDragging = false;
     DatabaseManager *dbManager = nullptr;

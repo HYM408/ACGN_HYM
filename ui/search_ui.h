@@ -1,17 +1,18 @@
 /********************************************************************************
 ** Form generated from reading UI file 'search_ui.ui'
 **
-** Created by: Qt User Interface Compiler version 6.10.1
+** Created by: Qt User Interface Compiler version 6.10.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
-#ifndef UI_SEARCH_UI_H
-#define UI_SEARCH_UI_H
+#ifndef SEARCH_UI_H
+#define SEARCH_UI_H
 
 #include <QtCore/QVariant>
 #include <QtGui/QIcon>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QCheckBox>
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QFrame>
 #include <QtWidgets/QHBoxLayout>
@@ -39,6 +40,9 @@ public:
     QHBoxLayout *horizontalLayout_10;
     QLineEdit *search_lineEdit;
     QComboBox *comboBox;
+    QFrame *frame_2;
+    QVBoxLayout *verticalLayout;
+    QCheckBox *checkBox;
     QScrollArea *searchresult_scrollArea;
     QWidget *scrollAreaWidgetContents;
     QVBoxLayout *verticalLayout_10;
@@ -157,15 +161,79 @@ public:
 
         verticalLayout_6->addWidget(frame);
 
+        frame_2 = new QFrame(search_frame);
+        frame_2->setObjectName("frame_2");
+        frame_2->setFrameShape(QFrame::Shape::StyledPanel);
+        frame_2->setFrameShadow(QFrame::Shadow::Raised);
+        verticalLayout = new QVBoxLayout(frame_2);
+        verticalLayout->setSpacing(0);
+        verticalLayout->setObjectName("verticalLayout");
+        verticalLayout->setContentsMargins(13, 0, 0, 0);
+        checkBox = new QCheckBox(frame_2);
+        checkBox->setObjectName("checkBox");
+        QFont font3;
+        font3.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
+        font3.setPointSize(13);
+        font3.setBold(false);
+        checkBox->setFont(font3);
+
+        verticalLayout->addWidget(checkBox);
+
+
+        verticalLayout_6->addWidget(frame_2);
+
         searchresult_scrollArea = new QScrollArea(search_frame);
         searchresult_scrollArea->setObjectName("searchresult_scrollArea");
-        searchresult_scrollArea->setStyleSheet(QString::fromUtf8("border:none;"));
-        searchresult_scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOn);
+        searchresult_scrollArea->setStyleSheet(QString::fromUtf8("QScrollArea {\n"
+"	border: none;\n"
+"}\n"
+"\n"
+"QScrollArea > QWidget > QWidget {\n"
+"    background-color: white;\n"
+"}\n"
+"\n"
+"QScrollBar:vertical {\n"
+"    border: none;\n"
+"    background: #f0f0f0;\n"
+"    width: 11px;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:vertical {\n"
+"    background: #c0c0c0;\n"
+"    border-radius: 5px;\n"
+"    min-height: 20px;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:vertical:hover {\n"
+"    background: #a0a0a0;\n"
+"}\n"
+"\n"
+"QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {\n"
+"    border: none;\n"
+"    background: none;\n"
+"    height: 0px;\n"
+"}\n"
+"\n"
+"QScrollBar:horizontal {\n"
+"    border: none;\n"
+"    background: #f0f0f0;\n"
+"    height: 10px;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:horizontal {\n"
+"    background: #c0c0c0;\n"
+"    border-radius: 5px;\n"
+"    min-width: 20px;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:horizontal:hover {\n"
+"    background: #a0a0a0;\n"
+"}"));
         searchresult_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
         searchresult_scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName("scrollAreaWidgetContents");
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 381, 802));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 398, 764));
         verticalLayout_10 = new QVBoxLayout(scrollAreaWidgetContents);
         verticalLayout_10->setSpacing(0);
         verticalLayout_10->setObjectName("verticalLayout_10");
@@ -203,11 +271,12 @@ public:
     {
         back_Button->setText(QString());
         search_pushButton->setText(QCoreApplication::translate("SearchPage", "\346\220\234\347\264\242", nullptr));
-        search_lineEdit->setPlaceholderText(QString());
+        search_lineEdit->setPlaceholderText(QCoreApplication::translate("SearchPage", "\345\233\236\350\275\246\346\220\234\347\264\242", nullptr));
         comboBox->setItemText(0, QCoreApplication::translate("SearchPage", "\345\212\250\347\224\273", nullptr));
         comboBox->setItemText(1, QCoreApplication::translate("SearchPage", "\344\271\246\347\261\215", nullptr));
         comboBox->setItemText(2, QCoreApplication::translate("SearchPage", "\346\270\270\346\210\217", nullptr));
 
+        checkBox->setText(QCoreApplication::translate("SearchPage", "tag\346\220\234\347\264\242", nullptr));
         (void)SearchPage;
     } // retranslateUi
 
@@ -219,4 +288,4 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // UI_SEARCH_UI_H
+#endif // SEARCH_UI_H

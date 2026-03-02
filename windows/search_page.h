@@ -2,9 +2,11 @@
 #define SEARCH_PAGE_H
 
 #include "search_ui.h"
+#include "sql.h"
 
 class QLabel;
 class BangumiAPI;
+class DetailPage;
 class CacheImageUtil;
 
 class SearchPage : public QWidget
@@ -20,7 +22,7 @@ public:
 
 signals:
     void backButtonClicked();
-    void showDetailPage(const QVariantMap &data);
+    void showEpisodePageRequested(const CollectionData &collectionData);
 
 private slots:
     void onSearchLineEditReturnPressed();
@@ -37,6 +39,7 @@ private:
     BangumiAPI *bangumiApi = nullptr;
     CacheImageUtil *cacheImageUtil = nullptr;
     QLabel *statusLabel = nullptr;
+    DetailPage *detailPage = nullptr;
 };
 
 #endif // SEARCH_PAGE_H
