@@ -7,7 +7,6 @@
 class QLabel;
 class BangumiAPI;
 class CacheImageUtil;
-class DatabaseManager;
 
 struct CardComponents {
     QFrame *card = nullptr;
@@ -16,7 +15,6 @@ struct CardComponents {
     QLabel *progressLabel = nullptr;
     QPushButton *moreButton = nullptr;
     QPushButton *episodeButton = nullptr;
-    bool inUse = false;
 };
 
 class MainPageManager : public QObject
@@ -47,13 +45,12 @@ private:
         QPushButton *statusButton = nullptr;
         QPushButton *countButton = nullptr;
     };
-    void initCardPool();
     void initStatusFrames();
     void switchCategory(int subjectType, const QString &title);
     void updatePageInfo() const;
     void displayCurrentPage();
     void clearDisplayArea();
-    void setupCardComponents(int cardIndex, const CollectionData &collection);
+    void createCardComponents(CardComponents &card, const CollectionData &collection);
     static void setProgressText(QLabel* label, const CollectionData& collection);
     bool eventFilter(QObject *obj, QEvent *event) override;
     void showDetailPage(const CollectionData &collectionData);
@@ -69,7 +66,6 @@ private:
     QVector<CollectionData> allCollections;
     QVector<CollectionData> filteredCollections;
     QVector<QWidget*> placeholderWidgets;
-    QVector<CardComponents> cardPool;
     QMap<int, QMap<int, QString>> statusNamesMap;
     QMap<int, StatusFrameInfo> statusFrames;
 };

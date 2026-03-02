@@ -1,9 +1,5 @@
 #include "main_page.h"
-#include <QTimer>
 #include <QLabel>
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QMouseEvent>
 #include "utils/menu_util.h"
 #include "utils/image_util.h"
 #include "utils/cache_image_util.h"
@@ -16,77 +12,8 @@ MainPageManager::MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cac
         {4, {{1, "想玩"}, {2, "玩过"}, {3, "在玩"}}},
         {7, {{1, "想读"}, {2, "读过"}, {3, "在读"}}},
         {8, {{1, "想读"}, {2, "读过"}, {3, "在读"}}}};
-    // 初始化卡片池
-    initCardPool();
     // 初始化连接
     setupConnections();
-}
-
-void MainPageManager::initCardPool()
-{   // 初始化卡片池
-    cardPool.resize(itemsPerPage);
-    for (int i = 0; i < itemsPerPage; ++i) {
-        CardComponents &components = cardPool[i];
-        components.inUse = false;
-        // 主框架
-        components.card = new QFrame(mainWindow->centralwidget);
-        components.card->setFixedSize(420, 170);
-        components.card->setStyleSheet("QFrame{background-color: rgb(242, 236, 244);border-radius: 15px}");
-        components.card->setCursor(Qt::PointingHandCursor);
-        components.card->hide();
-        components.card->installEventFilter(this);
-        auto *layout = new QHBoxLayout(components.card);
-        layout->setContentsMargins(0, 0, 0, 0);
-        // 图片
-        components.coverLabel = new QLabel();
-        components.coverLabel->setFixedSize(125, 170);
-        components.coverLabel->setStyleSheet("background-color: rgb(242, 236, 244); border-top-left-radius: 15px; border-bottom-left-radius: 15px");
-        components.coverLabel->setAlignment(Qt::AlignCenter);
-        layout->addWidget(components.coverLabel);
-        // 信息框架
-        auto *infoFrame = new QFrame();
-        infoFrame->setStyleSheet("background-color: transparent");
-        auto *infoLayout = new QVBoxLayout(infoFrame);
-        infoLayout->setSpacing(15);
-        infoLayout->setContentsMargins(5, 5, 0, 0);
-        // 标题
-        components.titleLabel = new QLabel();
-        components.titleLabel->setMaximumHeight(30);
-        components.titleLabel->setFont(QFont("Microsoft YaHei", 13));
-        infoLayout->addWidget(components.titleLabel);
-        // 进度
-        components.progressLabel = new QLabel();
-        components.progressLabel->setFont(QFont("Microsoft YaHei", 10));
-        infoLayout->addWidget(components.progressLabel);
-        infoLayout->addStretch();
-        // 按钮
-        auto *buttonLayout = new QHBoxLayout();
-        buttonLayout->setContentsMargins(0, 0, 15, 15);
-        buttonLayout->addItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
-        // 状态
-        components.moreButton = new QPushButton();
-        components.moreButton->setFixedSize(40, 40);
-        components.moreButton->setStyleSheet("QPushButton {background-color: rgb(242, 236, 244); border-radius: 20px}"
-                                             "QPushButton:hover {background-color: rgb(216, 207, 232)}");
-        components.moreButton->setIcon(QIcon("icons/more.png"));
-        buttonLayout->addWidget(components.moreButton);
-        // 选集.进度
-        components.episodeButton = new QPushButton();
-        components.episodeButton->setFixedSize(60, 40);
-        components.episodeButton->setFont(QFont("Microsoft YaHei", 10));
-        buttonLayout->addWidget(components.episodeButton);
-        infoLayout->addLayout(buttonLayout);
-        layout->addWidget(infoFrame);
-        // 连接信号
-        connect(components.moreButton, &QPushButton::clicked, this, [this, i] {
-            auto data = cardPool[i].card->property("collectionData").value<CollectionData>();
-            StatusSelector::showStatusSelector(cardPool[i].moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);}, -37);});
-        connect(components.episodeButton, &QPushButton::clicked, this, [this, i] {
-            auto data = cardPool[i].card->property("collectionData").value<CollectionData>();
-            if (data.subject_type == 4) showDetailPage(data);
-            else showEpisodePage(data);
-        });
-    }
 }
 
 void MainPageManager::initStatusFrames()
@@ -125,18 +52,13 @@ void MainPageManager::setupConnections()
 
 bool MainPageManager::eventFilter(QObject *obj, QEvent *event)
 {   // 鼠标事件
-    for (auto &card : cardPool) {
-        if (card.inUse && card.card == obj && event->type() == QEvent::MouseButtonPress) {
-            if (dynamic_cast<QMouseEvent*>(event)->button() == Qt::LeftButton) {
-                showDetailPage(card.card->property("collectionData").value<CollectionData>());
-                return true;
-            }
-        }
+    if (obj->property("isCard").toBool() && event->type() == QEvent::MouseButtonPress) {
+        showDetailPage(qobject_cast<QFrame*>(obj)->property("collectionData").value<CollectionData>());
+        return true;
     }
     for (auto &[statusType, info] : statusFrames.toStdMap()) {
         if (info.frame == obj) {
-            bool isSelected = statusType == currentStatusType;
-            QString baseStyle = isSelected ? ";border-bottom: 3px solid rgb(103, 79, 165)" : "";
+            QString baseStyle = statusType == currentStatusType ? ";border-bottom: 3px solid rgb(103, 79, 165)" : "";
             if (event->type() == QEvent::Enter) {
                 info.frame->setStyleSheet(QString("QFrame{background-color: rgba(103, 79, 165, 30)%1}").arg(baseStyle));
                 return true;
@@ -146,10 +68,8 @@ bool MainPageManager::eventFilter(QObject *obj, QEvent *event)
                 return true;
             }
             if (event->type() == QEvent::MouseButtonPress) {
-                if (dynamic_cast<QMouseEvent*>(event)->button() == Qt::LeftButton) {
-                    loadCollections(currentSubjectType, statusType, true);
-                    return true;
-                }
+                loadCollections(currentSubjectType, statusType, true);
+                return true;
             }
         }
     }
@@ -227,9 +147,8 @@ void MainPageManager::displayCurrentPage()
     int start = (currentPage - 1) * itemsPerPage;
     int dataCount = static_cast<int>(qMin(itemsPerPage, filteredCollections.size() - start));
     for (int i = 0; i < dataCount; ++i) {
-        auto &card = cardPool[i];
-        card.inUse = true;
-        setupCardComponents(i, filteredCollections[start + i]);
+        CardComponents card;
+        createCardComponents(card, filteredCollections[start + i]);
         layout->addWidget(card.card, i / 3, i % 3, Qt::AlignCenter);
         card.card->show();
     }
@@ -244,10 +163,59 @@ void MainPageManager::displayCurrentPage()
     updatePageInfo();
 }
 
-void MainPageManager::setupCardComponents(int cardIndex, const CollectionData &collection)
-{   // 设置卡片
-    auto &card = cardPool[cardIndex];
+void MainPageManager::createCardComponents(CardComponents &card, const CollectionData &collection)
+{   // 创建卡片
+    // 主框架
+    card.card = new QFrame(mainWindow->centralwidget);
+    card.card->setFixedSize(420, 170);
+    card.card->setStyleSheet("QFrame{background-color: rgb(242, 236, 244);border-radius: 15px}");
+    card.card->setCursor(Qt::PointingHandCursor);
+    card.card->installEventFilter(this);
+    card.card->setProperty("isCard", true);
     card.card->setProperty("collectionData", QVariant::fromValue(collection));
+    auto *layout = new QHBoxLayout(card.card);
+    layout->setContentsMargins(0, 0, 0, 0);
+    // 图片
+    card.coverLabel = new QLabel();
+    card.coverLabel->setFixedSize(125, 170);
+    card.coverLabel->setStyleSheet("background-color: rgb(242, 236, 244); border-top-left-radius: 15px; border-bottom-left-radius: 15px");
+    card.coverLabel->setAlignment(Qt::AlignCenter);
+    layout->addWidget(card.coverLabel);
+    // 信息框架
+    auto *infoFrame = new QFrame();
+    infoFrame->setStyleSheet("background-color: transparent");
+    auto *infoLayout = new QVBoxLayout(infoFrame);
+    infoLayout->setSpacing(15);
+    infoLayout->setContentsMargins(5, 5, 0, 0);
+    // 标题
+    card.titleLabel = new QLabel();
+    card.titleLabel->setMaximumHeight(30);
+    card.titleLabel->setFont(QFont("Microsoft YaHei", 13));
+    infoLayout->addWidget(card.titleLabel);
+    // 进度
+    card.progressLabel = new QLabel();
+    card.progressLabel->setFont(QFont("Microsoft YaHei", 10));
+    infoLayout->addWidget(card.progressLabel);
+    infoLayout->addStretch();
+    // 按钮
+    auto *buttonLayout = new QHBoxLayout();
+    buttonLayout->setContentsMargins(0, 0, 15, 15);
+    buttonLayout->addItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
+    // 状态
+    card.moreButton = new QPushButton();
+    card.moreButton->setFixedSize(40, 40);
+    card.moreButton->setStyleSheet("QPushButton {background-color: rgb(242, 236, 244); border-radius: 20px}"
+                                   "QPushButton:hover {background-color: rgb(216, 207, 232)}");
+    card.moreButton->setIcon(QIcon("icons/more.png"));
+    buttonLayout->addWidget(card.moreButton);
+    // 选集.进度
+    card.episodeButton = new QPushButton();
+    card.episodeButton->setFixedSize(60, 40);
+    card.episodeButton->setFont(QFont("Microsoft YaHei", 10));
+    buttonLayout->addWidget(card.episodeButton);
+    infoLayout->addLayout(buttonLayout);
+    layout->addWidget(infoFrame);
+    // 填充内容
     if (collection.subject_images_common.isEmpty()) {
         card.coverLabel->setText("暂无图片");
         card.coverLabel->setStyleSheet("QLabel {color: gray}");
@@ -260,6 +228,15 @@ void MainPageManager::setupCardComponents(int cardIndex, const CollectionData &c
     if (collection.subject_type == 4) card.episodeButton->setStyleSheet("QPushButton {background-color: rgb(242, 236, 244); border-radius: 20px}");
     else card.episodeButton->setStyleSheet("QPushButton {background-color: rgb(242, 236, 244); border-radius: 20px}"
                                           "QPushButton:hover {background-color: rgb(216, 207, 232)}");
+    // 连接信号
+    connect(card.moreButton, &QPushButton::clicked, this, [this, card]() mutable {
+        auto data = card.card->property("collectionData").value<CollectionData>();
+        StatusSelector::showStatusSelector(card.moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);}, -37);});
+    connect(card.episodeButton, &QPushButton::clicked, this, [this, card]() mutable {
+        auto data = card.card->property("collectionData").value<CollectionData>();
+        if (data.subject_type == 4) showDetailPage(data);
+        else showEpisodePage(data);
+    });
 }
 
 void MainPageManager::setProgressText(QLabel *label, const CollectionData &collection)
@@ -283,22 +260,10 @@ void MainPageManager::clearDisplayArea()
 {   // 清理布局
     auto layout = mainWindow->gridLayout_2;
     while (QLayoutItem *item = layout->takeAt(0)) {
-        if (QWidget *widget = item->widget()) {
-            if (widget->property("isPlaceholder").toBool()) widget->deleteLater();
-            else widget->hide();
-        }
+        item->widget()->deleteLater();
         delete item;
     }
     placeholderWidgets.clear();
-    for (auto &card : cardPool) {
-        if (!card.inUse) continue;
-        card.coverLabel->clear();
-        card.titleLabel->clear();
-        card.progressLabel->clear();
-        card.card->setProperty("collectionData", QVariant());
-        card.card->hide();
-        card.inUse = false;
-    }
 }
 
 void MainPageManager::updatePageInfo() const
