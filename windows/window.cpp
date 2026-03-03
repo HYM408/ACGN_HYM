@@ -138,7 +138,7 @@ void MainWindow::onSettingsButtonClicked()
 {   // 切换到设置页面
     if (!settingsPage) {
         settingsPage = new SettingsPage(this);
-        settingsPage->setManagers(bangumiAPI, pikpakApi);
+        settingsPage->setManagers(bangumiAPI, pikpakApi, dbManager);
         main_stackedWidget->addWidget(settingsPage);
         connect(settingsPage, &SettingsPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
     }

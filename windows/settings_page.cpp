@@ -32,10 +32,11 @@ SettingsPage::~SettingsPage()
     delete bangumiOAuth;
 }
 
-void SettingsPage::setManagers(BangumiAPI *api, PikPakApi *pikpakapi)
+void SettingsPage::setManagers(BangumiAPI *api, PikPakApi *pikpakapi, DatabaseManager *db)
 {   // 初始化实例
     bangumiAPI = api;
     pikpakApi = pikpakapi;
+    dbManager = db;
 }
 
 void SettingsPage::setupConnections()
@@ -161,6 +162,7 @@ void SettingsPage::onCollectionButtonClicked()
 {   // 获取Bangumi收藏
     QJsonArray collections = bangumiAPI->getUserCollections(true, 3);
     if (!collections.isEmpty()) {
+        dbManager->clearCollectionTable();
         if (DatabaseManager::insertManyCollectionData(collections)) QMessageBox::information(this, "成功", QString("获取Bangumi收藏完成，共%1条记录").arg(collections.size()));
         else QMessageBox::warning(this, "错误", "保存收藏到数据库失败");
     } else QMessageBox::warning(this, "错误", "获取收藏失败");

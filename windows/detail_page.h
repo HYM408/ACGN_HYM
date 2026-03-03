@@ -43,7 +43,6 @@ private:
     void onBackButtonClicked();
     Ui::DetailPage ui{};
     CollectionData currentData;
-    DatabaseManager *dbManager = nullptr;
     CacheImageUtil *cacheImageUtil = nullptr;
     BangumiAPI *bangumiAPI = nullptr;
     QMap<int, QMap<int, QString>> statusNamesMap;

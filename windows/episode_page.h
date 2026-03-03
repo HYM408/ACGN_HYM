@@ -52,7 +52,6 @@ private:
     void onMarkAllWatchedClicked();
     void onUpdateClicked() const;
     Ui::EpisodePage ui{};
-    DatabaseManager *dbManager = nullptr;
     BangumiAPI *bangumiAPI = nullptr;
     QWidget *episodeContainer = nullptr;
     QJsonObject collectionData;
