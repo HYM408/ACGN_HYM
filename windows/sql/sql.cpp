@@ -32,20 +32,20 @@ void DatabaseManager::initTables()
     const QStringList tables = {
         "CREATE TABLE IF NOT EXISTS collection ("
         // collection表
-        "subject_id INTEGER PRIMARY KEY, vol_status INTEGER, ep_status INTEGER, subject_type INTEGER, type INTEGER, rate INTEGER, subject_date TEXT, subject_name TEXT, subject_name_cn TEXT, subject_eps INTEGER, subject_volumes INTEGER, subject_images_common TEXT, updated_at TEXT)",
+        "subject_id INTEGER PRIMARY KEY, vol_status INTEGER, ep_status INTEGER, subject_type INTEGER, type INTEGER, rate INTEGER, subject_date INTEGER, subject_name TEXT, subject_name_cn TEXT, subject_eps INTEGER, subject_volumes INTEGER, subject_images_common TEXT, updated_at INTEGER)",
         // episode表
         "CREATE TABLE IF NOT EXISTS episode_collection ("
-        "subject_id INTEGER, id INTEGER, ep REAL, sort INTEGER, name TEXT, name_cn TEXT, episode_type INTEGER, collection_type INTEGER, created_at TEXT DEFAULT (datetime('now')), PRIMARY KEY(subject_id, id))",
+        "subject_id INTEGER, id INTEGER, ep INTEGER, sort INTEGER, name TEXT, name_cn TEXT, episode_type INTEGER, collection_type INTEGER, created_at INTEGER DEFAULT (strftime('%s','now')), PRIMARY KEY(subject_id, id))",
         // subjects表
         "CREATE TABLE IF NOT EXISTS subjects ("
-        "id INTEGER PRIMARY KEY, name TEXT NOT NULL, name_cn TEXT, date TEXT, total_episodes INTEGER, volumes INTEGER, summary TEXT, rating_rank INTEGER, rating_score REAL, rating_total INTEGER, collect INTEGER, on_hold INTEGER, dropped INTEGER, wish INTEGER, doing INTEGER, tags TEXT, created_at TEXT DEFAULT (datetime('now')))"
+        "id INTEGER PRIMARY KEY, name TEXT NOT NULL, name_cn TEXT, total_episodes INTEGER, volumes INTEGER, summary BLOB, rating_rank INTEGER, rating_score REAL, rating_total INTEGER, collect INTEGER, on_hold INTEGER, dropped INTEGER, wish INTEGER, doing INTEGER, tags TEXT, created_at INTEGER DEFAULT (strftime('%s','now')))"
     };
     for (const auto &sql : tables) query.exec(sql);
     // episode公共数据表
     QSqlQuery queryEpisode(QSqlDatabase::database("episode_public_date_connection"));
     queryEpisode.exec(
         "CREATE TABLE IF NOT EXISTS episode_public_date ("
-        "subject_id INTEGER NOT NULL, id INTEGER NOT NULL, airdate TEXT NOT NULL, sort INTEGER, PRIMARY KEY (subject_id, id))"
+        "subject_id INTEGER NOT NULL, id INTEGER NOT NULL, airdate INTEGER NOT NULL, sort INTEGER, PRIMARY KEY (subject_id, id))"
     );
 }
 
@@ -83,6 +83,40 @@ bool DatabaseManager::executeQuery(QSqlQuery &query, const QString &errorMsg)
     return true;
 }
 
+qint64 DatabaseManager::dateStringToTimestamp(const QString& dateStr)
+{   // yyyy-MM-dd -> Unix时间戳
+    if (dateStr.isEmpty()) return 0;
+    QDate date = QDate::fromString(dateStr, "yyyy-MM-dd");
+    QDateTime dt(date.startOfDay(QTimeZone::utc()));
+    return dt.toSecsSinceEpoch();
+}
+
+qint64 DatabaseManager::dateTimeStringToTimestamp(const QString& dateTimeStr)
+{   // ISO 8601 日期 -> Unix时间戳
+    if (dateTimeStr.isEmpty()) return 0;
+    QDateTime dt = QDateTime::fromString(dateTimeStr, Qt::ISODate);
+    return dt.toSecsSinceEpoch();
+}
+
+QString DatabaseManager::timestampToDateString(qint64 timestamp)
+{   // Unix时间戳 -> yyyy-MM-dd
+    if (timestamp == 0) return {};
+    QDateTime dt = QDateTime::fromSecsSinceEpoch(timestamp, QTimeZone::utc());
+    return dt.toString("yyyy-MM-dd");
+}
+
+QByteArray DatabaseManager::compressString(const QString &str)
+{
+    QByteArray original = str.toUtf8();
+    return qCompress(original, 9);
+}
+
+QString DatabaseManager::decompressString(const QByteArray &data)
+{
+    QByteArray uncompressed = qUncompress(data);
+    return QString::fromUtf8(uncompressed);
+}
+
 // =============== collection表 ===============
 bool DatabaseManager::insertManyCollectionData(const QJsonArray &jsonArray)
 {   // 批量插入多条数据
@@ -93,19 +127,21 @@ bool DatabaseManager::insertManyCollectionData(const QJsonArray &jsonArray)
         QJsonObject subject = data["subject"].toObject();
         QJsonArray tags = subject["tags"].toArray();
         int finalType = determineSubjectType(data["subject_type"].toInt(), tags);
+        qint64 dateTimestamp = dateStringToTimestamp(subject["date"].toString());
+        qint64 updatedTimestamp = dateTimeStringToTimestamp(data["updated_at"].toString());
         query.addBindValue(data["subject_id"].toInt());
         query.addBindValue(data["vol_status"].toInt());
         query.addBindValue(data["ep_status"].toInt());
         query.addBindValue(finalType);
         query.addBindValue(data["type"].toInt());
         query.addBindValue(data["rate"].toInt());
-        query.addBindValue(subject["date"].toString());
+        query.addBindValue(dateTimestamp);
         query.addBindValue(subject["name"].toString());
         query.addBindValue(subject["name_cn"].toString());
         query.addBindValue(subject["eps"].toInt());
         query.addBindValue(subject["volumes"].toInt());
         query.addBindValue(processImageUrl(subject["images"].toObject()["common"].toString()));
-        query.addBindValue(data["updated_at"].toString());
+        query.addBindValue(updatedTimestamp);
         if (!executeQuery(query, "插入收藏失败")) return false;
         query.finish();
     }
@@ -121,7 +157,8 @@ CollectionData DatabaseManager::collectionFromQuery(const QSqlQuery &query)
     data.subject_type = query.value("subject_type").toInt();
     data.type = query.value("type").toInt();
     data.rate = query.value("rate").toInt();
-    data.subject_date = query.value("subject_date").toString();
+    int dateTimestamp = query.value("subject_date").toInt();
+    data.subject_date = timestampToDateString(dateTimestamp);
     data.subject_name = query.value("subject_name").toString();
     data.subject_name_cn = query.value("subject_name_cn").toString();
     data.subject_eps = query.value("subject_eps").toInt();
@@ -173,7 +210,7 @@ bool DatabaseManager::updateCollectionFields(int subjectId, const QJsonObject &f
     }
     if (updateTimestamp) {
         setParts << "updated_at = ?";
-        values << QDateTime::currentDateTime().toString(Qt::ISODate);
+        values << QDateTime::currentDateTime().toSecsSinceEpoch();
     }
     QSqlQuery query;
     query.prepare(QString("UPDATE collection SET %1 WHERE subject_id = ?").arg(setParts.join(", ")));
@@ -198,18 +235,18 @@ void DatabaseManager::clearCollectionTable() const
     query.exec("DELETE FROM collection");
 }
 
-// =============== episode_collection表操作 ===============
+// =============== episode_collection表 ===============
 bool DatabaseManager::insertManyEpisodes(int subjectId, const QJsonArray &episodesArray)
 {   // 插入剧集数据
     QSqlQuery query;
-    query.prepare("INSERT OR REPLACE INTO episode_collection VALUES (?,?,?,?,?,?,?,?,datetime('now'))");
+    query.prepare("INSERT OR REPLACE INTO episode_collection VALUES (?,?,?,?,?,?,?,?,strftime('%s','now'))");
     for (const auto &v : episodesArray) {
         QJsonObject item = v.toObject();
         QJsonObject ep = item["episode"].toObject();
         query.addBindValue(subjectId);
         query.addBindValue(ep["id"].toInt());
-        query.addBindValue(ep["ep"].toDouble());
-        query.addBindValue(ep["sort"].toDouble());
+        query.addBindValue(ep["ep"].toDouble() * 10.0);
+        query.addBindValue(ep["sort"].toDouble() * 10.0);
         query.addBindValue(ep["name"].toString());
         query.addBindValue(ep["name_cn"].toString());
         query.addBindValue(ep["type"].toInt());
@@ -231,13 +268,12 @@ QVector<EpisodeData> DatabaseManager::getEpisodesBySubjectId(int subjectId)
         EpisodeData ep;
         ep.subject_id = query.value("subject_id").toInt();
         ep.id = query.value("id").toInt();
-        ep.ep = query.value("ep").toDouble();
-        ep.sort = query.value("sort").toDouble();
+        ep.ep = query.value("ep").toInt() / 10.0;
+        ep.sort = query.value("sort").toInt() / 10.0;
         ep.name = query.value("name").toString();
         ep.name_cn = query.value("name_cn").toString();
         ep.episode_type = query.value("episode_type").toInt();
         ep.collection_type = query.value("collection_type").toInt();
-        ep.created_at = query.value("created_at").toString();
         results.append(ep);
     }
     return results;
@@ -260,20 +296,19 @@ bool DatabaseManager::updateAllEpisodesStatus(int subjectId, int collectionType)
     return executeQuery(query, "更新剧集状态失败");
 }
 
-// =============== subjects表操作 ===============
+// =============== subjects表 ===============
 bool DatabaseManager::insertOrUpdateSubject(const QJsonObject &apiData)
 {   // 插入subjects信息
     QSqlQuery query;
-    query.prepare("INSERT OR REPLACE INTO subjects VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'))");
+    query.prepare("INSERT OR REPLACE INTO subjects VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,strftime('%s','now'))");
     QJsonObject rating = apiData["rating"].toObject();
     QJsonObject collection = apiData["collection"].toObject();
     query.addBindValue(apiData["id"].toInt());
     query.addBindValue(apiData["name"].toString());
     query.addBindValue(apiData["name_cn"].toString());
-    query.addBindValue(apiData["date"].toString());
     query.addBindValue(apiData["total_episodes"].toInt());
     query.addBindValue(apiData["volumes"].toInt());
-    query.addBindValue(apiData["summary"].toString());
+    query.addBindValue(compressString(apiData["summary"].toString()));
     query.addBindValue(rating["rank"].toInt());
     query.addBindValue(rating["score"].toDouble());
     query.addBindValue(rating["total"].toInt());
@@ -297,10 +332,10 @@ SubjectsData DatabaseManager::getSubjectById(int subjectId)
         result.id = query.value("id").toInt();
         result.name = query.value("name").toString();
         result.name_cn = query.value("name_cn").toString();
-        result.date = query.value("date").toString();
         result.total_episodes = query.value("total_episodes").toInt();
         result.volumes = query.value("volumes").toInt();
-        result.summary = query.value("summary").toString();
+        QByteArray compressedSummary = query.value("summary").toByteArray();
+        if (!compressedSummary.isEmpty()) result.summary = decompressString(compressedSummary);
         result.rating_rank = query.value("rating_rank").toInt();
         result.rating_score = query.value("rating_score").toDouble();
         result.rating_total = query.value("rating_total").toInt();
@@ -336,14 +371,14 @@ bool DatabaseManager::insertEpisodeAirdateFromFile(const QString &filePath)
         QJsonDocument doc = QJsonDocument::fromJson(line.toUtf8());
         if (!doc.isObject()) continue;
         QJsonObject obj = doc.object();
-        QString airdate = obj["airdate"].toString();
-        if (airdate.isEmpty()) continue;
+        QString airdateStr = obj["airdate"].toString();
+        if (airdateStr.isEmpty()) continue;
         int subjectId = obj["subject_id"].toInt();
         int id = obj["id"].toInt();
-        int sort = obj["sort"].toInt();
+        int sort = static_cast<int>(obj["sort"].toDouble() * 10.0);
         query.addBindValue(subjectId);
         query.addBindValue(id);
-        query.addBindValue(airdate);
+        query.addBindValue(dateStringToTimestamp(airdateStr));
         query.addBindValue(sort);
         query.exec();
         ++count;
@@ -367,8 +402,10 @@ QJsonObject DatabaseManager::getEpisodeAirdates(const QList<int> &subjectIds) co
     QJsonObject result;
     while (query.next()) {
         QString key = QString::number(query.value("subject_id").toInt());
+        QString airdateStr = timestampToDateString(query.value("airdate").toLongLong());
         QJsonArray arr = result[key].toArray();
-        arr.append(QJsonObject{{"id", query.value("id").toInt()}, {"airdate", query.value("airdate").toString()}, {"sort", query.value("sort").toInt()}});
+        double sort = query.value("sort").toInt();
+        arr.append(QJsonObject{{"id", query.value("id").toInt()}, {"airdate", airdateStr}, {"sort", sort}});
         result[key] = arr;
     }
     return result;

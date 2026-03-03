@@ -44,6 +44,11 @@ private:
     static int determineSubjectType(int originalType, const QJsonArray &tags);
     static QString processImageUrl(const QString &url);
     static bool executeQuery(QSqlQuery &query, const QString &errorMsg = "");
+    static qint64 dateStringToTimestamp(const QString& dateStr);
+    static qint64 dateTimeStringToTimestamp(const QString& dateTimeStr);
+    static QString timestampToDateString(qint64 timestamp);
+    static QByteArray compressString(const QString& str);
+    static QString decompressString(const QByteArray& data);
 };
 
 #endif // SQL_H
