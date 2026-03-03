@@ -1,7 +1,6 @@
 #include "sql.h"
 #include <QDir>
 #include <QSqlError>
-#include <QSqlRecord>
 #include <QJsonArray>
 #include <QJsonObject>
 
@@ -75,13 +74,6 @@ QString DatabaseManager::processImageUrl(const QString &url)
     return url.startsWith(prefix) ? url.mid(prefix.length()) : url;
 }
 
-QJsonObject DatabaseManager::rowToJsonObject(const QSqlRecord &record)
-{   // 构建JSON
-    QJsonObject obj;
-    for (int i = 0; i < record.count(); ++i) obj[record.fieldName(i)] = QJsonValue::fromVariant(record.value(i));
-    return obj;
-}
-
 bool DatabaseManager::executeQuery(QSqlQuery &query, const QString &errorMsg)
 {   // 查询操作
     if (!query.exec()) {
@@ -120,6 +112,25 @@ bool DatabaseManager::insertManyCollectionData(const QJsonArray &jsonArray)
     return true;
 }
 
+CollectionData DatabaseManager::collectionFromQuery(const QSqlQuery &query)
+{   // collection表解析
+    CollectionData data;
+    data.subject_id = query.value("subject_id").toInt();
+    data.vol_status = query.value("vol_status").toInt();
+    data.ep_status = query.value("ep_status").toInt();
+    data.subject_type = query.value("subject_type").toInt();
+    data.type = query.value("type").toInt();
+    data.rate = query.value("rate").toInt();
+    data.subject_date = query.value("subject_date").toString();
+    data.subject_name = query.value("subject_name").toString();
+    data.subject_name_cn = query.value("subject_name_cn").toString();
+    data.subject_eps = query.value("subject_eps").toInt();
+    data.subject_volumes = query.value("subject_volumes").toInt();
+    QString stored = query.value("subject_images_common").toString();
+    data.subject_images_common = stored.isEmpty() ? QString() : "https://lain.bgm.tv/r/400/pic/cover/l/" + stored;
+    return data;
+}
+
 QVector<CollectionData> DatabaseManager::getCollectionBySubjectTypeAndType(int subjectType, int typeValue)
 {   // 获取所有收藏
     QVector<CollectionData> results;
@@ -128,23 +139,7 @@ QVector<CollectionData> DatabaseManager::getCollectionBySubjectTypeAndType(int s
     query.addBindValue(subjectType);
     query.addBindValue(typeValue);
     if (!executeQuery(query, "获取收藏失败")) return results;
-    while (query.next()) {
-        CollectionData collectiondata;
-        collectiondata.subject_id = query.value("subject_id").toInt();
-        collectiondata.vol_status = query.value("vol_status").toInt();
-        collectiondata.ep_status = query.value("ep_status").toInt();
-        collectiondata.subject_type = query.value("subject_type").toInt();
-        collectiondata.type = query.value("type").toInt();
-        collectiondata.rate = query.value("rate").toInt();
-        collectiondata.subject_date = query.value("subject_date").toString();
-        collectiondata.subject_name = query.value("subject_name").toString();
-        collectiondata.subject_name_cn = query.value("subject_name_cn").toString();
-        collectiondata.subject_eps = query.value("subject_eps").toInt();
-        collectiondata.subject_volumes = query.value("subject_volumes").toInt();
-        collectiondata.subject_images_common = query.value("subject_images_common").toString();
-        if (!collectiondata.subject_images_common.isEmpty()) collectiondata.subject_images_common = "https://lain.bgm.tv/r/400/pic/cover/l/" + collectiondata.subject_images_common;
-        results.append(collectiondata);
-    }
+    while (query.next()) results.append(collectionFromQuery(query));
     return results;
 }
 
@@ -159,19 +154,13 @@ QJsonObject DatabaseManager::getStatusCountsBySubjectType(int subjectType)
     return statusCounts;
 }
 
-QJsonObject DatabaseManager::getCollectionBySubjectId(int subjectId)
+CollectionData DatabaseManager::getCollectionBySubjectId(int subjectId)
 {   // 根据subject_id获取单条记录
-    QJsonObject result;
     QSqlQuery query;
     query.prepare("SELECT * FROM collection WHERE subject_id = ?");
     query.addBindValue(subjectId);
-    if (!executeQuery(query, "获取单条收藏失败")) return result;
-    if (query.next()) {
-        result = rowToJsonObject(query.record());
-        QString imageUrl = result["subject_images_common"].toString();
-        if (!imageUrl.isEmpty()) result["subject_images_common"] = "https://lain.bgm.tv/r/400/pic/cover/l/" + imageUrl;
-    }
-    return result;
+    if (!executeQuery(query, "获取单条收藏失败") || !query.next()) return {};
+    return collectionFromQuery(query);
 }
 
 bool DatabaseManager::updateCollectionFields(int subjectId, const QJsonObject &fields, bool updateTimestamp)
@@ -231,14 +220,26 @@ bool DatabaseManager::insertManyEpisodes(int subjectId, const QJsonArray &episod
     return true;
 }
 
-QJsonArray DatabaseManager::getEpisodesBySubjectId(int subjectId)
+QVector<EpisodeData> DatabaseManager::getEpisodesBySubjectId(int subjectId)
 {   // 根据subject_id获取所有剧集
-    QJsonArray results;
+    QVector<EpisodeData> results;
     QSqlQuery query;
     query.prepare("SELECT * FROM episode_collection WHERE subject_id = ? ORDER BY episode_type ASC");
     query.addBindValue(subjectId);
     if (!executeQuery(query, "获取剧集失败")) return results;
-    while (query.next()) results.append(rowToJsonObject(query.record()));
+    while (query.next()) {
+        EpisodeData ep;
+        ep.subject_id = query.value("subject_id").toInt();
+        ep.id = query.value("id").toInt();
+        ep.ep = query.value("ep").toDouble();
+        ep.sort = query.value("sort").toDouble();
+        ep.name = query.value("name").toString();
+        ep.name_cn = query.value("name_cn").toString();
+        ep.episode_type = query.value("episode_type").toInt();
+        ep.collection_type = query.value("collection_type").toInt();
+        ep.created_at = query.value("created_at").toString();
+        results.append(ep);
+    }
     return results;
 }
 
@@ -285,20 +286,35 @@ bool DatabaseManager::insertOrUpdateSubject(const QJsonObject &apiData)
     return executeQuery(query, "插入subject失败");
 }
 
-QJsonObject DatabaseManager::getSubjectById(int subjectId)
+SubjectsData DatabaseManager::getSubjectById(int subjectId)
 {   // 根据ID获取subject信息
-    QJsonObject result;
+    SubjectsData result;
     QSqlQuery query;
     query.prepare("SELECT * FROM subjects WHERE id = ?");
     query.addBindValue(subjectId);
     if (!executeQuery(query)) return result;
     if (query.next()) {
-        result = rowToJsonObject(query.record());
-        QString tagsJson = result["tags"].toString();
+        result.id = query.value("id").toInt();
+        result.name = query.value("name").toString();
+        result.name_cn = query.value("name_cn").toString();
+        result.date = query.value("date").toString();
+        result.total_episodes = query.value("total_episodes").toInt();
+        result.volumes = query.value("volumes").toInt();
+        result.summary = query.value("summary").toString();
+        result.rating_rank = query.value("rating_rank").toInt();
+        result.rating_score = query.value("rating_score").toDouble();
+        result.rating_total = query.value("rating_total").toInt();
+        result.collect = query.value("collect").toInt();
+        result.on_hold = query.value("on_hold").toInt();
+        result.dropped = query.value("dropped").toInt();
+        result.wish = query.value("wish").toInt();
+        result.doing = query.value("doing").toInt();
+        QString tagsJson = query.value("tags").toString();
         if (!tagsJson.isEmpty()) {
             QJsonDocument doc = QJsonDocument::fromJson(tagsJson.toUtf8());
-            if (doc.isObject()) result["tags"] = doc.object();
+            if (doc.isObject()) result.tags = doc.object();
         }
+        return result;
     }
     return result;
 }

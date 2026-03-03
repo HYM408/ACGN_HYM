@@ -43,6 +43,9 @@ add_executable(appACGN_HYM
         windows/player/player_core.cpp
         windows/player/player_page.h
         windows/player/player_page.cpp
+        windows/sql/data_structs.h
+        windows/sql/sql.h
+        windows/sql/sql.cpp
         windows/utils/cache_image_util.h
         windows/utils/cache_image_util.cpp
         windows/utils/image_util.h
@@ -67,8 +70,6 @@ add_executable(appACGN_HYM
         windows/search_page.cpp
         windows/settings_page.h
         windows/settings_page.cpp
-        windows/sql.h
-        windows/sql.cpp
         windows/window.h
         windows/window.cpp
 )

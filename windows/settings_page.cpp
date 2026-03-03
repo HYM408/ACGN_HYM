@@ -5,8 +5,8 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDesktopServices>
-#include "sql.h"
 #include "config.h"
+#include "sql/sql.h"
 #include "api/pikpak_api.h"
 #include "api/bangumi_api.h"
 #include "api/bangumi_oauth.h"

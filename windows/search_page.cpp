@@ -1,6 +1,6 @@
 #include "search_page.h"
 #include <QJsonArray>
-#include "sql.h"
+#include "sql/sql.h"
 #include "detail_page.h"
 #include "api/bangumi_api.h"
 #include "utils/image_util.h"
@@ -75,7 +75,10 @@ void SearchPage::doSearch(const QString &keyword, const QString &tag)
     if (!isVisible()) return;
     auto *layout = qobject_cast<QVBoxLayout*>(ui.scrollAreaWidgetContents->layout());
     const qsizetype resultCount = results.size();
-    for (int i = 0; i < resultCount; ++i) layout->addWidget(createResultFrame(results[i].toObject().toVariantMap()));
+    for (int i = 0; i < resultCount; ++i) {
+        QVariantMap result = results[i].toObject().toVariantMap();
+        layout->addWidget(createResultFrame(result));
+    }
     if (resultCount == 0) showSearchStatus("未找到结果");
     layout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 }
@@ -89,14 +92,8 @@ QFrame *SearchPage::createResultFrame(const QVariantMap &result)
     animationFrame->setCursor(Qt::PointingHandCursor);
     // 获取数据
     int subjectId = result["id"].toInt();
-    QVariantMap resultData;
-    resultData["subject_id"] = subjectId;
-    resultData["subject_name"] = result["name"];
-    resultData["subject_name_cn"] = result["name_cn"];
-    resultData["subject_images_common"] = result["images"].toMap()["common"];
-    resultData["subject_type"] = result["type"];
-    resultData["type"] = 0;
-    animationFrame->setProperty("resultData", resultData);
+    resultDataMap[subjectId] = result;
+    animationFrame->setProperty("subjectId", subjectId);
     // 水平布局
     auto *horizontalLayout = new QHBoxLayout(animationFrame);
     horizontalLayout->setSpacing(0);
@@ -126,15 +123,7 @@ QFrame *SearchPage::createResultFrame(const QVariantMap &result)
     infoLayout->addWidget(titleLabel);
     infoLayout->addStretch();
     horizontalLayout->addLayout(infoLayout);
-    // 点击事件
-    auto onClicked = [this, subjectId, resultData] {
-        QVariantMap data = resultData;
-        data["type"] = DatabaseManager::getCollectionBySubjectId(subjectId)["type"].toInt();
-        detailPage->setCollectionDataFromMap(data);
-        ui.stackedWidget->setCurrentWidget(detailPage);
-    };
     animationFrame->installEventFilter(this);
-    animationFrame->setProperty("clickHandler", QVariant::fromValue<void*>(new std::function(onClicked)));
     return animationFrame;
 }
 
@@ -143,10 +132,21 @@ bool SearchPage::eventFilter(QObject *watched, QEvent *event)
     if (event->type() == QEvent::MouseButtonPress) {
         auto *mouseEvent = dynamic_cast<QMouseEvent*>(event);
         if (mouseEvent->button() == Qt::LeftButton) {
-            auto *frame = qobject_cast<QFrame*>(watched);
-            if (auto *handler = static_cast<std::function<void()>*>(frame->property("clickHandler").value<void*>())) {
-                (*handler)();
-                return true;
+            if (auto *frame = qobject_cast<QFrame*>(watched)) {
+                int subjectId = frame->property("subjectId").toInt();
+                if (subjectId > 0 && resultDataMap.contains(subjectId)) {
+                    QVariantMap original = resultDataMap[subjectId];
+                    CollectionData data;
+                    data.subject_id = subjectId;
+                    data.subject_name = original["name"].toString();
+                    data.subject_name_cn = original["name_cn"].toString();
+                    data.subject_images_common = original["images"].toMap()["common"].toString();
+                    data.subject_type = original["type"].toInt();
+                    data.type = DatabaseManager::getCollectionBySubjectId(subjectId).type;
+                    detailPage->setCollectionData(data);
+                    ui.stackedWidget->setCurrentWidget(detailPage);
+                    return true;
+                }
             }
         }
     }
@@ -155,15 +155,13 @@ bool SearchPage::eventFilter(QObject *watched, QEvent *event)
 
 void SearchPage::clearSearchResults()
 {   // 清理框架
+    resultDataMap.clear();
     auto *layout = qobject_cast<QVBoxLayout*>(ui.scrollAreaWidgetContents->layout());
     delete statusLabel;
     statusLabel = nullptr;
     while (layout->count() > 0) {
         QLayoutItem *item = layout->takeAt(0);
-        if (QWidget *widget = item->widget()) {
-            if (auto *frame = qobject_cast<QFrame*>(widget)) delete static_cast<std::function<void()>*>(frame->property("clickHandler").value<void*>());
-            delete widget;
-        }
+        delete item->widget();
         delete item;
     }
 }

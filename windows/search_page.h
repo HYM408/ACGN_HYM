@@ -2,12 +2,13 @@
 #define SEARCH_PAGE_H
 
 #include "search_ui.h"
-#include "sql.h"
+#include "sql/data_structs.h"
 
 class QLabel;
 class BangumiAPI;
 class DetailPage;
 class CacheImageUtil;
+class DatabaseManager;
 
 class SearchPage : public QWidget
 {
@@ -41,6 +42,7 @@ private:
     DatabaseManager *dbManager = nullptr;
     QLabel *statusLabel = nullptr;
     DetailPage *detailPage = nullptr;
+    QMap<int, QVariantMap> resultDataMap;
 };
 
 #endif // SEARCH_PAGE_H

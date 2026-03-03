@@ -4,10 +4,11 @@
 #include "detail_ui.h"
 #include <QListWidget>
 #include <QMouseEvent>
-#include "sql.h"
+#include "sql/data_structs.h"
 
 class BangumiAPI;
 class CacheImageUtil;
+class DatabaseManager;
 
 class DetailPage : public QWidget
 {
@@ -35,7 +36,7 @@ protected:
 
 private:
     void setupConnections();
-    void updateDetailPage(const QJsonObject &subjectData);
+    void updateDetailPage(const SubjectsData &subjectData);
     void tagsDisplay(const QList<QPair<QString, int>> &tagPairs);
     static QString getTimeInfo(const QList<QPair<QString, int>> &tagPairs, const QString &dateStr);
     void clearLayout() const;

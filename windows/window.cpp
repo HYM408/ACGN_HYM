@@ -1,8 +1,8 @@
 #include "window.h"
 #include <QTimer>
-#include "sql.h"
 #include "rss.h"
 #include "config.h"
+#include "sql/sql.h"
 #include "detail_page.h"
 #include "search_page.h"
 #include "episode_page.h"
@@ -189,7 +189,7 @@ void MainWindow::precreatePlayerPage()
     connect(playerPage, &PlayerPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
 }
 
-void MainWindow::onEpisodeClicked(const QJsonObject &collectionData, const QJsonObject &episodeData)
+void MainWindow::onEpisodeClicked(const CollectionData &collectionData, const EpisodeData &episodeData)
 {   // 切换播放器页面
     pageHistory.append(main_stackedWidget->currentWidget());
     playerPage->fetchRoutes(collectionData, episodeData);

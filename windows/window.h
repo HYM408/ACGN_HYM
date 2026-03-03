@@ -39,7 +39,7 @@ private slots:
     void onShowDetailPageRequested(const CollectionData &collectionData);
     void onShowEpisodePageRequested(const CollectionData &collectionData);
     void precreatePlayerPage();
-    void onEpisodeClicked(const QJsonObject &collectionData, const QJsonObject &episodeData);
+    void onEpisodeClicked(const CollectionData &collectionData, const EpisodeData &episodeData);
 
 private:
     void setupConnections();

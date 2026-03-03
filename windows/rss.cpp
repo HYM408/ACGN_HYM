@@ -2,8 +2,8 @@
 #include <QTimer>
 #include <QJsonArray>
 #include <QCoreApplication>
-#include "sql.h"
 #include "config.h"
+#include "sql/sql.h"
 #include "api/bangumi_api.h"
 #include "utils/network_util.h"
 

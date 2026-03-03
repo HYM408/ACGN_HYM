@@ -3,8 +3,6 @@
 
 #include "episode_ui.h"
 #include <QListView>
-#include <QJsonArray>
-#include <QJsonObject>
 #include <QStandardItemModel>
 #include <QStyledItemDelegate>
 #include "main_page.h"
@@ -20,7 +18,7 @@ public:
     bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index) override;
 
 signals:
-    void episodeClicked(const QJsonObject &episodeData);
+    void episodeClicked(const EpisodeData &episodeData);
 };
 
 class EpisodeOverlay : public QWidget
@@ -35,7 +33,7 @@ public:
     enum EpisodeRole {EpisodeDataRole = Qt::UserRole + 1};
 
 signals:
-    void episodeClicked(const QJsonObject &collectionData, const QJsonObject &episodeData);
+    void episodeClicked(const CollectionData &collectionData, const EpisodeData &episodeData);
     void overlayClosed();
 
 protected:
@@ -48,14 +46,14 @@ private:
     void loadEpisodesData();
     void loadVolEpData();
     void updateEpisodeView();
-    void onEpisodeItemClicked(const QJsonObject &episodeData);
+    void onEpisodeItemClicked(const EpisodeData &episodeData);
     void onMarkAllWatchedClicked();
     void onUpdateClicked() const;
     Ui::EpisodePage ui{};
     BangumiAPI *bangumiAPI = nullptr;
     QWidget *episodeContainer = nullptr;
-    QJsonObject collectionData;
-    QJsonArray episodes;
+    CollectionData collectionData;
+    QVector<EpisodeData> episodes;
     QLabel *noEpisodesLabel = nullptr;
     QListView *episodeListView = nullptr;
     QStandardItemModel *episodeModel = nullptr;

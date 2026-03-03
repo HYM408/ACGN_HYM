@@ -2,8 +2,8 @@
 #include <QTimer>
 #include <QJsonObject>
 #include <QDesktopServices>
-#include "sql.h"
 #include "config.h"
+#include "sql/sql.h"
 #include "utils/menu_util.h"
 #include "api/bangumi_api.h"
 #include "utils/image_util.h"
@@ -94,8 +94,8 @@ void DetailPage::setCollectionDataFromMap(const QVariantMap &data)
 
 void DetailPage::loadData()
 {   // 加载数据
-    QJsonObject subjectData = DatabaseManager::getSubjectById(currentData.subject_id);
-    if (!subjectData.isEmpty()) updateDetailPage(subjectData);
+    SubjectsData subjectData = DatabaseManager::getSubjectById(currentData.subject_id);
+    if (subjectData.id != 0) updateDetailPage(subjectData);
     else {
         QTimer::singleShot(0, this, [this] {
             QJsonObject subjectInfo = bangumiAPI->getSubjectInfo(currentData.subject_id);
@@ -127,27 +127,27 @@ void DetailPage::onStatusButtonClicked()
     }, -20);
 }
 
-void DetailPage::updateDetailPage(const QJsonObject &subjectData)
+void DetailPage::updateDetailPage(const SubjectsData &subjectData)
 {   // 显示数据
-    QString score = QString::number(subjectData.value("rating_score").toDouble());
-    QString total = QString::number(subjectData.value("rating_total").toInt());
-    QString rank = QString::number(subjectData.value("rating_rank").toInt());
+    QString score = QString::number(subjectData.rating_score);
+    QString total = QString::number(subjectData.rating_total);
+    QString rank = QString::number(subjectData.rating_rank);
     ui.pushButton_21->setText(QString("%1|%2人评|#%3").arg(score, total, rank));
-    int eps = subjectData.value("total_episodes").toInt();
+    int eps = subjectData.total_episodes;
     ui.pushButton_24->setText(QString("全%1话").arg(eps > 0 ? QString::number(eps) : "-"));
-    int collect = subjectData.value("collect").toInt();
-    int onHold = subjectData.value("on_hold").toInt();
-    int dropped = subjectData.value("dropped").toInt();
-    int wish = subjectData.value("wish").toInt();
-    int doing = subjectData.value("doing").toInt();
+    int collect = subjectData.collect;
+    int onHold = subjectData.on_hold;
+    int dropped = subjectData.dropped;
+    int wish = subjectData.wish;
+    int doing = subjectData.doing;
     ui.pushButton_25->setText(QString("%1收藏/%2在看/%3抛弃").arg(collect + onHold + dropped + wish + doing).arg(doing).arg(dropped));
-    ui.textEdit_2->setText(subjectData.value("summary").toString());
+    ui.textEdit_2->setText(subjectData.summary);
     QList<QPair<QString, int>> tagPairs;
-    QJsonObject tagsObject = subjectData.value("tags").toObject();
-    for (auto it = tagsObject.begin(); it != tagsObject.end(); ++it) {tagPairs.append(qMakePair(it.key(), it.value().toInt()));}
+    QJsonObject tagsObject = subjectData.tags;
+    for (auto it = tagsObject.begin(); it != tagsObject.end(); ++it) tagPairs.append(qMakePair(it.key(), it.value().toInt()));
     std::sort(tagPairs.begin(), tagPairs.end(), [](const QPair<QString, int> &a, const QPair<QString, int> &b) {return b.second < a.second;});
     tagsDisplay(tagPairs);
-    QString timeTag = getTimeInfo(tagPairs, subjectData.value("date").toString());
+    QString timeTag = getTimeInfo(tagPairs, subjectData.date);
     ui.pushButton_23->setText(timeTag);
 }
 

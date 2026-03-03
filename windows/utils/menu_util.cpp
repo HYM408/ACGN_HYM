@@ -7,8 +7,8 @@
 #include <QApplication>
 #include <QDialogButtonBox>
 #include <QDesktopServices>
-#include "../sql.h"
 #include "../config.h"
+#include "../sql/sql.h"
 #include "../api/bangumi_api.h"
 
 static const QMap<int, QMap<int, QString>> statusNamesMap = {
@@ -64,7 +64,7 @@ void StatusSelector::updateStatus(int statusValue)
         connect(&buttonBox, &QDialogButtonBox::rejected, &confirmDialog, &QDialog::reject);
         if (confirmDialog.exec() == QDialog::Accepted) dbManager->deleteCollectionBySubjectId(subjectId);
         else{
-            for (QWidget *widget : qApp->topLevelWidgets()) {
+            for (QWidget *widget : QApplication::topLevelWidgets()) {
                 if (!widget->inherits("QDialog")) {
                     widget->raise();
                     widget->activateWindow();
@@ -78,12 +78,12 @@ void StatusSelector::updateStatus(int statusValue)
     QJsonObject collectionData{{"type", statusValue}};
     bool success = false;
     if (collectionType >= 1 && collectionType <= 5) success = bangumiAPI->updateCollection(subjectId, collectionData) && (DatabaseManager::updateCollectionFields(subjectId, {{"type", statusValue}}, true), true);
-    else  success = bangumiAPI->createOrUpdateCollection(subjectId, collectionData) && (DatabaseManager::insertManyCollectionData(QJsonArray{bangumiAPI->getUserCollection(subjectId)}), true);
+    else success = bangumiAPI->createOrUpdateCollection(subjectId, collectionData) && (DatabaseManager::insertManyCollectionData(QJsonArray{bangumiAPI->getUserCollection(subjectId)}), true);
     qDebug() << subjectId << "状态更新" << (success ? "成功" : "失败");
     if (success) {
         callback(statusValue);
         if (statusValue == 2) {
-            QJsonArray episodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
+            QVector<EpisodeData> episodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
             QJsonArray apiEpisodes;
             if (episodes.isEmpty()) apiEpisodes = bangumiAPI->getSubjectEpisodes(subjectId);
             if (!apiEpisodes.isEmpty()) {
@@ -91,7 +91,7 @@ void StatusSelector::updateStatus(int statusValue)
                 episodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
             }
             QJsonArray episodeIds;
-            for (const QJsonValueRef &value : episodes) episodeIds.append(value.toObject().value("id").toInt());
+            for (const auto &ep : episodes) episodeIds.append(ep.id);
             if (!episodeIds.isEmpty()) {
                 QJsonObject apiRequestData{{"episode_id", episodeIds}, {"type", 2}};
                 if (bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData)) DatabaseManager::updateAllEpisodesStatus(subjectId, 2);

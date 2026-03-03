@@ -2,22 +2,7 @@
 #define SQL_H
 
 #include <QSqlQuery>
-#include <QJsonObject>
-
-struct CollectionData {
-    int subject_id;
-    int vol_status;
-    int ep_status;
-    int subject_type;
-    int type;
-    int rate;
-    QString subject_date;
-    QString subject_name;
-    QString subject_name_cn;
-    int subject_eps;
-    int subject_volumes;
-    QString subject_images_common;
-};
+#include "data_structs.h"
 
 class DatabaseManager: public QObject
 {
@@ -30,20 +15,21 @@ public:
     static void initTables();
     // collection表
     static bool insertManyCollectionData(const QJsonArray &jsonArray);
+    static CollectionData collectionFromQuery(const QSqlQuery& query);
     static QVector<CollectionData> getCollectionBySubjectTypeAndType(int subjectType, int typeValue);
     static QJsonObject getStatusCountsBySubjectType(int subjectType);
-    static QJsonObject getCollectionBySubjectId(int subjectId);
+    static CollectionData getCollectionBySubjectId(int subjectId);
     static bool updateCollectionFields(int subjectId, const QJsonObject &fields, bool updateTimestamp);
     bool deleteCollectionBySubjectId(int subjectId);
     void clearCollectionTable() const;
     // episode表
     static bool insertManyEpisodes(int subjectId, const QJsonArray &episodesArray);
-    static QJsonArray getEpisodesBySubjectId(int subjectId);
+    static QVector<EpisodeData> getEpisodesBySubjectId(int subjectId);
     static bool deleteEpisodesBySubjectId(int subjectId);
     static bool updateAllEpisodesStatus(int subjectId, int collectionType = 2);
     // subjects表
     static bool insertOrUpdateSubject(const QJsonObject &apiData);
-    static QJsonObject getSubjectById(int subjectId);
+    static SubjectsData getSubjectById(int subjectId);
     // episode公共数据表
     bool insertEpisodeAirdateFromFile(const QString& filePath);
     [[nodiscard]] QJsonObject getEpisodeAirdates(const QList<int> &subjectIds) const;
@@ -57,7 +43,6 @@ private:
     static QString simplifyTags(const QJsonArray &tags);
     static int determineSubjectType(int originalType, const QJsonArray &tags);
     static QString processImageUrl(const QString &url);
-    static QJsonObject rowToJsonObject(const QSqlRecord &record);
     static bool executeQuery(QSqlQuery &query, const QString &errorMsg = "");
 };
 

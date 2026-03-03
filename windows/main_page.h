@@ -1,12 +1,13 @@
 #ifndef MAIN_PAGE_H
 #define MAIN_PAGE_H
 
-#include "sql.h"
 #include "main_ui.h"
+#include "sql/data_structs.h"
 
 class QLabel;
 class BangumiAPI;
 class CacheImageUtil;
+class DatabaseManager;
 
 struct CardComponents {
     QFrame *card = nullptr;
@@ -68,7 +69,7 @@ private:
     QVector<QWidget*> placeholderWidgets;
     QMap<int, QMap<int, QString>> statusNamesMap;
     QMap<int, StatusFrameInfo> statusFrames;
-    QMap<int, QJsonArray> airdatesMap;
+    QJsonObject airdatesJson;
 };
 
 #endif // MAIN_PAGE_H

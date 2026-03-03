@@ -1,15 +1,14 @@
 #ifndef PLAYER_PAGE_H
 #define PLAYER_PAGE_H
 
-#include <QJsonObject>
 #include "player_ui.h"
+#include "../sql/sql.h"
 #include "../crawler/crawler.h"
 
 class VLCPlayer;
 class PikPakApi;
 class CacheImageUtil;
 class ControlOverlay;
-class DatabaseManager;
 
 class PlayerPage : public QWidget
 {
@@ -20,7 +19,7 @@ public:
     ~PlayerPage() override;
     void setManagers(CacheImageUtil *cacheImage, PikPakApi *pikpakapi);
     void setupControlOverlay();
-    void fetchRoutes(const QJsonObject& collectionData, const QJsonObject& episodeData);
+    void fetchRoutes(const CollectionData& collectionData, const EpisodeData& episodeData);
     void cancelAllSearches() const;
 
 signals:
@@ -28,7 +27,7 @@ signals:
 
 private slots:
     void reSearchSite(const QString &siteId);
-    void onRouteSelected(const QString &siteId, const QJsonObject &route);
+    void onRouteSelected(const QString &siteId, const QJsonObject &route) const;
     void onBTResultClicked(const QString &magnet, const QString &playLink);
     void handleSearchResult(const QString &siteId, const QList<SearchResult> &results);
     void handleBTSearchResult(const QString &siteId, const QList<BTResult> &results);
@@ -64,7 +63,7 @@ private:
     QWidget *original_parent = nullptr;
     QLayout *original_layout = nullptr;
     bool fullscreen_mode = false;
-    QJsonObject m_episodeData;
+    EpisodeData m_episodeData;
     std::shared_ptr<std::atomic<bool>> m_abortFlag;
     QString m_keyword;
 };

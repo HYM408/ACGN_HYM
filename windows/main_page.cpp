@@ -1,7 +1,7 @@
 #include "main_page.h"
-
-#include <QJsonArray>
 #include <QLabel>
+#include <QJsonArray>
+#include "sql/sql.h"
 #include "utils/menu_util.h"
 #include "utils/image_util.h"
 #include "utils/cache_image_util.h"
@@ -120,13 +120,11 @@ void MainPageManager::loadCollections(int subjectType, int statusType, bool rese
         info.statusButton->setChecked(selected);
     }
     allCollections = DatabaseManager::getCollectionBySubjectTypeAndType(subjectType, statusType);
-    airdatesMap.clear();
     if (!allCollections.isEmpty()) {
         QList<int> subjectIds;
         for (const auto &col : allCollections) subjectIds.append(col.subject_id);
-        QJsonObject airdatesObj = dbManager->getEpisodeAirdates(subjectIds);
-        for (auto it = airdatesObj.begin(); it != airdatesObj.end(); ++it) airdatesMap[it.key().toInt()] = it.value().toArray();
-    }
+        airdatesJson = dbManager->getEpisodeAirdates(subjectIds);
+    } else airdatesJson = QJsonObject();
     if (!typeChanged) {
         if (oldSearchText.isEmpty()) filteredCollections = allCollections;
         else {
@@ -255,7 +253,7 @@ void MainPageManager::setProgressText(QLabel *label, const CollectionData &colle
         bool hasAirdate = false;
         QDate earliest, latest;
         int airedCount = 0;
-        QJsonArray episodes = airdatesMap.value(collection.subject_id);
+        QJsonArray episodes = airdatesJson.value(QString::number(collection.subject_id)).toArray();
         qsizetype totalAirdates = episodes.size();
         for (const auto &epVal : episodes) {
             QJsonObject epObj = epVal.toObject();

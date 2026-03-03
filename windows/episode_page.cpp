@@ -2,8 +2,9 @@
 #include <QLabel>
 #include <QPainter>
 #include <QPointer>
+#include <QJsonArray>
 #include <QResizeEvent>
-#include "sql.h"
+#include "sql/sql.h"
 #include "api/bangumi_api.h"
 
 EpisodeOverlay::EpisodeOverlay(QWidget *parent) : QWidget(parent)
@@ -47,12 +48,10 @@ void EpisodeDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing);
     QRect rect = option.rect.adjusted(2, 2, -2, -2);
-    QByteArray jsonData = index.data(EpisodeOverlay::EpisodeDataRole).toByteArray();
-    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
-    QJsonObject episode = doc.object();
-    int epType = episode.value("episode_type").toInt();
+    auto ep = qvariant_cast<EpisodeData>(index.data(EpisodeOverlay::EpisodeDataRole));
+    int epType = ep.episode_type;
     bool isHovered = option.state & QStyle::State_MouseOver;
-    int colVal = episode.value("collection_type").toInt();
+    int colVal = ep.collection_type;
     QColor bgColor, textColor;
     if (colVal == 2) {
         bgColor = isHovered ? QColor(66, 155, 70) : QColor(76, 175, 80);
@@ -71,11 +70,11 @@ void EpisodeDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
     painter->setFont(font);
     QString epText;
     if (epType == 0) {
-        double epValue = episode.value("ep").toDouble();
+        double epValue = ep.ep;
         if (qAbs(epValue - qRound(epValue)) < 0.001) epText = QString::number(qRound(epValue));
         else epText = QString::number(epValue, 'f', 1);
     } else {
-        double sortValue = episode.value("sort").toDouble();
+        double sortValue = ep.sort;
         epText = QString::number(sortValue);
     }
     painter->drawText(rect, Qt::AlignCenter, epText);
@@ -104,9 +103,7 @@ bool EpisodeDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, cons
     if (event->type() == QEvent::MouseButtonRelease) {
         auto *mouseEvent = dynamic_cast<QMouseEvent*>(event);
         if (mouseEvent->button() == Qt::LeftButton) {
-            QByteArray jsonData = index.data(EpisodeOverlay::EpisodeDataRole).toByteArray();
-            QJsonDocument doc = QJsonDocument::fromJson(jsonData);
-            emit episodeClicked(doc.object());
+            emit episodeClicked(qvariant_cast<EpisodeData>(index.data(EpisodeOverlay::EpisodeDataRole)));
             return true;
         }
     }
@@ -123,16 +120,7 @@ void EpisodeOverlay::showWithCollectionData(const CollectionData &collData)
     show();
     setFocus();
     ui.pushButton_13->setText(collData.subject_name_cn.isEmpty() ? collData.subject_name : collData.subject_name_cn);
-    QJsonObject jsonData;
-    jsonData["subject_id"] = collData.subject_id;
-    jsonData["subject_name"] = collData.subject_name;
-    jsonData["subject_name_cn"] = collData.subject_name_cn;
-    jsonData["vol_status"] = collData.vol_status;
-    jsonData["ep_status"] = collData.ep_status;
-    jsonData["subject_volumes"] = collData.subject_volumes;
-    jsonData["subject_eps"] = collData.subject_eps;
-    jsonData["subject_type"] = collData.subject_type;
-    this->collectionData = jsonData;
+    this->collectionData = collData;
     ui.pushButton_15->setEnabled(true);
     if (collData.subject_type != 2) {
         connect(ui.pushButton_15, &QPushButton::clicked, this, &EpisodeOverlay::onUpdateClicked);
@@ -173,21 +161,19 @@ void EpisodeOverlay::resizeEvent(QResizeEvent *event)
 
 void EpisodeOverlay::loadEpisodesData()
 {   // 加载剧集数据
-    int subjectId = collectionData.value("subject_id").toInt();
+    int subjectId = collectionData.subject_id;
     episodeModel->clear();
     episodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
     if (!episodes.isEmpty()) {
         updateEpisodeView();
         return;
     }
-    int localSubjectId = subjectId;
-    BangumiAPI* localBangumiAPI = bangumiAPI;
     QPointer guard(this);
-    QJsonArray apiEpisodes = localBangumiAPI->getSubjectEpisodes(localSubjectId);
-    if (!apiEpisodes.isEmpty()) DatabaseManager::insertManyEpisodes(localSubjectId, apiEpisodes);
+    QJsonArray apiEpisodes = bangumiAPI->getSubjectEpisodes(subjectId);
+    if (!apiEpisodes.isEmpty()) DatabaseManager::insertManyEpisodes(subjectId, apiEpisodes);
     if (!guard) return;
     if (!apiEpisodes.isEmpty()) {
-        episodes = DatabaseManager::getEpisodesBySubjectId(localSubjectId);
+        episodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
         updateEpisodeView();
     } else {
         episodeListView->hide();
@@ -204,10 +190,6 @@ void EpisodeOverlay::loadEpisodesData()
 
 void EpisodeOverlay::loadVolEpData()
 {   // 加载卷话数据
-    int subjectVolumes = collectionData.value("subject_volumes").toInt();
-    int subjectEps = collectionData.value("subject_eps").toInt();
-    int volStatus = collectionData.value("vol_status").toInt();
-    int epStatus = collectionData.value("ep_status").toInt();
     auto *container = new QWidget(episodeContainer);
     auto *vLayout = new QVBoxLayout(container);
     auto createField = [&](const QString &label, int value, int total, QLineEdit* &editPtr) {
@@ -224,8 +206,8 @@ void EpisodeOverlay::loadVolEpData()
         hLayout->addWidget(totalLabel);
         vLayout->addLayout(hLayout);
     };
-    createField("Vol.", volStatus, subjectVolumes, volEdit);
-    createField("Chap.", epStatus, subjectEps, epEdit);
+    createField("Vol.", collectionData.vol_status, collectionData.subject_volumes, volEdit);
+    createField("Chap.", collectionData.ep_status, collectionData.subject_eps, epEdit);
     auto *hBox = new QHBoxLayout;
     hBox->addStretch();
     hBox->addWidget(container);
@@ -239,12 +221,10 @@ void EpisodeOverlay::loadVolEpData()
 
 void EpisodeOverlay::updateEpisodeView()
 {   // 更新ui
-    for (const QJsonValueRef &value : episodes) {
+    for (const auto &ep : episodes) {
         auto *item = new QStandardItem();
-        QJsonObject episodeObj = value.toObject();
-        item->setData(QJsonDocument(episodeObj).toJson(), EpisodeDataRole);
-        QString name = episodeObj.value("name_cn").toString();
-        if (name.isEmpty()) name = episodeObj.value("name").toString();
+        item->setData(QVariant::fromValue(ep), EpisodeDataRole);
+        QString name = ep.name_cn.isEmpty() ? ep.name : ep.name_cn;
         item->setToolTip(name);
         episodeModel->appendRow(item);
     }
@@ -259,10 +239,10 @@ void EpisodeOverlay::updateEpisodeView()
     resizeEvent(nullptr);
 }
 
-void EpisodeOverlay::onEpisodeItemClicked(const QJsonObject &episodeData)
+void EpisodeOverlay::onEpisodeItemClicked(const EpisodeData &episodeData)
 {   // 点击剧集
-    int epType = episodeData.value("episode_type").toInt();
-    if (epType != 0 && epType != 1) return ;
+    int epType = episodeData.episode_type;
+    if (epType != 0 && epType != 1) return;
     closeOverlay();
     emit episodeClicked(collectionData, episodeData);
 }
@@ -272,9 +252,9 @@ void EpisodeOverlay::onMarkAllWatchedClicked()
     if (episodes.isEmpty()) return;
     ui.pushButton_15->setText(tr("标记中..."));
     ui.pushButton_15->setEnabled(false);
-    int subjectId = collectionData.value("subject_id").toInt();
+    int subjectId = collectionData.subject_id;
     QJsonArray episodeIds;
-    for (const QJsonValueRef &value : episodes) episodeIds.append(value.toObject().value("id").toInt());
+    for (const auto &ep : episodes) episodeIds.append(ep.id);
     QJsonObject apiRequestData{{"episode_id", episodeIds}, {"type", 2}};
     QPointer guard(this);
     bool success = bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData);
@@ -290,7 +270,7 @@ void EpisodeOverlay::onUpdateClicked() const
 {   // 更新进度
     ui.pushButton_15->setText(tr("更新中..."));
     ui.pushButton_15->setEnabled(false);
-    int subjectId = collectionData.value("subject_id").toInt();
+    int subjectId = collectionData.subject_id;
     int newEpStatus  = epEdit->text().toInt();
     int newVolStatus = volEdit->text().toInt();
     QJsonObject apiRequestData{{"vol_status", newVolStatus}, {"ep_status", newEpStatus}};

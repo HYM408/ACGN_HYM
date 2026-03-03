@@ -80,7 +80,7 @@ void PlayerPage::startSiteSearch(const QString &siteId)
     }
 }
 
-void PlayerPage::fetchRoutes(const QJsonObject &collectionData, const QJsonObject &episodeData)
+void PlayerPage::fetchRoutes(const CollectionData &collectionData, const EpisodeData &episodeData)
 {   // 创建组件
     show();
     updateTimer = new QTimer(this);
@@ -88,8 +88,8 @@ void PlayerPage::fetchRoutes(const QJsonObject &collectionData, const QJsonObjec
     updateTimer->start(100);
     m_abortFlag = std::make_shared<std::atomic<bool>>(false);
     m_episodeData = episodeData;
-    m_keyword = collectionData.value("subject_name_cn").toString();
-    if (m_keyword.isEmpty()) m_keyword = collectionData.value("subject_name").toString();
+    m_keyword = collectionData.subject_name_cn;
+    if (m_keyword.isEmpty()) m_keyword = collectionData.subject_name;
     *m_abortFlag = true;
     m_abortFlag->store(false);
     QStringList allApiIds = Crawler::getAllAPISiteIds();
@@ -381,13 +381,12 @@ bool PlayerPage::eventFilter(QObject *watched, QEvent *event)
     return QWidget::eventFilter(watched, event);
 }
 
-void PlayerPage::onRouteSelected(const QString &siteId, const QJsonObject &route)
+void PlayerPage::onRouteSelected(const QString &siteId, const QJsonObject &route) const
 {   // 解析并播放
     vlcPlayer->stop();
-    int episodeIndex = 0;
-    episodeIndex = m_episodeData["sort"].toInt() - 1;
+    int episodeIndex = static_cast<int>(m_episodeData.sort) - 1;
     QJsonArray episodes = route["episodes"].toArray();
-    if (episodes.isEmpty() || episodeIndex >= episodes.size()) return;
+    if (episodes.isEmpty() || episodeIndex < 0 || episodeIndex >= episodes.size()) return;
     QString episodeUrl = episodes[episodeIndex].toObject()["link"].toString();
     if (episodeUrl.isEmpty()) return;
     Crawler::processVideoUrl(siteId, episodeUrl, [this](const QString &videoUrl) {
