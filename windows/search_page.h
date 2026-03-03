@@ -16,7 +16,7 @@ class SearchPage : public QWidget
 public:
     explicit SearchPage(QWidget *parent = nullptr);
     ~SearchPage() override;
-    void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api);
+    void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db);
     void updateComboBoxByType(int currentType) const;
     void searchByTag(const QString &tag);
 
@@ -38,6 +38,7 @@ private:
     Ui::SearchPage ui{};
     BangumiAPI *bangumiApi = nullptr;
     CacheImageUtil *cacheImageUtil = nullptr;
+    DatabaseManager *dbManager = nullptr;
     QLabel *statusLabel = nullptr;
     DetailPage *detailPage = nullptr;
 };

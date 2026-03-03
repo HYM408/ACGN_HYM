@@ -17,7 +17,7 @@ public:
     explicit DetailPage(QWidget *parent = nullptr);
     void setCollectionData(const CollectionData &data);
     void setCollectionDataFromMap(const QVariantMap &data);
-    void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api);
+    void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db);
     void resetUI() const;
 
 signals:
@@ -45,6 +45,7 @@ private:
     CollectionData currentData;
     CacheImageUtil *cacheImageUtil = nullptr;
     BangumiAPI *bangumiAPI = nullptr;
+    DatabaseManager *dbManager = nullptr;
     QMap<int, QMap<int, QString>> statusNamesMap;
     QListWidget *tagListWidget = nullptr;
 };

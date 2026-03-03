@@ -18,14 +18,15 @@ SearchPage::~SearchPage()
     delete statusLabel;
 }
 
-void SearchPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api)
+void SearchPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db)
 {   // 初始化实例
     cacheImageUtil = cacheImage;
     bangumiApi = api;
+    dbManager = db;
     // 详情页
     if (!detailPage) {
         detailPage = new DetailPage(this);
-        detailPage->setManagers(cacheImageUtil, bangumiApi);
+        detailPage->setManagers(cacheImageUtil, bangumiApi, dbManager);
         ui.stackedWidget->addWidget(detailPage);
         connect(detailPage, &DetailPage::backButtonClicked, this, [this] {ui.stackedWidget->setCurrentIndex(0);});
         connect(detailPage, &DetailPage::showEpisodePageRequested, this, &SearchPage::showEpisodePageRequested);

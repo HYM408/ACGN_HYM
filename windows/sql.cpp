@@ -193,7 +193,17 @@ bool DatabaseManager::updateCollectionFields(int subjectId, const QJsonObject &f
     return executeQuery(query, "更新字段失败");
 }
 
-void DatabaseManager::clearCollectionTable()
+bool DatabaseManager::deleteCollectionBySubjectId(int subjectId)
+{   // 删除指定subject_id
+    QSqlQuery query;
+    query.prepare("DELETE FROM collection WHERE subject_id = ?");
+    query.addBindValue(subjectId);
+    bool success = executeQuery(query, "删除收藏失败");
+    if (success) emit collectionDeleted();
+    return success;
+}
+
+void DatabaseManager::clearCollectionTable() const
 {   // 清空collection表
     QSqlQuery query(database);
     query.exec("DELETE FROM collection");

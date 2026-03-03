@@ -240,7 +240,7 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
     // 连接信号
     connect(card.moreButton, &QPushButton::clicked, this, [this, card]() mutable {
         auto data = card.card->property("collectionData").value<CollectionData>();
-        StatusSelector::showStatusSelector(card.moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);}, -37);});
+        StatusSelector::showStatusSelector(card.moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, dbManager, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);}, -37);});
     connect(card.episodeButton, &QPushButton::clicked, this, [this, card]() mutable {
         auto data = card.card->property("collectionData").value<CollectionData>();
         if (data.subject_type == 4) showDetailPage(data);

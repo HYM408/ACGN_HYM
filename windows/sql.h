@@ -19,7 +19,7 @@ struct CollectionData {
     QString subject_images_common;
 };
 
-class DatabaseManager : public QObject
+class DatabaseManager: public QObject
 {
     Q_OBJECT
 
@@ -34,7 +34,8 @@ public:
     static QJsonObject getStatusCountsBySubjectType(int subjectType);
     static QJsonObject getCollectionBySubjectId(int subjectId);
     static bool updateCollectionFields(int subjectId, const QJsonObject &fields, bool updateTimestamp);
-    void clearCollectionTable();
+    bool deleteCollectionBySubjectId(int subjectId);
+    void clearCollectionTable() const;
     // episode表
     static bool insertManyEpisodes(int subjectId, const QJsonArray &episodesArray);
     static QJsonArray getEpisodesBySubjectId(int subjectId);
@@ -46,6 +47,9 @@ public:
     // episode公共数据表
     bool insertEpisodeAirdateFromFile(const QString& filePath);
     [[nodiscard]] QJsonObject getEpisodeAirdates(const QList<int> &subjectIds) const;
+
+signals:
+    void collectionDeleted();
 
 private:
     QSqlDatabase database;

@@ -1,9 +1,14 @@
 #include "menu_util.h"
+#include <QLabel>
+#include <QDialog>
 #include <QJsonArray>
-#include <QJsonObject>
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QApplication>
+#include <QDialogButtonBox>
+#include <QDesktopServices>
 #include "../sql.h"
+#include "../config.h"
 #include "../api/bangumi_api.h"
 
 static const QMap<int, QMap<int, QString>> statusNamesMap = {
@@ -13,7 +18,7 @@ static const QMap<int, QMap<int, QString>> statusNamesMap = {
     {7, {{0, "取消收藏"}, {1, "想读"}, {2, "读过"}, {3, "在读"}, {4, "搁置"}, {5, "抛弃"}}},
     {8, {{0, "取消收藏"}, {1, "想读"}, {2, "读过"}, {3, "在读"}, {4, "搁置"}, {5, "抛弃"}}}};
 
-StatusSelector::StatusSelector(const QPushButton *parentButton, int subjectType, int collectionType, int subjectId, BangumiAPI* bangumiAPI, std::function<void(int)> callback, int xOffset): QWidget(nullptr), subjectId(subjectId), collectionType(collectionType), bangumiAPI(bangumiAPI), callback(std::move(callback))
+StatusSelector::StatusSelector(const QPushButton *parentButton, int subjectType, int collectionType, int subjectId, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, std::function<void(int)> callback, int xOffset): QWidget(nullptr), subjectId(subjectId), collectionType(collectionType), bangumiAPI(bangumiAPI), dbManager(dbManager), callback(std::move(callback))
 {   // 下拉菜单
     setWindowFlags(Qt::Popup | Qt::FramelessWindowHint);
     setFixedWidth(120);
@@ -24,6 +29,7 @@ StatusSelector::StatusSelector(const QPushButton *parentButton, int subjectType,
                   "QPushButton:hover {background-color: #f5f5f5}");
     auto statusMap = statusNamesMap.value(subjectType, statusNamesMap[2]);
     for (auto statusValue : {1, 3, 2, 4, 5, 0}) {
+        if (statusValue == 0 && collectionType == 0) continue;
         auto *btn = new QPushButton(statusMap.value(statusValue));
         connect(btn, &QPushButton::clicked, this, [this, statusValue] {updateStatus(statusValue);});
         layout->addWidget(btn);
@@ -31,9 +37,9 @@ StatusSelector::StatusSelector(const QPushButton *parentButton, int subjectType,
     move(parentButton->mapToGlobal(QPoint(xOffset, parentButton->height())));
 }
 
-void StatusSelector::showStatusSelector(const QPushButton *parentButton, int subjectType, int collectionType, int subjectId, BangumiAPI* bangumiAPI, std::function<void(int)> callback, int xOffset)
+void StatusSelector::showStatusSelector(const QPushButton *parentButton, int subjectType, int collectionType, int subjectId, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, std::function<void(int)> callback, int xOffset)
 {   // 显示下拉菜单
-    auto selector = new StatusSelector(parentButton, subjectType, collectionType, subjectId, bangumiAPI, std::move(callback), xOffset);
+    auto selector = new StatusSelector(parentButton, subjectType, collectionType, subjectId, bangumiAPI, dbManager, std::move(callback), xOffset);
     selector->setAttribute(Qt::WA_DeleteOnClose);
     selector->show();
 }
@@ -41,7 +47,34 @@ void StatusSelector::showStatusSelector(const QPushButton *parentButton, int sub
 void StatusSelector::updateStatus(int statusValue)
 {   // 状态更新
     hide();
-    if (statusValue == 0) return deleteLater();
+    if (statusValue == 0) {
+        QDesktopServices::openUrl(QString("%1subject/%2").arg(getConfig("Bangumi/bangumi_base_url").toString()).arg(subjectId));
+        QDialog confirmDialog;
+        confirmDialog.setWindowFlags(confirmDialog.windowFlags() | Qt::WindowStaysOnTopHint);
+        confirmDialog.setWindowTitle("删除收藏");
+        confirmDialog.setFixedSize(300, 100);
+        QVBoxLayout dialogLayout(&confirmDialog);
+        QLabel label("请从浏览器中执行删除收藏操作");
+        dialogLayout.addWidget(&label);
+        QDialogButtonBox buttonBox;
+        buttonBox.addButton("确认删除", QDialogButtonBox::AcceptRole);
+        buttonBox.addButton("取消", QDialogButtonBox::RejectRole);
+        dialogLayout.addWidget(&buttonBox);
+        connect(&buttonBox, &QDialogButtonBox::accepted, &confirmDialog, &QDialog::accept);
+        connect(&buttonBox, &QDialogButtonBox::rejected, &confirmDialog, &QDialog::reject);
+        if (confirmDialog.exec() == QDialog::Accepted) dbManager->deleteCollectionBySubjectId(subjectId);
+        else{
+            for (QWidget *widget : qApp->topLevelWidgets()) {
+                if (!widget->inherits("QDialog")) {
+                    widget->raise();
+                    widget->activateWindow();
+                    break;
+                }
+            }
+        }
+        deleteLater();
+        return;
+    }
     QJsonObject collectionData{{"type", statusValue}};
     bool success = false;
     if (collectionType >= 1 && collectionType <= 5) success = bangumiAPI->updateCollection(subjectId, collectionData) && (DatabaseManager::updateCollectionFields(subjectId, {{"type", statusValue}}, true), true);

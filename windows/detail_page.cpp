@@ -34,10 +34,11 @@ DetailPage::DetailPage(QWidget *parent) : QWidget(parent)
     setupConnections();
 }
 
-void DetailPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api)
+void DetailPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db)
 {   // 初始化实例
     cacheImageUtil = cacheImage;
     bangumiAPI = api;
+    dbManager = db;
 }
 
 void DetailPage::showEvent(QShowEvent *event)
@@ -113,14 +114,14 @@ void DetailPage::onEpisodeClicked()
 void DetailPage::onOpenBangumiPage() const
 {   // 跳转Bangumi
     QString baseUrl = getConfig("Bangumi/bangumi_base_url").toString();
-    QDesktopServices::openUrl(QUrl(QString("%1subject/%2").arg(baseUrl).arg(currentData.subject_id)));
+    QDesktopServices::openUrl(QString("%1subject/%2").arg(baseUrl).arg(currentData.subject_id));
 }
 
 void DetailPage::onStatusButtonClicked()
 {   // 改变状态
     int subjectType = currentData.subject_type;
     int currentStatus = currentData.type;
-    StatusSelector::showStatusSelector(ui.pushButton_26, subjectType, currentStatus, currentData.subject_id, bangumiAPI, [this, subjectType](int selectedStatus) {
+    StatusSelector::showStatusSelector(ui.pushButton_26, subjectType, currentStatus, currentData.subject_id, bangumiAPI, dbManager,[this, subjectType](int selectedStatus) {
         currentData.type = selectedStatus;
         ui.pushButton_26->setText(statusNamesMap.value(subjectType).value(selectedStatus));
     }, -20);

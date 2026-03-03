@@ -47,6 +47,8 @@ void MainWindow::setupConnections()
 {   // 连接
     // RSS
     connect(rss, &Rss::rssUpdated, this, [this] {mainPageManager->loadCollections(mainPageManager->getCurrentSubjectType(), mainPageManager->getCurrentStatusType(), false);});
+    // 删除收藏
+    connect(dbManager, &DatabaseManager::collectionDeleted, this, [this] {mainPageManager->loadCollections(mainPageManager->getCurrentSubjectType(), mainPageManager->getCurrentStatusType(), false);});
     // 标题栏
     connect(pushButton, &QPushButton::clicked, this, &MainWindow::minimizeWindow);
     connect(pushButton_8, &QPushButton::clicked, this, &MainWindow::toggleMaximizeWindow);
@@ -67,7 +69,7 @@ void MainWindow::setupConnections()
 void MainWindow::ensureSearchPage()
 {   // 确保搜索页面
     searchPage = new SearchPage();
-    searchPage->setManagers(cacheImageUtil, bangumiAPI);
+    searchPage->setManagers(cacheImageUtil, bangumiAPI, dbManager);
     main_stackedWidget->addWidget(searchPage);
     connect(searchPage, &SearchPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
     connect(searchPage, &SearchPage::showEpisodePageRequested, this, &MainWindow::onShowEpisodePageRequested);
@@ -142,7 +144,7 @@ void MainWindow::onShowDetailPageRequested(const CollectionData &collectionData)
 {   // 主页面 to 详情页面
     if (!detailPage) {
         detailPage = new DetailPage();
-        detailPage->setManagers(cacheImageUtil, bangumiAPI);
+        detailPage->setManagers(cacheImageUtil, bangumiAPI, dbManager);
         main_stackedWidget->addWidget(detailPage);
         connect(detailPage, &DetailPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
         connect(detailPage, &DetailPage::showEpisodePageRequested, this, &MainWindow::onShowEpisodePageRequested);
@@ -192,11 +194,6 @@ void MainWindow::onEpisodeClicked(const QJsonObject &collectionData, const QJson
     pageHistory.append(main_stackedWidget->currentWidget());
     playerPage->fetchRoutes(collectionData, episodeData);
     main_stackedWidget->setCurrentWidget(playerPage);
-}
-
-void MainWindow::refreshMainPage() const
-{
-    mainPageManager->loadCollections(mainPageManager->getCurrentSubjectType(), mainPageManager->getCurrentStatusType(), false);
 }
 
 void MainWindow::onBackButtonClicked()
