@@ -3,6 +3,7 @@
 
 #include "main_page.h"
 
+class Rss;
 class PikPakApi;
 class DetailPage;
 class SearchPage;
@@ -39,6 +40,7 @@ private slots:
     void onShowEpisodePageRequested(const CollectionData &collectionData);
     void precreatePlayerPage();
     void onEpisodeClicked(const QJsonObject &collectionData, const QJsonObject &episodeData);
+    void refreshMainPage() const;
 
 private:
     void setupConnections();
@@ -49,6 +51,7 @@ private:
     CacheImageUtil *cacheImageUtil = nullptr;
     BangumiAPI *bangumiAPI = nullptr;
     PikPakApi *pikpakApi = nullptr;
+    Rss *rss = nullptr;
     SearchPage *searchPage = nullptr;
     SettingsPage *settingsPage = nullptr;
     DownloadPage *downloadPage = nullptr;

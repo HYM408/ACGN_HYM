@@ -22,10 +22,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     dbManager = new DatabaseManager(this);
     cacheImageUtil = new CacheImageUtil(this);
     pikpakApi = new PikPakApi(this);
+    rss = new Rss(bangumiAPI, this);
     dbManager->openDatabase();
     DatabaseManager::initTables();
     // 启动 RSS
-    QTimer::singleShot(5000, this, [this] {startRSS(bangumiAPI);});
+    QTimer::singleShot(5000, rss, &Rss::startRSS);
     // 设置主页面
     setupUi(this);
     mainPageManager = new MainPageManager(this, cacheImageUtil, bangumiAPI, dbManager);
@@ -38,22 +39,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 MainWindow::~MainWindow()
 {
-    delete searchPage;
-    delete settingsPage;
-    delete downloadPage;
-    delete detailPage;
-    delete playerPage;
-    delete episodeOverlay;
-    delete mainPageManager;
+    if (playerPage) playerPage->cancelAllSearches();
     cacheImageUtil->clearPendingDownloads();
-    delete cacheImageUtil;
-    delete bangumiAPI;
-    delete pikpakApi;
-    delete dbManager;
 }
 
 void MainWindow::setupConnections()
 {   // 连接
+    // RSS
+    connect(rss, &Rss::rssUpdated, this, [this] {mainPageManager->loadCollections(mainPageManager->getCurrentSubjectType(), mainPageManager->getCurrentStatusType(), false);});
     // 标题栏
     connect(pushButton, &QPushButton::clicked, this, &MainWindow::minimizeWindow);
     connect(pushButton_8, &QPushButton::clicked, this, &MainWindow::toggleMaximizeWindow);
@@ -199,6 +192,11 @@ void MainWindow::onEpisodeClicked(const QJsonObject &collectionData, const QJson
     pageHistory.append(main_stackedWidget->currentWidget());
     playerPage->fetchRoutes(collectionData, episodeData);
     main_stackedWidget->setCurrentWidget(playerPage);
+}
+
+void MainWindow::refreshMainPage() const
+{
+    mainPageManager->loadCollections(mainPageManager->getCurrentSubjectType(), mainPageManager->getCurrentStatusType(), false);
 }
 
 void MainWindow::onBackButtonClicked()

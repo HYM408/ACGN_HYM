@@ -7,7 +7,19 @@
 #include "api/bangumi_api.h"
 #include "utils/network_util.h"
 
-void updateRSS(BangumiAPI* api)
+Rss::Rss(BangumiAPI *api, QObject *parent): QObject(parent), api(api), timer(new QTimer(this))
+{
+    connect(timer, &QTimer::timeout, this, &Rss::updateRSS);
+}
+
+void Rss::startRSS()
+{   // 启动 RSS 定时
+    qDebug() << "启动RSS监控";
+    updateRSS();
+    timer->start(5 * 60 * 1000);
+}
+
+void Rss::updateRSS()
 {   // 获取 Guid
     qDebug() << "RSS：开始获取";
     const QString userId = getConfig("Bangumi/user_id").toString();
@@ -31,15 +43,6 @@ void updateRSS(BangumiAPI* api)
         DatabaseManager::insertManyCollectionData(collections);
         setConfig("Bangumi/rss_guid", newGuid);
         qDebug() << "RSS: 更新完成";
-
+        emit rssUpdated();
     } else qDebug() << "RSS无变化";
-}
-
-void startRSS(BangumiAPI* api)
-{   // 启动 RSS 定时
-    qDebug() << "启动RSS监控";
-    updateRSS(api);
-    static auto* timer = new QTimer(QCoreApplication::instance());
-    QObject::connect(timer, &QTimer::timeout, [api]() {updateRSS(api);});
-    timer->start(5 * 60 * 1000);
 }
