@@ -9,16 +9,11 @@
 #ifndef EPISODE_UI_H
 #define EPISODE_UI_H
 
-#include <QtCore/QVariant>
-#include <QtGui/QIcon>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QFrame>
-#include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QScrollArea>
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
 
@@ -31,9 +26,9 @@ public:
     QFrame *frame;
     QHBoxLayout *horizontalLayout;
     QPushButton *pushButton_14;
-    QPushButton *pushButton_12;
+    QLabel *pushButton_12;
     QPushButton *pushButton_15;
-    QPushButton *pushButton_13;
+    QLabel *pushButton_13;
     QScrollArea *scrollArea;
     QWidget *scrollAreaWidgetContents_2;
     QGridLayout *gridLayout_3;
@@ -55,8 +50,8 @@ public:
         frame_2->setMinimumSize(QSize(600, 0));
         frame_2->setMaximumSize(QSize(600, 16777215));
         frame_2->setStyleSheet(QString::fromUtf8("QFrame {\n"
-"    background-color:rgb(230, 224, 233)\n"
-"}"));
+"       background-color:rgb(230, 224, 233)\n"
+"       }"));
         frame_2->setFrameShape(QFrame::Shape::StyledPanel);
         frame_2->setFrameShadow(QFrame::Shadow::Raised);
         verticalLayout_9 = new QVBoxLayout(frame_2);
@@ -71,14 +66,14 @@ public:
         pushButton_14->setMinimumSize(QSize(44, 44));
         pushButton_14->setMaximumSize(QSize(44, 44));
         pushButton_14->setStyleSheet(QString::fromUtf8("QPushButton {\n"
-"	background-color: rgb(230, 224, 233);\n"
-"	border:none;\n"
-"	border-radius:22px\n"
-"}\n"
+"             background-color: rgb(230, 224, 233);\n"
+"             border:none;\n"
+"             border-radius:22px\n"
+"             }\n"
 "\n"
-"QPushButton:hover {\n"
-"    background-color: rgb(225, 219, 228);\n"
-"}"));
+"             QPushButton:hover {\n"
+"             background-color: rgb(225, 219, 228);\n"
+"             }"));
         QIcon icon;
         icon.addFile(QString::fromUtf8("icons/back.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         pushButton_14->setIcon(icon);
@@ -87,7 +82,7 @@ public:
 
         horizontalLayout->addWidget(pushButton_14);
 
-        pushButton_12 = new QPushButton(frame);
+        pushButton_12 = new QLabel(frame);
         pushButton_12->setObjectName("pushButton_12");
         pushButton_12->setMinimumSize(QSize(480, 0));
         pushButton_12->setMaximumSize(QSize(300, 16777215));
@@ -96,7 +91,7 @@ public:
         font.setPointSize(25);
         font.setBold(true);
         pushButton_12->setFont(font);
-        pushButton_12->setStyleSheet(QString::fromUtf8("border:none;"));
+        pushButton_12->setAlignment(Qt::AlignmentFlag::AlignCenter);
 
         horizontalLayout->addWidget(pushButton_12);
 
@@ -113,14 +108,14 @@ public:
 
         verticalLayout_9->addWidget(frame);
 
-        pushButton_13 = new QPushButton(frame_2);
+        pushButton_13 = new QLabel(frame_2);
         pushButton_13->setObjectName("pushButton_13");
         QFont font2;
         font2.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font2.setPointSize(15);
         font2.setBold(true);
         pushButton_13->setFont(font2);
-        pushButton_13->setStyleSheet(QString::fromUtf8("border:none;"));
+        pushButton_13->setAlignment(Qt::AlignmentFlag::AlignCenter);
 
         verticalLayout_9->addWidget(pushButton_13);
 
@@ -171,12 +166,12 @@ public:
         QMetaObject::connectSlotsByName(EpisodePage);
     } // setupUi
 
-    void retranslateUi(QWidget *EpisodePage)
+    void retranslateUi(QWidget *EpisodePage) const
     {
         pushButton_14->setText(QString());
         pushButton_12->setText(QCoreApplication::translate("EpisodePage", "\351\200\211\351\233\206", nullptr));
-        pushButton_15->setText(QCoreApplication::translate("EpisodePage", "\345\205\250\351\203\250\345\267\262\347\234\213", nullptr));
-        pushButton_13->setText(QCoreApplication::translate("EpisodePage", "\346\240\207\351\242\230", nullptr));
+        pushButton_15->setText(QString());
+        pushButton_13->setText(QString());
         (void)EpisodePage;
     } // retranslateUi
 

@@ -1,22 +1,18 @@
 /********************************************************************************
 ** Form generated from reading UI file 'player_ui.ui'
 **
-** Created by: Qt User Interface Compiler version 6.10.1
+** Created by: Qt User Interface Compiler version 6.10.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
-#ifndef UI_PLAYER_UI_H
-#define UI_PLAYER_UI_H
+#ifndef PLAYER_UI_H
+#define PLAYER_UI_H
 
-#include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QFrame>
-#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QScrollArea>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
 
@@ -171,7 +167,7 @@ public:
         QMetaObject::connectSlotsByName(choicePage);
     } // setupUi
 
-    void retranslateUi(QWidget *choicePage)
+    void retranslateUi(QWidget *choicePage) const
     {
         choicePage->setWindowTitle(QCoreApplication::translate("choicePage", "Form", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("choicePage", "\345\237\272\347\241\200", nullptr));
@@ -186,4 +182,4 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // UI_PLAYER_UI_H
+#endif // PLAYER_UI_H

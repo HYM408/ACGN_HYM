@@ -43,8 +43,8 @@ public slots:
 private:
     struct StatusFrameInfo {
         QFrame *frame = nullptr;
-        QPushButton *statusButton = nullptr;
-        QPushButton *countButton = nullptr;
+        QLabel *statusButton = nullptr;
+        QLabel *countButton = nullptr;
     };
     void initStatusFrames();
     void switchCategory(int subjectType, const QString &title);

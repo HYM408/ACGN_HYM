@@ -75,14 +75,14 @@
            </property>
            <property name="styleSheet">
             <string notr="true">QPushButton {
-	background-color: white;
-	border:none;
-	border-radius:22px
-}
+             background-color: white;
+             border:none;
+             border-radius:22px
+             }
 
-QPushButton:hover {
-    background-color: rgb(237, 237, 238);
-}</string>
+             QPushButton:hover {
+             background-color: rgb(237, 237, 238);
+             }</string>
            </property>
            <property name="text">
             <string/>
@@ -176,17 +176,17 @@ QPushButton:hover {
            </property>
            <property name="styleSheet">
             <string notr="true">QPushButton:hover {
-    background-color: rgba(0, 0, 0,20);
-}
+             background-color: rgba(0, 0, 0,20);
+             }
 
-QPushButton:checked {
-    background-color: rgb(233, 221, 255);
-}
+             QPushButton:checked {
+             background-color: rgb(233, 221, 255);
+             }
 
-QPushButton {
-    border:none;
-	border-radius: 10px;
-}</string>
+             QPushButton {
+             border:none;
+             border-radius: 10px;
+             }</string>
            </property>
            <property name="text">
             <string>Bangumi</string>
@@ -222,17 +222,17 @@ QPushButton {
            </property>
            <property name="styleSheet">
             <string notr="true">QPushButton:hover {
-    background-color: rgba(0, 0, 0,20);
-}
+             background-color: rgba(0, 0, 0,20);
+             }
 
-QPushButton:checked {
-    background-color: rgb(233, 221, 255);
-}
+             QPushButton:checked {
+             background-color: rgb(233, 221, 255);
+             }
 
-QPushButton {
-    border:none;
-	border-radius: 10px;
-}</string>
+             QPushButton {
+             border:none;
+             border-radius: 10px;
+             }</string>
            </property>
            <property name="text">
             <string>PikPak</string>
@@ -268,17 +268,17 @@ QPushButton {
            </property>
            <property name="styleSheet">
             <string notr="true">QPushButton:hover {
-    background-color: rgba(0, 0, 0,20);
-}
+             background-color: rgba(0, 0, 0,20);
+             }
 
-QPushButton:checked {
-    background-color: rgb(233, 221, 255);
-}
+             QPushButton:checked {
+             background-color: rgb(233, 221, 255);
+             }
 
-QPushButton {
-    border:none;
-	border-radius: 10px;
-}</string>
+             QPushButton {
+             border:none;
+             border-radius: 10px;
+             }</string>
            </property>
            <property name="text">
             <string>下载</string>
@@ -314,12 +314,12 @@ QPushButton {
     <widget class="QStackedWidget" name="stackedWidget_2">
      <property name="styleSheet">
       <string notr="true">QStackedWidget {
-    background-color: rgb(248, 242, 250);
-}
+       background-color: rgb(248, 242, 250);
+       }
 
-QStackedWidget &gt; QWidget {
-    background-color: transparent;
-}</string>
+       QStackedWidget &gt; QWidget {
+       background-color: transparent;
+       }</string>
      </property>
      <property name="currentIndex">
       <number>1</number>
@@ -327,7 +327,7 @@ QStackedWidget &gt; QWidget {
      <widget class="QWidget" name="login_page">
       <layout class="QVBoxLayout" name="verticalLayout_7">
        <item alignment="Qt::AlignmentFlag::AlignLeft">
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QLabel" name="pushButton">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -347,9 +347,6 @@ QStackedWidget &gt; QWidget {
            <bold>true</bold>
           </font>
          </property>
-         <property name="styleSheet">
-          <string notr="true">border:none;</string>
-         </property>
          <property name="text">
           <string>Bangumi</string>
          </property>
@@ -362,7 +359,7 @@ QStackedWidget &gt; QWidget {
            <number>8</number>
           </property>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QPushButton" name="pushButton_7">
+           <widget class="QLabel" name="pushButton_7">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -382,16 +379,13 @@ QStackedWidget &gt; QWidget {
               <bold>true</bold>
              </font>
             </property>
-            <property name="styleSheet">
-             <string notr="true">border:none</string>
-            </property>
             <property name="text">
              <string>Bangumi 授权</string>
             </property>
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QPushButton" name="pushButton_2">
+           <widget class="QLabel" name="pushButton_2">
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -399,16 +393,13 @@ QStackedWidget &gt; QWidget {
               <bold>false</bold>
              </font>
             </property>
-            <property name="styleSheet">
-             <string notr="true">border:none;</string>
-            </property>
             <property name="text">
-             <string>ID</string>
+             <string/>
             </property>
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QPushButton" name="pushButton_9">
+           <widget class="QLabel" name="pushButton_9">
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -416,16 +407,13 @@ QStackedWidget &gt; QWidget {
               <bold>false</bold>
              </font>
             </property>
-            <property name="styleSheet">
-             <string notr="true">border:none;</string>
-            </property>
             <property name="text">
-             <string>Access Token</string>
+             <string/>
             </property>
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QPushButton" name="pushButton_8">
+           <widget class="QLabel" name="pushButton_8">
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -433,11 +421,8 @@ QStackedWidget &gt; QWidget {
               <bold>false</bold>
              </font>
             </property>
-            <property name="styleSheet">
-             <string notr="true">border:none;</string>
-            </property>
             <property name="text">
-             <string>Refresh Token</string>
+             <string/>
             </property>
            </widget>
           </item>
@@ -491,7 +476,7 @@ QStackedWidget &gt; QWidget {
            <number>1</number>
           </property>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QPushButton" name="pushButton_12">
+           <widget class="QLabel" name="pushButton_12">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -510,9 +495,6 @@ QStackedWidget &gt; QWidget {
               <pointsize>13</pointsize>
               <bold>true</bold>
              </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">border:none</string>
             </property>
             <property name="text">
              <string>Bangumi 域名 ：</string>
@@ -572,7 +554,7 @@ QStackedWidget &gt; QWidget {
      <widget class="QWidget" name="pikpak_page">
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item alignment="Qt::AlignmentFlag::AlignLeft">
-        <widget class="QPushButton" name="pushButton_5">
+        <widget class="QLabel" name="pushButton_5">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -592,9 +574,6 @@ QStackedWidget &gt; QWidget {
            <bold>true</bold>
           </font>
          </property>
-         <property name="styleSheet">
-          <string notr="true">border:none;</string>
-         </property>
          <property name="text">
           <string>PikPak 登录</string>
          </property>
@@ -610,7 +589,7 @@ QStackedWidget &gt; QWidget {
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QPushButton" name="pushButton_6">
+           <widget class="QLabel" name="pushButton_6">
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -618,16 +597,13 @@ QStackedWidget &gt; QWidget {
               <bold>false</bold>
              </font>
             </property>
-            <property name="styleSheet">
-             <string notr="true">border:none;</string>
-            </property>
             <property name="text">
-             <string>username</string>
+             <string/>
             </property>
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QPushButton" name="pushButton_10">
+           <widget class="QLabel" name="pushButton_10">
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -635,43 +611,34 @@ QStackedWidget &gt; QWidget {
               <bold>false</bold>
              </font>
             </property>
-            <property name="styleSheet">
-             <string notr="true">border:none;</string>
-            </property>
             <property name="text">
-             <string>password</string>
+             <string/>
             </property>
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QPushButton" name="pushButton_11">
+           <widget class="QLabel" name="pushButton_11">
             <property name="font">
              <font>
               <family>微软雅黑</family>
               <pointsize>13</pointsize>
              </font>
             </property>
-            <property name="styleSheet">
-             <string notr="true">border:none;</string>
-            </property>
             <property name="text">
-             <string>access token</string>
+             <string/>
             </property>
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QPushButton" name="pushButton_15">
+           <widget class="QLabel" name="pushButton_15">
             <property name="font">
              <font>
               <family>微软雅黑</family>
               <pointsize>13</pointsize>
              </font>
             </property>
-            <property name="styleSheet">
-             <string notr="true">border:none;</string>
-            </property>
             <property name="text">
-             <string>refresh token</string>
+             <string/>
             </property>
            </widget>
           </item>
@@ -719,7 +686,7 @@ QStackedWidget &gt; QWidget {
      <widget class="QWidget" name="download_page">
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item alignment="Qt::AlignmentFlag::AlignLeft">
-        <widget class="QPushButton" name="pushButton_14">
+        <widget class="QLabel" name="pushButton_14">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -738,9 +705,6 @@ QStackedWidget &gt; QWidget {
            <pointsize>17</pointsize>
            <bold>true</bold>
           </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">border:none;</string>
          </property>
          <property name="text">
           <string>下载路径</string>

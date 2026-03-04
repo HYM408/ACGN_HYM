@@ -117,7 +117,6 @@ void MainPageManager::loadCollections(int subjectType, int statusType, bool rese
         QString backgroundColor = isHovered ? "rgba(103, 79, 165, 30)" : "transparent";
         QString borderStyle = selected ? ";border-bottom: 3px solid rgb(103, 79, 165)" : "";
         info.frame->setStyleSheet(QString("QFrame{background-color: %1%2}").arg(backgroundColor, borderStyle));
-        info.statusButton->setChecked(selected);
     }
     allCollections = DatabaseManager::getCollectionBySubjectTypeAndType(subjectType, statusType);
     if (!allCollections.isEmpty()) {

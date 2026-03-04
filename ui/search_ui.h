@@ -9,20 +9,14 @@
 #ifndef SEARCH_UI_H
 #define SEARCH_UI_H
 
-#include <QtCore/QVariant>
-#include <QtGui/QIcon>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QComboBox>
-#include <QtWidgets/QFrame>
-#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QScrollArea>
-#include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
 
@@ -214,21 +208,7 @@ public:
 "    height: 0px;\n"
 "}\n"
 "\n"
-"QScrollBar:horizontal {\n"
-"    border: none;\n"
-"    background: #f0f0f0;\n"
-"    height: 10px;\n"
-"}\n"
-"\n"
-"QScrollBar::handle:horizontal {\n"
-"    background: #c0c0c0;\n"
-"    border-radius: 5px;\n"
-"    min-width: 20px;\n"
-"}\n"
-"\n"
-"QScrollBar::handle:horizontal:hover {\n"
-"    background: #a0a0a0;\n"
-"}"));
+""));
         searchresult_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
         searchresult_scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
@@ -267,7 +247,7 @@ public:
         QMetaObject::connectSlotsByName(SearchPage);
     } // setupUi
 
-    void retranslateUi(QWidget *SearchPage)
+    void retranslateUi(QWidget *SearchPage) const
     {
         back_Button->setText(QString());
         search_pushButton->setText(QCoreApplication::translate("SearchPage", "\346\220\234\347\264\242", nullptr));

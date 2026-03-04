@@ -36,8 +36,8 @@
     <widget class="QFrame" name="frame_2">
      <property name="styleSheet">
       <string notr="true">QFrame {
-    background-color: white;
-}</string>
+       background-color: white;
+       }</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::Shape::StyledPanel</enum>
@@ -62,7 +62,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QTabWidget" name="tabWidget">
+       <widget class="QScrollArea" name="scrollArea">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>1</horstretch>
@@ -70,64 +70,24 @@
          </sizepolicy>
         </property>
         <property name="styleSheet">
-         <string notr="true">QTabWidget::pane {
-    border-right: 1px solid #c0c0c0;
-}</string>
+         <string notr="true">border: none;</string>
         </property>
-        <property name="currentIndex">
-         <number>0</number>
+        <property name="widgetResizable">
+         <bool>true</bool>
         </property>
-        <widget class="QWidget" name="tab">
-         <property name="styleSheet">
-          <string notr="true">border:none;
-background-color: white;</string>
+        <widget class="QWidget" name="scrollAreaWidgetContents">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>762</width>
+           <height>940</height>
+          </rect>
          </property>
-         <attribute name="title">
-          <string>最近添加</string>
-         </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QScrollArea" name="scrollArea">
-            <property name="styleSheet">
-             <string notr="true"/>
-            </property>
-            <property name="widgetResizable">
-             <bool>true</bool>
-            </property>
-            <widget class="QWidget" name="scrollAreaWidgetContents">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>761</width>
-               <height>917</height>
-              </rect>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_2"/>
-            </widget>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="tab_2">
-         <attribute name="title">
-          <string>Tab 2</string>
-         </attribute>
+         <property name="styleSheet">
+          <string notr="true">border-right: 2px solid #c0c0c0;</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2"/>
         </widget>
        </widget>
       </item>

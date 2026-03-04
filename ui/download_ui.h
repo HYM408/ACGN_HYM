@@ -1,24 +1,19 @@
 /********************************************************************************
 ** Form generated from reading UI file 'download_ui.ui'
 **
-** Created by: Qt User Interface Compiler version 6.10.1
+** Created by: Qt User Interface Compiler version 6.10.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
-#ifndef UI_DOWNLOAD_UI_H
-#define UI_DOWNLOAD_UI_H
+#ifndef DOWNLOAD_UI_H
+#define DOWNLOAD_UI_H
 
-#include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QFrame>
-#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QScrollArea>
-#include <QtWidgets/QTabWidget>
 #include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
 
@@ -28,13 +23,9 @@ public:
     QHBoxLayout *horizontalLayout;
     QFrame *frame_2;
     QHBoxLayout *horizontalLayout_3;
-    QTabWidget *tabWidget;
-    QWidget *tab;
-    QVBoxLayout *verticalLayout;
     QScrollArea *scrollArea;
     QWidget *scrollAreaWidgetContents;
     QVBoxLayout *verticalLayout_2;
-    QWidget *tab_2;
     QFrame *frame_3;
     QVBoxLayout *verticalLayout_3;
     QFrame *frame;
@@ -58,51 +49,32 @@ public:
         frame_2 = new QFrame(DownloaderPage);
         frame_2->setObjectName("frame_2");
         frame_2->setStyleSheet(QString::fromUtf8("QFrame {\n"
-"    background-color: white;\n"
-"}"));
+"       background-color: white;\n"
+"       }"));
         frame_2->setFrameShape(QFrame::Shape::StyledPanel);
         frame_2->setFrameShadow(QFrame::Shadow::Raised);
         horizontalLayout_3 = new QHBoxLayout(frame_2);
         horizontalLayout_3->setSpacing(0);
         horizontalLayout_3->setObjectName("horizontalLayout_3");
         horizontalLayout_3->setContentsMargins(0, 0, 0, 0);
-        tabWidget = new QTabWidget(frame_2);
-        tabWidget->setObjectName("tabWidget");
+        scrollArea = new QScrollArea(frame_2);
+        scrollArea->setObjectName("scrollArea");
         QSizePolicy sizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Expanding);
         sizePolicy.setHorizontalStretch(1);
         sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(tabWidget->sizePolicy().hasHeightForWidth());
-        tabWidget->setSizePolicy(sizePolicy);
-        tabWidget->setStyleSheet(QString::fromUtf8("QTabWidget::pane {\n"
-"    border-right: 1px solid #c0c0c0;\n"
-"}"));
-        tab = new QWidget();
-        tab->setObjectName("tab");
-        tab->setStyleSheet(QString::fromUtf8("border:none;\n"
-"background-color: white;"));
-        verticalLayout = new QVBoxLayout(tab);
-        verticalLayout->setSpacing(0);
-        verticalLayout->setObjectName("verticalLayout");
-        verticalLayout->setContentsMargins(0, 0, 0, 0);
-        scrollArea = new QScrollArea(tab);
-        scrollArea->setObjectName("scrollArea");
-        scrollArea->setStyleSheet(QString::fromUtf8(""));
+        sizePolicy.setHeightForWidth(scrollArea->sizePolicy().hasHeightForWidth());
+        scrollArea->setSizePolicy(sizePolicy);
+        scrollArea->setStyleSheet(QString::fromUtf8("border: none;"));
         scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName("scrollAreaWidgetContents");
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 761, 917));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 762, 940));
+        scrollAreaWidgetContents->setStyleSheet(QString::fromUtf8("border-right: 2px solid #c0c0c0;"));
         verticalLayout_2 = new QVBoxLayout(scrollAreaWidgetContents);
         verticalLayout_2->setObjectName("verticalLayout_2");
         scrollArea->setWidget(scrollAreaWidgetContents);
 
-        verticalLayout->addWidget(scrollArea);
-
-        tabWidget->addTab(tab, QString());
-        tab_2 = new QWidget();
-        tab_2->setObjectName("tab_2");
-        tabWidget->addTab(tab_2, QString());
-
-        horizontalLayout_3->addWidget(tabWidget);
+        horizontalLayout_3->addWidget(scrollArea);
 
         frame_3 = new QFrame(frame_2);
         frame_3->setObjectName("frame_3");
@@ -168,17 +140,12 @@ public:
 
         retranslateUi(DownloaderPage);
 
-        tabWidget->setCurrentIndex(0);
-
-
         QMetaObject::connectSlotsByName(DownloaderPage);
     } // setupUi
 
-    void retranslateUi(QWidget *DownloaderPage)
+    void retranslateUi(QWidget *DownloaderPage) const
     {
         DownloaderPage->setWindowTitle(QCoreApplication::translate("DownloaderPage", "Form", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("DownloaderPage", "\346\234\200\350\277\221\346\267\273\345\212\240", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("DownloaderPage", "Tab 2", nullptr));
         lineEdit->setText(QString());
         pushButton->setText(QCoreApplication::translate("DownloaderPage", "\351\200\211\346\213\251\350\267\257\345\276\204", nullptr));
     } // retranslateUi
@@ -191,4 +158,4 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // UI_DOWNLOAD_UI_H
+#endif // DOWNLOAD_UI_H

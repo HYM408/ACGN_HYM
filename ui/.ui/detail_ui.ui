@@ -33,7 +33,7 @@
     <widget class="QFrame" name="frame_3">
      <property name="styleSheet">
       <string notr="true">background-color: white;
-border: none;</string>
+       border: none;</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::Shape::StyledPanel</enum>
@@ -73,14 +73,14 @@ border: none;</string>
         </property>
         <property name="styleSheet">
          <string notr="true">QPushButton {
-	background-color: white;
-	border:none;
-	border-radius:22px
-}
+          background-color: white;
+          border:none;
+          border-radius:22px
+          }
 
-QPushButton:hover {
-    background-color: rgb(237, 237, 238);
-}</string>
+          QPushButton:hover {
+          background-color: rgb(237, 237, 238);
+          }</string>
         </property>
         <property name="text">
          <string/>
@@ -113,14 +113,14 @@ QPushButton:hover {
         </property>
         <property name="styleSheet">
          <string notr="true">QPushButton {
-	background-color: white;
-	border:none;
-	border-radius:22px
-}
+          background-color: white;
+          border:none;
+          border-radius:22px
+          }
 
-QPushButton:hover {
-    background-color: rgb(237, 237, 238);
-}</string>
+          QPushButton:hover {
+          background-color: rgb(237, 237, 238);
+          }</string>
         </property>
         <property name="text">
          <string/>
@@ -156,9 +156,9 @@ QPushButton:hover {
      </property>
      <property name="styleSheet">
       <string notr="true">QFrame {
-	background-color: white;
-	border: none;
-}</string>
+       background-color: white;
+       border: none;
+       }</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::Shape::StyledPanel</enum>
@@ -200,7 +200,7 @@ QPushButton:hover {
          <string notr="true">border-radius: 15px;</string>
         </property>
         <property name="text">
-         <string>封面</string>
+         <string/>
         </property>
         <property name="alignment">
          <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -252,7 +252,7 @@ QPushButton:hover {
           </widget>
          </item>
          <item alignment="Qt::AlignmentFlag::AlignLeft">
-          <widget class="QPushButton" name="pushButton_23">
+          <widget class="QLabel" name="pushButton_23">
            <property name="minimumSize">
             <size>
              <width>80</width>
@@ -268,15 +268,18 @@ QPushButton:hover {
            </property>
            <property name="styleSheet">
             <string notr="true">border: 1px solid gray;
-border-radius:8px;</string>
+             border-radius:8px;</string>
            </property>
            <property name="text">
-            <string>时间</string>
+            <string>TBA</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
          <item alignment="Qt::AlignmentFlag::AlignLeft">
-          <widget class="QPushButton" name="pushButton_24">
+          <widget class="QLabel" name="pushButton_24">
            <property name="font">
             <font>
              <family>微软雅黑</family>
@@ -292,7 +295,7 @@ border-radius:8px;</string>
           </widget>
          </item>
          <item alignment="Qt::AlignmentFlag::AlignLeft">
-          <widget class="QPushButton" name="pushButton_21">
+          <widget class="QLabel" name="pushButton_21">
            <property name="font">
             <font>
              <family>微软雅黑</family>
@@ -308,7 +311,7 @@ border-radius:8px;</string>
           </widget>
          </item>
          <item alignment="Qt::AlignmentFlag::AlignLeft">
-          <widget class="QPushButton" name="pushButton_25">
+          <widget class="QLabel" name="pushButton_25">
            <property name="font">
             <font>
              <family>微软雅黑</family>
@@ -339,10 +342,10 @@ border-radius:8px;</string>
            </property>
            <property name="styleSheet">
             <string notr="true">border: 1px solid gray;
-border-radius:15px</string>
+             border-radius:15px</string>
            </property>
            <property name="text">
-            <string>追番</string>
+            <string/>
            </property>
           </widget>
          </item>
@@ -358,7 +361,7 @@ border-radius:15px</string>
             <string notr="true">border: none;</string>
            </property>
            <property name="text">
-            <string>选集</string>
+            <string/>
            </property>
           </widget>
          </item>
@@ -385,8 +388,8 @@ border-radius:15px</string>
      </property>
      <property name="styleSheet">
       <string notr="true">QTabWidget::tab-bar {
-    alignment: center;
-}</string>
+       alignment: center;
+       }</string>
      </property>
      <property name="currentIndex">
       <number>0</number>
@@ -437,7 +440,33 @@ border-radius:15px</string>
           <enum>Qt::ContextMenuPolicy::CustomContextMenu</enum>
          </property>
          <property name="styleSheet">
-          <string notr="true"/>
+          <string notr="true">QScrollArea &gt; QWidget &gt; QWidget {
+    background-color: white;
+}
+
+QScrollBar:vertical {
+    border: none;
+    background: #f0f0f0;
+    width: 11px;
+}
+
+QScrollBar::handle:vertical {
+    background: #c0c0c0;
+    border-radius: 5px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #a0a0a0;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+    height: 0px;
+}
+
+</string>
          </property>
          <property name="frameShape">
           <enum>QFrame::Shape::NoFrame</enum>

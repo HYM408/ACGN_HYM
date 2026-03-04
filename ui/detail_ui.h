@@ -1,25 +1,20 @@
 /********************************************************************************
 ** Form generated from reading UI file 'detail_ui.ui'
 **
-** Created by: Qt User Interface Compiler version 6.10.1
+** Created by: Qt User Interface Compiler version 6.10.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
-#ifndef UI_DETAIL_UI_H
-#define UI_DETAIL_UI_H
+#ifndef DETAIL_UI_H
+#define DETAIL_UI_H
 
-#include <QtCore/QVariant>
-#include <QtGui/QIcon>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QFrame>
-#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTextEdit>
 #include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
 
@@ -37,10 +32,10 @@ public:
     QFrame *frame;
     QVBoxLayout *verticalLayout_13;
     QTextEdit *textEdit;
-    QPushButton *pushButton_23;
-    QPushButton *pushButton_24;
-    QPushButton *pushButton_21;
-    QPushButton *pushButton_25;
+    QLabel *pushButton_23;
+    QLabel *pushButton_24;
+    QLabel *pushButton_21;
+    QLabel *pushButton_25;
     QPushButton *pushButton_26;
     QPushButton *pushButton_27;
     QTabWidget *tabWidget;
@@ -65,7 +60,7 @@ public:
         frame_3 = new QFrame(DetailPage);
         frame_3->setObjectName("frame_3");
         frame_3->setStyleSheet(QString::fromUtf8("background-color: white;\n"
-"border: none;"));
+"       border: none;"));
         frame_3->setFrameShape(QFrame::Shape::StyledPanel);
         frame_3->setFrameShadow(QFrame::Shadow::Raised);
         horizontalLayout_11 = new QHBoxLayout(frame_3);
@@ -77,14 +72,14 @@ public:
         pushButton_19->setMinimumSize(QSize(45, 45));
         pushButton_19->setMaximumSize(QSize(45, 45));
         pushButton_19->setStyleSheet(QString::fromUtf8("QPushButton {\n"
-"	background-color: white;\n"
-"	border:none;\n"
-"	border-radius:22px\n"
-"}\n"
+"          background-color: white;\n"
+"          border:none;\n"
+"          border-radius:22px\n"
+"          }\n"
 "\n"
-"QPushButton:hover {\n"
-"    background-color: rgb(237, 237, 238);\n"
-"}"));
+"          QPushButton:hover {\n"
+"          background-color: rgb(237, 237, 238);\n"
+"          }"));
         QIcon icon;
         icon.addFile(QString::fromUtf8("icons/back.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         pushButton_19->setIcon(icon);
@@ -97,14 +92,14 @@ public:
         pushButton_20->setMinimumSize(QSize(45, 45));
         pushButton_20->setMaximumSize(QSize(45, 45));
         pushButton_20->setStyleSheet(QString::fromUtf8("QPushButton {\n"
-"	background-color: white;\n"
-"	border:none;\n"
-"	border-radius:22px\n"
-"}\n"
+"          background-color: white;\n"
+"          border:none;\n"
+"          border-radius:22px\n"
+"          }\n"
 "\n"
-"QPushButton:hover {\n"
-"    background-color: rgb(237, 237, 238);\n"
-"}"));
+"          QPushButton:hover {\n"
+"          background-color: rgb(237, 237, 238);\n"
+"          }"));
         QIcon icon1;
         icon1.addFile(QString::fromUtf8("icons/openUrl.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         pushButton_20->setIcon(icon1);
@@ -120,9 +115,9 @@ public:
         frame_4->setMinimumSize(QSize(0, 310));
         frame_4->setMaximumSize(QSize(16777215, 310));
         frame_4->setStyleSheet(QString::fromUtf8("QFrame {\n"
-"	background-color: white;\n"
-"	border: none;\n"
-"}"));
+"       background-color: white;\n"
+"       border: none;\n"
+"       }"));
         frame_4->setFrameShape(QFrame::Shape::StyledPanel);
         frame_4->setFrameShadow(QFrame::Shadow::Raised);
         horizontalLayout_14 = new QHBoxLayout(frame_4);
@@ -159,7 +154,7 @@ public:
 
         verticalLayout_13->addWidget(textEdit);
 
-        pushButton_23 = new QPushButton(frame);
+        pushButton_23 = new QLabel(frame);
         pushButton_23->setObjectName("pushButton_23");
         pushButton_23->setMinimumSize(QSize(80, 35));
         QFont font1;
@@ -168,11 +163,12 @@ public:
         font1.setBold(false);
         pushButton_23->setFont(font1);
         pushButton_23->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
-"border-radius:8px;"));
+"             border-radius:8px;"));
+        pushButton_23->setAlignment(Qt::AlignmentFlag::AlignCenter);
 
         verticalLayout_13->addWidget(pushButton_23, 0, Qt::AlignmentFlag::AlignLeft);
 
-        pushButton_24 = new QPushButton(frame);
+        pushButton_24 = new QLabel(frame);
         pushButton_24->setObjectName("pushButton_24");
         QFont font2;
         font2.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
@@ -182,14 +178,14 @@ public:
 
         verticalLayout_13->addWidget(pushButton_24, 0, Qt::AlignmentFlag::AlignLeft);
 
-        pushButton_21 = new QPushButton(frame);
+        pushButton_21 = new QLabel(frame);
         pushButton_21->setObjectName("pushButton_21");
         pushButton_21->setFont(font2);
         pushButton_21->setStyleSheet(QString::fromUtf8("border: none;"));
 
         verticalLayout_13->addWidget(pushButton_21, 0, Qt::AlignmentFlag::AlignLeft);
 
-        pushButton_25 = new QPushButton(frame);
+        pushButton_25 = new QLabel(frame);
         pushButton_25->setObjectName("pushButton_25");
         pushButton_25->setFont(font2);
         pushButton_25->setStyleSheet(QString::fromUtf8("border: none;"));
@@ -201,7 +197,7 @@ public:
         pushButton_26->setMinimumSize(QSize(80, 35));
         pushButton_26->setFont(font2);
         pushButton_26->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
-"border-radius:15px"));
+"             border-radius:15px"));
 
         verticalLayout_13->addWidget(pushButton_26, 0, Qt::AlignmentFlag::AlignLeft);
 
@@ -230,8 +226,8 @@ public:
         font4.setBold(false);
         tabWidget->setFont(font4);
         tabWidget->setStyleSheet(QString::fromUtf8("QTabWidget::tab-bar {\n"
-"    alignment: center;\n"
-"}"));
+"       alignment: center;\n"
+"       }"));
         tab = new QWidget();
         tab->setObjectName("tab");
         verticalLayout_14 = new QVBoxLayout(tab);
@@ -254,7 +250,33 @@ public:
         font5.setBold(true);
         textEdit_2->setFont(font5);
         textEdit_2->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
-        textEdit_2->setStyleSheet(QString::fromUtf8(""));
+        textEdit_2->setStyleSheet(QString::fromUtf8("QScrollArea > QWidget > QWidget {\n"
+"    background-color: white;\n"
+"}\n"
+"\n"
+"QScrollBar:vertical {\n"
+"    border: none;\n"
+"    background: #f0f0f0;\n"
+"    width: 11px;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:vertical {\n"
+"    background: #c0c0c0;\n"
+"    border-radius: 5px;\n"
+"    min-height: 20px;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:vertical:hover {\n"
+"    background: #a0a0a0;\n"
+"}\n"
+"\n"
+"QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {\n"
+"    border: none;\n"
+"    background: none;\n"
+"    height: 0px;\n"
+"}\n"
+"\n"
+""));
         textEdit_2->setFrameShape(QFrame::Shape::NoFrame);
         textEdit_2->setReadOnly(true);
 
@@ -282,17 +304,17 @@ public:
         QMetaObject::connectSlotsByName(DetailPage);
     } // setupUi
 
-    void retranslateUi(QWidget *DetailPage)
+    void retranslateUi(QWidget *DetailPage) const
     {
         pushButton_19->setText(QString());
         pushButton_20->setText(QString());
-        cover_label_3->setText(QCoreApplication::translate("DetailPage", "\345\260\201\351\235\242", nullptr));
-        pushButton_23->setText(QCoreApplication::translate("DetailPage", "\346\227\266\351\227\264", nullptr));
+        cover_label_3->setText(QString());
+        pushButton_23->setText(QCoreApplication::translate("DetailPage", "TBA", nullptr));
         pushButton_24->setText(QCoreApplication::translate("DetailPage", "\345\205\250-\350\257\235", nullptr));
         pushButton_21->setText(QCoreApplication::translate("DetailPage", "|\344\272\272\350\257\204|#", nullptr));
         pushButton_25->setText(QCoreApplication::translate("DetailPage", "\346\224\266\350\227\217/\345\234\250\347\234\213/\346\212\233\345\274\203", nullptr));
-        pushButton_26->setText(QCoreApplication::translate("DetailPage", "\350\277\275\347\225\252", nullptr));
-        pushButton_27->setText(QCoreApplication::translate("DetailPage", "\351\200\211\351\233\206", nullptr));
+        pushButton_26->setText(QString());
+        pushButton_27->setText(QString());
         tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("DetailPage", "\350\257\246\346\203\205", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("DetailPage", "\350\247\222\350\211\262", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_3), QCoreApplication::translate("DetailPage", "\347\233\270\345\205\263\346\235\241\347\233\256", nullptr));
@@ -308,4 +330,4 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // UI_DETAIL_UI_H
+#endif // DETAIL_UI_H
