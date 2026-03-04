@@ -253,26 +253,34 @@ void MainPageManager::setProgressText(QLabel *label, const CollectionData &colle
         QDate earliest, latest;
         int airedCount = 0;
         QJsonArray episodes = airdatesJson.value(QString::number(collection.subject_id)).toArray();
-        qsizetype totalAirdates = episodes.size();
+        int totalEpisodes = collection.subject_eps > 0 ? collection.subject_eps : static_cast<int>(episodes.size());
+        QString totalEpsStr = (totalEpisodes > 0) ? QString::number(totalEpisodes) : "--";
         for (const auto &epVal : episodes) {
             QJsonObject epObj = epVal.toObject();
             QString dateStr = epObj["airdate"].toString();
             QDate airDate = QDate::fromString(dateStr, Qt::ISODate);
-            if (!airDate.isValid()) continue;
+            if (!airDate.isValid()) {
+                airDate = QDate::fromString(collection.subject_date, Qt::ISODate);
+                if (!airDate.isValid()) continue;
+            }
             hasAirdate = true;
             if (!earliest.isValid() || airDate < earliest) earliest = airDate;
             if (!latest.isValid() || airDate > latest) latest = airDate;
             if (airDate <= currentDate) ++airedCount;
         }
-        qsizetype actualTotalEps = totalAirdates;
-        QString totalEpsStr = actualTotalEps > 0 ? QString::number(actualTotalEps) : "--";
-        QString progress = collection.ep_status >= actualTotalEps ? "已看完" : QString("看到 %1").arg(collection.ep_status);
-        if (!hasAirdate || earliest > currentDate) {
-            if (!collection.subject_date.isEmpty()) label->setText(QString("%1 开播 · 预定全 %2 话").arg(collection.subject_date, totalEpsStr));
-            else label->setText(QString("未开播 · 预定全 %1 话").arg(totalEpsStr));
+        QString progress;
+        if (totalEpisodes > 0 && collection.ep_status >= totalEpisodes) progress = "已看完";
+        else progress = QString("看到 %1").arg(collection.ep_status);
+        if (!hasAirdate) {
+            QDate subjectDate = QDate::fromString(collection.subject_date, Qt::ISODate);
+            if (!subjectDate.isValid()) label->setText(QString("未开播 · 预定全 %1 话").arg(totalEpsStr));
+            else if (subjectDate <= currentDate) label->setText(QString("已完结 · 全 %1 话 · %2").arg(totalEpsStr, progress));
+            else label->setText(QString("%1 开播 · 预定全 %2 话").arg(collection.subject_date, totalEpsStr));
+        } else if (earliest > currentDate) label->setText(QString("%1 开播 · 预定全 %2 话").arg(earliest.toString(Qt::ISODate), totalEpsStr));
+        else {
+            if (latest < currentDate) label->setText(QString("已完结 · 全 %1 话 · %2").arg(totalEpsStr, progress));
+            else label->setText(QString("连载至第 %1 话 · 全 %2 话 · %3").arg(airedCount).arg(totalEpsStr, progress));
         }
-        else if (latest < currentDate) label->setText(QString("已完结 · 全 %1 话 · %2").arg(totalEpsStr).arg(progress));
-        else label->setText(QString("连载至第 %1 话 · 全 %2 话 · %3").arg(airedCount).arg(totalEpsStr).arg(progress));
     }
     else if (collection.subject_type == 7 || collection.subject_type == 8) {
         QString totalVols = collection.subject_volumes > 0 ? QString::number(collection.subject_volumes) : "--";
