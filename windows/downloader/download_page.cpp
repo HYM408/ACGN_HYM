@@ -96,11 +96,15 @@ void DownloadPage::fetchAndDownload(const QString &fileId, const QString &fileNa
 {   // 获取链接并下载
     updateDownloadStatus(taskWidgets.value(fileName, nullptr), "获取链接");
     QJsonObject fileInfo = pikpakApi->getDownloadUrl(fileId);
-    QString downloadUrl = fileInfo["web_content_link"].toString();
-    if (downloadUrl.isEmpty()) {
-        auto medias = fileInfo["medias"].toArray();
-        if (!medias.isEmpty()) downloadUrl = medias.first().toObject()["link"].toObject()["url"].toString();
+    auto medias = fileInfo["medias"].toArray();
+    QString downloadUrl;
+    if (!medias.isEmpty()) {
+        auto link = medias.first().toObject()["link"].toObject();
+        auto mirrors = link["mirrors"].toArray();
+        if (!mirrors.isEmpty()) downloadUrl = mirrors[mirrors.size() >= 2 ? 1 : 0].toString();
+        else downloadUrl = link["url"].toString();
     }
+    if (downloadUrl.isEmpty()) downloadUrl = fileInfo["web_content_link"].toString();
     QString savePath = downloadPath + "/" + fileName;
     auto *task = new ChunkDownload(downloadUrl, savePath, 4, this);
     downloadTasks[fileName] = task;
