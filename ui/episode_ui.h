@@ -9,11 +9,17 @@
 #ifndef EPISODE_UI_H
 #define EPISODE_UI_H
 
+#include <QtCore/QVariant>
+#include <QtGui/QIcon>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QScrollArea>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
 
@@ -84,8 +90,8 @@ public:
 
         pushButton_12 = new QLabel(frame);
         pushButton_12->setObjectName("pushButton_12");
-        pushButton_12->setMinimumSize(QSize(480, 0));
-        pushButton_12->setMaximumSize(QSize(300, 16777215));
+        pushButton_12->setMinimumSize(QSize(468, 0));
+        pushButton_12->setMaximumSize(QSize(468, 16777215));
         QFont font;
         font.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font.setPointSize(25);
@@ -110,6 +116,8 @@ public:
 
         pushButton_13 = new QLabel(frame_2);
         pushButton_13->setObjectName("pushButton_13");
+        pushButton_13->setMinimumSize(QSize(585, 0));
+        pushButton_13->setMaximumSize(QSize(585, 16777215));
         QFont font2;
         font2.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font2.setPointSize(15);
@@ -166,12 +174,12 @@ public:
         QMetaObject::connectSlotsByName(EpisodePage);
     } // setupUi
 
-    void retranslateUi(QWidget *EpisodePage) const
+    void retranslateUi(QWidget *EpisodePage)
     {
         pushButton_14->setText(QString());
         pushButton_12->setText(QCoreApplication::translate("EpisodePage", "\351\200\211\351\233\206", nullptr));
         pushButton_15->setText(QString());
-        pushButton_13->setText(QString());
+        pushButton_13->setText(QCoreApplication::translate("EpisodePage", "\345\271\270\350\277\220\346\230\237", nullptr));
         (void)EpisodePage;
     } // retranslateUi
 
