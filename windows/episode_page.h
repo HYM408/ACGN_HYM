@@ -35,6 +35,7 @@ public:
 signals:
     void episodeClicked(const CollectionData &collectionData, const EpisodeData &episodeData);
     void overlayClosed();
+    void collectionDataChanged();
 
 protected:
     void keyPressEvent(QKeyEvent* event) override;

@@ -174,6 +174,7 @@ void MainWindow::onShowEpisodePageRequested(const CollectionData &collectionData
         episodeOverlay->deleteLater();
         episodeOverlay = nullptr;
     });
+    connect(episodeOverlay, &EpisodeOverlay::collectionDataChanged, this, [this] {mainPageManager->loadCollections(mainPageManager->getCurrentSubjectType(), mainPageManager->getCurrentStatusType(), false);});
     episodeOverlay->setGeometry(0, 0, width(), height());
     episodeOverlay->showWithCollectionData(collectionData);
     if (playerPage) return;

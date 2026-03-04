@@ -260,7 +260,9 @@ void EpisodeOverlay::onMarkAllWatchedClicked()
     bool success = bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData);
     if (!success) return;
     DatabaseManager::updateAllEpisodesStatus(subjectId, 2);
+    DatabaseManager::updateCollectionFields(subjectId, {{"ep_status", episodes.size()}}, false);
     if (!guard) return;
+    emit collectionDataChanged();
     loadEpisodesData();
     ui.pushButton_15->setText("全部已看");
     ui.pushButton_15->setEnabled(true);
