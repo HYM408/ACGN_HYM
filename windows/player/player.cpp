@@ -299,8 +299,9 @@ void ControlOverlay::resizeEvent(QResizeEvent *event)
 }
 
 bool ControlOverlay::isInControlArea(const QPoint &pos) const
-{   // 判断鼠标坐标位置
-    return pos.y() <= 60 || pos.y() >= height() - 80;
+{   // 是否在控制面板区域
+    if (bottomWidget->geometry().contains(pos) || topWidget->geometry().contains(pos)) return true;
+    return false;
 }
 
 void ControlOverlay::updatePlayButtonIcon() const

@@ -13,7 +13,7 @@
 #include "../crawler/crawler.h"
 #include "../utils/cache_image_util.h"
 
-PlayerPage::PlayerPage(QWidget *parent) : QWidget(parent)
+PlayerPage::PlayerPage(QWidget *parent): QWidget(parent)
 {
     ui.setupUi(this);
     // 初始化播放器
