@@ -1,5 +1,4 @@
 #include "player_page.h"
-#include <QTimer>
 #include <QLabel>
 #include <QDialog>
 #include <QPointer>
@@ -24,11 +23,6 @@ PlayerPage::PlayerPage(QWidget *parent) : QWidget(parent)
     setupControlOverlay();
 }
 
-PlayerPage::~PlayerPage()
-{
-    if (updateTimer) updateTimer->stop();
-}
-
 void PlayerPage::setManagers(CacheImageUtil *cacheImage, PikPakApi *pikpakapi)
 {   // 初始化实例
     cacheImageUtil = cacheImage;
@@ -47,6 +41,9 @@ void PlayerPage::setupControlOverlay()
     connect(controlOverlay, &ControlOverlay::playbackRateChanged, vlcPlayer, &VLCPlayer::setPlaybackRate);
     connect(controlOverlay, &ControlOverlay::fullscreenRequested, this, &PlayerPage::toggleFullscreen);
     connect(controlOverlay, &ControlOverlay::backRequested, this, &PlayerPage::onBackButtonClicked);
+    connect(vlcPlayer, &VLCPlayer::playStateChanged, controlOverlay, &ControlOverlay::setPlayState);
+    connect(vlcPlayer, &VLCPlayer::timeChanged, [this](int currentMs, int totalMs) {controlOverlay->setTime(currentMs / 1000, totalMs / 1000);});
+    connect(vlcPlayer, &VLCPlayer::positionChanged, controlOverlay, &ControlOverlay::setProgress);
 }
 
 void PlayerPage::setSiteLoadingState(const QString &siteId) const
@@ -83,9 +80,6 @@ void PlayerPage::startSiteSearch(const QString &siteId)
 void PlayerPage::fetchRoutes(const CollectionData &collectionData, const EpisodeData &episodeData)
 {   // 创建组件
     show();
-    updateTimer = new QTimer(this);
-    connect(updateTimer, &QTimer::timeout, this, &PlayerPage::updatePlayerInfo);
-    updateTimer->start(100);
     m_abortFlag = std::make_shared<std::atomic<bool>>(false);
     m_episodeData = episodeData;
     m_keyword = collectionData.subject_name_cn;
@@ -455,17 +449,6 @@ void PlayerPage::onBTResultClicked(const QString &magnet, const QString &playLin
     dialog->exec();
 }
 
-void PlayerPage::updatePlayerInfo() const
-{   // 更新播放信息
-    bool playing = vlcPlayer->isPlaying();
-    controlOverlay->setPlayState(playing);
-    auto [currentMs, totalMs] = vlcPlayer->getTimeInfo();
-    controlOverlay->setTime(currentMs / 1000, totalMs / 1000);
-    controlOverlay->setProgress(vlcPlayer->getPosition());
-    int volume = vlcPlayer->getVolume();
-    if (volume >= 0) controlOverlay->setVolume(volume);
-}
-
 void PlayerPage::toggleFullscreen()
 {
     if (!fullscreen_mode) {
@@ -497,7 +480,6 @@ void PlayerPage::clearLayout(QLayout *layout)
 void PlayerPage::cleanupPage()
 {   // 清理
     vlcPlayer->stop();
-    updateTimer->stop();
     QWidget *container = ui.scrollAreaWidgetContents;
     if (QLayout *oldLayout = container->layout()) {
         clearLayout(oldLayout);

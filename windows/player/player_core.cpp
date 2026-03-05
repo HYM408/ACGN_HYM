@@ -7,10 +7,23 @@ VLCPlayer::VLCPlayer(QWidget* parent) : QWidget(parent)
     const char* vlc_args[] = {"--quiet", "--no-xlib", "--avcodec-fast", "--avcodec-threads=1"};
     vlc_instance = libvlc_new(std::size(vlc_args), vlc_args);
     media_player = libvlc_media_player_new(vlc_instance);
+    eventManager = libvlc_media_player_event_manager(media_player);
+    libvlc_event_attach(eventManager, libvlc_MediaPlayerPlaying, onVlcEvent, this);
+    libvlc_event_attach(eventManager, libvlc_MediaPlayerPaused, onVlcEvent, this);
+    libvlc_event_attach(eventManager, libvlc_MediaPlayerStopped, onVlcEvent, this);
+    libvlc_event_attach(eventManager, libvlc_MediaPlayerTimeChanged, onVlcEvent, this);
+    libvlc_event_attach(eventManager, libvlc_MediaPlayerPositionChanged, onVlcEvent, this);
+    libvlc_event_attach(eventManager, libvlc_MediaPlayerAudioVolume, onVlcEvent, this);
 }
 
 VLCPlayer::~VLCPlayer()
 {
+    libvlc_event_detach(eventManager, libvlc_MediaPlayerPlaying, onVlcEvent, this);
+    libvlc_event_detach(eventManager, libvlc_MediaPlayerPaused, onVlcEvent, this);
+    libvlc_event_detach(eventManager, libvlc_MediaPlayerStopped, onVlcEvent, this);
+    libvlc_event_detach(eventManager, libvlc_MediaPlayerTimeChanged, onVlcEvent, this);
+    libvlc_event_detach(eventManager, libvlc_MediaPlayerPositionChanged, onVlcEvent, this);
+    libvlc_event_detach(eventManager, libvlc_MediaPlayerAudioVolume, onVlcEvent, this);
     if (media_player) {
         libvlc_media_player_stop(media_player);
         libvlc_media_player_release(media_player);
@@ -23,7 +36,7 @@ void VLCPlayer::playVideo(const QString& source)
     stop();
     libvlc_media_t* media = nullptr;
     if (source.contains("http")) media = libvlc_media_new_location(vlc_instance, source.toUtf8().constData());
-    else  media = libvlc_media_new_path(vlc_instance, source.toUtf8().constData());
+    else media = libvlc_media_new_path(vlc_instance, source.toUtf8().constData());
     libvlc_media_add_option(media, ":avcodec-hw=dxva2");
     libvlc_media_player_set_media(media_player, media);
     libvlc_media_release(media);
@@ -69,6 +82,40 @@ void VLCPlayer::paintEvent(QPaintEvent* event)
         QPixmap pixmap = QPixmap::fromImage(current_frame);
         QPixmap scaled = pixmap.scaled(this->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         painter.drawPixmap((width() - scaled.width()) / 2, (height() - scaled.height()) / 2, scaled);
+    }
+}
+
+void VLCPlayer::onVlcEvent(const libvlc_event_t* event, void* userData)
+{   // vlc事件处理
+    auto* player = static_cast<VLCPlayer*>(userData);
+    switch (event->type) {
+    case libvlc_MediaPlayerPlaying:
+        QMetaObject::invokeMethod(player, [player] {emit player->playStateChanged(true);});
+        break;
+    case libvlc_MediaPlayerPaused:
+    case libvlc_MediaPlayerStopped:
+        QMetaObject::invokeMethod(player, [player] {emit player->playStateChanged(false);});
+        break;
+    case libvlc_MediaPlayerTimeChanged: {
+        libvlc_time_t newTime = event->u.media_player_time_changed.new_time;
+        QMetaObject::invokeMethod(player, [player, newTime] {
+            libvlc_time_t total = libvlc_media_player_get_length(player->media_player);
+            emit player->timeChanged(static_cast<int>(newTime), static_cast<int>(total));
+        });
+        break;
+    }
+    case libvlc_MediaPlayerPositionChanged: {
+        float newPos = event->u.media_player_position_changed.new_position;
+        QMetaObject::invokeMethod(player, [player, newPos] {emit player->positionChanged(newPos);});
+        break;
+    }
+    case libvlc_MediaPlayerAudioVolume: {
+        float newVol = event->u.media_player_audio_volume.volume;
+        QMetaObject::invokeMethod(player, [player, newVol] {emit player->volumeChanged(static_cast<int>(newVol));});
+        break;
+    }
+    default:
+        break;
     }
 }
 

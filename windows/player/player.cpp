@@ -126,7 +126,7 @@ void ControlOverlay::setupUi()
     volumeSlider = new ClickableSlider(Qt::Horizontal, 10, bottomWidget);
     volumeSlider->setFixedSize(80, 20);
     volumeSlider->setRange(0, 100);
-    volumeSlider->setValue(50); // 初始音量
+    volumeSlider->setValue(100);
     volumeSlider->setStyleSheet(SLIDER_STYLE);
     connect(volumeSlider, &QSlider::valueChanged, this, &ControlOverlay::volumeChanged);
     connect(volumeSlider, &ClickableSlider::sliderPressed, this, &ControlOverlay::onVolumePressed);

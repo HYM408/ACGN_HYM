@@ -2,13 +2,14 @@
 #define PLAYER_PAGE_H
 
 #include "player_ui.h"
-#include "../sql/sql.h"
 #include "../crawler/crawler.h"
+#include "../sql/data_structs.h"
 
 class VLCPlayer;
 class PikPakApi;
 class CacheImageUtil;
 class ControlOverlay;
+class DatabaseManager;
 
 class PlayerPage : public QWidget
 {
@@ -16,7 +17,6 @@ class PlayerPage : public QWidget
 
 public:
     explicit PlayerPage(QWidget *parent = nullptr);
-    ~PlayerPage() override;
     void setManagers(CacheImageUtil *cacheImage, PikPakApi *pikpakapi);
     void setupControlOverlay();
     void fetchRoutes(const CollectionData& collectionData, const EpisodeData& episodeData);
@@ -31,7 +31,6 @@ private slots:
     void onBTResultClicked(const QString &magnet, const QString &playLink);
     void handleSearchResult(const QString &siteId, const QList<SearchResult> &results);
     void handleBTSearchResult(const QString &siteId, const QList<BTResult> &results);
-    void updatePlayerInfo() const;
     void toggleFullscreen();
     void onBackButtonClicked();
 
@@ -59,7 +58,6 @@ private:
     QMap<QString, QWidget*> siteWidgets;
     QMap<QString, QFrame*> siteDetailFrames;
     QTabWidget *detailTabWidget = nullptr;
-    QTimer *updateTimer = nullptr;
     QWidget *original_parent = nullptr;
     QLayout *original_layout = nullptr;
     bool fullscreen_mode = false;
