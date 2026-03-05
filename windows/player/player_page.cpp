@@ -44,6 +44,8 @@ void PlayerPage::setupControlOverlay()
     connect(vlcPlayer, &VLCPlayer::playStateChanged, controlOverlay, &ControlOverlay::setPlayState);
     connect(vlcPlayer, &VLCPlayer::timeChanged, [this](int currentMs, int totalMs) {controlOverlay->setTime(currentMs / 1000, totalMs / 1000);});
     connect(vlcPlayer, &VLCPlayer::positionChanged, controlOverlay, &ControlOverlay::setProgress);
+    connect(vlcPlayer, &VLCPlayer::exitFullscreenRequested, this, [this] {if (fullscreen_mode) toggleFullscreen();});
+    connect(vlcPlayer, &VLCPlayer::volumeChanged, controlOverlay, &ControlOverlay::setVolume);
 }
 
 void PlayerPage::setSiteLoadingState(const QString &siteId) const
@@ -387,6 +389,7 @@ void PlayerPage::onRouteSelected(const QString &siteId, const QJsonObject &route
         qDebug() << videoUrl;
         vlcPlayer->playVideo(videoUrl);
     });
+    vlcPlayer->setFocus();
 }
 
 void PlayerPage::onBTResultClicked(const QString &magnet, const QString &playLink)

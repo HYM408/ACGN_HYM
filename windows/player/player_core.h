@@ -26,19 +26,21 @@ signals:
     void timeChanged(int currentMs, int totalMs);
     void positionChanged(float position);
     void volumeChanged(int volume);
+    void exitFullscreenRequested();
 
 protected:
     void paintEvent(QPaintEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
 
 private:
     static void *lock(void* data, void** pixels);
     static void unlock(void* data, void* id, void* const* pixels);
     static void onVlcEvent(const libvlc_event_t *event, void *userData);
-    libvlc_instance_t *vlc_instance   = nullptr;
+    libvlc_instance_t *vlc_instance = nullptr;
     libvlc_media_player_t *media_player = nullptr;
     libvlc_event_manager_t *eventManager = nullptr;
     QImage current_frame;
-    int video_width  = 1920;
+    int video_width = 1920;
     int video_height = 1080;
     std::atomic<uchar*> current_buffer{nullptr};
 };

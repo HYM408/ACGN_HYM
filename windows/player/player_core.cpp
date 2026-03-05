@@ -1,9 +1,11 @@
 #include "player_core.h"
 #include <QPainter>
+#include <QKeyEvent>
 
 VLCPlayer::VLCPlayer(QWidget* parent) : QWidget(parent)
 {
     setAttribute(Qt::WA_OpaquePaintEvent);
+    setFocusPolicy(Qt::StrongFocus);
     const char* vlc_args[] = {"--quiet", "--no-xlib", "--avcodec-fast", "--avcodec-threads=1"};
     vlc_instance = libvlc_new(std::size(vlc_args), vlc_args);
     media_player = libvlc_media_player_new(vlc_instance);
@@ -85,38 +87,33 @@ void VLCPlayer::paintEvent(QPaintEvent* event)
     }
 }
 
+void VLCPlayer::keyPressEvent(QKeyEvent* event)
+{   // 键盘事件
+    bool handled = true;
+    if (event->key() == Qt::Key_Space) togglePlayPause();
+    else if (event->key() == Qt::Key_Escape) emit exitFullscreenRequested();
+    else if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Right) {
+        auto [currentMs, totalMs] = getTimeInfo();
+        if (totalMs > 0) setPosition(static_cast<float>(qBound(0, currentMs + (event->key() == Qt::Key_Right ? 5000 : -5000), totalMs)) / static_cast<float>(totalMs));
+    } else if (event->key() == Qt::Key_Up) setVolume(qMin(getVolume() + 5, 100));
+    else if (event->key() == Qt::Key_Down) setVolume(qMax(getVolume() - 5, 0));
+    else handled = false;
+    if (handled) event->accept();
+    else QWidget::keyPressEvent(event);
+}
+
 void VLCPlayer::onVlcEvent(const libvlc_event_t* event, void* userData)
 {   // vlc事件处理
     auto* player = static_cast<VLCPlayer*>(userData);
-    switch (event->type) {
-    case libvlc_MediaPlayerPlaying:
-        QMetaObject::invokeMethod(player, [player] {emit player->playStateChanged(true);});
-        break;
-    case libvlc_MediaPlayerPaused:
-    case libvlc_MediaPlayerStopped:
-        QMetaObject::invokeMethod(player, [player] {emit player->playStateChanged(false);});
-        break;
-    case libvlc_MediaPlayerTimeChanged: {
-        libvlc_time_t newTime = event->u.media_player_time_changed.new_time;
-        QMetaObject::invokeMethod(player, [player, newTime] {
-            libvlc_time_t total = libvlc_media_player_get_length(player->media_player);
-            emit player->timeChanged(static_cast<int>(newTime), static_cast<int>(total));
-        });
-        break;
+    if (event->type == libvlc_MediaPlayerPlaying) emit player->playStateChanged(true);
+    else if (event->type == libvlc_MediaPlayerPaused || event->type == libvlc_MediaPlayerStopped) emit player->playStateChanged(false);
+    else if (event->type == libvlc_MediaPlayerTimeChanged) {
+        libvlc_time_t new_time = event->u.media_player_time_changed.new_time;
+        libvlc_time_t length = libvlc_media_player_get_length(player->media_player);
+        QMetaObject::invokeMethod(player, [player, new_time, length] {emit player->timeChanged(static_cast<int>(new_time), static_cast<int>(length));}, Qt::QueuedConnection);
     }
-    case libvlc_MediaPlayerPositionChanged: {
-        float newPos = event->u.media_player_position_changed.new_position;
-        QMetaObject::invokeMethod(player, [player, newPos] {emit player->positionChanged(newPos);});
-        break;
-    }
-    case libvlc_MediaPlayerAudioVolume: {
-        float newVol = event->u.media_player_audio_volume.volume;
-        QMetaObject::invokeMethod(player, [player, newVol] {emit player->volumeChanged(static_cast<int>(newVol));});
-        break;
-    }
-    default:
-        break;
-    }
+    else if (event->type == libvlc_MediaPlayerPositionChanged) emit player->positionChanged(event->u.media_player_position_changed.new_position);
+    else if (event->type == libvlc_MediaPlayerAudioVolume) emit player->volumeChanged(qRound(event->u.media_player_audio_volume.volume * 100.0f));
 }
 
 void VLCPlayer::setPosition(float position) const
