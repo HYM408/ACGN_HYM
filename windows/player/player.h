@@ -50,7 +50,6 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
-    void resizeEvent(QResizeEvent *event) override;
 
 private slots:
     void onProgressPressed();

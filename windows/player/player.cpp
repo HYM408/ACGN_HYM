@@ -28,8 +28,7 @@ void ClickableSlider::mousePressEvent(QMouseEvent *event)
         int intValue = qRound(value);
         setValue(intValue);
         emit clicked(intValue);
-        emit sliderPressed();
-        emit sliderReleased();
+        event->accept();
     }
 }
 
@@ -293,11 +292,6 @@ void ControlOverlay::mouseDoubleClickEvent(QMouseEvent *event)
     }
 }
 
-void ControlOverlay::resizeEvent(QResizeEvent *event)
-{   // 窗口大小改变事件
-    QWidget::resizeEvent(event);
-}
-
 bool ControlOverlay::isInControlArea(const QPoint &pos) const
 {   // 是否在控制面板区域
     if (bottomWidget->geometry().contains(pos) || topWidget->geometry().contains(pos)) return true;
@@ -314,7 +308,7 @@ void ControlOverlay::updatePlayButtonIcon() const
 QString ControlOverlay::formatTime(int seconds)
 {   // 格式化时间
     int hrs = seconds / 3600;
-    int mins = (seconds % 3600) / 60;
+    int mins = seconds % 3600 / 60;
     int secs = seconds % 60;
     if (hrs > 0) return QString("%1:%2:%3").arg(hrs, 2, 10, QChar('0')) .arg(mins, 2, 10, QChar('0')) .arg(secs, 2, 10, QChar('0'));
     return QString("%1:%2").arg(mins, 2, 10, QChar('0')) .arg(secs, 2, 10, QChar('0'));

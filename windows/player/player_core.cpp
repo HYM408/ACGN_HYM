@@ -121,11 +121,6 @@ void VLCPlayer::setPosition(float position) const
     if (media_player) libvlc_media_player_set_position(media_player, position);
 }
 
-float VLCPlayer::getPosition() const
-{   // 获取当前播放位置
-    return media_player ? libvlc_media_player_get_position(media_player) : 0.0f;
-}
-
 std::pair<int, int> VLCPlayer::getTimeInfo() const
 {    // 当前时间ms, 总时长ms
     if (!media_player) return {0, 0};
@@ -145,11 +140,6 @@ int VLCPlayer::getVolume() const
 void VLCPlayer::setPlaybackRate(float rate) const
 {   // 设置播放速度
     if (media_player) libvlc_media_player_set_rate(media_player, rate);
-}
-
-bool VLCPlayer::isPlaying() const
-{   // 播放状态
-    return media_player ? libvlc_media_player_is_playing(media_player) : false;
 }
 
 void VLCPlayer::togglePlayPause() const

@@ -13,12 +13,10 @@ public:
     void playVideo(const QString& source);
     void stop();
     void setPosition(float position) const;
-    float getPosition() const;
     std::pair<int, int> getTimeInfo() const;
     void setVolume(int volume) const;
     int getVolume() const;
     void setPlaybackRate(float rate) const;
-    bool isPlaying() const;
     void togglePlayPause() const;
 
 signals:
