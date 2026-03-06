@@ -22,7 +22,7 @@ public:
 
 signals:
     void backButtonClicked();
-    void tagClicked(const QString &tag);
+    void tagClicked(const QString &tag, int subjectType);
     void showEpisodePageRequested(const CollectionData &collectionData);
 
 private slots:

@@ -121,12 +121,12 @@ void MainWindow::onSearchButtonClicked()
     main_stackedWidget->setCurrentWidget(searchPage);
 }
 
-void MainWindow::onTagClicked(const QString &tag)
+void MainWindow::onTagClicked(const QString &tag, const int subjectType)
 {   // tag搜索
     if (!searchPage) ensureSearchPage();
     pageHistory.append(main_stackedWidget->currentWidget());
     main_stackedWidget->setCurrentWidget(searchPage);
-    searchPage->searchByTag(tag);
+    searchPage->searchByTag(tag, subjectType);
 }
 
 void MainWindow::onSettingsButtonClicked()

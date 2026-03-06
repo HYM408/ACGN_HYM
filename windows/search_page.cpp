@@ -31,7 +31,7 @@ void SearchPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, Databa
         ui.stackedWidget->addWidget(detailPage);
         connect(detailPage, &DetailPage::backButtonClicked, this, [this] {ui.stackedWidget->setCurrentIndex(0);});
         connect(detailPage, &DetailPage::showEpisodePageRequested, this, &SearchPage::showEpisodePageRequested);
-        connect(detailPage, &DetailPage::tagClicked, this, [this](const QString &tag) {searchByTag(tag);});
+        connect(detailPage, &DetailPage::tagClicked, this, [this](const QString &tag, const int subjectType) {searchByTag(tag, subjectType);});
     }
 }
 
@@ -42,16 +42,17 @@ void SearchPage::setupConnections()
     connect(ui.back_Button, &QPushButton::clicked, this, &SearchPage::onBackButtonClicked);
 }
 
-void SearchPage::updateComboBoxByType(int currentType) const
+void SearchPage::updateComboBoxByType(const int currentType) const
 {   // 类型映射
     if (currentType == 7 || currentType == 8) ui.comboBox->setCurrentIndex(1);
     else if (currentType == 4) ui.comboBox->setCurrentIndex(2);
     else ui.comboBox->setCurrentIndex(0);
 }
 
-void SearchPage::searchByTag(const QString &tag)
+void SearchPage::searchByTag(const QString &tag, const int subjectType)
 {   // tag搜索
     if (tag.isEmpty()) return;
+    updateComboBoxByType(subjectType);
     ui.checkBox->setChecked(true);
     ui.search_lineEdit->setText(tag);
     doSearch("", tag);
@@ -59,7 +60,7 @@ void SearchPage::searchByTag(const QString &tag)
 
 void SearchPage::onSearchLineEditReturnPressed()
 {   // 搜索事件
-    QString input = ui.search_lineEdit->text().trimmed();
+    const QString input = ui.search_lineEdit->text().trimmed();
     if (input.isEmpty()) return;
     if (ui.checkBox->isChecked()) doSearch("", input);
     else doSearch(input, "");
@@ -68,8 +69,8 @@ void SearchPage::onSearchLineEditReturnPressed()
 void SearchPage::doSearch(const QString &keyword, const QString &tag)
 {   // 搜索
     ui.stackedWidget->setCurrentIndex(0);
-    QMap<int, int> typeMapping{{1, 1}, {2, 4}};
-    int searchType = typeMapping.value(ui.comboBox->currentIndex(), 2);
+    const QMap<int, int> typeMapping{{1, 1}, {2, 4}};
+    const int searchType = typeMapping.value(ui.comboBox->currentIndex(), 2);
     showSearchStatus("搜索中...");
     QJsonArray results = bangumiApi->searchSubjects(keyword, tag, searchType);
     clearSearchResults();
@@ -92,7 +93,7 @@ QFrame *SearchPage::createResultFrame(const QVariantMap &result)
     animationFrame->setStyleSheet("QFrame{background-color: rgb(242, 236, 244)}");
     animationFrame->setCursor(Qt::PointingHandCursor);
     // 获取数据
-    int subjectId = result["id"].toInt();
+    const int subjectId = result["id"].toInt();
     resultDataMap[subjectId] = result;
     animationFrame->setProperty("subjectId", subjectId);
     // 水平布局
@@ -117,9 +118,9 @@ QFrame *SearchPage::createResultFrame(const QVariantMap &result)
     // 标题
     auto *titleLabel = new QLabel(animationFrame);
     titleLabel->setFixedHeight(30);
-    QString title = result.contains("name_cn") && !result["name_cn"].toString().isEmpty() ? result["name_cn"].toString() : result["name"].toString();
+    const QString title = result.contains("name_cn") && !result["name_cn"].toString().isEmpty() ? result["name_cn"].toString() : result["name"].toString();
     titleLabel->setText(title);
-    QFont font("微软雅黑", 13);
+    const QFont font("微软雅黑", 13);
     titleLabel->setFont(font);
     infoLayout->addWidget(titleLabel);
     infoLayout->addStretch();
@@ -131,13 +132,11 @@ QFrame *SearchPage::createResultFrame(const QVariantMap &result)
 bool SearchPage::eventFilter(QObject *watched, QEvent *event)
 {   // 点击事件
     if (event->type() == QEvent::MouseButtonPress) {
-        auto *mouseEvent = dynamic_cast<QMouseEvent*>(event);
-        if (mouseEvent->button() == Qt::LeftButton) {
-            if (auto *frame = qobject_cast<QFrame*>(watched)) {
-                int subjectId = frame->property("subjectId").toInt();
-                if (subjectId > 0 && resultDataMap.contains(subjectId)) {
+        if (const auto *mouseEvent = dynamic_cast<QMouseEvent*>(event); mouseEvent->button() == Qt::LeftButton) {
+            if (const auto *frame = qobject_cast<QFrame*>(watched)) {
+                if (int subjectId = frame->property("subjectId").toInt(); subjectId > 0 && resultDataMap.contains(subjectId)) {
                     QVariantMap original = resultDataMap[subjectId];
-                    CollectionData collectionData = DatabaseManager::getCollectionBySubjectId(subjectId);
+                    const CollectionData collectionData = DatabaseManager::getCollectionBySubjectId(subjectId);
                     CollectionData data = collectionData;
                     if (collectionData.type == 0) {
                         data.subject_id = subjectId;
@@ -149,7 +148,7 @@ bool SearchPage::eventFilter(QObject *watched, QEvent *event)
                         data.subject_eps = original["eps"].toDouble();
                         data.subject_date = original["date"].toString();
                     }
-                    QString progressText = computeProgressText(data, dbManager->getEpisodeAirdates({subjectId}));
+                    const QString progressText = computeProgressText(data, dbManager->getEpisodeAirdates({subjectId}));
                     detailPage->setCollectionData(data, progressText);
                     ui.stackedWidget->setCurrentWidget(detailPage);
                     return true;
@@ -167,7 +166,7 @@ void SearchPage::clearSearchResults()
     delete statusLabel;
     statusLabel = nullptr;
     while (layout->count() > 0) {
-        QLayoutItem *item = layout->takeAt(0);
+        const QLayoutItem *item = layout->takeAt(0);
         delete item->widget();
         delete item;
     }
@@ -179,7 +178,7 @@ void SearchPage::showSearchStatus(const QString &text)
     auto *layout = qobject_cast<QVBoxLayout*>(ui.scrollAreaWidgetContents->layout());
     statusLabel = new QLabel(text);
     statusLabel->setAlignment(Qt::AlignCenter);
-    QFont font("微软雅黑", 14);
+    const QFont font("微软雅黑", 14);
     statusLabel->setFont(font);
     statusLabel->setStyleSheet("color: #666; padding: 20px");
     layout->addWidget(statusLabel);

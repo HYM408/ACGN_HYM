@@ -19,7 +19,7 @@ public:
     ~SearchPage() override;
     void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db);
     void updateComboBoxByType(int currentType) const;
-    void searchByTag(const QString &tag);
+    void searchByTag(const QString &tag, int subjectType);
 
 signals:
     void backButtonClicked();

@@ -88,7 +88,7 @@ void DetailPage::loadData()
     if (subjectData.id != 0) updateDetailPage(subjectData);
     else {
         QTimer::singleShot(0, this, [this] {
-            QJsonObject subjectInfo = bangumiAPI->getSubjectInfo(currentData.subject_id);
+            const QJsonObject subjectInfo = bangumiAPI->getSubjectInfo(currentData.subject_id);
             dbManager->insertOrUpdateSubject(subjectInfo);
             if (!isVisible()) return;
             updateDetailPage(dbManager->getSubjectById(currentData.subject_id));
@@ -103,15 +103,15 @@ void DetailPage::onEpisodeClicked()
 
 void DetailPage::onOpenBangumiPage() const
 {   // 跳转Bangumi
-    QString baseUrl = getConfig("Bangumi/bangumi_base_url").toString();
+    const QString baseUrl = getConfig("Bangumi/bangumi_base_url").toString();
     QDesktopServices::openUrl(QString("%1subject/%2").arg(baseUrl).arg(currentData.subject_id));
 }
 
 void DetailPage::onStatusButtonClicked()
 {   // 改变状态
     int subjectType = currentData.subject_type;
-    int currentStatus = currentData.type;
-    StatusSelector::showStatusSelector(ui.pushButton_26, subjectType, currentStatus, currentData.subject_id, bangumiAPI, dbManager,[this, subjectType](int selectedStatus) {
+    const int currentStatus = currentData.type;
+    StatusSelector::showStatusSelector(ui.pushButton_26, subjectType, currentStatus, currentData.subject_id, bangumiAPI, dbManager,[this, subjectType](const int selectedStatus) {
         currentData.type = selectedStatus;
         ui.pushButton_26->setText(statusNamesMap.value(subjectType).value(selectedStatus));
     }, -20);
@@ -123,12 +123,9 @@ void DetailPage::updateDetailPage(const SubjectsData &subjectData)
     QString total = QString::number(subjectData.rating_total);
     QString rank = QString::number(subjectData.rating_rank);
     ui.pushButton_21->setText(QString("%1 | %2人评 | #%3").arg(score, total, rank));
-    int collect = subjectData.collect;
-    int onHold = subjectData.on_hold;
-    int dropped = subjectData.dropped;
-    int wish = subjectData.wish;
-    int doing = subjectData.doing;
-    ui.pushButton_25->setText(QString("%1收藏 / %2在看 / %3抛弃").arg(collect + onHold + dropped + wish + doing).arg(doing).arg(dropped));
+    const int dropped = subjectData.dropped;
+    const int doing = subjectData.doing;
+    ui.pushButton_25->setText(QString("%1收藏 / %2在看 / %3抛弃").arg(subjectData.collect + subjectData.on_hold + dropped + subjectData.wish + doing).arg(doing).arg(dropped));
     ui.textEdit_2->setText(subjectData.summary);
     QList<QPair<QString, int>> allTagPairs, tagPairs;
     if (!subjectData.meta_tags.isEmpty()) for (const auto &value : QJsonDocument::fromJson(subjectData.meta_tags.toUtf8()).array()) allTagPairs.append(qMakePair(value.toString().trimmed(), 0));
@@ -137,7 +134,7 @@ void DetailPage::updateDetailPage(const SubjectsData &subjectData)
     std::sort(tagPairs.begin(), tagPairs.end(), [](const QPair<QString, int> &a, const QPair<QString, int> &b) {return b.second < a.second;});
     allTagPairs.append(tagPairs);
     tagsDisplay(allTagPairs);
-    QString timeTag = getTimeInfo(tagPairs, subjectData.date);
+    const QString timeTag = getTimeInfo(tagPairs, subjectData.date);
     ui.pushButton_23->setText(timeTag);
 }
 
@@ -147,28 +144,27 @@ void DetailPage::tagsDisplay(const QList<QPair<QString, int>> &tagPairs)
     auto *mainLayout = new QVBoxLayout(ui.frame_5);
     mainLayout->setSpacing(5);
     mainLayout->setContentsMargins(0, 0, 0, 0);
-    QFont font = ui.frame_5->font();
-    QFontMetrics fm(font);
-    int maxWidth = ui.frame_5->width();
+    const QFontMetrics fm(ui.frame_5->font());
+    const int maxWidth = ui.frame_5->width();
     QHBoxLayout *currentLayout = nullptr;
     QWidget *currentWidget = nullptr;
     int currentWidth = 0;
     QVector<QPair<QString, int>> labelData;
-    for (const auto &pair : tagPairs) {
+    for (const auto & [fst, snd] : tagPairs) {
         QString displayText;
         int textWidth;
-        if (pair.second > 0) {
-            displayText = QString("<span style='color:black'>%1</span> <span style='color:gray'>%2</span>").arg(pair.first).arg(pair.second);
-            textWidth = fm.horizontalAdvance(pair.first + " " + QString::number(pair.second)) + 25;
+        if (snd > 0) {
+            displayText = QString("<span style='color:black'>%1</span> <span style='color:gray'>%2</span>").arg(fst).arg(snd);
+            textWidth = fm.horizontalAdvance(fst + " " + QString::number(snd)) + 25;
         } else {
-            displayText = QString("<span style='color:black'>%1</span>").arg(pair.first);
-            textWidth = fm.horizontalAdvance(pair.first) + 25;
+            displayText = QString("<span style='color:black'>%1</span>").arg(fst);
+            textWidth = fm.horizontalAdvance(fst) + 25;
         }
         labelData.append(qMakePair(displayText, textWidth));
     }
     for (int i = 0; i < labelData.size(); ++i) {
-        const auto &data = labelData[i];
-        if (!currentLayout || currentWidth + data.second > maxWidth) {
+        const auto & [fst, snd] = labelData[i];
+        if (!currentLayout || currentWidth + snd > maxWidth) {
             currentWidget = new QWidget();
             currentLayout = new QHBoxLayout(currentWidget);
             currentLayout->setSpacing(8);
@@ -177,25 +173,22 @@ void DetailPage::tagsDisplay(const QList<QPair<QString, int>> &tagPairs)
             mainLayout->addWidget(currentWidget);
             currentWidth = 0;
         }
-        auto *tagLabel = new ClickableLabel(data.first, currentWidget);
-        tagLabel->setFixedSize(data.second, fm.height() + 10);
+        auto *tagLabel = new ClickableLabel(fst, currentWidget);
+        tagLabel->setFixedSize(snd, fm.height() + 10);
         tagLabel->setStyleSheet("QLabel {border: 1px solid gray; border-radius: 10px; padding: 2px 8px; background-color: white}"
                                 "QLabel:hover {background-color: #f0f0f0}");
         QString tagName = tagPairs[i].first;
         tagLabel->setProperty("tagName", tagName);
-        connect(tagLabel, &ClickableLabel::clicked, this, [this, tagName] {emit tagClicked(tagName);});
+        connect(tagLabel, &ClickableLabel::clicked, this, [this, tagName] {emit tagClicked(tagName, currentData.subject_type);});
         currentLayout->insertWidget(currentLayout->count() - 1, tagLabel);
-        currentWidth += data.second + 10;
+        currentWidth += snd + 10;
     }
 }
 
 QString DetailPage::getTimeInfo(const QList<QPair<QString, int>> &tagPairs, const QString &dateStr)
 {   // 时间
-    QRegularExpression timePattern(R"(\d{4}年\d{1,2}月)");
-    for (const auto &pair : tagPairs) {
-        QRegularExpressionMatch match = timePattern.match(pair.first);
-        if (match.hasMatch()) return match.captured();
-    }
+    const QRegularExpression timePattern(R"(\d{4}年\d{1,2}月)");
+    for (const auto & [fst, snd] : tagPairs) if (QRegularExpressionMatch match = timePattern.match(fst); match.hasMatch()) return match.captured();
     if (dateStr.isEmpty()) return "TBA";
     if (dateStr.length() >= 7) return QString("%1年%2月").arg(dateStr.left(4)).arg(dateStr.sliced(5, 2).toInt());
     return "TBA";

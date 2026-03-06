@@ -32,7 +32,7 @@ private slots:
     void toggleMaximizeWindow();
     void closeEvent(QCloseEvent *event) override;
     void onSearchButtonClicked();
-    void onTagClicked(const QString &tag);
+    void onTagClicked(const QString &tag, int subjectType);
     void onSettingsButtonClicked();
     void onDownloadButtonClicked();
     void onBackButtonClicked();
