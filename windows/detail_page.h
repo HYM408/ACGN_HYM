@@ -16,8 +16,7 @@ class DetailPage : public QWidget
 
 public:
     explicit DetailPage(QWidget *parent = nullptr);
-    void setCollectionData(const CollectionData &data);
-    void setCollectionDataFromMap(const QVariantMap &data);
+    void setCollectionData(const CollectionData &data, const QString &progressText);
     void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db);
     void resetUI() const;
 

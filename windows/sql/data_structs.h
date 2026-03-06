@@ -22,19 +22,20 @@ struct SubjectsData {
     int id = 0;
     QString name;
     QString name_cn;
-    QString date;
-    int total_episodes = 0;
-    int volumes = 0;
     QString summary;
-    int rating_rank = 0;
-    double rating_score = 0.0;
-    int rating_total = 0;
-    int collect = 0;
-    int on_hold = 0;
-    int dropped = 0;
-    int wish = 0;
-    int doing = 0;
     QJsonObject tags;
+    QString meta_tags;
+    int volumes = 0;
+    int eps = 0;
+    double rating_score = 0.0;
+    int rating_rank = 0;
+    QString date;
+    int rating_total = 0;
+    int doing = 0;
+    int collect = 0;
+    int dropped = 0;
+    int on_hold = 0;
+    int wish = 0;
 };
 
 struct EpisodeData {

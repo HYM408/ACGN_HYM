@@ -4,6 +4,7 @@
 #include "detail_page.h"
 #include "api/bangumi_api.h"
 #include "utils/image_util.h"
+#include "utils/progress_util.h"
 
 SearchPage::SearchPage(QWidget *parent) : QWidget(parent)
 {
@@ -136,14 +137,20 @@ bool SearchPage::eventFilter(QObject *watched, QEvent *event)
                 int subjectId = frame->property("subjectId").toInt();
                 if (subjectId > 0 && resultDataMap.contains(subjectId)) {
                     QVariantMap original = resultDataMap[subjectId];
-                    CollectionData data;
-                    data.subject_id = subjectId;
-                    data.subject_name = original["name"].toString();
-                    data.subject_name_cn = original["name_cn"].toString();
-                    data.subject_images_common = original["images"].toMap()["common"].toString();
-                    data.subject_type = original["type"].toInt();
-                    data.type = DatabaseManager::getCollectionBySubjectId(subjectId).type;
-                    detailPage->setCollectionData(data);
+                    CollectionData collectionData = DatabaseManager::getCollectionBySubjectId(subjectId);
+                    CollectionData data = collectionData;
+                    if (collectionData.type == 0) {
+                        data.subject_id = subjectId;
+                        data.subject_name = original["name"].toString();
+                        data.subject_name_cn = original["name_cn"].toString();
+                        data.subject_images_common = original["images"].toMap()["common"].toString();
+                        data.subject_type = original["type"].toInt();
+                        data.subject_volumes = original["volumes"].toInt();
+                        data.subject_eps = original["eps"].toDouble();
+                        data.subject_date = original["date"].toString();
+                    }
+                    QString progressText = computeProgressText(data, dbManager->getEpisodeAirdates({subjectId}));
+                    detailPage->setCollectionData(data, progressText);
                     ui.stackedWidget->setCurrentWidget(detailPage);
                     return true;
                 }

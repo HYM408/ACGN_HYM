@@ -7,9 +7,9 @@
 DatabaseManager::DatabaseManager(QObject* parent) : QObject(parent)
 {   // 初始化
     database = QSqlDatabase::addDatabase("QSQLITE");
-    episodePublicDate = QSqlDatabase::addDatabase("QSQLITE", "episode_public_date_connection");
+    episodePublicDate = QSqlDatabase::addDatabase("QSQLITE", "public_date_connection");
     database.setDatabaseName("data/data.db");
-    episodePublicDate.setDatabaseName("data/episode_public_date.db");
+    episodePublicDate.setDatabaseName("data/public_date.db");
 }
 
 DatabaseManager::~DatabaseManager()
@@ -30,23 +30,25 @@ void DatabaseManager::initTables()
 {   // 初始化表
     QSqlQuery query;
     const QStringList tables = {
-        "CREATE TABLE IF NOT EXISTS collection ("
         // collection表
+        "CREATE TABLE IF NOT EXISTS collection ("
         "subject_id INTEGER PRIMARY KEY, vol_status INTEGER, ep_status INTEGER, subject_type INTEGER, type INTEGER, rate INTEGER, subject_date INTEGER, subject_name TEXT, subject_name_cn TEXT, subject_eps INTEGER, subject_volumes INTEGER, subject_images_common TEXT, updated_at INTEGER)",
         // episode表
         "CREATE TABLE IF NOT EXISTS episode_collection ("
         "subject_id INTEGER, id INTEGER, ep INTEGER, sort INTEGER, name TEXT, name_cn TEXT, episode_type INTEGER, collection_type INTEGER, created_at INTEGER DEFAULT (strftime('%s','now')), PRIMARY KEY(subject_id, id))",
-        // subjects表
-        "CREATE TABLE IF NOT EXISTS subjects ("
-        "id INTEGER PRIMARY KEY, name TEXT NOT NULL, name_cn TEXT, total_episodes INTEGER, volumes INTEGER, summary BLOB, rating_rank INTEGER, rating_score REAL, rating_total INTEGER, collect INTEGER, on_hold INTEGER, dropped INTEGER, wish INTEGER, doing INTEGER, tags TEXT, created_at INTEGER DEFAULT (strftime('%s','now')))"
     };
     for (const auto &sql : tables) query.exec(sql);
-    // episode公共数据表
-    QSqlQuery queryEpisode(QSqlDatabase::database("episode_public_date_connection"));
-    queryEpisode.exec(
+
+    const QStringList publicTables = {
+        // episode公共数据表
         "CREATE TABLE IF NOT EXISTS episode_public_date ("
-        "subject_id INTEGER NOT NULL, id INTEGER NOT NULL, airdate INTEGER NOT NULL, sort INTEGER, PRIMARY KEY (subject_id, id))"
-    );
+        "subject_id INTEGER NOT NULL, id INTEGER NOT NULL, airdate INTEGER NOT NULL, sort INTEGER, PRIMARY KEY (subject_id, id))",
+        // subject公共数据表
+        "CREATE TABLE IF NOT EXISTS subject_public_date ("
+        "id INTEGER PRIMARY KEY, name TEXT, name_cn TEXT, summary BLOB, tags TEXT, meta_tags TEXT, score INTEGER, rank INTEGER, date INTEGER, rating_total INTEGER, doing INTEGER, done INTEGER, dropped INTEGER, on_hold INTEGER, wish INTEGER)"
+    };
+    QSqlQuery publicQuery(QSqlDatabase::database("public_date_connection"));
+    for (const auto &sql : publicTables) publicQuery.exec(sql);
 }
 
 QString DatabaseManager::simplifyTags(const QJsonArray &tags)
@@ -296,71 +298,13 @@ bool DatabaseManager::updateAllEpisodesStatus(int subjectId, int collectionType)
     return executeQuery(query, "更新剧集状态失败");
 }
 
-// =============== subjects表 ===============
-bool DatabaseManager::insertOrUpdateSubject(const QJsonObject &apiData)
-{   // 插入subjects信息
-    QSqlQuery query;
-    query.prepare("INSERT OR REPLACE INTO subjects VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,strftime('%s','now'))");
-    QJsonObject rating = apiData["rating"].toObject();
-    QJsonObject collection = apiData["collection"].toObject();
-    query.addBindValue(apiData["id"].toInt());
-    query.addBindValue(apiData["name"].toString());
-    query.addBindValue(apiData["name_cn"].toString());
-    query.addBindValue(apiData["total_episodes"].toInt());
-    query.addBindValue(apiData["volumes"].toInt());
-    query.addBindValue(compressString(apiData["summary"].toString()));
-    query.addBindValue(rating["rank"].toInt());
-    query.addBindValue(rating["score"].toDouble());
-    query.addBindValue(rating["total"].toInt());
-    query.addBindValue(collection["collect"].toInt());
-    query.addBindValue(collection["on_hold"].toInt());
-    query.addBindValue(collection["dropped"].toInt());
-    query.addBindValue(collection["wish"].toInt());
-    query.addBindValue(collection["doing"].toInt());
-    query.addBindValue(simplifyTags(apiData["tags"].toArray()));
-    return executeQuery(query, "插入subject失败");
-}
-
-SubjectsData DatabaseManager::getSubjectById(int subjectId)
-{   // 根据ID获取subject信息
-    SubjectsData result;
-    QSqlQuery query;
-    query.prepare("SELECT * FROM subjects WHERE id = ?");
-    query.addBindValue(subjectId);
-    if (!executeQuery(query)) return result;
-    if (query.next()) {
-        result.id = query.value("id").toInt();
-        result.name = query.value("name").toString();
-        result.name_cn = query.value("name_cn").toString();
-        result.total_episodes = query.value("total_episodes").toInt();
-        result.volumes = query.value("volumes").toInt();
-        QByteArray compressedSummary = query.value("summary").toByteArray();
-        if (!compressedSummary.isEmpty()) result.summary = decompressString(compressedSummary);
-        result.rating_rank = query.value("rating_rank").toInt();
-        result.rating_score = query.value("rating_score").toDouble();
-        result.rating_total = query.value("rating_total").toInt();
-        result.collect = query.value("collect").toInt();
-        result.on_hold = query.value("on_hold").toInt();
-        result.dropped = query.value("dropped").toInt();
-        result.wish = query.value("wish").toInt();
-        result.doing = query.value("doing").toInt();
-        QString tagsJson = query.value("tags").toString();
-        if (!tagsJson.isEmpty()) {
-            QJsonDocument doc = QJsonDocument::fromJson(tagsJson.toUtf8());
-            if (doc.isObject()) result.tags = doc.object();
-        }
-        return result;
-    }
-    return result;
-}
-
 // =============== episode公共数据表 ===============
 bool DatabaseManager::insertEpisodeAirdateFromFile(const QString &filePath)
-{
+{   // episode公共数据插入
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
     QSqlQuery query(episodePublicDate);
-    query.prepare("INSERT OR REPLACE INTO episode_public_date (subject_id, id, airdate, sort) VALUES (?, ?, ?, ?)");
+    query.prepare("INSERT OR REPLACE INTO episode_public_date (subject_id, id, airdate, sort) VALUES (?,?,?,?)");
     episodePublicDate.transaction();
     int count = 0;
     constexpr int batchSize = 10000;
@@ -409,4 +353,105 @@ QJsonObject DatabaseManager::getEpisodeAirdates(const QList<int> &subjectIds) co
         result[key] = arr;
     }
     return result;
+}
+
+// =============== subject公共数据表 ===============
+bool DatabaseManager::insertSubjectPublic(const QString &filePath)
+{   // subject公共数据插入
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
+    QSqlQuery query(episodePublicDate);
+    query.prepare("INSERT OR REPLACE INTO subject_public_date VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    episodePublicDate.transaction();
+    int count = 0;
+    constexpr int batchSize = 10000;
+    QTextStream stream(&file);
+    while (!stream.atEnd()) {
+        QString line = stream.readLine().trimmed();
+        if (line.isEmpty()) continue;
+        QJsonParseError parseError;
+        QJsonDocument doc = QJsonDocument::fromJson(line.toUtf8(), &parseError);
+        if (parseError.error != QJsonParseError::NoError || !doc.isObject()) continue;
+        QJsonObject obj = doc.object();
+        if (obj["type"].toInt() != 2) continue;
+        query.addBindValue(obj["id"].toInt());
+        query.addBindValue(obj["name"].toString());
+        query.addBindValue(obj["name_cn"].toString());
+        query.addBindValue(compressString(obj["summary"].toString()));
+        query.addBindValue(simplifyTags(obj["tags"].toArray()));
+        query.addBindValue(QJsonDocument(obj["meta_tags"].toArray()).toJson(QJsonDocument::Compact));
+        query.addBindValue(obj["score"].toDouble() * 10.0);
+        query.addBindValue(obj["rank"].toInt());
+        query.addBindValue(dateStringToTimestamp(obj["date"].toString()));
+        QJsonObject scoreDetails = obj["score_details"].toObject();
+        int totalVotes = 0;
+        for (auto it = scoreDetails.begin(); it != scoreDetails.end(); ++it) totalVotes += it.value().toInt();
+        query.addBindValue(totalVotes);
+        QJsonObject favorite = obj["favorite"].toObject();
+        query.addBindValue(favorite["doing"].toInt());
+        query.addBindValue(favorite["done"].toInt());
+        query.addBindValue(favorite["dropped"].toInt());
+        query.addBindValue(favorite["on_hold"].toInt());
+        query.addBindValue(favorite["wish"].toInt());
+        query.exec();
+        ++count;
+        query.finish();
+        if (count % batchSize == 0) {
+            episodePublicDate.commit();
+            episodePublicDate.transaction();
+        }
+    }
+    episodePublicDate.commit();
+    return true;
+}
+
+bool DatabaseManager::insertOrUpdateSubject(const QJsonObject &apiData) const
+{   // 插入subjects信息(API)
+    QSqlQuery query(episodePublicDate);
+    query.prepare("INSERT OR REPLACE INTO subject_public_date VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    query.addBindValue(apiData["id"].toInt());
+    query.addBindValue(apiData["name"].toString());
+    query.addBindValue(apiData["name_cn"].toString());
+    query.addBindValue(compressString(apiData["summary"].toString()));
+    query.addBindValue(simplifyTags(apiData["tags"].toArray()));
+    query.addBindValue(QJsonDocument(apiData["meta_tags"].toArray()).toJson(QJsonDocument::Compact));
+    QJsonObject rating = apiData["rating"].toObject();
+    query.addBindValue(rating["score"].toDouble() * 10.0);
+    query.addBindValue(rating["rank"].toInt());
+    query.addBindValue(dateStringToTimestamp(apiData["date"].toString()));
+    query.addBindValue(rating["total"].toInt());
+    QJsonObject collection = apiData["collection"].toObject();
+    query.addBindValue(collection["doing"].toInt());
+    query.addBindValue(collection["collect"].toInt());
+    query.addBindValue(collection["dropped"].toInt());
+    query.addBindValue(collection["on_hold"].toInt());
+    query.addBindValue(collection["wish"].toInt());
+    return executeQuery(query, "插入subject失败");
+}
+
+SubjectsData DatabaseManager::getSubjectById(int subjectId) const
+{   // // 根据ID获取subject信息
+    QSqlQuery query(episodePublicDate);
+    query.prepare("SELECT * FROM subject_public_date WHERE id = ?");
+    query.addBindValue(subjectId);
+    if (!query.exec() || !query.next()) return {};
+    SubjectsData data;
+    data.id = query.value("id").toInt();
+    data.name = query.value("name").toString();
+    data.name_cn = query.value("name_cn").toString();
+    QByteArray compressedSummary = query.value("summary").toByteArray();
+    if (!compressedSummary.isEmpty()) data.summary = decompressString(compressedSummary);
+    QString tagsJson = query.value("tags").toString();
+    if (!tagsJson.isEmpty()) data.tags = QJsonDocument::fromJson(tagsJson.toUtf8()).object();
+    data.meta_tags = query.value("meta_tags").toString();
+    data.rating_score = query.value("score").toInt() / 10.0;
+    data.rating_rank = query.value("rank").toInt();
+    data.date = timestampToDateString(query.value("date").toLongLong());
+    data.rating_total = query.value("rating_total").toInt();
+    data.doing = query.value("doing").toInt();
+    data.collect = query.value("done").toInt();;
+    data.dropped = query.value("dropped").toInt();
+    data.on_hold = query.value("on_hold").toInt();
+    data.wish = query.value("wish").toInt();
+    return data;
 }

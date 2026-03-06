@@ -140,7 +140,7 @@ void MainWindow::onSettingsButtonClicked()
     main_stackedWidget->setCurrentWidget(settingsPage);
 }
 
-void MainWindow::onShowDetailPageRequested(const CollectionData &collectionData)
+void MainWindow::onShowDetailPageRequested(const CollectionData &collectionData, const QString &progressText)
 {   // 主页面 to 详情页面
     if (!detailPage) {
         detailPage = new DetailPage();
@@ -150,7 +150,7 @@ void MainWindow::onShowDetailPageRequested(const CollectionData &collectionData)
         connect(detailPage, &DetailPage::showEpisodePageRequested, this, &MainWindow::onShowEpisodePageRequested);
         connect(detailPage, &DetailPage::tagClicked, this, &MainWindow::onTagClicked);
     }
-    detailPage->setCollectionData(collectionData);
+    detailPage->setCollectionData(collectionData, progressText);
     main_stackedWidget->setCurrentWidget(detailPage);
 }
 

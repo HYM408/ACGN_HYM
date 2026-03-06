@@ -1,9 +1,8 @@
 #include "main_page.h"
-#include <QLabel>
-#include <QJsonArray>
 #include "sql/sql.h"
 #include "utils/menu_util.h"
 #include "utils/image_util.h"
+#include "utils/progress_util.h"
 #include "utils/cache_image_util.h"
 
 MainPageManager::MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI, DatabaseManager *dbManager): QObject(nullptr), mainWindow(mainWindow), dbManager(dbManager), cacheImageUtil(cacheImageUtil), bangumiAPI(bangumiAPI)
@@ -55,7 +54,9 @@ void MainPageManager::setupConnections()
 bool MainPageManager::eventFilter(QObject *obj, QEvent *event)
 {   // 鼠标事件
     if (obj->property("isCard").toBool() && event->type() == QEvent::MouseButtonPress) {
-        showDetailPage(qobject_cast<QFrame*>(obj)->property("collectionData").value<CollectionData>());
+        auto *frame = qobject_cast<QFrame*>(obj);
+        auto *progressLabel = frame->property("progressLabel").value<QLabel*>();
+        showDetailPage(frame->property("collectionData").value<CollectionData>(), progressLabel ? progressLabel->text() : QString());
         return true;
     }
     for (auto &[statusType, info] : statusFrames.toStdMap()) {
@@ -227,7 +228,8 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
         card.coverLabel->setStyleSheet("QLabel {color: gray}");
     } else ImageUtil::loadImageWithCache(cacheImageUtil, collection.subject_images_common, card.coverLabel, 40, false, true);
     card.titleLabel->setText(collection.subject_name_cn.isEmpty() ? collection.subject_name : collection.subject_name_cn);
-    setProgressText(card.progressLabel, collection);
+    card.progressLabel->setText(computeProgressText(collection, airdatesJson));
+    card.card->setProperty("progressLabel", QVariant::fromValue(card.progressLabel));
     if (collection.subject_type == 2) card.episodeButton->setText("选集");
     else if (collection.subject_type == 4) card.episodeButton->setText("");
     else card.episodeButton->setText("进度");
@@ -240,53 +242,9 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
         StatusSelector::showStatusSelector(card.moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, dbManager, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);}, -37);});
     connect(card.episodeButton, &QPushButton::clicked, this, [this, card]() mutable {
         auto data = card.card->property("collectionData").value<CollectionData>();
-        if (data.subject_type == 4) showDetailPage(data);
+        if (data.subject_type == 4) showDetailPage(data, card.progressLabel->text());
         else showEpisodePage(data);
     });
-}
-
-void MainPageManager::setProgressText(QLabel *label, const CollectionData &collection) const
-{   // 设置进度
-    if (collection.subject_type == 2) {
-        QDate currentDate = QDate::currentDate();
-        bool hasAirdate = false;
-        QDate earliest, latest;
-        int airedCount = 0;
-        QJsonArray episodes = airdatesJson.value(QString::number(collection.subject_id)).toArray();
-        int totalEpisodes = collection.subject_eps > 0 ? collection.subject_eps : static_cast<int>(episodes.size());
-        QString totalEpsStr = (totalEpisodes > 0) ? QString::number(totalEpisodes) : "--";
-        for (const auto &epVal : episodes) {
-            QJsonObject epObj = epVal.toObject();
-            QString dateStr = epObj["airdate"].toString();
-            QDate airDate = QDate::fromString(dateStr, Qt::ISODate);
-            if (!airDate.isValid()) {
-                airDate = QDate::fromString(collection.subject_date, Qt::ISODate);
-                if (!airDate.isValid()) continue;
-            }
-            hasAirdate = true;
-            if (!earliest.isValid() || airDate < earliest) earliest = airDate;
-            if (!latest.isValid() || airDate > latest) latest = airDate;
-            if (airDate <= currentDate) ++airedCount;
-        }
-        QString progress;
-        if (totalEpisodes > 0 && collection.ep_status >= totalEpisodes) progress = "已看完";
-        else progress = QString("看到 %1").arg(collection.ep_status);
-        if (!hasAirdate) {
-            QDate subjectDate = QDate::fromString(collection.subject_date, Qt::ISODate);
-            if (!subjectDate.isValid()) label->setText(QString("未开播 · 预定全 %1 话").arg(totalEpsStr));
-            else if (subjectDate <= currentDate) label->setText(QString("已完结 · 全 %1 话 · %2").arg(totalEpsStr, progress));
-            else label->setText(QString("%1 开播 · 预定全 %2 话").arg(collection.subject_date, totalEpsStr));
-        } else if (earliest > currentDate) label->setText(QString("%1 开播 · 预定全 %2 话").arg(earliest.toString(Qt::ISODate), totalEpsStr));
-        else {
-            if (latest < currentDate) label->setText(QString("已完结 · 全 %1 话 · %2").arg(totalEpsStr, progress));
-            else label->setText(QString("连载至第 %1 话 · 全 %2 话 · %3").arg(airedCount).arg(totalEpsStr, progress));
-        }
-    }
-    else if (collection.subject_type == 7 || collection.subject_type == 8) {
-        QString totalVols = collection.subject_volumes > 0 ? QString::number(collection.subject_volumes) : "--";
-        QString totalEps = collection.subject_eps > 0 ? QString::number(collection.subject_eps) : "--";
-        label->setText(QString("全 %1 卷 · 全 %2 话").arg(totalVols, totalEps));
-    } else label->clear();
 }
 
 void MainPageManager::clearDisplayArea()
@@ -326,9 +284,9 @@ void MainPageManager::nextPage()
     }
 }
 
-void MainPageManager::showDetailPage(const CollectionData &collectionData)
+void MainPageManager::showDetailPage(const CollectionData &collectionData, const QString &progressText)
 {   // 跳转详情页面
-    emit showDetailPageRequested(collectionData);
+    emit showDetailPageRequested(collectionData, progressText);
 }
 
 void MainPageManager::showEpisodePage(const CollectionData &collectionData)

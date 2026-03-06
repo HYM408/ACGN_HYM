@@ -36,7 +36,7 @@ private slots:
     void onSettingsButtonClicked();
     void onDownloadButtonClicked();
     void onBackButtonClicked();
-    void onShowDetailPageRequested(const CollectionData &collectionData);
+    void onShowDetailPageRequested(const CollectionData &collectionData, const QString &progressText);
     void onShowEpisodePageRequested(const CollectionData &collectionData);
     void precreatePlayerPage();
     void onEpisodeClicked(const CollectionData &collectionData, const EpisodeData &episodeData);

@@ -27,12 +27,12 @@ public:
     static QVector<EpisodeData> getEpisodesBySubjectId(int subjectId);
     static bool deleteEpisodesBySubjectId(int subjectId);
     static bool updateAllEpisodesStatus(int subjectId, int collectionType = 2);
-    // subjects表
-    static bool insertOrUpdateSubject(const QJsonObject &apiData);
-    static SubjectsData getSubjectById(int subjectId);
-    // episode公共数据表
+    // 公共数据表
     bool insertEpisodeAirdateFromFile(const QString& filePath);
     [[nodiscard]] QJsonObject getEpisodeAirdates(const QList<int> &subjectIds) const;
+    bool insertSubjectPublic(const QString& filePath);
+    bool insertOrUpdateSubject(const QJsonObject &apiData) const;
+    [[nodiscard]] SubjectsData getSubjectById(int subjectId) const;
 
 signals:
     void collectionDeleted();

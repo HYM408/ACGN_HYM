@@ -1,5 +1,6 @@
 #include "detail_page.h"
 #include <QTimer>
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QDesktopServices>
 #include "config.h"
@@ -55,8 +56,9 @@ void DetailPage::setupConnections()
     connect(ui.pushButton_26, &QPushButton::clicked, this, &DetailPage::onStatusButtonClicked);
 }
 
-void DetailPage::setCollectionData(const CollectionData &data)
+void DetailPage::setCollectionData(const CollectionData &data, const QString &progressText)
 {   // 显示传入数据
+    resetUI();
     currentData = data;
     if (currentData.subject_images_common.isEmpty()) {
         ui.cover_label_3->setText("暂无图片");
@@ -76,32 +78,20 @@ void DetailPage::setCollectionData(const CollectionData &data)
         ui.pushButton_27->setText("进度");
         ui.pushButton_27->setEnabled(true);
     }
-}
-
-void DetailPage::setCollectionDataFromMap(const QVariantMap &data)
-{   // 数据加工
-    resetUI();
-    CollectionData collectionData;
-    collectionData.subject_id = data["subject_id"].toInt();
-    collectionData.subject_name = data["subject_name"].toString();
-    collectionData.subject_name_cn = data["subject_name_cn"].toString();
-    collectionData.subject_images_common = data["subject_images_common"].toString();
-    collectionData.subject_type = data["subject_type"].toInt();
-    collectionData.type = data["type"].toInt();
-    setCollectionData(collectionData);
+    ui.pushButton_24->setText(progressText);
     loadData();
 }
 
 void DetailPage::loadData()
 {   // 加载数据
-    SubjectsData subjectData = DatabaseManager::getSubjectById(currentData.subject_id);
+    SubjectsData subjectData = dbManager->getSubjectById(currentData.subject_id);
     if (subjectData.id != 0) updateDetailPage(subjectData);
     else {
         QTimer::singleShot(0, this, [this] {
             QJsonObject subjectInfo = bangumiAPI->getSubjectInfo(currentData.subject_id);
-            DatabaseManager::insertOrUpdateSubject(subjectInfo);
+            dbManager->insertOrUpdateSubject(subjectInfo);
             if (!isVisible()) return;
-            updateDetailPage(DatabaseManager::getSubjectById(currentData.subject_id));
+            updateDetailPage(dbManager->getSubjectById(currentData.subject_id));
         });
     }
 }
@@ -132,21 +122,21 @@ void DetailPage::updateDetailPage(const SubjectsData &subjectData)
     QString score = QString::number(subjectData.rating_score);
     QString total = QString::number(subjectData.rating_total);
     QString rank = QString::number(subjectData.rating_rank);
-    ui.pushButton_21->setText(QString("%1|%2人评|#%3").arg(score, total, rank));
-    int eps = subjectData.total_episodes;
-    ui.pushButton_24->setText(QString("全%1话").arg(eps > 0 ? QString::number(eps) : "-"));
+    ui.pushButton_21->setText(QString("%1 | %2人评 | #%3").arg(score, total, rank));
     int collect = subjectData.collect;
     int onHold = subjectData.on_hold;
     int dropped = subjectData.dropped;
     int wish = subjectData.wish;
     int doing = subjectData.doing;
-    ui.pushButton_25->setText(QString("%1收藏/%2在看/%3抛弃").arg(collect + onHold + dropped + wish + doing).arg(doing).arg(dropped));
+    ui.pushButton_25->setText(QString("%1收藏 / %2在看 / %3抛弃").arg(collect + onHold + dropped + wish + doing).arg(doing).arg(dropped));
     ui.textEdit_2->setText(subjectData.summary);
-    QList<QPair<QString, int>> tagPairs;
+    QList<QPair<QString, int>> allTagPairs, tagPairs;
+    if (!subjectData.meta_tags.isEmpty()) for (const auto &value : QJsonDocument::fromJson(subjectData.meta_tags.toUtf8()).array()) allTagPairs.append(qMakePair(value.toString().trimmed(), 0));
     QJsonObject tagsObject = subjectData.tags;
     for (auto it = tagsObject.begin(); it != tagsObject.end(); ++it) tagPairs.append(qMakePair(it.key(), it.value().toInt()));
     std::sort(tagPairs.begin(), tagPairs.end(), [](const QPair<QString, int> &a, const QPair<QString, int> &b) {return b.second < a.second;});
-    tagsDisplay(tagPairs);
+    allTagPairs.append(tagPairs);
+    tagsDisplay(allTagPairs);
     QString timeTag = getTimeInfo(tagPairs, subjectData.date);
     ui.pushButton_23->setText(timeTag);
 }
@@ -165,10 +155,16 @@ void DetailPage::tagsDisplay(const QList<QPair<QString, int>> &tagPairs)
     int currentWidth = 0;
     QVector<QPair<QString, int>> labelData;
     for (const auto &pair : tagPairs) {
-        labelData.append(qMakePair(
-            QString("<span style='color:black'>%1</span> <span style='color:gray'>%2</span>").arg(pair.first).arg(pair.second),
-            fm.horizontalAdvance(pair.first + " " + QString::number(pair.second)) + 25
-        ));
+        QString displayText;
+        int textWidth;
+        if (pair.second > 0) {
+            displayText = QString("<span style='color:black'>%1</span> <span style='color:gray'>%2</span>").arg(pair.first).arg(pair.second);
+            textWidth = fm.horizontalAdvance(pair.first + " " + QString::number(pair.second)) + 25;
+        } else {
+            displayText = QString("<span style='color:black'>%1</span>").arg(pair.first);
+            textWidth = fm.horizontalAdvance(pair.first) + 25;
+        }
+        labelData.append(qMakePair(displayText, textWidth));
     }
     for (int i = 0; i < labelData.size(); ++i) {
         const auto &data = labelData[i];
@@ -223,10 +219,10 @@ void DetailPage::resetUI() const
     ui.textEdit->clear();
     ui.textEdit_2->clear();
     ui.cover_label_3->clear();
-    ui.pushButton_24->setText("全-话");
+    ui.pushButton_24->setText("全 - 话");
     ui.pushButton_23->setText("TBA");
-    ui.pushButton_21->setText("|人评|#");
-    ui.pushButton_25->setText("收藏/在看/抛弃");
+    ui.pushButton_21->setText(" | 人评 | #");
+    ui.pushButton_25->setText("收藏 / 在看 / 抛弃");
 }
 
 void DetailPage::onBackButtonClicked()
