@@ -5,6 +5,7 @@ project(ACGN_HYM VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
+set(QT_NO_PRIVATE_MODULE_WARNING ON)
 
 find_package(Qt6 REQUIRED COMPONENTS
         Core
@@ -13,6 +14,7 @@ find_package(Qt6 REQUIRED COMPONENTS
         Sql
         Network
         WebEngineWidgets
+        CorePrivate
 )
 
 set(LIBXML2_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
@@ -83,6 +85,7 @@ target_link_libraries(appACGN_HYM
         Qt6::Widgets
         Qt6::Sql
         Qt6::Network
+        Qt6::CorePrivate
         ${LIBXML2_LIBRARIES}
         ${VLC_LIBRARIES}
 )

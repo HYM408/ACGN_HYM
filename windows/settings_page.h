@@ -2,10 +2,12 @@
 #define SETTINGS_PAGE_H
 
 #include "settings_ui.h"
+#include <QFutureWatcher>
 
 class PikPakApi;
 class BangumiAPI;
 class BangumiOAuth;
+class ChunkDownload;
 class DatabaseManager;
 
 class SettingsPage : public QWidget
@@ -25,22 +27,26 @@ private slots:
     void onCollectionButtonClicked();
     static void onBangumiUrlChanged(int index);
     void onSelectDownloadPath();
+    void clearDownloadTasks(bool stop);
     void onBackButtonClicked();
     void onPikPakLoginButtonClicked();
 
 private:
     void setupConnections();
-    void setupDownloadPathUi() const;
     void updateTokenDisplay() const;
     void setBangumiBaseUrl() const;
     void ensureBangumiCredentials();
-    void loginBangumi();
+    void downloadPublicDate(bool useMirror);
+    void onExtractArchiveButtonClicked();
     void ensurePikPakCredentials();
+    void setupDownloadPathUi() const;
     Ui::SettingsPage ui{};
     BangumiAPI *bangumiAPI = nullptr;
     BangumiOAuth *bangumiOAuth = nullptr;
     DatabaseManager *dbManager = nullptr;
     PikPakApi *pikpakApi = nullptr;
+    ChunkDownload *m_currentDownload = nullptr;
+    static const QString BANGUMI_ARCHIVE_URL;
 };
 
 #endif // SETTINGS_PAGE_H

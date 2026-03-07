@@ -20,10 +20,15 @@ DatabaseManager::~DatabaseManager()
 
 void DatabaseManager::openDatabase()
 {   // 打开数据库
-    QDir dir("data");
+    const QDir dir("data");
     if (!dir.exists()) dir.mkpath(".");
     database.open();
     episodePublicDate.open();
+}
+
+void DatabaseManager::closePublicDatabase()
+{   // 关闭public_date数据库
+    episodePublicDate.close();
 }
 
 void DatabaseManager::initTables()
@@ -63,7 +68,7 @@ QString DatabaseManager::simplifyTags(const QJsonArray &tags)
     return QJsonDocument(tagObject).toJson(QJsonDocument::Compact);
 }
 
-int DatabaseManager::determineSubjectType(int originalType, const QJsonArray &tags)
+int DatabaseManager::determineSubjectType(const int originalType, const QJsonArray &tags)
 {   // 类型处理
     if (originalType != 1) return originalType;
     for (const auto &tag : tags) if (tag.toObject()["name"].toString().trimmed() == "漫画") return 8;
@@ -88,34 +93,34 @@ bool DatabaseManager::executeQuery(QSqlQuery &query, const QString &errorMsg)
 qint64 DatabaseManager::dateStringToTimestamp(const QString& dateStr)
 {   // yyyy-MM-dd -> Unix时间戳
     if (dateStr.isEmpty()) return 0;
-    QDate date = QDate::fromString(dateStr, "yyyy-MM-dd");
-    QDateTime dt(date.startOfDay(QTimeZone::utc()));
+    const QDate date = QDate::fromString(dateStr, "yyyy-MM-dd");
+    const QDateTime dt(date.startOfDay(QTimeZone::utc()));
     return dt.toSecsSinceEpoch();
 }
 
 qint64 DatabaseManager::dateTimeStringToTimestamp(const QString& dateTimeStr)
 {   // ISO 8601 日期 -> Unix时间戳
     if (dateTimeStr.isEmpty()) return 0;
-    QDateTime dt = QDateTime::fromString(dateTimeStr, Qt::ISODate);
+    const QDateTime dt = QDateTime::fromString(dateTimeStr, Qt::ISODate);
     return dt.toSecsSinceEpoch();
 }
 
-QString DatabaseManager::timestampToDateString(qint64 timestamp)
+QString DatabaseManager::timestampToDateString(const qint64 timestamp)
 {   // Unix时间戳 -> yyyy-MM-dd
     if (timestamp == 0) return {};
-    QDateTime dt = QDateTime::fromSecsSinceEpoch(timestamp, QTimeZone::utc());
+    const QDateTime dt = QDateTime::fromSecsSinceEpoch(timestamp, QTimeZone::utc());
     return dt.toString("yyyy-MM-dd");
 }
 
 QByteArray DatabaseManager::compressString(const QString &str)
-{
-    QByteArray original = str.toUtf8();
+{   // 压缩字符串
+    const QByteArray original = str.toUtf8();
     return qCompress(original, 9);
 }
 
 QString DatabaseManager::decompressString(const QByteArray &data)
-{
-    QByteArray uncompressed = qUncompress(data);
+{   // 解压缩字符串
+    const QByteArray uncompressed = qUncompress(data);
     return QString::fromUtf8(uncompressed);
 }
 
@@ -128,9 +133,9 @@ bool DatabaseManager::insertManyCollectionData(const QJsonArray &jsonArray)
         QJsonObject data = value.toObject();
         QJsonObject subject = data["subject"].toObject();
         QJsonArray tags = subject["tags"].toArray();
-        int finalType = determineSubjectType(data["subject_type"].toInt(), tags);
-        qint64 dateTimestamp = dateStringToTimestamp(subject["date"].toString());
-        qint64 updatedTimestamp = dateTimeStringToTimestamp(data["updated_at"].toString());
+        const int finalType = determineSubjectType(data["subject_type"].toInt(), tags);
+        const qint64 dateTimestamp = dateStringToTimestamp(subject["date"].toString());
+        const qint64 updatedTimestamp = dateTimeStringToTimestamp(data["updated_at"].toString());
         query.addBindValue(data["subject_id"].toInt());
         query.addBindValue(data["vol_status"].toInt());
         query.addBindValue(data["ep_status"].toInt());
@@ -159,18 +164,18 @@ CollectionData DatabaseManager::collectionFromQuery(const QSqlQuery &query)
     data.subject_type = query.value("subject_type").toInt();
     data.type = query.value("type").toInt();
     data.rate = query.value("rate").toInt();
-    int dateTimestamp = query.value("subject_date").toInt();
+    const int dateTimestamp = query.value("subject_date").toInt();
     data.subject_date = timestampToDateString(dateTimestamp);
     data.subject_name = query.value("subject_name").toString();
     data.subject_name_cn = query.value("subject_name_cn").toString();
     data.subject_eps = query.value("subject_eps").toInt();
     data.subject_volumes = query.value("subject_volumes").toInt();
-    QString stored = query.value("subject_images_common").toString();
+    const QString stored = query.value("subject_images_common").toString();
     data.subject_images_common = stored.isEmpty() ? QString() : "https://lain.bgm.tv/r/400/pic/cover/l/" + stored;
     return data;
 }
 
-QVector<CollectionData> DatabaseManager::getCollectionBySubjectTypeAndType(int subjectType, int typeValue)
+QVector<CollectionData> DatabaseManager::getCollectionBySubjectTypeAndType(const int subjectType, const int typeValue)
 {   // 获取所有收藏
     QVector<CollectionData> results;
     QSqlQuery query;
@@ -182,7 +187,7 @@ QVector<CollectionData> DatabaseManager::getCollectionBySubjectTypeAndType(int s
     return results;
 }
 
-QJsonObject DatabaseManager::getStatusCountsBySubjectType(int subjectType)
+QJsonObject DatabaseManager::getStatusCountsBySubjectType(const int subjectType)
 {   // 统状态计藏数量
     QJsonObject statusCounts;
     QSqlQuery query;
@@ -193,7 +198,7 @@ QJsonObject DatabaseManager::getStatusCountsBySubjectType(int subjectType)
     return statusCounts;
 }
 
-CollectionData DatabaseManager::getCollectionBySubjectId(int subjectId)
+CollectionData DatabaseManager::getCollectionBySubjectId(const int subjectId)
 {   // 根据subject_id获取单条记录
     QSqlQuery query;
     query.prepare("SELECT * FROM collection WHERE subject_id = ?");
@@ -202,7 +207,7 @@ CollectionData DatabaseManager::getCollectionBySubjectId(int subjectId)
     return collectionFromQuery(query);
 }
 
-bool DatabaseManager::updateCollectionFields(int subjectId, const QJsonObject &fields, bool updateTimestamp)
+bool DatabaseManager::updateCollectionFields(const int subjectId, const QJsonObject &fields, const bool updateTimestamp)
 {   // 更新指定subject_id的某个字段值
     QStringList setParts;
     QVariantList values;
@@ -221,12 +226,12 @@ bool DatabaseManager::updateCollectionFields(int subjectId, const QJsonObject &f
     return executeQuery(query, "更新字段失败");
 }
 
-bool DatabaseManager::deleteCollectionBySubjectId(int subjectId)
+bool DatabaseManager::deleteCollectionBySubjectId(const int subjectId)
 {   // 删除指定subject_id
     QSqlQuery query;
     query.prepare("DELETE FROM collection WHERE subject_id = ?");
     query.addBindValue(subjectId);
-    bool success = executeQuery(query, "删除收藏失败");
+    const bool success = executeQuery(query, "删除收藏失败");
     if (success) emit collectionDeleted();
     return success;
 }
@@ -238,7 +243,7 @@ void DatabaseManager::clearCollectionTable() const
 }
 
 // =============== episode_collection表 ===============
-bool DatabaseManager::insertManyEpisodes(int subjectId, const QJsonArray &episodesArray)
+bool DatabaseManager::insertManyEpisodes(const int subjectId, const QJsonArray &episodesArray)
 {   // 插入剧集数据
     QSqlQuery query;
     query.prepare("INSERT OR REPLACE INTO episode_collection VALUES (?,?,?,?,?,?,?,?,strftime('%s','now'))");
@@ -259,7 +264,7 @@ bool DatabaseManager::insertManyEpisodes(int subjectId, const QJsonArray &episod
     return true;
 }
 
-QVector<EpisodeData> DatabaseManager::getEpisodesBySubjectId(int subjectId)
+QVector<EpisodeData> DatabaseManager::getEpisodesBySubjectId(const int subjectId)
 {   // 根据subject_id获取所有剧集
     QVector<EpisodeData> results;
     QSqlQuery query;
@@ -281,7 +286,7 @@ QVector<EpisodeData> DatabaseManager::getEpisodesBySubjectId(int subjectId)
     return results;
 }
 
-bool DatabaseManager::deleteEpisodesBySubjectId(int subjectId)
+bool DatabaseManager::deleteEpisodesBySubjectId(const int subjectId)
 {   // 根据subject_id删除所有剧集
     QSqlQuery query;
     query.prepare("DELETE FROM episode_collection WHERE subject_id = ?");
@@ -289,7 +294,7 @@ bool DatabaseManager::deleteEpisodesBySubjectId(int subjectId)
     return executeQuery(query, "删除剧集失败");
 }
 
-bool DatabaseManager::updateAllEpisodesStatus(int subjectId, int collectionType)
+bool DatabaseManager::updateAllEpisodesStatus(const int subjectId, const int collectionType)
 {   // 根据subject_id更新剧集状态
     QSqlQuery query;
     query.prepare("UPDATE episode_collection SET collection_type = ? WHERE subject_id = ?");
@@ -299,13 +304,13 @@ bool DatabaseManager::updateAllEpisodesStatus(int subjectId, int collectionType)
 }
 
 // =============== episode公共数据表 ===============
-bool DatabaseManager::insertEpisodeAirdateFromFile(const QString &filePath)
+bool DatabaseManager::insertEpisodeAirdateFromFile(const QString &filePath, QSqlDatabase db)
 {   // episode公共数据插入
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
-    QSqlQuery query(episodePublicDate);
+    QSqlQuery query(db);
     query.prepare("INSERT OR REPLACE INTO episode_public_date (subject_id, id, airdate, sort) VALUES (?,?,?,?)");
-    episodePublicDate.transaction();
+    db.transaction();
     int count = 0;
     constexpr int batchSize = 10000;
     QTextStream stream(&file);
@@ -317,9 +322,9 @@ bool DatabaseManager::insertEpisodeAirdateFromFile(const QString &filePath)
         QJsonObject obj = doc.object();
         QString airdateStr = obj["airdate"].toString();
         if (airdateStr.isEmpty()) continue;
-        int subjectId = obj["subject_id"].toInt();
-        int id = obj["id"].toInt();
-        int sort = static_cast<int>(obj["sort"].toDouble() * 10.0);
+        const int subjectId = obj["subject_id"].toInt();
+        const int id = obj["id"].toInt();
+        const int sort = static_cast<int>(obj["sort"].toDouble() * 10.0);
         query.addBindValue(subjectId);
         query.addBindValue(id);
         query.addBindValue(dateStringToTimestamp(airdateStr));
@@ -327,11 +332,11 @@ bool DatabaseManager::insertEpisodeAirdateFromFile(const QString &filePath)
         query.exec();
         ++count;
         if (count % batchSize == 0) {
-            episodePublicDate.commit();
-            episodePublicDate.transaction();
+            db.commit();
+            db.transaction();
         }
     }
-    episodePublicDate.commit();
+    db.commit();
     return true;
 }
 
@@ -341,7 +346,7 @@ QJsonObject DatabaseManager::getEpisodeAirdates(const QList<int> &subjectIds) co
     QStringList placeholders;
     placeholders.fill(QString('?'), subjectIds.size());
     query.prepare(QString("SELECT * FROM episode_public_date WHERE subject_id IN (%1)").arg(placeholders.join(", ")));
-    for (int id : subjectIds) query.addBindValue(id);
+    for (const int id : subjectIds) query.addBindValue(id);
     query.exec();
     QJsonObject result;
     while (query.next()) {
@@ -356,13 +361,13 @@ QJsonObject DatabaseManager::getEpisodeAirdates(const QList<int> &subjectIds) co
 }
 
 // =============== subject公共数据表 ===============
-bool DatabaseManager::insertSubjectPublic(const QString &filePath)
+bool DatabaseManager::insertSubjectPublic(const QString& filePath, QSqlDatabase db, const QList<int>& allowedTypes)
 {   // subject公共数据插入
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
-    QSqlQuery query(episodePublicDate);
+    QSqlQuery query(db);
     query.prepare("INSERT OR REPLACE INTO subject_public_date VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-    episodePublicDate.transaction();
+    db.transaction();
     int count = 0;
     constexpr int batchSize = 10000;
     QTextStream stream(&file);
@@ -373,7 +378,7 @@ bool DatabaseManager::insertSubjectPublic(const QString &filePath)
         QJsonDocument doc = QJsonDocument::fromJson(line.toUtf8(), &parseError);
         if (parseError.error != QJsonParseError::NoError || !doc.isObject()) continue;
         QJsonObject obj = doc.object();
-        if (obj["type"].toInt() != 2) continue;
+        if (!allowedTypes.contains(obj["type"].toInt())) continue;
         query.addBindValue(obj["id"].toInt());
         query.addBindValue(obj["name"].toString());
         query.addBindValue(obj["name_cn"].toString());
@@ -395,13 +400,12 @@ bool DatabaseManager::insertSubjectPublic(const QString &filePath)
         query.addBindValue(favorite["wish"].toInt());
         query.exec();
         ++count;
-        query.finish();
         if (count % batchSize == 0) {
-            episodePublicDate.commit();
-            episodePublicDate.transaction();
+            db.commit();
+            db.transaction();
         }
     }
-    episodePublicDate.commit();
+    db.commit();
     return true;
 }
 
@@ -429,7 +433,7 @@ bool DatabaseManager::insertOrUpdateSubject(const QJsonObject &apiData) const
     return executeQuery(query, "插入subject失败");
 }
 
-SubjectsData DatabaseManager::getSubjectById(int subjectId) const
+SubjectsData DatabaseManager::getSubjectById(const int subjectId) const
 {   // // 根据ID获取subject信息
     QSqlQuery query(episodePublicDate);
     query.prepare("SELECT * FROM subject_public_date WHERE id = ?");
@@ -439,9 +443,9 @@ SubjectsData DatabaseManager::getSubjectById(int subjectId) const
     data.id = query.value("id").toInt();
     data.name = query.value("name").toString();
     data.name_cn = query.value("name_cn").toString();
-    QByteArray compressedSummary = query.value("summary").toByteArray();
+    const QByteArray compressedSummary = query.value("summary").toByteArray();
     if (!compressedSummary.isEmpty()) data.summary = decompressString(compressedSummary);
-    QString tagsJson = query.value("tags").toString();
+    const QString tagsJson = query.value("tags").toString();
     if (!tagsJson.isEmpty()) data.tags = QJsonDocument::fromJson(tagsJson.toUtf8()).object();
     data.meta_tags = query.value("meta_tags").toString();
     data.rating_score = query.value("score").toInt() / 10.0;

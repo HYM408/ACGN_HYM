@@ -12,6 +12,7 @@ public:
     explicit DatabaseManager(QObject *parent = nullptr);
     ~DatabaseManager() override;
     void openDatabase();
+    void closePublicDatabase();
     static void initTables();
     // collection表
     static bool insertManyCollectionData(const QJsonArray &jsonArray);
@@ -28,9 +29,9 @@ public:
     static bool deleteEpisodesBySubjectId(int subjectId);
     static bool updateAllEpisodesStatus(int subjectId, int collectionType = 2);
     // 公共数据表
-    bool insertEpisodeAirdateFromFile(const QString& filePath);
+    static bool insertEpisodeAirdateFromFile(const QString& filePath, QSqlDatabase db);
     [[nodiscard]] QJsonObject getEpisodeAirdates(const QList<int> &subjectIds) const;
-    bool insertSubjectPublic(const QString& filePath);
+    static bool insertSubjectPublic(const QString& filePath, QSqlDatabase db, const QList<int>& allowedTypes);
     bool insertOrUpdateSubject(const QJsonObject &apiData) const;
     [[nodiscard]] SubjectsData getSubjectById(int subjectId) const;
 

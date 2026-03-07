@@ -11,6 +11,7 @@
 
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QCheckBox>
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
@@ -54,6 +55,20 @@ public:
     QLabel *pushButton_12;
     QComboBox *comboBox;
     QSpacerItem *horizontalSpacer_2;
+    QFrame *frame;
+    QVBoxLayout *verticalLayout_6;
+    QLabel *pushButton_16;
+    QFrame *frame_4;
+    QHBoxLayout *horizontalLayout_4;
+    QPushButton *pushButton_17;
+    QPushButton *pushButton_19;
+    QPushButton *pushButton_20;
+    QFrame *frame_5;
+    QVBoxLayout *verticalLayout_8;
+    QCheckBox *checkBox;
+    QCheckBox *checkBox_2;
+    QCheckBox *checkBox_3;
+    QPushButton *pushButton_18;
     QSpacerItem *verticalSpacer_3;
     QWidget *pikpak_page;
     QVBoxLayout *verticalLayout_3;
@@ -259,7 +274,6 @@ public:
         Frame_3->setObjectName("Frame_3");
         verticalLayout_4 = new QVBoxLayout(Frame_3);
         verticalLayout_4->setObjectName("verticalLayout_4");
-        verticalLayout_4->setContentsMargins(8, -1, -1, -1);
         pushButton_7 = new QLabel(Frame_3);
         pushButton_7->setObjectName("pushButton_7");
         pushButton_7->setMinimumSize(QSize(0, 30));
@@ -296,15 +310,20 @@ public:
 
         login_Button = new QPushButton(Frame_3);
         login_Button->setObjectName("login_Button");
-        login_Button->setFont(font5);
-        login_Button->setStyleSheet(QString::fromUtf8(""));
+        login_Button->setMinimumSize(QSize(76, 0));
+        login_Button->setMaximumSize(QSize(76, 16777215));
+        QFont font6;
+        font6.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
+        font6.setPointSize(13);
+        login_Button->setFont(font6);
 
         verticalLayout_4->addWidget(login_Button, 0, Qt::AlignmentFlag::AlignLeft);
 
         collection_Button = new QPushButton(Frame_3);
         collection_Button->setObjectName("collection_Button");
-        collection_Button->setFont(font5);
-        collection_Button->setStyleSheet(QString::fromUtf8(""));
+        collection_Button->setMinimumSize(QSize(76, 0));
+        collection_Button->setMaximumSize(QSize(76, 16777215));
+        collection_Button->setFont(font6);
 
         verticalLayout_4->addWidget(collection_Button, 0, Qt::AlignmentFlag::AlignLeft);
 
@@ -316,7 +335,6 @@ public:
         horizontalLayout_2 = new QHBoxLayout(Frame_4);
         horizontalLayout_2->setSpacing(0);
         horizontalLayout_2->setObjectName("horizontalLayout_2");
-        horizontalLayout_2->setContentsMargins(8, 1, -1, -1);
         pushButton_12 = new QLabel(Frame_4);
         pushButton_12->setObjectName("pushButton_12");
         pushButton_12->setMinimumSize(QSize(0, 30));
@@ -330,6 +348,11 @@ public:
         comboBox->addItem(QString());
         comboBox->addItem(QString());
         comboBox->setObjectName("comboBox");
+        comboBox->setMinimumSize(QSize(0, 25));
+        QFont font7;
+        font7.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
+        font7.setPointSize(10);
+        comboBox->setFont(font7);
 
         horizontalLayout_2->addWidget(comboBox, 0, Qt::AlignmentFlag::AlignLeft);
 
@@ -339,6 +362,91 @@ public:
 
 
         verticalLayout_7->addWidget(Frame_4);
+
+        frame = new QFrame(login_page);
+        frame->setObjectName("frame");
+        frame->setFrameShape(QFrame::Shape::StyledPanel);
+        frame->setFrameShadow(QFrame::Shadow::Raised);
+        verticalLayout_6 = new QVBoxLayout(frame);
+        verticalLayout_6->setObjectName("verticalLayout_6");
+        pushButton_16 = new QLabel(frame);
+        pushButton_16->setObjectName("pushButton_16");
+        pushButton_16->setMinimumSize(QSize(0, 30));
+        pushButton_16->setMaximumSize(QSize(16777215, 30));
+        pushButton_16->setFont(font4);
+
+        verticalLayout_6->addWidget(pushButton_16, 0, Qt::AlignmentFlag::AlignLeft);
+
+        frame_4 = new QFrame(frame);
+        frame_4->setObjectName("frame_4");
+        frame_4->setFrameShape(QFrame::Shape::StyledPanel);
+        frame_4->setFrameShadow(QFrame::Shadow::Raised);
+        horizontalLayout_4 = new QHBoxLayout(frame_4);
+        horizontalLayout_4->setObjectName("horizontalLayout_4");
+        horizontalLayout_4->setContentsMargins(0, 0, -1, 5);
+        pushButton_17 = new QPushButton(frame_4);
+        pushButton_17->setObjectName("pushButton_17");
+        pushButton_17->setMinimumSize(QSize(76, 0));
+        pushButton_17->setMaximumSize(QSize(76, 16777215));
+        pushButton_17->setFont(font6);
+
+        horizontalLayout_4->addWidget(pushButton_17);
+
+        pushButton_19 = new QPushButton(frame_4);
+        pushButton_19->setObjectName("pushButton_19");
+        pushButton_19->setMinimumSize(QSize(76, 0));
+        pushButton_19->setMaximumSize(QSize(76, 16777215));
+        pushButton_19->setFont(font6);
+
+        horizontalLayout_4->addWidget(pushButton_19);
+
+        pushButton_20 = new QPushButton(frame_4);
+        pushButton_20->setObjectName("pushButton_20");
+        pushButton_20->setFont(font6);
+        pushButton_20->setStyleSheet(QString::fromUtf8("border: none;"));
+
+        horizontalLayout_4->addWidget(pushButton_20);
+
+
+        verticalLayout_6->addWidget(frame_4, 0, Qt::AlignmentFlag::AlignLeft);
+
+        frame_5 = new QFrame(frame);
+        frame_5->setObjectName("frame_5");
+        frame_5->setFrameShape(QFrame::Shape::StyledPanel);
+        frame_5->setFrameShadow(QFrame::Shadow::Raised);
+        verticalLayout_8 = new QVBoxLayout(frame_5);
+        verticalLayout_8->setObjectName("verticalLayout_8");
+        verticalLayout_8->setContentsMargins(0, -1, -1, -1);
+        checkBox = new QCheckBox(frame_5);
+        checkBox->setObjectName("checkBox");
+        checkBox->setFont(font7);
+        checkBox->setChecked(true);
+
+        verticalLayout_8->addWidget(checkBox);
+
+        checkBox_2 = new QCheckBox(frame_5);
+        checkBox_2->setObjectName("checkBox_2");
+        checkBox_2->setFont(font7);
+
+        verticalLayout_8->addWidget(checkBox_2);
+
+        checkBox_3 = new QCheckBox(frame_5);
+        checkBox_3->setObjectName("checkBox_3");
+        checkBox_3->setFont(font7);
+
+        verticalLayout_8->addWidget(checkBox_3);
+
+        pushButton_18 = new QPushButton(frame_5);
+        pushButton_18->setObjectName("pushButton_18");
+        pushButton_18->setFont(font6);
+
+        verticalLayout_8->addWidget(pushButton_18, 0, Qt::AlignmentFlag::AlignLeft);
+
+
+        verticalLayout_6->addWidget(frame_5);
+
+
+        verticalLayout_7->addWidget(frame);
 
         verticalSpacer_3 = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
 
@@ -353,11 +461,11 @@ public:
         pushButton_5->setObjectName("pushButton_5");
         pushButton_5->setMinimumSize(QSize(0, 0));
         pushButton_5->setMaximumSize(QSize(16777215, 16777215));
-        QFont font6;
-        font6.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
-        font6.setPointSize(20);
-        font6.setBold(true);
-        pushButton_5->setFont(font6);
+        QFont font8;
+        font8.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
+        font8.setPointSize(20);
+        font8.setBold(true);
+        pushButton_5->setFont(font8);
 
         verticalLayout_3->addWidget(pushButton_5, 0, Qt::AlignmentFlag::AlignLeft);
 
@@ -381,16 +489,13 @@ public:
 
         pushButton_11 = new QLabel(frame_2);
         pushButton_11->setObjectName("pushButton_11");
-        QFont font7;
-        font7.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
-        font7.setPointSize(13);
-        pushButton_11->setFont(font7);
+        pushButton_11->setFont(font6);
 
         verticalLayout_9->addWidget(pushButton_11, 0, Qt::AlignmentFlag::AlignLeft);
 
         pushButton_15 = new QLabel(frame_2);
         pushButton_15->setObjectName("pushButton_15");
-        pushButton_15->setFont(font7);
+        pushButton_15->setFont(font6);
 
         verticalLayout_9->addWidget(pushButton_15, 0, Qt::AlignmentFlag::AlignLeft);
 
@@ -456,7 +561,7 @@ public:
 
         retranslateUi(SettingsPage);
 
-        stackedWidget_2->setCurrentIndex(1);
+        stackedWidget_2->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(SettingsPage);
@@ -481,6 +586,14 @@ public:
         comboBox->setItemText(1, QCoreApplication::translate("SettingsPage", "bgm.tv", nullptr));
         comboBox->setItemText(2, QCoreApplication::translate("SettingsPage", "chii.in", nullptr));
 
+        pushButton_16->setText(QCoreApplication::translate("SettingsPage", "Bangumi \345\205\254\345\205\261\346\225\260\346\215\256", nullptr));
+        pushButton_17->setText(QCoreApplication::translate("SettingsPage", "\344\270\213\350\275\275", nullptr));
+        pushButton_19->setText(QCoreApplication::translate("SettingsPage", "\351\225\234\345\203\217", nullptr));
+        pushButton_20->setText(QString());
+        checkBox->setText(QCoreApplication::translate("SettingsPage", "\345\212\250\347\224\273", nullptr));
+        checkBox_2->setText(QCoreApplication::translate("SettingsPage", "\344\271\246\347\261\215", nullptr));
+        checkBox_3->setText(QCoreApplication::translate("SettingsPage", "\346\270\270\346\210\217", nullptr));
+        pushButton_18->setText(QCoreApplication::translate("SettingsPage", "\345\257\274\345\205\245\346\225\260\346\215\256", nullptr));
         pushButton_5->setText(QCoreApplication::translate("SettingsPage", "PikPak \347\231\273\345\275\225", nullptr));
         pushButton_6->setText(QString());
         pushButton_10->setText(QString());
