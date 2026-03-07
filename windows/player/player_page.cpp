@@ -42,7 +42,7 @@ void PlayerPage::setupControlOverlay()
     connect(controlOverlay, &ControlOverlay::fullscreenRequested, this, &PlayerPage::toggleFullscreen);
     connect(controlOverlay, &ControlOverlay::backRequested, this, &PlayerPage::onBackButtonClicked);
     connect(vlcPlayer, &VLCPlayer::playStateChanged, controlOverlay, &ControlOverlay::setPlayState);
-    connect(vlcPlayer, &VLCPlayer::timeChanged, [this](int currentMs, int totalMs) {controlOverlay->setTime(currentMs / 1000, totalMs / 1000);});
+    connect(vlcPlayer, &VLCPlayer::timeChanged, [this](const int currentMs, const int totalMs) {controlOverlay->setTime(currentMs / 1000, totalMs / 1000);});
     connect(vlcPlayer, &VLCPlayer::positionChanged, controlOverlay, &ControlOverlay::setProgress);
     connect(vlcPlayer, &VLCPlayer::exitFullscreenRequested, this, [this] {if (fullscreen_mode) toggleFullscreen();});
     connect(vlcPlayer, &VLCPlayer::volumeChanged, controlOverlay, &ControlOverlay::setVolume);
@@ -50,11 +50,11 @@ void PlayerPage::setupControlOverlay()
 
 void PlayerPage::setSiteLoadingState(const QString &siteId) const
 {   // 更新卡片状态
-    if (auto *card = siteWidgets.value(siteId)) {
+    if (const auto *card = siteWidgets.value(siteId)) {
         if (auto *statusBtn = card->findChild<QPushButton*>("statusBtn")) statusBtn->setText("搜索中...");
         if (auto *routesContainer = card->findChild<QWidget*>("routesContainer")) routesContainer->setVisible(false);
     }
-    if (auto *contentFrame = siteDetailFrames.value(siteId)) {
+    if (const auto *contentFrame = siteDetailFrames.value(siteId)) {
         auto *contentLayout = qobject_cast<QVBoxLayout*>(contentFrame->layout());
         clearLayout(contentLayout);
         auto *loadingBtn = new QPushButton("搜索中...");
@@ -68,13 +68,13 @@ void PlayerPage::startSiteSearch(const QString &siteId)
 {   // 搜索
     setSiteLoadingState(siteId);
     if (Crawler::getAllAPISiteIds().contains(siteId)) {QThreadPool::globalInstance()->start([=] {
-        auto results = Crawler::searchAPI(siteId, m_keyword, m_abortFlag);
+        const auto results = Crawler::searchAPI(siteId, m_keyword, m_abortFlag);
         QMetaObject::invokeMethod(this, "handleSearchResult", Qt::QueuedConnection, Q_ARG(QString, siteId), Q_ARG(QList<SearchResult>, results));});
     } else if (Crawler::getAllSiteIds().contains(siteId)) {QThreadPool::globalInstance()->start([=] {
-        auto results = Crawler::searchSite(siteId, m_keyword, m_abortFlag);
+        const auto results = Crawler::searchSite(siteId, m_keyword, m_abortFlag);
         QMetaObject::invokeMethod(this, "handleSearchResult", Qt::QueuedConnection, Q_ARG(QString, siteId), Q_ARG(QList<SearchResult>, results));});
     } else if (Crawler::getAllBTSiteIds().contains(siteId)) {QThreadPool::globalInstance()->start([=] {
-        auto results = Crawler::searchBT(siteId, m_keyword, m_abortFlag);
+        const auto results = Crawler::searchBT(siteId, m_keyword, m_abortFlag);
         QMetaObject::invokeMethod(this, "handleBTSearchResult", Qt::QueuedConnection, Q_ARG(QString, siteId), Q_ARG(QList<BTResult>, results));});
     }
 }
@@ -88,31 +88,29 @@ void PlayerPage::fetchRoutes(const CollectionData &collectionData, const Episode
     if (m_keyword.isEmpty()) m_keyword = collectionData.subject_name;
     *m_abortFlag = true;
     m_abortFlag->store(false);
-    QStringList allApiIds = Crawler::getAllAPISiteIds();
-    QStringList allSiteIds = Crawler::getAllSiteIds();
-    QStringList allBtIds = Crawler::getAllBTSiteIds();
+    const QStringList allApiIds = Crawler::getAllAPISiteIds();
+    const QStringList allSiteIds = Crawler::getAllSiteIds();
+    const QStringList allBtIds = Crawler::getAllBTSiteIds();
     QStringList allIds = allApiIds + allSiteIds + allBtIds;
     if (allIds.isEmpty()) return;
-    QVariant sitesOrder = getConfig("EnabledSites/sites");
+    const QVariant sitesOrder = getConfig("EnabledSites/sites");
     QStringList sortedIds;
     if (sitesOrder.typeId() == QMetaType::QStringList)  sortedIds = sitesOrder.toStringList();
     else {
-        QString str = sitesOrder.toString();
+        const QString str = sitesOrder.toString();
         if (str.isEmpty()) return;
-        if (str == "*") {
-            setConfig("EnabledSites/sites", allIds);
-            sortedIds = allIds;
-        } else sortedIds = QStringList(str);
+        if (str == "*") sortedIds = allIds;
+        else sortedIds = QStringList(str);
     }
     if (!sortedIds.isEmpty()) {
-        QSet<QString> allSet = QSet(allIds.begin(), allIds.end());
+        auto allSet = QSet(allIds.begin(), allIds.end());
         QStringList filtered;
         for (const QString &id : sortedIds) filtered.append(id);
         allIds = filtered;
     }
     QWidget *container = ui.scrollAreaWidgetContents;
     container->setLayout(new QVBoxLayout());
-    QWidget *detailTab = ui.tabWidget->widget(1);
+    const QWidget *detailTab = ui.tabWidget->widget(1);
     detailTabWidget = new QTabWidget();
     detailTabWidget->setTabPosition(QTabWidget::West);
     detailTabWidget->setIconSize(QSize(30, 30));
@@ -136,8 +134,8 @@ void PlayerPage::reSearchSite(const QString &siteId)
 
 QString PlayerPage::getSiteIconUrl(const QString &siteId)
 {   // 图标
-    std::vector loaders = {Crawler::loadAPIConfig, Crawler::loadSiteConfig, Crawler::loadBTConfig};
-    for (auto loader : loaders) {
+    const std::vector loaders = {Crawler::loadAPIConfig, Crawler::loadSiteConfig, Crawler::loadBTConfig};
+    for (const auto loader : loaders) {
         QJsonObject config = loader(siteId);
         if (!config.isEmpty()) return config["icon"].toString();
     }
@@ -162,7 +160,8 @@ void PlayerPage::createSiteDetailTab(const QString &siteId)
     scrollArea->setWidget(contentFrame);
     int tabIndex = detailTabWidget->addTab(scrollArea, "");Q_UNUSED(tabIndex);
     siteDetailFrames[siteId] = contentFrame;
-    QString iconUrl = getSiteIconUrl(siteId);
+    siteDetailTabIndex[siteId] = tabIndex;
+    const QString iconUrl = getSiteIconUrl(siteId);
     cacheImageUtil->getImageAsync(iconUrl, [this, tabIndex](const QPixmap &pixmap) {
         if (!detailTabWidget) return;
         if (tabIndex < 0 || tabIndex >= detailTabWidget->count()) return;
@@ -184,12 +183,17 @@ QWidget* PlayerPage::createSiteCard(const QString &siteId)
     topLayout->setAlignment(Qt::AlignTop);
     // 图标
     auto *iconBtn = new QPushButton();
-    iconBtn->setFixedSize(20, 20);
+    iconBtn->setFixedSize(30, 30);
     iconBtn->setFlat(true);
+    iconBtn->setStyleSheet("QPushButton:hover {background-color: #f0f0f0; border-radius: 5px}");
     topLayout->addWidget(iconBtn);
-    QString iconUrl = getSiteIconUrl(siteId);
+    const QString iconUrl = getSiteIconUrl(siteId);
     QPointer btnPtr(iconBtn);
     cacheImageUtil->getImageAsync(iconUrl, [btnPtr](const QPixmap &pixmap) {if (btnPtr) btnPtr->setIcon(QIcon(pixmap));}, false);
+    connect(iconBtn, &QPushButton::clicked, this, [this, siteId]{
+        ui.tabWidget->setCurrentIndex(1);
+        detailTabWidget->setCurrentIndex(siteDetailTabIndex[siteId]);
+    });
     // 站点名称
     auto *siteBtn = new QPushButton(siteId);
     siteBtn->setFont(QFont("", 14, QFont::Bold));
@@ -240,14 +244,14 @@ void PlayerPage::updateCardContent(const QWidget *card, const QString &status, c
 
 void PlayerPage::updateBTCardContent(const QWidget *card, const QString &status, const QList<BTResult> &results)
 {   // 更新BT基础卡片
-    if (auto *statusBtn = card->findChild<QPushButton*>("statusBtn")) statusBtn->setText(status == "loading" ? "搜索中..." : (status == "success" ? QString::number(results.size()) + "个结果" : "✗"));
+    if (auto *statusBtn = card->findChild<QPushButton*>("statusBtn")) statusBtn->setText(status == "loading" ? "搜索中..." : status == "success" ? QString::number(results.size()) + "个结果" : "✗");
     card->findChild<QWidget*>("routesContainer")->setVisible(false);
 }
 
 void PlayerPage::handleSearchResult(const QString &siteId, const QList<SearchResult> &results)
 {   // 处理搜索结果
-    if (auto *card = siteWidgets.value(siteId)) updateCardContent(card, results.isEmpty() ? "error" : "success", results);
-    auto *contentFrame = siteDetailFrames.value(siteId);
+    if (const auto *card = siteWidgets.value(siteId)) updateCardContent(card, results.isEmpty() ? "error" : "success", results);
+    const auto *contentFrame = siteDetailFrames.value(siteId);
     if (!contentFrame) return;
     auto *contentLayout = qobject_cast<QVBoxLayout*>(contentFrame->layout());
     clearLayout(contentLayout);
@@ -264,8 +268,8 @@ void PlayerPage::handleBTSearchResult(const QString &siteId, const QList<BTResul
 {   // 处理BT搜索结果
     QList<BTResult> filtered, excluded;
     filterBTResults(results, filtered, excluded);
-    if (auto *card = siteWidgets.value(siteId)) updateBTCardContent(card, results.isEmpty() ? "error" : "success", results);
-    auto *contentFrame = siteDetailFrames.value(siteId);
+    if (const auto *card = siteWidgets.value(siteId)) updateBTCardContent(card, results.isEmpty() ? "error" : "success", results);
+    const auto *contentFrame = siteDetailFrames.value(siteId);
     if (!contentFrame) return;
     auto *contentLayout = qobject_cast<QVBoxLayout*>(contentFrame->layout());
     clearLayout(contentLayout);
@@ -291,7 +295,7 @@ void PlayerPage::handleBTSearchResult(const QString &siteId, const QList<BTResul
             }
             excludedLayout->addStretch();
             contentLayout->addWidget(excludedContainer);
-            connect(toggleCheck, &QCheckBox::toggled, [excludedContainer](bool checked) {excludedContainer->setVisible(checked);});
+            connect(toggleCheck, &QCheckBox::toggled, [excludedContainer](const bool checked) {excludedContainer->setVisible(checked);});
         }
     }
     contentLayout->addStretch();
@@ -315,7 +319,7 @@ QFrame* PlayerPage::createRouteComponent(const QString &siteId, const QJsonObjec
     frame->setStyleSheet("QFrame {border: 1px solid #e0e0e0; border-radius: 4px; margin: 2px; background-color: white}"
                          "QFrame:hover {border: 1px solid #4da6ff; background-color: #e8f4ff}");
     auto *layout = new QVBoxLayout(frame);
-    auto makeLabel = [](const QString &text, int size, const QString &color, bool bold) -> QLabel* {
+    auto makeLabel = [](const QString &text, const int size, const QString &color, const bool bold) -> QLabel* {
         auto *label = new QLabel(text);
         label->setFont(QFont("微软雅黑", size, bold ? QFont::Bold : QFont::Normal));
         label->setStyleSheet(QString("color: %1; background-color: transparent; border: none; text-align: left").arg(color));
@@ -338,7 +342,7 @@ QFrame* PlayerPage::createBTResultComponent(const BTResult &result)
                          "QFrame:hover {border: 1px solid #4caf50; background-color: #e8f5e9}");
     auto *layout = new QVBoxLayout(frame);
     layout->setSpacing(5);
-    auto addLabel = [layout](const QString &text, int fontSize, const QString &color, bool bold = false, bool expand = false) {
+    auto addLabel = [layout](const QString &text, const int fontSize, const QString &color, const bool bold = false, const bool expand = false) {
         if (text.isEmpty()) return;
         auto *label = new QLabel(text);
         QFont font("微软雅黑", fontSize);
@@ -365,7 +369,7 @@ bool PlayerPage::eventFilter(QObject *watched, QEvent *event)
         return true;
     }
     if (event->type() == QEvent::MouseButtonPress) {
-        if (auto *frame = qobject_cast<QFrame*>(watched)) {
+        if (const auto *frame = qobject_cast<QFrame*>(watched)) {
             if (frame->dynamicPropertyNames().contains("magnet")) {
                 onBTResultClicked(frame->property("magnet").toString(), frame->property("play").toString());
                 return true;
@@ -380,10 +384,10 @@ bool PlayerPage::eventFilter(QObject *watched, QEvent *event)
 void PlayerPage::onRouteSelected(const QString &siteId, const QJsonObject &route) const
 {   // 解析并播放
     vlcPlayer->stop();
-    int episodeIndex = static_cast<int>(m_episodeData.sort) - 1;
+    const int episodeIndex = static_cast<int>(m_episodeData.sort) - 1;
     QJsonArray episodes = route["episodes"].toArray();
     if (episodes.isEmpty() || episodeIndex < 0 || episodeIndex >= episodes.size()) return;
-    QString episodeUrl = episodes[episodeIndex].toObject()["link"].toString();
+    const QString episodeUrl = episodes[episodeIndex].toObject()["link"].toString();
     if (episodeUrl.isEmpty()) return;
     Crawler::processVideoUrl(siteId, episodeUrl, [this](const QString &videoUrl) {
         qDebug() << videoUrl;
@@ -428,7 +432,7 @@ void PlayerPage::onBTResultClicked(const QString &magnet, const QString &playLin
         QNetworkReply *reply = manager->get(request);
         connect(reply, &QNetworkReply::finished, [=] {
             if (reply->error() == QNetworkReply::NoError) {
-                QUrl finalUrl = reply->url();
+                const QUrl finalUrl = reply->url();
                 QString finalUrlStr = finalUrl.toString();
                 if (finalUrlStr.contains("?act=play")) finalUrlStr = finalUrlStr.left(finalUrlStr.indexOf("?act=play"));
                 redirectLabel->setText(QString("PikPak链接: %1").arg(finalUrlStr));
@@ -442,7 +446,7 @@ void PlayerPage::onBTResultClicked(const QString &magnet, const QString &playLin
     detectRedirect();
     // 保存到PikPak
     connect(pikpakBtn, &QPushButton::clicked, [=] {
-        QString finalUrl = pikpakBtn->property("finalUrl").toString();
+        const QString finalUrl = pikpakBtn->property("finalUrl").toString();
         pikpakBtn->setText("转存中...");
         pikpakBtn->setEnabled(false);
         if (pikpakApi->transferShareLink(finalUrl, "")) pikpakBtn->setText("转存成功");
@@ -453,7 +457,7 @@ void PlayerPage::onBTResultClicked(const QString &magnet, const QString &playLin
 }
 
 void PlayerPage::toggleFullscreen()
-{
+{   // 全屏切换
     if (!fullscreen_mode) {
         window()->hide();
         fullscreen_mode = true;
@@ -474,7 +478,7 @@ void PlayerPage::toggleFullscreen()
 void PlayerPage::clearLayout(QLayout *layout)
 {   // 清理布局
     if (!layout) return;
-    while (QLayoutItem *item = layout->takeAt(0)) {
+    while (const QLayoutItem *item = layout->takeAt(0)) {
         if (QWidget *widget = item->widget()) widget->deleteLater();
         delete item;
     }
@@ -483,7 +487,7 @@ void PlayerPage::clearLayout(QLayout *layout)
 void PlayerPage::cleanupPage()
 {   // 清理
     vlcPlayer->stop();
-    QWidget *container = ui.scrollAreaWidgetContents;
+    const QWidget *container = ui.scrollAreaWidgetContents;
     if (QLayout *oldLayout = container->layout()) {
         clearLayout(oldLayout);
         delete oldLayout;

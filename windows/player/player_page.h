@@ -54,7 +54,7 @@ private:
     PikPakApi *pikpakApi = nullptr;
     VLCPlayer *vlcPlayer = nullptr;
     ControlOverlay *controlOverlay = nullptr;
-    QJsonObject currentEpisode;
+    QMap<QString, int> siteDetailTabIndex;
     QMap<QString, QWidget*> siteWidgets;
     QMap<QString, QFrame*> siteDetailFrames;
     QTabWidget *detailTabWidget = nullptr;
