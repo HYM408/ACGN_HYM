@@ -4,9 +4,9 @@
 #include <QScopedPointer>
 #include <libxml/xpath.h>
 
-struct XmlDocDeleter {static void cleanup(xmlDocPtr d) {if (d) xmlFreeDoc(d);}};
-struct XmlXPathCtxDeleter {static void cleanup(xmlXPathContextPtr c) {if (c) xmlXPathFreeContext(c);}};
-struct XmlXPathObjDeleter {static void cleanup(xmlXPathObjectPtr o) {if (o) xmlXPathFreeObject(o);}};
+struct XmlDocDeleter {static void cleanup(const xmlDocPtr d) {if (d) xmlFreeDoc(d);}};
+struct XmlXPathCtxDeleter {static void cleanup(const xmlXPathContextPtr c) {if (c) xmlXPathFreeContext(c);}};
+struct XmlXPathObjDeleter {static void cleanup(const xmlXPathObjectPtr o) {if (o) xmlXPathFreeObject(o);}};
 using XmlDocPtr = QScopedPointer<xmlDoc, XmlDocDeleter>;
 using XmlXPathContextPtr = QScopedPointer<xmlXPathContext, XmlXPathCtxDeleter>;
 using XmlXPathObjectPtr = QScopedPointer<xmlXPathObject, XmlXPathObjDeleter>;

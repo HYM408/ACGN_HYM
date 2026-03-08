@@ -172,7 +172,7 @@ void EpisodeOverlay::loadEpisodesData()
         return;
     }
     const QPointer guard(this);
-    const QJsonArray apiEpisodes = bangumiAPI->getSubjectEpisodes(subjectId);
+    const QJsonArray apiEpisodes = bangumiAPI->getSubjectEpisodes(subjectId, 3);
     if (!apiEpisodes.isEmpty()) DatabaseManager::insertManyEpisodes(subjectId, apiEpisodes);
     if (!guard) return;
     if (!apiEpisodes.isEmpty()) {
@@ -195,7 +195,7 @@ void EpisodeOverlay::loadVolEpData()
 {   // 加载卷话数据
     auto *container = new QWidget(episodeContainer);
     auto *vLayout = new QVBoxLayout(container);
-    auto createField = [&](const QString &label, int value, int total, QLineEdit* &editPtr) {
+    auto createField = [&](const QString &label, const int value, const int total, QLineEdit* &editPtr) {
         auto *hLayout = new QHBoxLayout;
         hLayout->setSpacing(28);
         auto *labelWidget = new QLabel(label);
@@ -260,7 +260,7 @@ void EpisodeOverlay::onMarkAllWatchedClicked()
     for (const auto &ep : episodes) episodeIds.append(ep.id);
     const QJsonObject apiRequestData{{"episode_id", episodeIds}, {"type", 2}};
     const QPointer guard(this);
-    const bool success = bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData);
+    const bool success = bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData, 3);
     if (!success) return;
     DatabaseManager::updateAllEpisodesStatus(subjectId, 2);
     DatabaseManager::updateCollectionFields(subjectId, {{"ep_status", episodes.size()}}, true);
@@ -280,7 +280,7 @@ void EpisodeOverlay::onUpdateClicked()
     int newVolStatus = volEdit->text().toInt();
     const QJsonObject apiRequestData{{"vol_status", newVolStatus}, {"ep_status", newEpStatus}};
     const QPointer guard(this);
-    const bool success = bangumiAPI->updateCollection(subjectId, apiRequestData);
+    const bool success = bangumiAPI->updateCollection(subjectId, apiRequestData, 3);
     if (!success) return;
     DatabaseManager::updateCollectionFields(subjectId, {{"vol_status", newVolStatus}, {"ep_status", newEpStatus}}, true);
     if (!guard) return;

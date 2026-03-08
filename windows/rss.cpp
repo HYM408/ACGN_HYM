@@ -32,14 +32,14 @@ void Rss::updateRSS()
     QNetworkRequest request(QUrl(baseUrl % "feed/user/" % userId % "/timeline?type=subject"));
     request.setHeader(QNetworkRequest::UserAgentHeader, "ACGN_HYM/1.0");
     request.setRawHeader("Authorization", "Bearer " + token.toUtf8());
-    QString content = sendRequestHtml(netManager, request, "GET", {}, 3, nullptr, nullptr);
-    QString newGuid = guidPattern.match(content).captured(1);
+    const QString content = sendRequestHtml(netManager, request, "GET", {}, 3, nullptr, nullptr);
+    const QString newGuid = guidPattern.match(content).captured(1);
     if (newGuid == "") return;
     if (oldGuid == "0") {
         setConfig("Bangumi/rss_guid", newGuid);
         qDebug() << "RSS: 首次获取";
     } else if (oldGuid != newGuid) {
-        const QJsonArray collections = api->getUserCollections(false, 3);
+        const QJsonArray collections = api->getUserCollections(false, 3, nullptr);
         DatabaseManager::insertManyCollectionData(collections);
         setConfig("Bangumi/rss_guid", newGuid);
         qDebug() << "RSS: 更新完成";

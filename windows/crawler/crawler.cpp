@@ -39,8 +39,8 @@ QList<SearchResult> Crawler::extractSearchResults(const QString &site_id, const 
     QJsonObject config = loadSiteConfig(site_id);
     QStringList titles = XmlUtil::xpath(XmlUtil::parseHtml(html).data(), config["title"].toString());
     QStringList links = XmlUtil::xpath(XmlUtil::parseHtml(html).data(), config["link"].toString());
-    QString baseUrl = config["base_url"].toString();
-    qsizetype count = qMin(titles.size(), links.size());
+    const QString baseUrl = config["base_url"].toString();
+    const qsizetype count = qMin(titles.size(), links.size());
     for (int i = 0; i < count; ++i) {
         SearchResult sr;
         sr.title = titles[i].trimmed();
@@ -55,17 +55,17 @@ QList<RouteInfo> Crawler::getRoutes(const QString &page_url, const QString &site
 {   // 线路和集数
     QList<RouteInfo> routes;
     QJsonObject config = loadSiteConfig(site_id);
-    QString html = sendRequest(page_url, abortFlag);
+    const QString html = sendRequest(page_url, abortFlag);
     if (html.isEmpty()) return routes;
-    auto doc = XmlUtil::parseHtml(html);
+    const auto doc = XmlUtil::parseHtml(html);
     QStringList routeNames = XmlUtil::xpath(doc.data(), config["route_tabs"].toString());
     QList<xmlNodePtr> containers = XmlUtil::xpathNodes(doc.data(), config["episode_containers"].toString());
-    qsizetype routeCount = qMin(routeNames.size(), containers.size());
+    const qsizetype routeCount = qMin(routeNames.size(), containers.size());
     for (int i = 0; i < routeCount; ++i) {
         RouteInfo ri;
         ri.route = routeNames[i].replace("&nbsp;", " ").trimmed();
         QList<xmlNodePtr> episodeNodes = XmlUtil::xpathNodes(containers[i], config["episode_items"].toString());
-        for (xmlNodePtr node : episodeNodes) {
+        for (const xmlNodePtr node : episodeNodes) {
             EpisodeInfo ep;
             ep.name = XmlUtil::nodeContent(node).trimmed();
             QString href = XmlUtil::nodeAttribute(node, "href");
@@ -81,11 +81,11 @@ QList<SearchResult> Crawler::searchSite(const QString &site_id, const QString &k
 {   // 搜索
     QList<SearchResult> results;
     QJsonObject config = loadSiteConfig(site_id);
-    QString baseUrl = config["base_url"].toString();
+    const QString baseUrl = config["base_url"].toString();
     QString searchPath = config["search_path"].toString();
     searchPath.replace("{keyword}", keyword);
-    QString url = XmlUtil::joinUrl(baseUrl, searchPath);
-    QString html = sendRequest(url, abortFlag);
+    const QString url = XmlUtil::joinUrl(baseUrl, searchPath);
+    const QString html = sendRequest(url, abortFlag);
     if (html.isEmpty()) return results;
     QList<SearchResult> searchResults = extractSearchResults(site_id, html);
     for (SearchResult &result : searchResults) {
@@ -113,11 +113,11 @@ QList<SearchResult> Crawler::searchSite(const QString &site_id, const QString &k
 void Crawler::processVideoUrl(const QString &site_id, const QString &url, const std::function<void(const QString&)> &callback, const AbortFlag &abortFlag)
 {   // 获取视频链接
     qDebug() << url;
-    QJsonValue video_type = loadSiteConfig(site_id)["video_type"];
+    const QJsonValue video_type = loadSiteConfig(site_id)["video_type"];
     if (video_type.isNull()) return callback(url);
     if (video_type.isDouble()) {
-        int type = video_type.toInt();
-        QString videoUrl = extractVideoUrl(url, abortFlag);
+        const int type = video_type.toInt();
+        const QString videoUrl = extractVideoUrl(url, abortFlag);
         if (type == 1) return callback(QUrl::fromPercentEncoding(QByteArray::fromBase64(videoUrl.toLatin1())));
         return callback(videoUrl);
     }
@@ -129,9 +129,9 @@ QString Crawler::extractVideoUrl(const QString &url, const AbortFlag &abortFlag)
 {   // 分析视频链接(video_type整数)
     QString html = sendRequest(url, abortFlag);
     if (html.isEmpty()) return {};
-    qsizetype pos = html.indexOf("player_aaaa");
+    const qsizetype pos = html.indexOf("player_aaaa");
     if (pos < 0) return {};
-    qsizetype braceStart = html.indexOf('{', pos + 11);
+    const qsizetype braceStart = html.indexOf('{', pos + 11);
     if (braceStart < 0) return {};
     int level = 0;
     qsizetype endPos = -1;
@@ -150,7 +150,7 @@ void Crawler::videoStreamDetector(const QString &site_id, const QString &url, co
 {   // 浏览器获取视频链接
     auto *proc = new QProcess;
     QObject::connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), [proc, onVideoUrl](int, QProcess::ExitStatus) {
-        QByteArray output = proc->readAllStandardOutput();
+        const QByteArray output = proc->readAllStandardOutput();
         for (const auto& line : output.split('\n')) {
             if (line.startsWith("VIDEO_URL:")) {
                 onVideoUrl(QString::fromUtf8(line.mid(10).trimmed()));
@@ -170,12 +170,12 @@ QList<BTResult> Crawler::searchBT(const QString &site_id, const QString &keyword
 {   // BT搜索
     QList<BTResult> results;
     const QJsonObject config = loadBTConfig(site_id);
-    QString url = XmlUtil::joinUrl(config["base_url"].toString(), config["search_path"].toString().replace("{keyword}", keyword));
-    QString html = sendRequest(url, abortFlag);
+    const QString url = XmlUtil::joinUrl(config["base_url"].toString(), config["search_path"].toString().replace("{keyword}", keyword));
+    const QString html = sendRequest(url, abortFlag);
     if (html.isEmpty()) return results;
-    auto doc = XmlUtil::parseHtml(html);
+    const auto doc = XmlUtil::parseHtml(html);
     QList<xmlNodePtr> rows = XmlUtil::xpathNodes(doc.data(), config["row_selector"].toString());
-    for (xmlNodePtr row : rows) {
+    for (const xmlNodePtr row : rows) {
         BTResult res;
         auto nameNodes = XmlUtil::xpathNodes(row, config["name_selector"].toString());
         if (!nameNodes.isEmpty()) res.name = XmlUtil::nodeContent(nameNodes[0]).trimmed();
@@ -194,12 +194,12 @@ QList<SearchResult> Crawler::searchAPI(const QString &site_id, const QString &ke
 {   // API搜索
     QList<SearchResult> results;
     QJsonObject config = loadAPIConfig(site_id);
-    QString searchUrl = config["search_api"].toString().replace("{keyword}", keyword);
+    const QString searchUrl = config["search_api"].toString().replace("{keyword}", keyword);
     QJsonArray rows = QJsonDocument::fromJson(sendRequest(searchUrl, abortFlag).toUtf8()).object()["info"].toObject()["rows"].toArray();
     if (rows.isEmpty()) return results;
     QString detailApi = config["detail_api"].toString();
     for (const auto &val : rows) {
-        int vod_id = val.toObject()["vod_id"].toInt();
+        const int vod_id = val.toObject()["vod_id"].toInt();
         QJsonObject info = QJsonDocument::fromJson(sendRequest(QString(detailApi).replace("{vod_id}", QString::number(vod_id)), abortFlag).toUtf8()).object()["info"].toObject();
         if (info.isEmpty()) continue;
         SearchResult sr;

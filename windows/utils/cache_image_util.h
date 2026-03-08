@@ -11,7 +11,7 @@ class CacheImageUtil : public QObject
 
 public:
     explicit CacheImageUtil(QObject *parent = nullptr);
-    void getImageAsync(const QString &url, const ImageCallback& callback, bool cacheToLocal = true);
+    void getImageAsync(const QString &url, const ImageCallback& callback, bool cacheToLocal);
     void clearPendingDownloads();
 
 signals:

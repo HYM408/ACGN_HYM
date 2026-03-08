@@ -81,8 +81,8 @@ void VLCPlayer::paintEvent(QPaintEvent* event)
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
     painter.fillRect(rect(), Qt::black);
     if (!current_frame.isNull()) {
-        QPixmap pixmap = QPixmap::fromImage(current_frame);
-        QPixmap scaled = pixmap.scaled(this->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        const QPixmap pixmap = QPixmap::fromImage(current_frame);
+        const QPixmap scaled = pixmap.scaled(this->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         painter.drawPixmap((width() - scaled.width()) / 2, (height() - scaled.height()) / 2, scaled);
     }
 }
@@ -116,7 +116,7 @@ void VLCPlayer::onVlcEvent(const libvlc_event_t* event, void* userData)
     else if (event->type == libvlc_MediaPlayerAudioVolume) emit player->volumeChanged(qRound(event->u.media_player_audio_volume.volume * 100.0f));
 }
 
-void VLCPlayer::setPosition(float position) const
+void VLCPlayer::setPosition(const float position) const
 {   // 设置播放位置 (0.0 ~ 1.0)
     if (media_player) libvlc_media_player_set_position(media_player, position);
 }
@@ -127,7 +127,7 @@ std::pair<int, int> VLCPlayer::getTimeInfo() const
     return {static_cast<int>(libvlc_media_player_get_time(media_player)), static_cast<int>(libvlc_media_player_get_length(media_player))};
 }
 
-void VLCPlayer::setVolume(int volume) const
+void VLCPlayer::setVolume(const int volume) const
 {   // 设置音量 (0 ~ 100)
     if (media_player) libvlc_audio_set_volume(media_player, volume);
 }
@@ -137,7 +137,7 @@ int VLCPlayer::getVolume() const
     return media_player ? libvlc_audio_get_volume(media_player) : 50;
 }
 
-void VLCPlayer::setPlaybackRate(float rate) const
+void VLCPlayer::setPlaybackRate(const float rate) const
 {   // 设置播放速度
     if (media_player) libvlc_media_player_set_rate(media_player, rate);
 }

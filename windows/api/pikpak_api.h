@@ -2,7 +2,9 @@
 #define PIKPAK_API_H
 
 #include <QJsonObject>
-#include <QNetworkReply>
+
+class QNetworkRequest;
+class QNetworkAccessManager;
 
 class PikPakApi : public QObject
 {
@@ -10,18 +12,19 @@ class PikPakApi : public QObject
 
 public:
     explicit PikPakApi(QObject *parent = nullptr);
+    void getInformation();
     bool loginPikPak();
     void refreshAccessToken();
-    QJsonObject captchaInit(const QString &action, QJsonObject meta = {});
+    QJsonObject captchaInit(const QString &action, QJsonObject meta);
     QJsonObject getRecentFiles();
     QJsonObject getDownloadUrl(const QString &fileId);
-    QJsonObject getShareInfo(const QString &shareId, const QString &parentId = QString(), const QString &passCode = QString());
+    QJsonObject getShareInfo(const QString &shareId, const QString &parentId, const QString &passCode);
     QJsonObject restoreShare(const QString &shareId, const QString &passCodeToken, const QStringList &fileIds);
     bool transferShareLink(const QString &shareLink, const QString &passCode);
     QJsonObject getFileList(const QString& parentId, int limit, const QString& pageToken);
 
 private:
-    QJsonObject sendRequest(QNetworkAccessManager &manager, QNetworkRequest &request, const QString &method = "GET", const QByteArray &data = QByteArray(), int maxRetries = 3, int *statusCode = nullptr);
+    QJsonObject sendRequest(QNetworkAccessManager &manager, QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, int *statusCode);
     QString username;
     QString password;
     QString accessToken;

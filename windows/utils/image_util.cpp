@@ -4,29 +4,32 @@
 #include <QPainterPath>
 #include "cache_image_util.h"
 
-QPixmap ImageUtil::createRoundedPixmap(const QPixmap& pixmap, int radius, bool allCorners)
+QPixmap ImageUtil::createRoundedPixmap(const QPixmap& pixmap, const int radius, const bool allCorners)
 {   // 图片圆角
     QPixmap result(pixmap.size());
     result.fill(Qt::transparent);
     QPainter painter(&result);
     painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     QPainterPath path;
-    const int w = pixmap.width();
-    const int h = pixmap.height();
-    const int d = 2 * radius;
-    path.moveTo(radius, 0);
-    path.lineTo(w, 0);
-    path.lineTo(w, h);
-    path.lineTo(radius, h);
-    path.arcTo(0, h - d, d, d, 270, -90);
-    path.arcTo(0, 0, d, d, 180, -90);
-    path.closeSubpath();
+    if (allCorners) path.addRoundedRect(0, 0, pixmap.width(), pixmap.height(), radius, radius);
+    else {
+        const int w = pixmap.width();
+        const int h = pixmap.height();
+        const int d = 2 * radius;
+        path.moveTo(radius, 0);
+        path.lineTo(w, 0);
+        path.lineTo(w, h);
+        path.lineTo(radius, h);
+        path.arcTo(0, h - d, d, d, 270, -90);
+        path.arcTo(0, 0, d, d, 180, -90);
+        path.closeSubpath();
+    }
     painter.setClipPath(path);
     painter.drawPixmap(0, 0, pixmap);
     return result;
 }
 
-void ImageUtil::loadImageWithCache(CacheImageUtil* cacheImageUtil, const QString& url, QLabel* label, int radius, bool allCorners, bool cacheToLocal)
+void ImageUtil::loadImageWithCache(CacheImageUtil* cacheImageUtil, const QString& url, QLabel* label, int radius, bool allCorners, const bool cacheToLocal)
 {   // 加载图片
     auto onLoaded = [label, radius, allCorners](const QPixmap& pixmap) {
         QPixmap processed = pixmap;

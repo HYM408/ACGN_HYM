@@ -31,7 +31,7 @@ private slots:
 
 private:
     void setupConnections();
-    void doSearch(const QString &keyword = "", const QString &tag = "");
+    void doSearch(const QString &keyword, const QString &tag);
     void clearSearchResults();
     void showSearchStatus(const QString &text);
     QFrame *createResultFrame(const QVariantMap &result);

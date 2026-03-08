@@ -311,7 +311,6 @@ public:
         login_Button = new QPushButton(Frame_3);
         login_Button->setObjectName("login_Button");
         login_Button->setMinimumSize(QSize(76, 0));
-        login_Button->setMaximumSize(QSize(76, 16777215));
         QFont font6;
         font6.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font6.setPointSize(13);
@@ -322,7 +321,6 @@ public:
         collection_Button = new QPushButton(Frame_3);
         collection_Button->setObjectName("collection_Button");
         collection_Button->setMinimumSize(QSize(76, 0));
-        collection_Button->setMaximumSize(QSize(76, 16777215));
         collection_Button->setFont(font6);
 
         verticalLayout_4->addWidget(collection_Button, 0, Qt::AlignmentFlag::AlignLeft);

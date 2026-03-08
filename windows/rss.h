@@ -8,6 +8,7 @@ class BangumiAPI;
 class Rss : public QObject
 {
     Q_OBJECT
+
 public:
     explicit Rss(BangumiAPI *api, QObject *parent = nullptr);
     void startRSS();

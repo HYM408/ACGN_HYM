@@ -38,7 +38,7 @@ public slots:
     void onSearchTextChanged(const QString &text);
     void previousPage();
     void nextPage();
-    void loadCollections(int subjectType, int statusType, bool resetToFirstPage = true);
+    void loadCollections(int subjectType, int statusType, bool resetToFirstPage);
 
 private:
     struct StatusFrameInfo {

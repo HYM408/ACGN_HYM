@@ -54,14 +54,14 @@ void MainPageManager::setupConnections()
 bool MainPageManager::eventFilter(QObject *obj, QEvent *event)
 {   // 鼠标事件
     if (obj->property("isCard").toBool() && event->type() == QEvent::MouseButtonPress) {
-        auto *frame = qobject_cast<QFrame*>(obj);
-        auto *progressLabel = frame->property("progressLabel").value<QLabel*>();
+        const auto *frame = qobject_cast<QFrame*>(obj);
+        const auto *progressLabel = frame->property("progressLabel").value<QLabel*>();
         showDetailPage(frame->property("collectionData").value<CollectionData>(), progressLabel ? progressLabel->text() : QString());
         return true;
     }
     for (auto &[statusType, info] : statusFrames.toStdMap()) {
         if (info.frame == obj) {
-            QString baseStyle = statusType == currentStatusType ? ";border-bottom: 3px solid rgb(103, 79, 165)" : "";
+            const QString baseStyle = statusType == currentStatusType ? ";border-bottom: 3px solid rgb(103, 79, 165)" : "";
             if (event->type() == QEvent::Enter) {
                 info.frame->setStyleSheet(QString("QFrame{background-color: rgba(103, 79, 165, 30)%1}").arg(baseStyle));
                 return true;
@@ -79,7 +79,7 @@ bool MainPageManager::eventFilter(QObject *obj, QEvent *event)
     return QObject::eventFilter(obj, event);
 }
 
-void MainPageManager::switchCategory(int subjectType, const QString &title)
+void MainPageManager::switchCategory(const int subjectType, const QString &title)
 {   // 类别切换
     emit showMainPageRequested();
     mainWindow->project_Button->setText(title);
@@ -100,21 +100,21 @@ void MainPageManager::onSearchTextChanged(const QString &text)
     displayCurrentPage();
 }
 
-void MainPageManager::loadCollections(int subjectType, int statusType, bool resetToFirstPage)
+void MainPageManager::loadCollections(const int subjectType, const int statusType, const bool resetToFirstPage)
 {   // 加载数据
-    bool typeChanged = subjectType != currentSubjectType || statusType != currentStatusType;
+    const bool typeChanged = subjectType != currentSubjectType || statusType != currentStatusType;
     QString oldSearchText;
     if (!typeChanged) oldSearchText = mainWindow->searchlist_lineEdit->text();
     currentSubjectType = subjectType;
     currentStatusType = statusType;
     const auto &statusMap = statusNamesMap[subjectType];
-    QJsonObject statusCounts = DatabaseManager::getStatusCountsBySubjectType(subjectType);
+    const QJsonObject statusCounts = DatabaseManager::getStatusCountsBySubjectType(subjectType);
     for (int i = 1; i <= 3; ++i) statusFrames[i].statusButton->setText(statusMap[i]);
     for (auto &[key, info] : statusFrames.toStdMap()) {
-        int count = statusCounts.value(QString::number(key)).toInt();
+        const int count = statusCounts.value(QString::number(key)).toInt();
         info.countButton->setText(QString::number(count));
-        bool isHovered = info.frame->underMouse();
-        bool selected = key == statusType;
+        const bool isHovered = info.frame->underMouse();
+        const bool selected = key == statusType;
         QString backgroundColor = isHovered ? "rgba(103, 79, 165, 30)" : "transparent";
         QString borderStyle = selected ? ";border-bottom: 3px solid rgb(103, 79, 165)" : "";
         info.frame->setStyleSheet(QString("QFrame{background-color: %1%2}").arg(backgroundColor, borderStyle));
@@ -144,15 +144,15 @@ void MainPageManager::loadCollections(int subjectType, int statusType, bool rese
 void MainPageManager::displayCurrentPage()
 {   // 显示标签
     clearDisplayArea();
-    auto layout = mainWindow->gridLayout_2;
+    const auto layout = mainWindow->gridLayout_2;
     layout->setColumnMinimumWidth(0, 420);
     layout->setColumnMinimumWidth(1, 420);
     layout->setColumnMinimumWidth(2, 420);
     layout->setVerticalSpacing(20);
     layout->setHorizontalSpacing(40);
     layout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-    int start = (currentPage - 1) * itemsPerPage;
-    int dataCount = static_cast<int>(qMin(itemsPerPage, filteredCollections.size() - start));
+    const int start = (currentPage - 1) * itemsPerPage;
+    const int dataCount = static_cast<int>(qMin(itemsPerPage, filteredCollections.size() - start));
     for (int i = 0; i < dataCount; ++i) {
         CardComponents card;
         createCardComponents(card, filteredCollections[start + i]);
@@ -160,7 +160,7 @@ void MainPageManager::displayCurrentPage()
         card.card->show();
     }
     for (int i = 0; i < 3 * ((dataCount + 2) / 3) - dataCount; ++i) {
-        auto placeholder = new QWidget();
+        const auto placeholder = new QWidget();
         placeholder->setFixedSize(420, 170);
         placeholder->setStyleSheet("background-color: transparent");
         placeholder->setProperty("isPlaceholder", true);
@@ -238,10 +238,10 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
                                           "QPushButton:hover {background-color: rgb(216, 207, 232)}");
     // 连接信号
     connect(card.moreButton, &QPushButton::clicked, this, [this, card]() mutable {
-        auto data = card.card->property("collectionData").value<CollectionData>();
+        const auto data = card.card->property("collectionData").value<CollectionData>();
         StatusSelector::showStatusSelector(card.moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, dbManager, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);}, -37);});
     connect(card.episodeButton, &QPushButton::clicked, this, [this, card]() mutable {
-        auto data = card.card->property("collectionData").value<CollectionData>();
+        const auto data = card.card->property("collectionData").value<CollectionData>();
         if (data.subject_type == 4) showDetailPage(data, card.progressLabel->text());
         else showEpisodePage(data);
     });
@@ -249,8 +249,8 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
 
 void MainPageManager::clearDisplayArea()
 {   // 清理布局
-    auto layout = mainWindow->gridLayout_2;
-    while (QLayoutItem *item = layout->takeAt(0)) {
+    const auto layout = mainWindow->gridLayout_2;
+    while (const QLayoutItem *item = layout->takeAt(0)) {
         item->widget()->deleteLater();
         delete item;
     }
@@ -259,7 +259,7 @@ void MainPageManager::clearDisplayArea()
 
 void MainPageManager::updatePageInfo() const
 {   // 分页
-    int totalPages = static_cast<int>(qMax(1LL, (filteredCollections.size() + itemsPerPage - 1) / itemsPerPage));
+    const int totalPages = static_cast<int>(qMax(1LL, (filteredCollections.size() + itemsPerPage - 1) / itemsPerPage));
     mainWindow->pages_Button->setText(QString("%1/%2").arg(currentPage).arg(totalPages));
     mainWindow->previous_Button->setEnabled(currentPage > 1);
     mainWindow->next_Button->setEnabled(currentPage < totalPages);
@@ -276,7 +276,7 @@ void MainPageManager::previousPage()
 
 void MainPageManager::nextPage()
 {   // 下一页
-    int totalPages = static_cast<int>(qMax(1, (filteredCollections.size() + itemsPerPage - 1) / itemsPerPage));
+    const int totalPages = static_cast<int>(qMax(1, (filteredCollections.size() + itemsPerPage - 1) / itemsPerPage));
     if (currentPage < totalPages) {
         cacheImageUtil->clearPendingDownloads();
         ++currentPage;

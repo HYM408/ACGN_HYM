@@ -7,7 +7,7 @@
 #include <QMouseEvent>
 #include <QRegularExpression>
 
-ClickableSlider::ClickableSlider(Qt::Orientation orientation, int thresholdPercent, QWidget *parent): QSlider(orientation, parent), thresholdPercent(thresholdPercent) {setMouseTracking(true);}
+ClickableSlider::ClickableSlider(const Qt::Orientation orientation, const int thresholdPercent, QWidget *parent): QSlider(orientation, parent), thresholdPercent(thresholdPercent) {setMouseTracking(true);}
 
 double ClickableSlider::calculateValueFromPos(const QPoint &pos) const
 {   // 计算滑块对应值
@@ -21,11 +21,11 @@ double ClickableSlider::calculateValueFromPos(const QPoint &pos) const
 
 void ClickableSlider::mousePressEvent(QMouseEvent *event)
 {   // 点击滑块直接跳转
-    double value = calculateValueFromPos(event->pos());
-    int threshold = maximum() * thresholdPercent / 100;
+    const double value = calculateValueFromPos(event->pos());
+    const int threshold = maximum() * thresholdPercent / 100;
     if (qAbs(value - this->value()) <= threshold) QSlider::mousePressEvent(event);
     else {
-        int intValue = qRound(value);
+        const int intValue = qRound(value);
         setValue(intValue);
         emit clicked(intValue);
         event->accept();
@@ -35,8 +35,8 @@ void ClickableSlider::mousePressEvent(QMouseEvent *event)
 void ClickableSlider::mouseMoveEvent(QMouseEvent *event)
 {   // 保持滑块默认的鼠标移动行为
     QSlider::mouseMoveEvent(event);
-    double value = calculateValueFromPos(event->pos());
-    double fraction = value / maximum();
+    const double value = calculateValueFromPos(event->pos());
+    const double fraction = value / maximum();
     emit hoverTime(fraction, event->pos().x());
 }
 
@@ -146,7 +146,7 @@ void ControlOverlay::setupUi()
                            "QMenu::item { color: white; padding: 6px 16px; font-size: 12px}"
                            "QMenu::item:selected { background-color: rgba(80, 80, 80, 255)}");
         for (int i = 0; i < PLAYBACK_RATES.size(); ++i) {
-            double rate = PLAYBACK_RATES[i];
+            const double rate = PLAYBACK_RATES[i];
             QString rateStr = QString::number(rate, 'f', 2);
             rateStr.replace(QRegularExpression("0+$"), "").replace(QRegularExpression("\\.$"), "");
             QAction *action = menu.addAction(rateStr + "x");
@@ -175,7 +175,7 @@ void ControlOverlay::setupTimers()
     connect(clickTimer, &QTimer::timeout, this, &ControlOverlay::playPauseRequested);
 }
 
-QPushButton* ControlOverlay::createControlButton(const QString &iconPath, int iconSize, void (ControlOverlay::*signal)())
+QPushButton* ControlOverlay::createControlButton(const QString &iconPath, const int iconSize, void (ControlOverlay::*signal)())
 {   // 创建控制按钮
     auto *btn = new QPushButton(this);
     btn->setFixedSize(28, 28);
@@ -188,37 +188,37 @@ QPushButton* ControlOverlay::createControlButton(const QString &iconPath, int ic
 
 void ControlOverlay::updatePlaybackRateButtonText() const
 {   // 播放速度按钮文本
-    double rate = PLAYBACK_RATES[currentPlaybackRateIndex];
+    const double rate = PLAYBACK_RATES[currentPlaybackRateIndex];
     QString rateStr = QString::number(rate, 'f', 2);
     rateStr.replace(QRegularExpression("0+$"), "").replace(QRegularExpression("\\.$"), "");
     playbackRateButton->setText(rateStr + "x");
 }
 
-void ControlOverlay::onPlaybackRateSelected(int index)
+void ControlOverlay::onPlaybackRateSelected(const int index)
 {   // 选择播放速度
     if (index == currentPlaybackRateIndex) return;
     currentPlaybackRateIndex = index;
     updatePlaybackRateButtonText();
     emit playbackRateChanged(PLAYBACK_RATES[index]);
-    showControls();
+    showControls(true);
 }
 
-void ControlOverlay::setPlayState(bool playing)
+void ControlOverlay::setPlayState(const bool playing)
 {   // 播放状态
     if (isPlaying == playing) return;
     isPlaying = playing;
     updatePlayButtonIcon();
     hideTimer->stop();
-    if (isPlaying) showControls();
+    if (isPlaying) showControls(true);
     else showControls(false);
 }
 
-void ControlOverlay::setProgress(double position) const
+void ControlOverlay::setProgress(const double position) const
 {   // 设置进度条
     if (!draggingProgress) progressSlider->setValue(static_cast<int>(position * PROGRESS_MAX_VALUE));
 }
 
-void ControlOverlay::setTime(int currentSeconds, int totalSeconds)
+void ControlOverlay::setTime(const int currentSeconds, const int totalSeconds)
 {   // 时间
     if (!draggingProgress) {
         currentTime = currentSeconds;
@@ -227,12 +227,12 @@ void ControlOverlay::setTime(int currentSeconds, int totalSeconds)
     }
 }
 
-void ControlOverlay::setVolume(int volume) const
+void ControlOverlay::setVolume(const int volume) const
 {   // 设置音量
     if (!draggingVolume) volumeSlider->setValue(volume);
 }
 
-void ControlOverlay::showControls(bool startTimer)
+void ControlOverlay::showControls(const bool startTimer)
 {   // 显示控制面板
     if (!isVisible) {
         isVisible = true;
@@ -256,9 +256,9 @@ void ControlOverlay::hideControls()
 void ControlOverlay::mouseMoveEvent(QMouseEvent *event)
 {   // 鼠标移动事件
     QWidget::mouseMoveEvent(event);
-    QPoint pos = event->pos();
+    const QPoint pos = event->pos();
     if (!isInControlArea(pos)) {
-        if (!isVisible) showControls();
+        if (!isVisible) showControls(true);
         else if (isPlaying && !draggingProgress && !draggingVolume) hideTimer->start(HIDE_DELAY);
     } else {
         hideTimer->stop();
@@ -270,10 +270,10 @@ void ControlOverlay::mousePressEvent(QMouseEvent *event)
 {   // 鼠标点击事件
     QWidget::mousePressEvent(event);
     setCursor(Qt::ArrowCursor);
-    QPoint pos = event->pos();
+    const QPoint pos = event->pos();
     if (isInControlArea(pos)) showControls(false);
     else if (event->button() == Qt::LeftButton) {
-        quint64 clickTimestamp = event->timestamp();
+        const quint64 clickTimestamp = event->timestamp();
         if (clickTimestamp - lastClickTime < DOUBLE_CLICK_INTERVAL) {
             clickTimer->stop();
             emit fullscreenRequested();
@@ -300,30 +300,30 @@ bool ControlOverlay::isInControlArea(const QPoint &pos) const
 
 void ControlOverlay::updatePlayButtonIcon() const
 {   // 暂停.播放图标
-    QString iconName = isPlaying ? "icons/stop.png" : "icons/play.png";
+    const QString iconName = isPlaying ? "icons/stop.png" : "icons/play.png";
     playButton->setIcon(QPixmap(iconName));
     playButton->setIconSize(QSize(25, 25));
 }
 
-QString ControlOverlay::formatTime(int seconds)
+QString ControlOverlay::formatTime(const int seconds)
 {   // 格式化时间
-    int hrs = seconds / 3600;
-    int mins = seconds % 3600 / 60;
-    int secs = seconds % 60;
+    const int hrs = seconds / 3600;
+    const int mins = seconds % 3600 / 60;
+    const int secs = seconds % 60;
     if (hrs > 0) return QString("%1:%2:%3").arg(hrs, 2, 10, QChar('0')) .arg(mins, 2, 10, QChar('0')) .arg(secs, 2, 10, QChar('0'));
     return QString("%1:%2").arg(mins, 2, 10, QChar('0')) .arg(secs, 2, 10, QChar('0'));
 }
 
-void ControlOverlay::updateTimeTooltipPosition(double fraction, int mouseX) const
+void ControlOverlay::updateTimeTooltipPosition(const double fraction, const int mouseX) const
 {   // 时间提示
     if (fraction < 0 || totalTime <= 0) {
         timeTooltip->hide();
         return;
     }
-    int hoverSeconds = qRound(fraction * totalTime);
+    const int hoverSeconds = qRound(fraction * totalTime);
     timeTooltip->setText(formatTime(hoverSeconds));
     timeTooltip->adjustSize();
-    QPoint progressPos = progressSlider->mapTo(this, QPoint(0, 0));
+    const QPoint progressPos = progressSlider->mapTo(this, QPoint(0, 0));
     int x = progressPos.x() + mouseX - timeTooltip->width() / 2;
     int y = progressPos.y() - timeTooltip->height();
     x = qBound(10, x, width() - timeTooltip->width() - 10);
@@ -343,22 +343,22 @@ void ControlOverlay::onProgressPressed()
 void ControlOverlay::onProgressReleased()
 {   // 拖动进度条结束
     draggingProgress = false;
-    double position = static_cast<double>(progressSlider->value()) / PROGRESS_MAX_VALUE;
+    const double position = static_cast<double>(progressSlider->value()) / PROGRESS_MAX_VALUE;
     emit seekRequested(position);
-    if (isPlaying) showControls();
+    if (isPlaying) showControls(true);
     else showControls(false);
 }
 
-void ControlOverlay::onProgressClicked(int value)
+void ControlOverlay::onProgressClicked(const int value)
 {   // 点击
-    double position = static_cast<double>(value) / PROGRESS_MAX_VALUE;
+    const double position = static_cast<double>(value) / PROGRESS_MAX_VALUE;
     emit seekRequested(position);
-    int currentSecs = qRound(totalTime * position);
+    const int currentSecs = qRound(totalTime * position);
     timeLabel->setText(formatTime(currentSecs) + " / " + formatTime(totalTime));
-    showControls();
+    showControls(true);
 }
 
-void ControlOverlay::onProgressHover(double fraction, int mouseX) const
+void ControlOverlay::onProgressHover(const double fraction, const int mouseX) const
 {   // 显示时间提示
     updateTimeTooltipPosition(fraction, mouseX);
     if (fraction < 0 && isPlaying && !isInControlArea(mapFromGlobal(QCursor::pos()))) hideTimer->start(HIDE_DELAY);
@@ -374,6 +374,6 @@ void ControlOverlay::onVolumePressed()
 void ControlOverlay::onVolumeReleased()
 {   // 拖动音量结束
     draggingVolume = false;
-    if (isPlaying) showControls();
+    if (isPlaying) showControls(true);
     else showControls(false);
 }

@@ -8,19 +8,19 @@ class BangumiAPI : public QObject {
 
 public:
     explicit BangumiAPI(QObject *parent = nullptr);
-    QJsonArray getUserCollections(bool getAll = true, int maxRetries = 3);
-    QJsonObject getUserCollection(int subjectId, int maxRetries = 3);
-    QJsonObject getSubjectInfo(int subjectId, int maxRetries = 3);
-    QJsonArray searchSubjects(const QString &keyword = "", const QString &tag = "", int subjectType = 2, int maxRetries = 3);
-    QJsonArray getSubjectEpisodes(int subjectId, int maxRetries = 3);
-    bool createOrUpdateCollection(int subjectId, const QJsonObject &collectionData, int maxRetries = 3);
-    bool updateCollection(int subjectId, const QJsonObject &collectionData, int maxRetries = 3);
-    bool updateSubjectEpisodes(int subjectId, const QJsonObject &episodesData, int maxRetries = 3);
+    QJsonArray getUserCollections(bool getAll, int maxRetries, const std::function<void(int offset, int total)>& progressCallback);
+    QJsonObject getUserCollection(int subjectId, int maxRetries);
+    QJsonObject getSubjectInfo(int subjectId, int maxRetries);
+    QJsonArray searchSubjects(const QString &keyword, const QString &tag, int subjectType, int maxRetries);
+    QJsonArray getSubjectEpisodes(int subjectId, int maxRetries);
+    bool createOrUpdateCollection(int subjectId, const QJsonObject &collectionData, int maxRetries);
+    bool updateCollection(int subjectId, const QJsonObject &collectionData, int maxRetries);
+    bool updateSubjectEpisodes(int subjectId, const QJsonObject &episodesData, int maxRetries);
 
 private:
     void refreshAndReload();
     [[nodiscard]] QNetworkRequest createRequest(const QString &url) const;
-    QJsonObject sendRequest(QNetworkAccessManager &manager, QNetworkRequest &request, const QString &method = "GET", const QByteArray &data = QByteArray(), int maxRetries = 3, int *statusCode = nullptr);
+    QJsonObject sendRequest(QNetworkAccessManager &manager, QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, int *statusCode);
     QString userId;
     QString accessToken;
     QString refreshToken;

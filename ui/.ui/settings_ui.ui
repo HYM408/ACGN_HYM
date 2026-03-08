@@ -431,12 +431,6 @@
               <height>0</height>
              </size>
             </property>
-            <property name="maximumSize">
-             <size>
-              <width>76</width>
-              <height>16777215</height>
-             </size>
-            </property>
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -454,12 +448,6 @@
              <size>
               <width>76</width>
               <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>76</width>
-              <height>16777215</height>
              </size>
             </property>
             <property name="font">

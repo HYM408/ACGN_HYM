@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
+    const QApplication app(argc, argv);
     struct : QWebEngineUrlRequestInterceptor {
         QStringList patterns;
         void interceptRequest(QWebEngineUrlRequestInfo& info) override {

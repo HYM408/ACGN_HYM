@@ -1,7 +1,7 @@
 #include "chunk_download.h"
 #include <QDir>
 
-ChunkDownload::ChunkDownload(const QString &url, QString savePath, int maxWorkers, QObject *parent): QObject(parent) , m_manager(new QNetworkAccessManager(this)) , m_url(url) , m_savePath(std::move(savePath)) , m_maxWorkers(maxWorkers) , m_totalSize(0) , m_downloaded(0) , m_isRunning(false) , m_chunksFinished(0) , m_hasError(false) {}
+ChunkDownload::ChunkDownload(const QString &url, QString savePath, const int maxWorkers, QObject *parent): QObject(parent) , m_manager(new QNetworkAccessManager(this)) , m_url(url) , m_savePath(std::move(savePath)) , m_maxWorkers(maxWorkers) , m_totalSize(0) , m_downloaded(0) , m_isRunning(false) , m_chunksFinished(0) , m_hasError(false) {}
 
 ChunkDownload::~ChunkDownload()
 {
@@ -21,7 +21,7 @@ void ChunkDownload::start()
     request.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
     QNetworkReply *reply = m_manager->head(request);
     connect(reply, &QNetworkReply::finished, this, &ChunkDownload::onHeadFinished);
-    connect(reply, &QNetworkReply::errorOccurred, this, [this, reply](QNetworkReply::NetworkError code) {
+    connect(reply, &QNetworkReply::errorOccurred, this, [this, reply](const QNetworkReply::NetworkError code) {
         if (code != QNetworkReply::NoError) {
             m_hasError = true;
             setStatus("错误");
@@ -62,21 +62,19 @@ void ChunkDownload::onHeadFinished()
 
 void ChunkDownload::startMultiPartDownload()
 {   // 启动分块下载
-    qint64 chunkSize = m_totalSize / m_maxWorkers;
+    const qint64 chunkSize = m_totalSize / m_maxWorkers;
     QList<QPair<qint64, qint64>> ranges;
     for (int i = 0; i < m_maxWorkers - 1; ++i) ranges.append({i * chunkSize, (i + 1) * chunkSize - 1});
     ranges.append({(m_maxWorkers - 1) * chunkSize, m_totalSize - 1});
     m_chunkDownloaded.resize(m_maxWorkers);
     m_chunkDownloaded.fill(0);
     m_replies.clear();
-
-    QFileInfo fileInfo(m_savePath);
-    QDir dir = fileInfo.absoluteDir();
+    const QFileInfo fileInfo(m_savePath);
+    const QDir dir = fileInfo.absoluteDir();
     if (!dir.exists()) dir.mkpath(".");
-
     for (int i = 0; i < m_maxWorkers; ++i) {
-        qint64 start = ranges[i].first;
-        qint64 end = ranges[i].second;
+        const qint64 start = ranges[i].first;
+        const qint64 end = ranges[i].second;
         QNetworkRequest request(m_url);
         request.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
         QString rangeHeader = QString("bytes=%1-%2").arg(start).arg(end);
@@ -102,15 +100,15 @@ void ChunkDownload::onChunkReadyRead()
 {   // 下载数据处理
     auto *reply = qobject_cast<QNetworkReply*>(sender());
     if (!m_isRunning) return;
-    int index = reply->property("chunkIndex").toInt();
+    const int index = reply->property("chunkIndex").toInt();
     auto *file = reply->property("tempFile").value<QFile*>();
-    QByteArray data = reply->readAll();
+    const QByteArray data = reply->readAll();
     file->write(data);
     m_chunkDownloaded[index] += data.size();
     qint64 total = 0;
-    for (qint64 size : std::as_const(m_chunkDownloaded)) total += size;
+    for (const qint64 size : std::as_const(m_chunkDownloaded)) total += size;
     m_downloaded = total;
-    int percent = m_totalSize > 0 ? static_cast<int>((m_downloaded * 100) / m_totalSize) : 0;
+    const int percent = m_totalSize > 0 ? static_cast<int>(m_downloaded * 100 / m_totalSize) : 0;
     emit progressChanged(percent, m_downloaded, m_totalSize);
 }
 
@@ -138,7 +136,7 @@ void ChunkDownload::onChunkFinished()
 
 void ChunkDownload::onChunkError(QNetworkReply::NetworkError)
 {   // 分块请求错误
-    auto *reply = qobject_cast<QNetworkReply*>(sender());
+    const auto *reply = qobject_cast<QNetworkReply*>(sender());
     if (m_isRunning) {
         m_hasError = true;
         setStatus("错误");

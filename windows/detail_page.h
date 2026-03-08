@@ -55,7 +55,7 @@ class ClickableLabel : public QLabel
     Q_OBJECT
 
 public:
-    explicit ClickableLabel(const QString &text = "", QWidget *parent = nullptr);
+    explicit ClickableLabel(const QString &text, QWidget *parent = nullptr);
 
 signals:
     void clicked();

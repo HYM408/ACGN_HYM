@@ -11,12 +11,12 @@ CacheImageUtil::CacheImageUtil(QObject *parent) : QObject(parent)
 
 QString CacheImageUtil::getCachePath(const QString &url)
 {   // 获取缓存路径
-    qsizetype lastSlash = url.lastIndexOf('/');
+    const qsizetype lastSlash = url.lastIndexOf('/');
     if (lastSlash == -1) return "";
-    QString fileName = url.mid(lastSlash + 1);
-    qsizetype underscore = fileName.indexOf('_');
+    const QString fileName = url.mid(lastSlash + 1);
+    const qsizetype underscore = fileName.indexOf('_');
     if (underscore == -1) return "";
-    QString subjectId = fileName.left(underscore);
+    const QString subjectId = fileName.left(underscore);
     return QString("data/images/%1.jpg").arg(subjectId);
 }
 
@@ -45,11 +45,11 @@ void CacheImageUtil::getImageAsync(const QString &url, const ImageCallback& call
 
 void CacheImageUtil::onDownloadFinished(QNetworkReply *reply)
 {   // 下载完成处理
-    QString url = reply->request().attribute(QNetworkRequest::Attribute::User).toString();
-    bool cacheToLocal = reply->request().attribute(static_cast<QNetworkRequest::Attribute>(QNetworkRequest::User + 1), true).toBool();
+    const QString url = reply->request().attribute(QNetworkRequest::Attribute::User).toString();
+    const bool cacheToLocal = reply->request().attribute(static_cast<QNetworkRequest::Attribute>(QNetworkRequest::User + 1), true).toBool();
     QPixmap pixmap;
     if (!reply->error()) {
-        QByteArray imageData = reply->readAll();
+        const QByteArray imageData = reply->readAll();
         if (pixmap.loadFromData(imageData)) {
             if (cacheToLocal) {
                 QFile file(getCachePath(url));
@@ -63,7 +63,7 @@ void CacheImageUtil::onDownloadFinished(QNetworkReply *reply)
 
 void CacheImageUtil::onDownloadComplete(const QString &url, const QPixmap &pixmap)
 {   // 下载完成
-    auto it = pendingCallbacks.find(url);
+    const auto it = pendingCallbacks.find(url);
     if (it != pendingCallbacks.end()) {
         auto callbacks = std::move(*it);
         pendingCallbacks.erase(it);

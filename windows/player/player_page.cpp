@@ -392,7 +392,7 @@ void PlayerPage::onRouteSelected(const QString &siteId, const QJsonObject &route
     Crawler::processVideoUrl(siteId, episodeUrl, [this](const QString &videoUrl) {
         qDebug() << videoUrl;
         vlcPlayer->playVideo(videoUrl);
-    });
+    }, nullptr);
     vlcPlayer->setFocus();
 }
 

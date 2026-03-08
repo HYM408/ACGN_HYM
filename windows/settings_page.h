@@ -24,7 +24,7 @@ signals:
 
 private slots:
     void onLoginButtonClicked();
-    void onCollectionButtonClicked();
+    void onCollectionButtonClicked() const;
     static void onBangumiUrlChanged(int index);
     void onSelectDownloadPath();
     void clearDownloadTasks(bool stop);
@@ -35,10 +35,10 @@ private:
     void setupConnections();
     void updateTokenDisplay() const;
     void setBangumiBaseUrl() const;
-    void ensureBangumiCredentials();
+    bool ensureBangumiCredentials();
     void downloadPublicDate(bool useMirror);
     void onExtractArchiveButtonClicked();
-    void ensurePikPakCredentials();
+    bool ensurePikPakCredentials();
     void setupDownloadPathUi() const;
     Ui::SettingsPage ui{};
     BangumiAPI *bangumiAPI = nullptr;

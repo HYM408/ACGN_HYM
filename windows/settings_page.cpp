@@ -91,21 +91,23 @@ void SettingsPage::onBangumiUrlChanged(const int index)
 
 void SettingsPage::onLoginButtonClicked()
 {   // 点击Bangumi授权
-    if (getConfig("Bangumi/client_id").toString().isEmpty() || getConfig("Bangumi/client_secret").toString().isEmpty() || getConfig("Bangumi/redirect_uri").toString().isEmpty()) ensureBangumiCredentials();
-    const QString authUrl = bangumiOAuth->generateAuthUrl();
-    QDesktopServices::openUrl(QUrl(authUrl));
-    const QString code = bangumiOAuth->listenForCode(60);
+    if (!ensureBangumiCredentials()) return;
+    ui.login_Button->setText("授权中...");
+    ui.login_Button->setEnabled(false);
+    QDesktopServices::openUrl(bangumiOAuth->generateAuthUrl());
+    const QString code = bangumiOAuth->listenForCode(30);
     if (code.isEmpty()) {
-        QMessageBox::warning(this, "错误", "授权失败: 授权失败或超时");
+        ui.login_Button->setText("Code获取失败");
         return;
     }
     if (bangumiOAuth->exchangeCodeForToken(code, "")) {
         updateTokenDisplay();
-        QMessageBox::information(this, "成功", "Bangumi授权成功！");
-    } else QMessageBox::warning(this, "错误", "授权失败: Token交换失败");
+        ui.login_Button->setText("Bangumi授权成功！");
+    } else ui.login_Button->setText("Token交换失败");
+    ui.login_Button->setEnabled(true);
 }
 
-void SettingsPage::ensureBangumiCredentials()
+bool SettingsPage::ensureBangumiCredentials()
 {   // Bangumi 授权凭证
     QDialog dialog(this);
     dialog.setWindowTitle("Bangumi授权");
@@ -121,36 +123,47 @@ void SettingsPage::ensureBangumiCredentials()
     layout->addWidget(new QLabel("Client ID:"));
     const auto clientIdInput = new QLineEdit();
     clientIdInput->setPlaceholderText("输入 App ID");
+    clientIdInput->setText(getConfig("Bangumi/client_id").toString());
     layout->addWidget(clientIdInput);
     layout->addWidget(new QLabel("Client Secret:"));
     const auto clientSecretInput = new QLineEdit();
     clientSecretInput->setPlaceholderText("输入 App Secret");
+    clientSecretInput->setText(getConfig("Bangumi/client_secret").toString());
     layout->addWidget(clientSecretInput);
     layout->addWidget(new QLabel("Redirect URI:"));
     const auto redirectUriInput = new QLineEdit();
     redirectUriInput->setPlaceholderText("输入 回调地址");
+    redirectUriInput->setText(getConfig("Bangumi/redirect_uri").toString());
     layout->addWidget(redirectUriInput);
     const auto confirmButton = new QPushButton("授权");
     layout->addWidget(confirmButton);
     connect(confirmButton, &QPushButton::clicked, &dialog, &QDialog::accept);
     if (dialog.exec() == QDialog::Accepted) {
-        const QString clientId = clientIdInput->text().trimmed();
-        const QString clientSecret = clientSecretInput->text().trimmed();
-        if (const QString redirectUri = redirectUriInput->text().trimmed(); !clientId.isEmpty() && !clientSecret.isEmpty() && !redirectUri.isEmpty()) {
+        const QString clientId = clientIdInput->text();
+        const QString clientSecret = clientSecretInput->text();
+        const QString redirectUri = redirectUriInput->text();
+        if (!clientId.isEmpty() && !clientSecret.isEmpty() && !redirectUri.isEmpty()) {
             setConfig("Bangumi/client_id", clientId);
             setConfig("Bangumi/client_secret", clientSecret);
             setConfig("Bangumi/redirect_uri", redirectUri);
-        } else QMessageBox::warning(this, "警告", "所有字段都必须填写完整！");
+            return true;
+        }
+        QMessageBox::warning(this, "警告", "所有字段都必须填写完整！");
     }
+    return false;
 }
 
-void SettingsPage::onCollectionButtonClicked()
+void SettingsPage::onCollectionButtonClicked() const
 {   // 获取Bangumi收藏
-    if (const QJsonArray collections = bangumiAPI->getUserCollections(true, 3); !collections.isEmpty()) {
+    ui.collection_Button->setText("进度：0/--");
+    const QJsonArray collections = bangumiAPI->getUserCollections(true, 3, [this](const int offset, const int total) {
+        ui.collection_Button->setText(QString("进度：%1/%2").arg(offset).arg(total));
+    });
+    if (!collections.isEmpty()) {
         dbManager->clearCollectionTable();
-        if (DatabaseManager::insertManyCollectionData(collections)) QMessageBox::information(this, "成功", QString("获取Bangumi收藏完成，共%1条记录").arg(collections.size()));
-        else QMessageBox::warning(this, "错误", "保存收藏到数据库失败");
-    } else QMessageBox::warning(this, "错误", "获取收藏失败");
+        if (DatabaseManager::insertManyCollectionData(collections)) ui.collection_Button->setText(QString("获取完成，共%1条").arg(collections.size()));
+        else ui.collection_Button->setText("保存收藏到数据库失败");
+    } else ui.collection_Button->setText("获取收藏失败");
 }
 
 void SettingsPage::downloadPublicDate(const bool useMirror)
@@ -247,14 +260,17 @@ void SettingsPage::onExtractArchiveButtonClicked()
 
 void SettingsPage::onPikPakLoginButtonClicked()
 {   // 点击PikPak登录
-    if (getConfig("PikPak/username").toString().isEmpty() || getConfig("PikPak/password").toString().isEmpty()) ensurePikPakCredentials();
+    if (!ensurePikPakCredentials()) return;
+    ui.login_Button_2->setText("登录中...");
+    ui.login_Button_2->setEnabled(false);
     if (pikpakApi->loginPikPak()) {
         updateTokenDisplay();
-        QMessageBox::information(this, "成功", "PikPak 登录成功！");
-    } else QMessageBox::warning(this, "错误", "PikPak 登录失败");
+        ui.login_Button_2->setText("PikPak 登录成功！");
+    } else ui.login_Button_2->setText("PikPak 登录失败");
+    ui.login_Button_2->setEnabled(true);
 }
 
-void SettingsPage::ensurePikPakCredentials()
+bool SettingsPage::ensurePikPakCredentials()
 {   // PikPak登录凭证
     QDialog dialog(this);
     dialog.setWindowTitle("PikPak登录(ip不能在中国大陆)");
@@ -266,21 +282,27 @@ void SettingsPage::ensurePikPakCredentials()
     layout->addWidget(new QLabel("用户名:"));
     const auto userInput = new QLineEdit();
     userInput->setPlaceholderText("输入 PikPak 账号");
+    userInput->setText(getConfig("PikPak/username").toString());
     layout->addWidget(userInput);
     layout->addWidget(new QLabel("密码:"));
     const auto passInput = new QLineEdit();
     passInput->setPlaceholderText("输入 PikPak 密码");
+    passInput->setText(getConfig("PikPak/password").toString());
     layout->addWidget(passInput);
     const auto confirmButton = new QPushButton("登录");
     layout->addWidget(confirmButton);
     connect(confirmButton, &QPushButton::clicked, &dialog, &QDialog::accept);
     if (dialog.exec() == QDialog::Accepted) {
-        const QString newUsername = userInput->text().trimmed();
-        if (const QString newPassword = passInput->text().trimmed(); !newUsername.isEmpty() && !newPassword.isEmpty()) {
+        const QString newUsername = userInput->text();
+        const QString newPassword = passInput->text();
+        if (!newUsername.isEmpty() && !newPassword.isEmpty()) {
             setConfig("PikPak/username", newUsername);
             setConfig("PikPak/password", newPassword);
-        } else QMessageBox::warning(this, "警告", "所有字段都必须填写完整！");
+            return true;
+        }
+        QMessageBox::warning(this, "警告", "所有字段都必须填写完整！");
     }
+    return false;
 }
 
 void SettingsPage::setupDownloadPathUi() const
@@ -307,6 +329,9 @@ void SettingsPage::clearDownloadTasks(const bool stop)
 
 void SettingsPage::onBackButtonClicked()
 {   // 返回
+    ui.login_Button->setText("开始授权");
+    ui.collection_Button->setText("获取收藏");
+    ui.login_Button_2->setText("开始登录");
     ui.pushButton_18->setText("导入数据");
     emit backButtonClicked();
 }

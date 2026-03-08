@@ -72,7 +72,7 @@ void SearchPage::doSearch(const QString &keyword, const QString &tag)
     const QMap<int, int> typeMapping{{1, 1}, {2, 4}};
     const int searchType = typeMapping.value(ui.comboBox->currentIndex(), 2);
     showSearchStatus("搜索中...");
-    QJsonArray results = bangumiApi->searchSubjects(keyword, tag, searchType);
+    QJsonArray results = bangumiApi->searchSubjects(keyword, tag, searchType, 3);
     clearSearchResults();
     if (!isVisible()) return;
     auto *layout = qobject_cast<QVBoxLayout*>(ui.scrollAreaWidgetContents->layout());
@@ -107,9 +107,9 @@ QFrame *SearchPage::createResultFrame(const QVariantMap &result)
     coverLabel->setAlignment(Qt::AlignCenter);
     coverLabel->setText("加载中...");
     coverLabel->setCursor(Qt::PointingHandCursor);
-    QVariantMap images = result["images"].toMap();
-    QString imageUrl = images.value("common").toString();
-    if (!imageUrl.isEmpty()) ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, coverLabel, 15, false);
+    const QVariantMap images = result["images"].toMap();
+    const QString imageUrl = images.value("common").toString();
+    if (!imageUrl.isEmpty()) ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, coverLabel, 15, false, true);
     else coverLabel->setText("暂无封面");
     horizontalLayout->addWidget(coverLabel);
     // 垂直布局

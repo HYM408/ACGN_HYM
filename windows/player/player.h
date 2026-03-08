@@ -35,7 +35,7 @@ public:
     void setProgress(double position) const;
     void setTime(int currentSeconds, int totalSeconds);
     void setVolume(int volume) const;
-    void showControls(bool startTimer = true);
+    void showControls(bool startTimer);
     void hideControls();
 
 signals:

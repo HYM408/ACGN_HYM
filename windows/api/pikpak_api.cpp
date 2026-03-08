@@ -7,7 +7,9 @@
 static const QString CLIENT_ID = "YNxT9w7GMdWvEOKa";
 static const QString CLIENT_SECRET = "dbw2OtmVEeuUvIptb1Coyg";
 
-PikPakApi::PikPakApi(QObject *parent) : QObject(parent)
+PikPakApi::PikPakApi(QObject *parent) : QObject(parent) {getInformation();}
+
+void PikPakApi::getInformation()
 {   // 获取信息
     username = getConfig("PikPak/username").toString();
     password = getConfig("PikPak/password").toString();
@@ -16,11 +18,12 @@ PikPakApi::PikPakApi(QObject *parent) : QObject(parent)
     deviceId = QString::fromLatin1(QCryptographicHash::hash((username + password).toUtf8(), QCryptographicHash::Md5).toHex());
 }
 
-QJsonObject PikPakApi::sendRequest(QNetworkAccessManager &manager, QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, int *statusCode)
+QJsonObject PikPakApi::sendRequest(QNetworkAccessManager &manager, QNetworkRequest &request, const QString &method, const QByteArray &data, const int maxRetries, int *statusCode)
 {   // 发送请求
-    QByteArray raw = sendRequestUtil(manager, request, method, data, maxRetries, statusCode, [this, &request] {
+    const QByteArray raw = sendRequestUtil(manager, request, method, data, maxRetries, statusCode, [this, &request] {
         refreshAccessToken();
-        request.setRawHeader("Authorization", QString("Bearer %1").arg(accessToken).toUtf8());});
+        request.setRawHeader("Authorization", QString("Bearer %1").arg(accessToken).toUtf8());
+    });
     return QJsonDocument::fromJson(raw).object();
 }
 
@@ -29,18 +32,19 @@ QJsonObject PikPakApi::captchaInit(const QString &action, QJsonObject meta)
     QNetworkAccessManager manager;
     QNetworkRequest request(QUrl("https://user.mypikpak.com/v1/shield/captcha/init"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    QJsonObject params = {
+    const QJsonObject params = {
         {"client_id", CLIENT_ID},
         {"action", action},
         {"device_id", deviceId},
         {"meta", meta}
     };
-    QByteArray postData = QJsonDocument(params).toJson(QJsonDocument::Compact);
-    return sendRequest(manager, request, "POST", postData, 3);
+    const QByteArray postData = QJsonDocument(params).toJson(QJsonDocument::Compact);
+    return sendRequest(manager, request, "POST", postData, 3, nullptr);
 }
 
 bool PikPakApi::loginPikPak()
 {   // 登录
+    getInformation();
     const QString url = "https://user.mypikpak.com/v1/auth/signin";
     static const QRegularExpression emailRegex(R"(\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*)");
     static const QRegularExpression phoneRegex(R"(\d{11,18})");
@@ -48,9 +52,9 @@ bool PikPakApi::loginPikPak()
     if (emailRegex.match(username).hasMatch()) meta["email"] = username;
     else if (phoneRegex.match(username).hasMatch()) meta["phone_number"] = username;
     else meta["username"] = username;
-    QString action = "POST:" + url;
+    const QString action = "POST:" + url;
     QJsonObject result = captchaInit(action, meta);
-    QString captchaToken = result["captcha_token"].toString();
+    const QString captchaToken = result["captcha_token"].toString();
     QNetworkAccessManager manager;
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -60,12 +64,13 @@ bool PikPakApi::loginPikPak()
     query.addQueryItem("password", password);
     query.addQueryItem("username", username);
     query.addQueryItem("captcha_token", captchaToken);
-    QByteArray postData = query.toString(QUrl::FullyEncoded).toUtf8();
+    const QByteArray postData = query.toString(QUrl::FullyEncoded).toUtf8();
     int statusCode = 0;
     QJsonObject userInfo = sendRequest(manager, request, "POST", postData, 3, &statusCode);
     if (statusCode == 200) {
         setConfig("PikPak/access_token", userInfo["access_token"].toString());
         setConfig("PikPak/refresh_token", userInfo["refresh_token"].toString());
+        getInformation();
         return true;
     }
     return false;
@@ -81,13 +86,13 @@ void PikPakApi::refreshAccessToken()
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
-    QByteArray postData = QJsonDocument(jsonData).toJson(QJsonDocument::Compact);
+    const QByteArray postData = QJsonDocument(jsonData).toJson(QJsonDocument::Compact);
     QNetworkAccessManager manager;
     int statusCode = 0;
     QJsonObject result = sendRequest(manager, request, "POST", postData, 3, &statusCode);
     if (statusCode == 200) {
-        QString newAccessToken = result["access_token"].toString();
-        QString newRefreshToken = result["refresh_token"].toString();
+        const QString newAccessToken = result["access_token"].toString();
+        const QString newRefreshToken = result["refresh_token"].toString();
         accessToken = newAccessToken;
         refreshToken = newRefreshToken;
         setConfig("PikPak/access_token", accessToken);
@@ -115,9 +120,9 @@ QJsonObject PikPakApi::getRecentFiles()
 
 QJsonObject PikPakApi::getDownloadUrl(const QString &fileId)
 {   // 获取下载链接
-    QString action = "GET:/drive/v1/files/" + fileId;
-    QJsonObject captchaResult = captchaInit(action);
-    QString captchaToken = captchaResult["captcha_token"].toString();
+    const QString action = "GET:/drive/v1/files/" + fileId;
+    QJsonObject captchaResult = captchaInit(action, {});
+    const QString captchaToken = captchaResult["captcha_token"].toString();
     QNetworkRequest request("https://api-drive.mypikpak.com/drive/v1/files/" + fileId);
     request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -164,7 +169,7 @@ QJsonObject PikPakApi::restoreShare(const QString &shareId, const QString &passC
     jsonData["share_id"] = shareId;
     jsonData["pass_code_token"] = passCodeToken;
     jsonData["file_ids"] = QJsonArray::fromStringList(fileIds);
-    QByteArray postData = QJsonDocument(jsonData).toJson(QJsonDocument::Compact);
+    const QByteArray postData = QJsonDocument(jsonData).toJson(QJsonDocument::Compact);
     QNetworkAccessManager manager;
     int statusCode = 0;
     QJsonObject result = sendRequest(manager, request, "POST", postData, 3, &statusCode);
@@ -176,11 +181,11 @@ bool PikPakApi::transferShareLink(const QString &shareLink, const QString &passC
     static const QRegularExpression re(R"(/s/([^/]+)(?:.*/([^/]+))?$)");
     QRegularExpressionMatch match = re.match(shareLink);
     if (!match.hasMatch()) return false;
-    QString shareId = match.captured(1);
-    QString parentId = match.captured(2);
+    const QString shareId = match.captured(1);
+    const QString parentId = match.captured(2);
     QJsonObject shareInfo = getShareInfo(shareId, parentId, passCode);
     if (shareInfo.isEmpty()) return false;
-    QString passCodeToken = shareInfo["pass_code_token"].toString();
+    const QString passCodeToken = shareInfo["pass_code_token"].toString();
     QStringList fileIds;
     QJsonArray filesArray = shareInfo["files"].toArray();
     for (const auto &fileValue : filesArray) {
@@ -189,12 +194,12 @@ bool PikPakApi::transferShareLink(const QString &shareLink, const QString &passC
         if (!fileId.isEmpty()) fileIds.append(fileId);
     }
     if (fileIds.isEmpty()) return false;
-    QJsonObject restoreResult = restoreShare(shareId, passCodeToken, fileIds);
+    const QJsonObject restoreResult = restoreShare(shareId, passCodeToken, fileIds);
     if (restoreResult.isEmpty()) return false;
     return true;
 }
 
-QJsonObject PikPakApi::getFileList(const QString &parentId, int limit, const QString &pageToken)
+QJsonObject PikPakApi::getFileList(const QString &parentId, const int limit, const QString &pageToken)
 {   // 获取目录下文件列表
     QUrl url("https://api-drive.mypikpak.com/drive/v1/files");
     QUrlQuery query;

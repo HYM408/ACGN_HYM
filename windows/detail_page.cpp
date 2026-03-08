@@ -84,11 +84,11 @@ void DetailPage::setCollectionData(const CollectionData &data, const QString &pr
 
 void DetailPage::loadData()
 {   // 加载数据
-    SubjectsData subjectData = dbManager->getSubjectById(currentData.subject_id);
+    const SubjectsData subjectData = dbManager->getSubjectById(currentData.subject_id);
     if (subjectData.id != 0) updateDetailPage(subjectData);
     else {
         QTimer::singleShot(0, this, [this] {
-            const QJsonObject subjectInfo = bangumiAPI->getSubjectInfo(currentData.subject_id);
+            const QJsonObject subjectInfo = bangumiAPI->getSubjectInfo(currentData.subject_id, 3);
             dbManager->insertOrUpdateSubject(subjectInfo);
             if (!isVisible()) return;
             updateDetailPage(dbManager->getSubjectById(currentData.subject_id));

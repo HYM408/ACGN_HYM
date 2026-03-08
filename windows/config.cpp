@@ -39,7 +39,7 @@ void setDefaultIfMissing(QSettings &settings, const QString &key, const QVariant
 
 QVariant getConfig(const QString &key, const QVariant &defaultValue)
 {   // 读取
-    QSettings settings("./config.ini", QSettings::IniFormat);
+    const QSettings settings("./config.ini", QSettings::IniFormat);
     return settings.value(key, defaultValue);
 }
 
