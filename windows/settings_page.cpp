@@ -155,6 +155,7 @@ bool SettingsPage::ensureBangumiCredentials()
 
 void SettingsPage::onCollectionButtonClicked() const
 {   // 获取Bangumi收藏
+    ui.collection_Button->setEnabled(false);
     ui.collection_Button->setText("进度：0/--");
     const QJsonArray collections = bangumiAPI->getUserCollections(true, 3, [this](const int offset, const int total) {
         ui.collection_Button->setText(QString("进度：%1/%2").arg(offset).arg(total));
@@ -164,6 +165,7 @@ void SettingsPage::onCollectionButtonClicked() const
         if (DatabaseManager::insertManyCollectionData(collections)) ui.collection_Button->setText(QString("获取完成，共%1条").arg(collections.size()));
         else ui.collection_Button->setText("保存收藏到数据库失败");
     } else ui.collection_Button->setText("获取收藏失败");
+    ui.collection_Button->setEnabled(true);
 }
 
 void SettingsPage::downloadPublicDate(const bool useMirror)
