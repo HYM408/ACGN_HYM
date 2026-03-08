@@ -115,6 +115,12 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
     return QMainWindow::eventFilter(watched, event);
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event)
+{   // 窗口大小改变事件
+    QMainWindow::resizeEvent(event);
+    if (episodeOverlay) episodeOverlay->setGeometry(0, titlebar_frame->height(), width(), height() - titlebar_frame->height());
+}
+
 void MainWindow::onSearchButtonClicked()
 {   // 切换到搜索页面
     if (!searchPage) ensureSearchPage();
@@ -176,7 +182,7 @@ void MainWindow::onShowEpisodePageRequested(const CollectionData &collectionData
         episodeOverlay = nullptr;
     });
     connect(episodeOverlay, &EpisodeOverlay::collectionDataChanged, this, [this] {mainPageManager->loadCollections(mainPageManager->getCurrentSubjectType(), mainPageManager->getCurrentStatusType(), false);});
-    episodeOverlay->setGeometry(0, 0, width(), height());
+    episodeOverlay->setGeometry(0, titlebar_frame->height(), width(), height() - titlebar_frame->height());
     episodeOverlay->showWithCollectionData(collectionData);
     if (playerPage) return;
     if (collectionData.subject_type != 2) return;

@@ -2,10 +2,12 @@
 #define EPISODE_PAGE_H
 
 #include "episode_ui.h"
-#include <QListView>
-#include <QStandardItemModel>
 #include <QStyledItemDelegate>
-#include "main_page.h"
+#include "sql/data_structs.h"
+
+class QListView;
+class BangumiAPI;
+class QStandardItemModel;
 
 class EpisodeDelegate : public QStyledItemDelegate
 {
@@ -49,7 +51,7 @@ private:
     void updateEpisodeView();
     void onEpisodeItemClicked(const EpisodeData &episodeData);
     void onMarkAllWatchedClicked();
-    void onUpdateClicked() const;
+    void onUpdateClicked();
     Ui::EpisodePage ui{};
     BangumiAPI *bangumiAPI = nullptr;
     QWidget *episodeContainer = nullptr;
