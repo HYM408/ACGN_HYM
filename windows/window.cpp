@@ -52,7 +52,7 @@ void MainWindow::setupConnections()
     // 标题栏
     connect(pushButton, &QPushButton::clicked, this, &MainWindow::minimizeWindow);
     connect(pushButton_8, &QPushButton::clicked, this, &MainWindow::toggleMaximizeWindow);
-    connect(pushButton_2, &QPushButton::clicked, this, &MainWindow::close);
+    connect(pushButton_2, &QPushButton::clicked, this, &MainWindow::onCloseButtonClicked);
     // 搜索
     connect(search_Button, &QPushButton::clicked, this, &MainWindow::onSearchButtonClicked);
     // 设置
@@ -85,16 +85,17 @@ void MainWindow::toggleMaximizeWindow()
     isMaximized() ? showNormal() : showMaximized();
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::onCloseButtonClicked()
 {   // 关闭程序
+    hide();
     if (playerPage) playerPage->cancelAllSearches();
-    QMainWindow::closeEvent(event);
+    QTimer::singleShot(500, [] {QApplication::quit();});
 }
 
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {   // 标题栏事件
     if (watched == titlebar_frame) {
-        auto *mouseEvent = dynamic_cast<QMouseEvent*>(event);
+        const auto *mouseEvent = dynamic_cast<QMouseEvent*>(event);
         if (event->type() == QEvent::MouseButtonDblClick) {
             toggleMaximizeWindow();
             return true;

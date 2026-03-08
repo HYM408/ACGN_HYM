@@ -9,7 +9,7 @@ QByteArray sendRequestUtil(QNetworkAccessManager &manager, const QNetworkRequest
         QEventLoop loop;
         QTimer::singleShot(5000, &loop, &QEventLoop::quit);
         QTimer exitCheckTimer;
-        exitCheckTimer.start();
+        exitCheckTimer.start(100);
         QObject::connect(&exitCheckTimer, &QTimer::timeout, [&] {
             if (abortFlag && abortFlag->load()) loop.quit();
         });
@@ -22,7 +22,7 @@ QByteArray sendRequestUtil(QNetworkAccessManager &manager, const QNetworkRequest
         else if (method == "PATCH") reply = manager.sendCustomRequest(request, "PATCH", data);
         QEventLoop loop;
         QTimer checkTimer;
-        checkTimer.start();
+        checkTimer.start(100);
         QElapsedTimer elapsed;
         elapsed.start();
         bool timeout = false, aborted = false;
