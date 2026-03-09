@@ -1,5 +1,6 @@
 #include "window.h"
 #include <QTimer>
+#include <QMouseEvent>
 #include "rss.h"
 #include "config.h"
 #include "sql/sql.h"

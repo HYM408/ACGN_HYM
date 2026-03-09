@@ -1,5 +1,6 @@
 #include "search_page.h"
 #include <QJsonArray>
+#include <QMouseEvent>
 #include "sql/sql.h"
 #include "detail_page.h"
 #include "api/bangumi_api.h"

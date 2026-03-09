@@ -34,7 +34,10 @@ public:
     QTextEdit *textEdit;
     QLabel *pushButton_23;
     QLabel *pushButton_24;
+    QFrame *frame_2;
+    QHBoxLayout *horizontalLayout;
     QLabel *pushButton_21;
+    QPushButton *pushButton;
     QLabel *pushButton_25;
     QPushButton *pushButton_26;
     QPushButton *pushButton_27;
@@ -178,12 +181,37 @@ public:
 
         verticalLayout_13->addWidget(pushButton_24, 0, Qt::AlignmentFlag::AlignLeft);
 
-        pushButton_21 = new QLabel(frame);
+        frame_2 = new QFrame(frame);
+        frame_2->setObjectName("frame_2");
+        frame_2->setFrameShape(QFrame::Shape::StyledPanel);
+        frame_2->setFrameShadow(QFrame::Shadow::Raised);
+        horizontalLayout = new QHBoxLayout(frame_2);
+        horizontalLayout->setSpacing(20);
+        horizontalLayout->setObjectName("horizontalLayout");
+        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+        pushButton_21 = new QLabel(frame_2);
         pushButton_21->setObjectName("pushButton_21");
         pushButton_21->setFont(font2);
         pushButton_21->setStyleSheet(QString::fromUtf8("border: none;"));
 
-        verticalLayout_13->addWidget(pushButton_21, 0, Qt::AlignmentFlag::AlignLeft);
+        horizontalLayout->addWidget(pushButton_21);
+
+        pushButton = new QPushButton(frame_2);
+        pushButton->setObjectName("pushButton");
+        pushButton->setFont(font2);
+        pushButton->setStyleSheet(QString::fromUtf8("QPushButton {\n"
+"	padding: 3px 5px;\n"
+"	border: none;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"	background-color: #f5f5f5;\n"
+"}"));
+
+        horizontalLayout->addWidget(pushButton);
+
+
+        verticalLayout_13->addWidget(frame_2, 0, Qt::AlignmentFlag::AlignLeft);
 
         pushButton_25 = new QLabel(frame);
         pushButton_25->setObjectName("pushButton_25");
@@ -312,6 +340,7 @@ public:
         pushButton_23->setText(QCoreApplication::translate("DetailPage", "TBA", nullptr));
         pushButton_24->setText(QCoreApplication::translate("DetailPage", "\345\205\250-\350\257\235", nullptr));
         pushButton_21->setText(QCoreApplication::translate("DetailPage", "|\344\272\272\350\257\204|#", nullptr));
+        pushButton->setText(QString());
         pushButton_25->setText(QCoreApplication::translate("DetailPage", "\346\224\266\350\227\217/\345\234\250\347\234\213/\346\212\233\345\274\203", nullptr));
         pushButton_26->setText(QString());
         pushButton_27->setText(QString());

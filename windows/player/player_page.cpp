@@ -223,7 +223,7 @@ QWidget* PlayerPage::createSiteCard(const QString &siteId)
 
 void PlayerPage::updateCardContent(const QWidget *card, const QString &status, const QList<SearchResult> &results)
 {   // 更新基础卡片
-    if (auto *statusBtn = card->findChild<QPushButton*>("statusBtn")) statusBtn->setText(status == "loading" ? "搜索中..." : (status == "success" ? results.first().title : "✗"));
+    if (auto *statusBtn = card->findChild<QPushButton*>("statusBtn")) statusBtn->setText(status == "loading" ? "搜索中..." : status == "success" ? results.first().title : "✗");
     auto *routesContainer = card->findChild<QWidget*>("routesContainer");
     auto *routesLayout = qobject_cast<QHBoxLayout*>(routesContainer->layout());
     clearLayout(routesLayout);

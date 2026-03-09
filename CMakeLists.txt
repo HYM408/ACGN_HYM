@@ -58,6 +58,8 @@ add_executable(appACGN_HYM
         windows/utils/network_util.cpp
         windows/utils/progress_util.h
         windows/utils/progress_util.cpp
+        windows/utils/star_rating_util.h
+        windows/utils/star_rating_util.cpp
         windows/utils/xml_util.h
         windows/utils/xml_util.cpp
         windows/config.h

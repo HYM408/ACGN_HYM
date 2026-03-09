@@ -2,13 +2,13 @@
 #define DETAIL_PAGE_H
 
 #include "detail_ui.h"
-#include <QListWidget>
-#include <QMouseEvent>
 #include "sql/data_structs.h"
 
 class BangumiAPI;
+class QListWidget;
 class CacheImageUtil;
 class DatabaseManager;
+class StarRatingWidget;
 
 class DetailPage : public QWidget
 {
@@ -38,6 +38,7 @@ private:
     void updateDetailPage(const SubjectsData &subjectData);
     void tagsDisplay(const QList<QPair<QString, int>> &tagPairs);
     static QString getTimeInfo(const QList<QPair<QString, int>> &tagPairs, const QString &dateStr);
+    void onRatingButtonClicked();
     void clearLayout() const;
     void loadData();
     void onBackButtonClicked();
@@ -48,6 +49,7 @@ private:
     DatabaseManager *dbManager = nullptr;
     QMap<int, QMap<int, QString>> statusNamesMap;
     QListWidget *tagListWidget = nullptr;
+    StarRatingWidget *m_starRating = nullptr;
 };
 
 class ClickableLabel : public QLabel

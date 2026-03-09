@@ -1,13 +1,14 @@
 #include "detail_page.h"
 #include <QTimer>
 #include <QJsonArray>
-#include <QJsonObject>
+#include <QMouseEvent>
 #include <QDesktopServices>
 #include "config.h"
 #include "sql/sql.h"
 #include "utils/menu_util.h"
 #include "api/bangumi_api.h"
 #include "utils/image_util.h"
+#include "utils/star_rating_util.h"
 
 ClickableLabel::ClickableLabel(const QString &text, QWidget *parent): QLabel(text, parent)
 {   // tag组件
@@ -54,6 +55,7 @@ void DetailPage::setupConnections()
     connect(ui.pushButton_27, &QPushButton::clicked, this, &DetailPage::onEpisodeClicked);
     connect(ui.pushButton_20, &QPushButton::clicked, this, &DetailPage::onOpenBangumiPage);
     connect(ui.pushButton_26, &QPushButton::clicked, this, &DetailPage::onStatusButtonClicked);
+    connect(ui.pushButton, &QPushButton::clicked, this, &DetailPage::onRatingButtonClicked);
 }
 
 void DetailPage::setCollectionData(const CollectionData &data, const QString &progressText)
@@ -79,6 +81,8 @@ void DetailPage::setCollectionData(const CollectionData &data, const QString &pr
         ui.pushButton_27->setEnabled(true);
     }
     ui.pushButton_24->setText(progressText);
+    const QString rateText = currentData.rate > 0 ? QString("我的评价: %1 分").arg(currentData.rate) : "未评价";
+    ui.pushButton->setText(rateText);
     loadData();
 }
 
@@ -192,6 +196,32 @@ QString DetailPage::getTimeInfo(const QList<QPair<QString, int>> &tagPairs, cons
     if (dateStr.isEmpty()) return "TBA";
     if (dateStr.length() >= 7) return QString("%1年%2月").arg(dateStr.left(4)).arg(dateStr.sliced(5, 2).toInt());
     return "TBA";
+}
+
+void DetailPage::onRatingButtonClicked()
+{   // 评分
+    if (m_starRating) {
+        m_starRating->close();
+        return;
+    }
+    m_starRating = new StarRatingWidget(10, this);
+    m_starRating->setRate(currentData.rate);
+    connect(m_starRating, &StarRatingWidget::ratingSelected, this, [this](const int rate) {
+        currentData.rate = rate;
+        ui.pushButton->setText(QString("我的评价: %1 分").arg(rate));
+        m_starRating->close();
+        ui.pushButton->setText("更改中...");
+        if (bangumiAPI->updateCollection(currentData.subject_id, {{"rate", rate}}, 3)) {
+            dbManager->updateCollectionFields(currentData.subject_id, {{"rate", rate}}, false);
+            ui.pushButton->setText(QString("我的评价: %1 分").arg(rate));
+        }
+        else ui.pushButton->setText("更改失败");
+    });
+    connect(m_starRating, &QObject::destroyed, this, [this] {m_starRating = nullptr;});
+    const QPoint btnTopRight = ui.pushButton->mapToGlobal(QPoint(ui.pushButton->width(), 0));
+    const QPoint btnCenter = ui.pushButton->mapToGlobal(ui.pushButton->rect().center());
+    m_starRating->move(btnTopRight.x(), btnCenter.y() - m_starRating->height() / 2);
+    m_starRating->show();
 }
 
 void DetailPage::clearLayout() const
