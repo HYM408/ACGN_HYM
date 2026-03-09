@@ -1,5 +1,4 @@
 #include "episode_page.h"
-#include <QLabel>
 #include <QPainter>
 #include <QPointer>
 #include <QLineEdit>
@@ -35,11 +34,11 @@ EpisodeOverlay::EpisodeOverlay(QWidget *parent) : QWidget(parent)
     ui.gridLayout_3->addWidget(episodeListView, 0, 0, 1, 1);
     ui.gridLayout_3->setContentsMargins(10, 10, 10, 10);
     connect(ui.pushButton_14, &QPushButton::clicked, this, &EpisodeOverlay::closeOverlay);
+    connect(ui.pushButton_15, &QPushButton::clicked, this, &EpisodeOverlay::onUpdateButtonClicked);
     connect(episodeDelegate, &EpisodeDelegate::episodeClicked, this, &EpisodeOverlay::onEpisodeItemClicked);
-    installEventFilter(this);
 }
 
-EpisodeDelegate::EpisodeDelegate(QObject *parent): QStyledItemDelegate(parent) {}
+EpisodeDelegate::EpisodeDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 
 void EpisodeOverlay::setManagers(BangumiAPI *api)
 {   // 初始化实例
@@ -76,10 +75,7 @@ void EpisodeDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
         double epValue = ep.ep;
         if (qAbs(epValue - qRound(epValue)) < 0.001) epText = QString::number(qRound(epValue));
         else epText = QString::number(epValue, 'f', 1);
-    } else {
-        double sortValue = ep.sort;
-        epText = QString::number(sortValue);
-    }
+    } else epText = QString::number(ep.sort);
     painter->drawText(rect, Qt::AlignCenter, epText);
     if (epType != 0) {
         QFont smallFont = painter->font();
@@ -104,11 +100,8 @@ QSize EpisodeDelegate::sizeHint(const QStyleOptionViewItem &option, const QModel
 bool EpisodeDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
 {   // 鼠标事件
     if (event->type() == QEvent::MouseButtonRelease) {
-        const auto *mouseEvent = dynamic_cast<QMouseEvent*>(event);
-        if (mouseEvent->button() == Qt::LeftButton) {
-            emit episodeClicked(qvariant_cast<EpisodeData>(index.data(EpisodeOverlay::EpisodeDataRole)));
-            return true;
-        }
+        emit episodeClicked(qvariant_cast<EpisodeData>(index.data(EpisodeOverlay::EpisodeDataRole)));
+        return true;
     }
     return QStyledItemDelegate::editorEvent(event, model, option, index);
 }
@@ -116,6 +109,12 @@ bool EpisodeDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, cons
 void EpisodeOverlay::keyPressEvent(QKeyEvent *event)
 {   // 键盘事件
     if (event->key() == Qt::Key_Escape) closeOverlay();
+}
+
+void EpisodeOverlay::onUpdateButtonClicked()
+{   // 更新按钮点击
+    if (collectionData.subject_type == 2) onMarkAllWatchedClicked();
+    else onUpdateClicked();
 }
 
 void EpisodeOverlay::showWithCollectionData(const CollectionData &collData)
@@ -126,11 +125,9 @@ void EpisodeOverlay::showWithCollectionData(const CollectionData &collData)
     this->collectionData = collData;
     ui.pushButton_15->setEnabled(true);
     if (collData.subject_type != 2) {
-        connect(ui.pushButton_15, &QPushButton::clicked, this, &EpisodeOverlay::onUpdateClicked);
         ui.pushButton_15->setText("更新");
         loadVolEpData();
     } else {
-        connect(ui.pushButton_15, &QPushButton::clicked, this, &EpisodeOverlay::onMarkAllWatchedClicked);
         ui.pushButton_15->setText("全部已看");
         loadEpisodesData();
     }
@@ -142,16 +139,12 @@ void EpisodeOverlay::paintEvent(QPaintEvent *event)
     painter.fillRect(rect(), QColor(0, 0, 0, 150));
 }
 
-bool EpisodeOverlay::eventFilter(QObject *obj, QEvent *event)
+void EpisodeOverlay::mousePressEvent(QMouseEvent *event)
 {   // 关闭事件
-    if (event->type() == QEvent::MouseButtonPress) {
-        const auto *mouseEvent = dynamic_cast<QMouseEvent*>(event);
-        if (mouseEvent->button() == Qt::LeftButton && !episodeContainer->geometry().contains(mouseEvent->pos())) {
-            closeOverlay();
-            return true;
-        }
-    }
-    return QWidget::eventFilter(obj, event);
+    if (!episodeContainer->geometry().contains(event->pos())) {
+        closeOverlay();
+        event->accept();
+    } else QWidget::mousePressEvent(event);
 }
 
 void EpisodeOverlay::resizeEvent(QResizeEvent *event)
@@ -165,7 +158,6 @@ void EpisodeOverlay::resizeEvent(QResizeEvent *event)
 void EpisodeOverlay::loadEpisodesData()
 {   // 加载剧集数据
     const int subjectId = collectionData.subject_id;
-    episodeModel->clear();
     episodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
     if (!episodes.isEmpty()) {
         updateEpisodeView();
@@ -194,6 +186,7 @@ void EpisodeOverlay::loadEpisodesData()
 void EpisodeOverlay::loadVolEpData()
 {   // 加载卷话数据
     auto *container = new QWidget(episodeContainer);
+    volContainer = container;
     auto *vLayout = new QVBoxLayout(container);
     auto createField = [&](const QString &label, const int value, const int total, QLineEdit* &editPtr) {
         auto *hLayout = new QHBoxLayout;
@@ -261,10 +254,14 @@ void EpisodeOverlay::onMarkAllWatchedClicked()
     const QJsonObject apiRequestData{{"episode_id", episodeIds}, {"type", 2}};
     const QPointer guard(this);
     const bool success = bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData, 3);
-    if (!success) return;
     DatabaseManager::updateAllEpisodesStatus(subjectId, 2);
     DatabaseManager::updateCollectionFields(subjectId, {{"ep_status", episodes.size()}}, true);
     if (!guard) return;
+    if (!success) {
+        ui.pushButton_15->setText(tr("失败"));
+        ui.pushButton_15->setEnabled(true);
+        return;
+    }
     emit collectionDataChanged();
     loadEpisodesData();
     ui.pushButton_15->setText("全部已看");
@@ -281,9 +278,13 @@ void EpisodeOverlay::onUpdateClicked()
     const QJsonObject apiRequestData{{"vol_status", newVolStatus}, {"ep_status", newEpStatus}};
     const QPointer guard(this);
     const bool success = bangumiAPI->updateCollection(subjectId, apiRequestData, 3);
-    if (!success) return;
     DatabaseManager::updateCollectionFields(subjectId, {{"vol_status", newVolStatus}, {"ep_status", newEpStatus}}, true);
     if (!guard) return;
+    if (!success) {
+        ui.pushButton_15->setText("失败");
+        ui.pushButton_15->setEnabled(true);
+        return;
+    }
     emit collectionDataChanged();
     ui.pushButton_15->setText("更新");
     ui.pushButton_15->setEnabled(true);
@@ -296,6 +297,12 @@ void EpisodeOverlay::closeOverlay()
     if (noEpisodesLabel) {
         delete noEpisodesLabel;
         noEpisodesLabel = nullptr;
+    }
+    if (volContainer) {
+        delete volContainer;
+        volContainer = nullptr;
+        volEdit = nullptr;
+        epEdit = nullptr;
     }
     emit overlayClosed();
 }

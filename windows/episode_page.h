@@ -40,10 +40,13 @@ signals:
     void collectionDataChanged();
 
 protected:
-    void keyPressEvent(QKeyEvent* event) override;
+    void keyPressEvent(QKeyEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
-    bool eventFilter(QObject *obj, QEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
+
+private slots:
+    void onUpdateButtonClicked();
 
 private:
     void loadEpisodesData();
@@ -61,13 +64,14 @@ private:
     QListView *episodeListView = nullptr;
     QStandardItemModel *episodeModel = nullptr;
     EpisodeDelegate *episodeDelegate = nullptr;
+    QLineEdit *volEdit = nullptr;
+    QLineEdit *epEdit = nullptr;
+    QWidget *volContainer = nullptr;
     const int BUTTON_SIZE = 40;
     const int SPACING = 7;
     const int COLUMNS = 12;
     const int MAX_CONTAINER_HEIGHT = 900;
     const int MIN_CONTAINER_HEIGHT = 200;
-    QLineEdit *volEdit = nullptr;
-    QLineEdit *epEdit = nullptr;
 };
 
 #endif // EPISODE_PAGE_H
