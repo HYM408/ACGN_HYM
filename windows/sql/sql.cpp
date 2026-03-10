@@ -2,7 +2,6 @@
 #include <QDir>
 #include <QSqlError>
 #include <QJsonArray>
-#include <QJsonObject>
 
 DatabaseManager::DatabaseManager(QObject* parent) : QObject(parent)
 {   // 初始化
@@ -43,7 +42,6 @@ void DatabaseManager::initTables()
         "subject_id INTEGER, id INTEGER, ep INTEGER, sort INTEGER, name TEXT, name_cn TEXT, episode_type INTEGER, collection_type INTEGER, created_at INTEGER DEFAULT (strftime('%s','now')), PRIMARY KEY(subject_id, id))",
     };
     for (const auto &sql : tables) query.exec(sql);
-
     const QStringList publicTables = {
         // episode公共数据表
         "CREATE TABLE IF NOT EXISTS episode_public_date ("
@@ -304,42 +302,6 @@ bool DatabaseManager::updateAllEpisodesStatus(const int subjectId, const int col
 }
 
 // =============== episode公共数据表 ===============
-bool DatabaseManager::insertEpisodeAirdateFromFile(const QString &filePath, QSqlDatabase db)
-{   // episode公共数据插入
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
-    QSqlQuery query(db);
-    query.prepare("INSERT OR REPLACE INTO episode_public_date (subject_id, id, airdate, sort) VALUES (?,?,?,?)");
-    db.transaction();
-    int count = 0;
-    constexpr int batchSize = 10000;
-    QTextStream stream(&file);
-    while (!stream.atEnd()) {
-        QString line = stream.readLine();
-        if (line.isEmpty()) continue;
-        QJsonDocument doc = QJsonDocument::fromJson(line.toUtf8());
-        if (!doc.isObject()) continue;
-        QJsonObject obj = doc.object();
-        QString airdateStr = obj["airdate"].toString();
-        if (airdateStr.isEmpty()) continue;
-        const int subjectId = obj["subject_id"].toInt();
-        const int id = obj["id"].toInt();
-        const int sort = static_cast<int>(obj["sort"].toDouble() * 10.0);
-        query.addBindValue(subjectId);
-        query.addBindValue(id);
-        query.addBindValue(dateStringToTimestamp(airdateStr));
-        query.addBindValue(sort);
-        query.exec();
-        ++count;
-        if (count % batchSize == 0) {
-            db.commit();
-            db.transaction();
-        }
-    }
-    db.commit();
-    return true;
-}
-
 QJsonObject DatabaseManager::getEpisodeAirdates(const QList<int> &subjectIds) const
 {   // 获取播出日期
     QSqlQuery query(episodePublicDate);
@@ -361,54 +323,6 @@ QJsonObject DatabaseManager::getEpisodeAirdates(const QList<int> &subjectIds) co
 }
 
 // =============== subject公共数据表 ===============
-bool DatabaseManager::insertSubjectPublic(const QString& filePath, QSqlDatabase db, const QList<int>& allowedTypes)
-{   // subject公共数据插入
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
-    QSqlQuery query(db);
-    query.prepare("INSERT OR REPLACE INTO subject_public_date VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-    db.transaction();
-    int count = 0;
-    constexpr int batchSize = 10000;
-    QTextStream stream(&file);
-    while (!stream.atEnd()) {
-        QString line = stream.readLine().trimmed();
-        if (line.isEmpty()) continue;
-        QJsonParseError parseError;
-        QJsonDocument doc = QJsonDocument::fromJson(line.toUtf8(), &parseError);
-        if (parseError.error != QJsonParseError::NoError || !doc.isObject()) continue;
-        QJsonObject obj = doc.object();
-        if (!allowedTypes.contains(obj["type"].toInt())) continue;
-        query.addBindValue(obj["id"].toInt());
-        query.addBindValue(obj["name"].toString());
-        query.addBindValue(obj["name_cn"].toString());
-        query.addBindValue(compressString(obj["summary"].toString()));
-        query.addBindValue(simplifyTags(obj["tags"].toArray()));
-        query.addBindValue(QJsonDocument(obj["meta_tags"].toArray()).toJson(QJsonDocument::Compact));
-        query.addBindValue(obj["score"].toDouble() * 10.0);
-        query.addBindValue(obj["rank"].toInt());
-        query.addBindValue(dateStringToTimestamp(obj["date"].toString()));
-        QJsonObject scoreDetails = obj["score_details"].toObject();
-        int totalVotes = 0;
-        for (auto it = scoreDetails.begin(); it != scoreDetails.end(); ++it) totalVotes += it.value().toInt();
-        query.addBindValue(totalVotes);
-        QJsonObject favorite = obj["favorite"].toObject();
-        query.addBindValue(favorite["doing"].toInt());
-        query.addBindValue(favorite["done"].toInt());
-        query.addBindValue(favorite["dropped"].toInt());
-        query.addBindValue(favorite["on_hold"].toInt());
-        query.addBindValue(favorite["wish"].toInt());
-        query.exec();
-        ++count;
-        if (count % batchSize == 0) {
-            db.commit();
-            db.transaction();
-        }
-    }
-    db.commit();
-    return true;
-}
-
 bool DatabaseManager::insertOrUpdateSubject(const QJsonObject &apiData) const
 {   // 插入subjects信息(API)
     QSqlQuery query(episodePublicDate);

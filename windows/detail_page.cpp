@@ -93,7 +93,7 @@ void DetailPage::loadData()
     else {
         QTimer::singleShot(0, this, [this] {
             const QJsonObject subjectInfo = bangumiAPI->getSubjectInfo(currentData.subject_id, 3);
-            dbManager->insertOrUpdateSubject(subjectInfo);
+            if (!dbManager->insertOrUpdateSubject(subjectInfo)) qDebug() << currentData.subject_id << "失败";
             if (!isVisible()) return;
             updateDetailPage(dbManager->getSubjectById(currentData.subject_id));
         });
@@ -212,7 +212,7 @@ void DetailPage::onRatingButtonClicked()
         m_starRating->close();
         ui.pushButton->setText("更改中...");
         if (bangumiAPI->updateCollection(currentData.subject_id, {{"rate", rate}}, 3)) {
-            dbManager->updateCollectionFields(currentData.subject_id, {{"rate", rate}}, false);
+            DatabaseManager::updateCollectionFields(currentData.subject_id, {{"rate", rate}}, false);
             ui.pushButton->setText(QString("我的评价: %1 分").arg(rate));
         }
         else ui.pushButton->setText("更改失败");

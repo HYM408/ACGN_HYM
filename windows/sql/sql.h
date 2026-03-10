@@ -29,10 +29,8 @@ public:
     static bool deleteEpisodesBySubjectId(int subjectId);
     static bool updateAllEpisodesStatus(int subjectId, int collectionType);
     // 公共数据表
-    static bool insertEpisodeAirdateFromFile(const QString& filePath, QSqlDatabase db);
     [[nodiscard]] QJsonObject getEpisodeAirdates(const QList<int> &subjectIds) const;
-    static bool insertSubjectPublic(const QString& filePath, QSqlDatabase db, const QList<int>& allowedTypes);
-    bool insertOrUpdateSubject(const QJsonObject &apiData) const;
+    [[nodiscard]] bool insertOrUpdateSubject(const QJsonObject &apiData) const;
     [[nodiscard]] SubjectsData getSubjectById(int subjectId) const;
 
 signals:

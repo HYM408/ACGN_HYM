@@ -1,10 +1,8 @@
 #include "settings_page.h"
-#include <QLabel>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDesktopServices>
 #include <QtConcurrent/QtConcurrent>
-#include <QtCore/private/qzipreader_p.h>
 #include "config.h"
 #include "sql/sql.h"
 #include "api/pikpak_api.h"
@@ -13,7 +11,7 @@
 #include "utils/network_util.h"
 #include "downloader/chunk_download.h"
 
-const QString SettingsPage::BANGUMI_ARCHIVE_URL = "https://raw.githubusercontent.com/bangumi/Archive/refs/heads/master/aux/latest.json";
+const QString SettingsPage::BANGUMI_ARCHIVE_URL = "https://raw.githubusercontent.com/HYM408/BangumiDateProcessing/refs/heads/main/latest.json";
 
 SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent)
 {
@@ -46,18 +44,17 @@ void SettingsPage::setManagers(BangumiAPI *api, PikPakApi *pikpakapi, DatabaseMa
 
 void SettingsPage::setupConnections()
 {   // 设置连接
+    ui.pushButton_3->setChecked(true);
+    ui.stackedWidget_2->setCurrentIndex(0);
     // 返回
     connect(ui.back_Button_2, &QPushButton::clicked, this, &SettingsPage::onBackButtonClicked);
     // Bangumi
     connect(ui.pushButton_3, &QPushButton::clicked, [this] {ui.stackedWidget_2->setCurrentWidget(ui.login_page);});
-    ui.pushButton_3->setChecked(true);
-    ui.stackedWidget_2->setCurrentWidget(ui.login_page);
     connect(ui.login_Button, &QPushButton::clicked, this, &SettingsPage::onLoginButtonClicked);
     connect(ui.collection_Button, &QPushButton::clicked, this, &SettingsPage::onCollectionButtonClicked);
     connect(ui.comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SettingsPage::onBangumiUrlChanged);
     connect(ui.pushButton_17, &QPushButton::clicked, this, [this] {downloadPublicDate(false);});
     connect(ui.pushButton_19, &QPushButton::clicked, this, [this] {downloadPublicDate(true);});
-    connect(ui.pushButton_18, &QPushButton::clicked, this, &SettingsPage::onExtractArchiveButtonClicked);
     // PikPak
     connect(ui.pushButton_4, &QPushButton::clicked, [this] {ui.stackedWidget_2->setCurrentWidget(ui.pikpak_page);});
     connect(ui.login_Button_2, &QPushButton::clicked, this, &SettingsPage::onPikPakLoginButtonClicked);
@@ -170,94 +167,45 @@ void SettingsPage::onCollectionButtonClicked() const
 
 void SettingsPage::downloadPublicDate(const bool useMirror)
 {   // 下载Bangumi公共数据
-    disconnect(ui.pushButton_20, &QPushButton::clicked, nullptr, nullptr);
+    QList<int> selectedTypes;
+    if (ui.checkBox->isChecked()) selectedTypes.append(2);
+    if (ui.checkBox_2->isChecked()) selectedTypes.append(1);
+    if (ui.checkBox_3->isChecked()) selectedTypes.append(4);
+    if (selectedTypes.isEmpty()) return ui.pushButton_20->setText("请至少选择一种要导入的类型");
     if (m_currentDownload) clearDownloadTasks(true);
     ui.pushButton_20->setText("获取下载链接");
     QNetworkAccessManager manager;
     const QNetworkRequest request(useMirror ? "https://hk.gh-proxy.org/" + BANGUMI_ARCHIVE_URL : BANGUMI_ARCHIVE_URL);
     QJsonObject json = sendRequestJson(manager, request, "GET", QByteArray(), 2, nullptr, nullptr);
     if (json.isEmpty()) return ui.pushButton_20->setText("错误：无法获取下载链接");
-    const QString downloadUrl = json["browser_download_url"].toString();
-    const QString downloadPath = getConfig("Download/download_path").toString();
-    if (const QDir dir(downloadPath); !dir.exists()) dir.mkpath(".");
-    const QString fullPath = downloadPath + "/" + "bangumi_archive_data.zip";
+    QStringList typeStrs;
+    for (const int type : selectedTypes) typeStrs << QString::number(type);
+    typeStrs.sort();
+    const QString key = "public_date_" + typeStrs.join("");
+    const QString downloadUrl = json[key].toString();
+    const QString targetDir = QDir::currentPath() + "/data";
+    const QString targetPath = targetDir + "/public_date.db";
+    const QString tempPath   = targetDir + "/public_date.db.tmp";
+    const QDir dir(targetDir);
+    if (!dir.exists()) dir.mkpath(".");
     const QString finalDownloadUrl = useMirror ? "https://hk.gh-proxy.org/" + downloadUrl : downloadUrl;
-    m_currentDownload = new ChunkDownload(finalDownloadUrl, fullPath, 4, this);
+    m_currentDownload = new ChunkDownload(finalDownloadUrl, tempPath, 4, this);
     connect(m_currentDownload, &ChunkDownload::progressChanged, this, [this](const int percent, qint64, qint64) {ui.pushButton_20->setText(QString("下载中 %1%").arg(percent));});
-    connect(m_currentDownload, &ChunkDownload::statusChanged, this, [this, fullPath](const QString &status) {
+    connect(m_currentDownload, &ChunkDownload::statusChanged, this, [this, targetPath, tempPath](const QString &status) {
         if (status == "完成") {
-            connect(ui.pushButton_20, &QPushButton::clicked, this, [fullPath] {QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(fullPath).path()));});
-            ui.pushButton_20->setText("下载完成，点击查看");
-        }
-        else if (status == "错误") {
-            ui.pushButton_20->setText("下载失败");
+            dbManager->closePublicDatabase();
+            QFile::remove(targetPath);
+            QFile tempFile(tempPath);
+            tempFile.rename(targetPath);
+            dbManager->openDatabase();
+            ui.pushButton_20->setText("完成");
+        } else if (status == "错误") {
+            ui.pushButton_20->setText("失败");
+            QFile::remove(tempPath);
             clearDownloadTasks(false);
         }
     });
     m_currentDownload->start();
-}
-
-void SettingsPage::onExtractArchiveButtonClicked()
-{   // 导入数据
-    QList<int> selectedTypes;
-    if (ui.checkBox->isChecked()) selectedTypes.append(2);
-    if (ui.checkBox_2->isChecked()) selectedTypes.append(1);
-    if (ui.checkBox_3->isChecked()) selectedTypes.append(4);
-    if (selectedTypes.isEmpty()) return ui.pushButton_18->setText("请至少选择一种要导入的类型");
-    ui.pushButton_18->setEnabled(false);
-    ui.pushButton_18->setText("解压中...");
-    const QString downloadPath = getConfig("Download/download_path").toString();
-    const QString dbPath = QDir::currentPath() + "/data/public_date.db";
-    dbManager->closePublicDatabase();
-    QFile::remove(dbPath);
-    auto future = QtConcurrent::run([=]() -> QString {
-        const QString zipPath = downloadPath + "/bangumi_archive_data.zip";
-        if (!QFile::exists(zipPath)) return "未找到 bangumi_archive_data.zip";
-        const QZipReader reader(zipPath);
-        if (!reader.exists()) return "文件损坏";
-        const QStringList targetFiles = {"subject.jsonlines", "episode.jsonlines"};
-        bool extractedAny = false, extractionFailed = false;
-        QStringList extractedFiles;
-        for (const auto &fi : reader.fileInfoList()) {
-            QString baseName = QFileInfo(fi.filePath).fileName();
-            if (!targetFiles.contains(baseName)) continue;
-            QByteArray data = reader.fileData(fi.filePath);
-            QString outPath = downloadPath + "/" + baseName;
-            if (QFile outFile(outPath); outFile.open(QIODevice::WriteOnly)) {
-                outFile.write(data);
-                extractedAny = true;
-                extractedFiles.append(outPath);
-            } else extractionFailed = true;
-        }
-        if (!extractedAny) return "未找到需要解压的文件";
-        if (extractionFailed) return "部分文件解压失败";
-        ui.pushButton_18->setText("导入中...");
-        const QString connName = "public_date_worker_" + QString::number(reinterpret_cast<quintptr>(QThread::currentThreadId()));
-        {
-            QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", connName);
-            db.setDatabaseName(dbPath);
-            db.open();
-            const QStringList createTableSqls = {
-                "CREATE TABLE IF NOT EXISTS episode_public_date ("
-                "subject_id INTEGER NOT NULL, id INTEGER NOT NULL, airdate INTEGER NOT NULL, sort INTEGER, PRIMARY KEY (subject_id, id))",
-                "CREATE TABLE IF NOT EXISTS subject_public_date ("
-                "id INTEGER PRIMARY KEY, name TEXT, name_cn TEXT, summary BLOB, tags TEXT, meta_tags TEXT, score INTEGER, rank INTEGER, date INTEGER, rating_total INTEGER, doing INTEGER, done INTEGER, dropped INTEGER, on_hold INTEGER, wish INTEGER)"
-            };
-            QSqlQuery query(db);
-            for (const auto &sql : createTableSqls) query.exec(sql);
-            const bool epOk = DatabaseManager::insertEpisodeAirdateFromFile(downloadPath + "/episode.jsonlines", db);
-            const bool subOk = DatabaseManager::insertSubjectPublic(downloadPath + "/subject.jsonlines", db, selectedTypes);
-            if (!epOk || !subOk) return "导入失败";
-        }
-        QSqlDatabase::removeDatabase(connName);
-        for (const QString &filePath : extractedFiles) QFile::remove(filePath);
-        return "导入成功";
-    });
-    future.then(this, [this](const QString &result) {
-        ui.pushButton_18->setText(result);
-        ui.pushButton_18->setEnabled(true);
-        dbManager->openDatabase();
-    });
 }
 
 void SettingsPage::onPikPakLoginButtonClicked()
@@ -331,9 +279,10 @@ void SettingsPage::clearDownloadTasks(const bool stop)
 
 void SettingsPage::onBackButtonClicked()
 {   // 返回
+    ui.pushButton_3->setChecked(true);
+    ui.stackedWidget_2->setCurrentIndex(0);
     ui.login_Button->setText("开始授权");
     ui.collection_Button->setText("获取收藏");
     ui.login_Button_2->setText("开始登录");
-    ui.pushButton_18->setText("导入数据");
     emit backButtonClicked();
 }

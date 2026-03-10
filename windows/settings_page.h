@@ -37,7 +37,6 @@ private:
     void setBangumiBaseUrl() const;
     bool ensureBangumiCredentials();
     void downloadPublicDate(bool useMirror);
-    void onExtractArchiveButtonClicked();
     bool ensurePikPakCredentials();
     void setupDownloadPathUi() const;
     Ui::SettingsPage ui{};

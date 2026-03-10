@@ -58,17 +58,16 @@ public:
     QFrame *frame;
     QVBoxLayout *verticalLayout_6;
     QLabel *pushButton_16;
-    QFrame *frame_4;
-    QHBoxLayout *horizontalLayout_4;
-    QPushButton *pushButton_17;
-    QPushButton *pushButton_19;
-    QPushButton *pushButton_20;
     QFrame *frame_5;
     QVBoxLayout *verticalLayout_8;
     QCheckBox *checkBox;
     QCheckBox *checkBox_2;
     QCheckBox *checkBox_3;
-    QPushButton *pushButton_18;
+    QFrame *frame_4;
+    QHBoxLayout *horizontalLayout_4;
+    QPushButton *pushButton_17;
+    QPushButton *pushButton_19;
+    QPushButton *pushButton_20;
     QSpacerItem *verticalSpacer_3;
     QWidget *pikpak_page;
     QVBoxLayout *verticalLayout_3;
@@ -375,7 +374,33 @@ public:
 
         verticalLayout_6->addWidget(pushButton_16, 0, Qt::AlignmentFlag::AlignLeft);
 
-        frame_4 = new QFrame(frame);
+        frame_5 = new QFrame(frame);
+        frame_5->setObjectName("frame_5");
+        frame_5->setFrameShape(QFrame::Shape::StyledPanel);
+        frame_5->setFrameShadow(QFrame::Shadow::Raised);
+        verticalLayout_8 = new QVBoxLayout(frame_5);
+        verticalLayout_8->setObjectName("verticalLayout_8");
+        verticalLayout_8->setContentsMargins(0, -1, -1, -1);
+        checkBox = new QCheckBox(frame_5);
+        checkBox->setObjectName("checkBox");
+        checkBox->setFont(font7);
+        checkBox->setChecked(true);
+
+        verticalLayout_8->addWidget(checkBox);
+
+        checkBox_2 = new QCheckBox(frame_5);
+        checkBox_2->setObjectName("checkBox_2");
+        checkBox_2->setFont(font7);
+
+        verticalLayout_8->addWidget(checkBox_2);
+
+        checkBox_3 = new QCheckBox(frame_5);
+        checkBox_3->setObjectName("checkBox_3");
+        checkBox_3->setFont(font7);
+
+        verticalLayout_8->addWidget(checkBox_3);
+
+        frame_4 = new QFrame(frame_5);
         frame_4->setObjectName("frame_4");
         frame_4->setFrameShape(QFrame::Shape::StyledPanel);
         frame_4->setFrameShadow(QFrame::Shadow::Raised);
@@ -406,39 +431,7 @@ public:
         horizontalLayout_4->addWidget(pushButton_20);
 
 
-        verticalLayout_6->addWidget(frame_4, 0, Qt::AlignmentFlag::AlignLeft);
-
-        frame_5 = new QFrame(frame);
-        frame_5->setObjectName("frame_5");
-        frame_5->setFrameShape(QFrame::Shape::StyledPanel);
-        frame_5->setFrameShadow(QFrame::Shadow::Raised);
-        verticalLayout_8 = new QVBoxLayout(frame_5);
-        verticalLayout_8->setObjectName("verticalLayout_8");
-        verticalLayout_8->setContentsMargins(0, -1, -1, -1);
-        checkBox = new QCheckBox(frame_5);
-        checkBox->setObjectName("checkBox");
-        checkBox->setFont(font7);
-        checkBox->setChecked(true);
-
-        verticalLayout_8->addWidget(checkBox);
-
-        checkBox_2 = new QCheckBox(frame_5);
-        checkBox_2->setObjectName("checkBox_2");
-        checkBox_2->setFont(font7);
-
-        verticalLayout_8->addWidget(checkBox_2);
-
-        checkBox_3 = new QCheckBox(frame_5);
-        checkBox_3->setObjectName("checkBox_3");
-        checkBox_3->setFont(font7);
-
-        verticalLayout_8->addWidget(checkBox_3);
-
-        pushButton_18 = new QPushButton(frame_5);
-        pushButton_18->setObjectName("pushButton_18");
-        pushButton_18->setFont(font6);
-
-        verticalLayout_8->addWidget(pushButton_18, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_8->addWidget(frame_4, 0, Qt::AlignmentFlag::AlignLeft);
 
 
         verticalLayout_6->addWidget(frame_5);
@@ -585,13 +578,12 @@ public:
         comboBox->setItemText(2, QCoreApplication::translate("SettingsPage", "chii.in", nullptr));
 
         pushButton_16->setText(QCoreApplication::translate("SettingsPage", "Bangumi \345\205\254\345\205\261\346\225\260\346\215\256", nullptr));
-        pushButton_17->setText(QCoreApplication::translate("SettingsPage", "\344\270\213\350\275\275", nullptr));
-        pushButton_19->setText(QCoreApplication::translate("SettingsPage", "\351\225\234\345\203\217", nullptr));
-        pushButton_20->setText(QString());
         checkBox->setText(QCoreApplication::translate("SettingsPage", "\345\212\250\347\224\273", nullptr));
         checkBox_2->setText(QCoreApplication::translate("SettingsPage", "\344\271\246\347\261\215", nullptr));
         checkBox_3->setText(QCoreApplication::translate("SettingsPage", "\346\270\270\346\210\217", nullptr));
-        pushButton_18->setText(QCoreApplication::translate("SettingsPage", "\345\257\274\345\205\245\346\225\260\346\215\256", nullptr));
+        pushButton_17->setText(QCoreApplication::translate("SettingsPage", "\344\270\213\350\275\275", nullptr));
+        pushButton_19->setText(QCoreApplication::translate("SettingsPage", "\351\225\234\345\203\217", nullptr));
+        pushButton_20->setText(QString());
         pushButton_5->setText(QCoreApplication::translate("SettingsPage", "PikPak \347\231\273\345\275\225", nullptr));
         pushButton_6->setText(QString());
         pushButton_10->setText(QString());
