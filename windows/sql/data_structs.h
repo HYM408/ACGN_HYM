@@ -15,7 +15,6 @@ struct CollectionData {
     QString subject_name_cn;
     int subject_eps = 0;
     int subject_volumes = 0;
-    QString subject_images_common;
 };
 
 struct SubjectsData {

@@ -42,7 +42,9 @@ void CacheImageUtil::onDownloadFinished(QNetworkReply *reply)
     if (!reply->error()) {
         const QByteArray imageData = reply->readAll();
         if (pixmap.loadFromData(imageData)) {
-            if (cacheToLocal && !fileName.isEmpty()) {
+            const QUrl finalUrl = reply->url();
+            const bool isDefaultImage = finalUrl.toString() == "https://lain.bgm.tv/img/no_icon_subject.png";
+            if (cacheToLocal && !fileName.isEmpty() && !isDefaultImage) {
                 const QString fullPath = "data/images/" + fileName;
                 const QFileInfo fileInfo(fullPath);
                 QDir().mkpath(fileInfo.absolutePath());

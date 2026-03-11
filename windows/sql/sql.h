@@ -42,7 +42,6 @@ private:
     QSqlDatabase episodePublicDate;
     static QString simplifyTags(const QJsonArray &tags);
     static int determineSubjectType(int originalType, const QJsonArray &tags);
-    static QString processImageUrl(const QString &url);
     static bool executeQuery(QSqlQuery &query, const QString &errorMsg);
     static qint64 dateStringToTimestamp(const QString& dateStr);
     static qint64 dateTimeStringToTimestamp(const QString& dateTimeStr);

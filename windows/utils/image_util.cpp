@@ -1,6 +1,7 @@
 #include "image_util.h"
 #include <QLabel>
 #include <QPainter>
+#include <QPointer>
 #include <QPainterPath>
 #include "cache_image_util.h"
 
@@ -31,14 +32,15 @@ QPixmap ImageUtil::createRoundedPixmap(const QPixmap &pixmap, const int radius, 
 
 void ImageUtil::loadImageWithCache(CacheImageUtil *cacheImageUtil, const QString &url, QLabel *label, int radius, bool allCorners, const bool cacheToLocal, const QString &fileName)
 {   // 加载图片
-    auto onLoaded = [label, radius, allCorners](const QPixmap& pixmap) {
-        if (pixmap.isNull()) return;
+    QPointer safeLabel(label);
+    auto onLoaded = [safeLabel, radius, allCorners](const QPixmap& pixmap) {
+        if (pixmap.isNull() || !safeLabel) return;
         QPixmap processed = pixmap;
         if (pixmap.height() >= pixmap.width()) {
             if (radius > 0) processed = createRoundedPixmap(pixmap, radius, allCorners);
-            processed = processed.scaled(label->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        } else processed = pixmap.scaledToWidth(label->width(), Qt::SmoothTransformation);
-        label->setPixmap(processed);
+            processed = processed.scaled(safeLabel->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        } else processed = pixmap.scaledToWidth(safeLabel->width(), Qt::SmoothTransformation);
+        safeLabel->setPixmap(processed);
     };
     cacheImageUtil->getImageAsync(url, onLoaded, cacheToLocal, fileName);
 }

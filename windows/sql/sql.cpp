@@ -36,7 +36,7 @@ void DatabaseManager::initTables()
     const QStringList tables = {
         // collection表
         "CREATE TABLE IF NOT EXISTS collection ("
-        "subject_id INTEGER PRIMARY KEY, vol_status INTEGER, ep_status INTEGER, subject_type INTEGER, type INTEGER, rate INTEGER, subject_date INTEGER, subject_name TEXT, subject_name_cn TEXT, subject_eps INTEGER, subject_volumes INTEGER, subject_images_common TEXT, updated_at INTEGER)",
+        "subject_id INTEGER PRIMARY KEY, vol_status INTEGER, ep_status INTEGER, subject_type INTEGER, type INTEGER, rate INTEGER, subject_date INTEGER, subject_name TEXT, subject_name_cn TEXT, subject_eps INTEGER, subject_volumes INTEGER, updated_at INTEGER)",
         // episode表
         "CREATE TABLE IF NOT EXISTS episode_collection ("
         "subject_id INTEGER, id INTEGER, ep INTEGER, sort INTEGER, name TEXT, name_cn TEXT, episode_type INTEGER, collection_type INTEGER, created_at INTEGER DEFAULT (strftime('%s','now')), PRIMARY KEY(subject_id, id))",
@@ -77,12 +77,6 @@ int DatabaseManager::determineSubjectType(const int originalType, const QJsonArr
     if (originalType != 1) return originalType;
     for (const auto &tag : tags) if (tag.toObject()["name"].toString().trimmed() == "漫画") return 8;
     return 7;
-}
-
-QString DatabaseManager::processImageUrl(const QString &url)
-{   // 图片url处理
-    const QString prefix = "https://lain.bgm.tv/r/400/pic/cover/l/";
-    return url.startsWith(prefix) ? url.mid(prefix.length()) : url;
 }
 
 bool DatabaseManager::executeQuery(QSqlQuery &query, const QString &errorMsg)
@@ -132,7 +126,7 @@ QString DatabaseManager::decompressString(const QByteArray &data)
 bool DatabaseManager::insertManyCollectionData(const QJsonArray &jsonArray)
 {   // 批量插入多条数据
     QSqlQuery query;
-    query.prepare("INSERT OR REPLACE INTO collection VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    query.prepare("INSERT OR REPLACE INTO collection VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
     for (const auto &value : jsonArray) {
         QJsonObject data = value.toObject();
         QJsonObject subject = data["subject"].toObject();
@@ -151,7 +145,6 @@ bool DatabaseManager::insertManyCollectionData(const QJsonArray &jsonArray)
         query.addBindValue(subject["name_cn"].toString());
         query.addBindValue(subject["eps"].toInt());
         query.addBindValue(subject["volumes"].toInt());
-        query.addBindValue(processImageUrl(subject["images"].toObject()["common"].toString()));
         query.addBindValue(updatedTimestamp);
         if (!executeQuery(query, "插入收藏失败")) return false;
         query.finish();
@@ -174,8 +167,6 @@ CollectionData DatabaseManager::collectionFromQuery(const QSqlQuery &query)
     data.subject_name_cn = query.value("subject_name_cn").toString();
     data.subject_eps = query.value("subject_eps").toInt();
     data.subject_volumes = query.value("subject_volumes").toInt();
-    const QString stored = query.value("subject_images_common").toString();
-    data.subject_images_common = stored.isEmpty() ? QString() : "https://lain.bgm.tv/r/400/pic/cover/l/" + stored;
     return data;
 }
 

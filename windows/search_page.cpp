@@ -143,7 +143,6 @@ bool SearchPage::eventFilter(QObject *watched, QEvent *event)
                         data.subject_id = subjectId;
                         data.subject_name = original["name"].toString();
                         data.subject_name_cn = original["name_cn"].toString();
-                        data.subject_images_common = original["images"].toMap()["common"].toString();
                         data.subject_type = original["type"].toInt();
                         data.subject_volumes = original["volumes"].toInt();
                         data.subject_eps = original["eps"].toInt();

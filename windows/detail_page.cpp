@@ -64,10 +64,8 @@ void DetailPage::setCollectionData(const CollectionData &data, const QString &pr
     ui.tabWidget->setCurrentIndex(0);
     resetUI();
     currentData = data;
-    if (currentData.subject_images_common.isEmpty()) {
-        ui.cover_label_3->setText("暂无图片");
-        ui.cover_label_3->setStyleSheet("QLabel {color: gray}");
-    } else ImageUtil::loadImageWithCache(cacheImageUtil, currentData.subject_images_common, ui.cover_label_3, 15, true, true, QString("s%1.jpg").arg(currentData.subject_id));
+    const QString imageUrl = QString("https://api.bgm.tv/v0/subjects/%1/image?type=large").arg(currentData.subject_id);
+    ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, ui.cover_label_3, 15, true, true, QString("s%1.jpg").arg(currentData.subject_id));
     ui.textEdit->setText(currentData.subject_name_cn.isEmpty() ? currentData.subject_name : currentData.subject_name_cn);
     ui.pushButton_26->setText(statusNamesMap.value(currentData.subject_type).value(currentData.type));
     if (currentData.subject_type == 2) {
