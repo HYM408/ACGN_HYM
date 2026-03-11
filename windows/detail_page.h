@@ -29,6 +29,7 @@ private slots:
     void onEpisodeClicked();
     void onOpenBangumiPage() const;
     void onStatusButtonClicked();
+    void onCharacterTab(int index);
 
 protected:
     void showEvent(QShowEvent *event) override;
@@ -40,6 +41,7 @@ private:
     static QString getTimeInfo(const QList<QPair<QString, int>> &tagPairs, const QString &dateStr);
     void onRatingButtonClicked();
     void clearLayout() const;
+    void clearTab2() const;
     void loadData();
     void onBackButtonClicked();
     Ui::DetailPage ui{};
@@ -50,6 +52,7 @@ private:
     QMap<int, QMap<int, QString>> statusNamesMap;
     QListWidget *tagListWidget = nullptr;
     StarRatingWidget *m_starRating = nullptr;
+    QVector<CharacterData> m_characters;
 };
 
 class ClickableLabel : public QLabel

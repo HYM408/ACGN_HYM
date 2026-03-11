@@ -56,16 +56,18 @@ void DetailPage::setupConnections()
     connect(ui.pushButton_20, &QPushButton::clicked, this, &DetailPage::onOpenBangumiPage);
     connect(ui.pushButton_26, &QPushButton::clicked, this, &DetailPage::onStatusButtonClicked);
     connect(ui.pushButton, &QPushButton::clicked, this, &DetailPage::onRatingButtonClicked);
+    connect(ui.tabWidget, &QTabWidget::currentChanged, this, &DetailPage::onCharacterTab);
 }
 
 void DetailPage::setCollectionData(const CollectionData &data, const QString &progressText)
 {   // 显示传入数据
+    ui.tabWidget->setCurrentIndex(0);
     resetUI();
     currentData = data;
     if (currentData.subject_images_common.isEmpty()) {
         ui.cover_label_3->setText("暂无图片");
         ui.cover_label_3->setStyleSheet("QLabel {color: gray}");
-    } else ImageUtil::loadImageWithCache(cacheImageUtil, currentData.subject_images_common, ui.cover_label_3, 15, true, true);
+    } else ImageUtil::loadImageWithCache(cacheImageUtil, currentData.subject_images_common, ui.cover_label_3, 15, true, true, QString("s%1.jpg").arg(currentData.subject_id));
     ui.textEdit->setText(currentData.subject_name_cn.isEmpty() ? currentData.subject_name : currentData.subject_name_cn);
     ui.pushButton_26->setText(statusNamesMap.value(currentData.subject_type).value(currentData.type));
     if (currentData.subject_type == 2) {
@@ -89,7 +91,7 @@ void DetailPage::setCollectionData(const CollectionData &data, const QString &pr
 void DetailPage::loadData()
 {   // 加载数据
     const SubjectsData subjectData = dbManager->getSubjectById(currentData.subject_id);
-    if (subjectData.id != 0) updateDetailPage(subjectData);
+    if (subjectData.subject_id != 0) updateDetailPage(subjectData);
     else {
         QTimer::singleShot(0, this, [this] {
             const QJsonObject subjectInfo = bangumiAPI->getSubjectInfo(currentData.subject_id, 3);
@@ -98,6 +100,7 @@ void DetailPage::loadData()
             updateDetailPage(dbManager->getSubjectById(currentData.subject_id));
         });
     }
+    QTimer::singleShot(10, this, [this] {m_characters = dbManager->getCharactersWithPersonsBySubjectId(currentData.subject_id);});
 }
 
 void DetailPage::onEpisodeClicked()
@@ -224,6 +227,69 @@ void DetailPage::onRatingButtonClicked()
     m_starRating->show();
 }
 
+void DetailPage::onCharacterTab(const int index)
+{   // 角色Tab
+    if (index != 1) return;
+    clearTab2();
+    QWidget *content = ui.scrollAreaWidgetContents;
+    auto *gridLayout = new QGridLayout(content);
+    gridLayout->setSpacing(20);
+    gridLayout->setContentsMargins(0, 20, 20, 20);
+    constexpr int maxCols = 2;
+    constexpr int cardWidth = 400;
+    constexpr int imageSize = 60;
+    auto createCard = [this](const CharacterData &characterData) -> QWidget* {
+        auto *card = new QWidget();
+        card->setFixedWidth(cardWidth);
+        card->setStyleSheet("QWidget {background-color: #f9f9f9; border-radius: 8px}");
+        auto *layout = new QHBoxLayout(card);
+        auto *imageLabel = new QLabel(card);
+        imageLabel->setFixedSize(imageSize, imageSize);
+        layout->addWidget(imageLabel);
+        const QString imageUrl = QString("https://api.bgm.tv/v0/characters/%1/image?type=grid").arg(characterData.character_id);
+        ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, imageLabel, 10, true, true, QString("c%1.jpg").arg(characterData.character_id));
+        auto *textLayout = new QVBoxLayout();
+        textLayout->setSpacing(5);
+        const QString name = characterData.character_name_cn.isEmpty() ? characterData.character_name : characterData.character_name_cn;
+        auto *nameLabel = new QLabel(name, card);
+        QFont nameFont = nameLabel->font();
+        nameFont.setBold(true);
+        nameFont.setPointSize(12);
+        nameLabel->setFont(nameFont);
+        textLayout->addWidget(nameLabel);
+        QStringList allPersons;
+        QString firstPerson;
+        for (const auto &p : characterData.persons) {
+            QString disp = p.person_name_cn.isEmpty() ? p.person_name : p.person_name_cn;
+            if (firstPerson.isEmpty()) firstPerson = disp;
+            allPersons << disp;
+        }
+        static QMap<int, QString> roleTypeMap = {{1, "主角"}, {2, "配角"}, {3, "客串"}, {4, "闲角"}};
+        QString typeAndPerson = roleTypeMap.value(characterData.type, QString::number(characterData.type));
+        if (!firstPerson.isEmpty()) typeAndPerson += " · " + firstPerson;
+        auto *personLabel = new QLabel(typeAndPerson, card);
+        if (allPersons.size() > 1) personLabel->setToolTip(allPersons.join(" "));
+        textLayout->addWidget(personLabel);
+        layout->addLayout(textLayout);
+        layout->addStretch();
+        return card;
+    };
+    int row = 0, col = 0;
+    for (const auto &characterData : m_characters) {
+        QWidget *card = createCard(characterData);
+        gridLayout->addWidget(card, row, col);
+        col++;
+        if (col >= maxCols) {
+            col = 0;
+            row++;
+        }
+    }
+    if (col != 0) gridLayout->addItem(new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum), row, col);
+    auto *vSpacer = new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    gridLayout->addItem(vSpacer, row + 1, 0, 1, maxCols);
+    content->setLayout(gridLayout);
+}
+
 void DetailPage::clearLayout() const
 {   // 清空组件
     if (QLayout *layout = ui.frame_5->layout()) {
@@ -234,6 +300,13 @@ void DetailPage::clearLayout() const
         }
         delete layout;
     }
+}
+
+void DetailPage::clearTab2() const
+{   // 清理角色Tab
+    const QWidget *content = ui.scrollAreaWidgetContents;
+    qDeleteAll(content->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly));
+    if (content->layout()) delete content->layout();
 }
 
 void DetailPage::resetUI() const
@@ -250,6 +323,8 @@ void DetailPage::resetUI() const
 
 void DetailPage::onBackButtonClicked()
 {   // 返回
+    m_characters.clear();
+    clearTab2();
     resetUI();
     emit backButtonClicked();
 }

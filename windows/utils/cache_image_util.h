@@ -11,7 +11,7 @@ class CacheImageUtil : public QObject
 
 public:
     explicit CacheImageUtil(QObject *parent = nullptr);
-    void getImageAsync(const QString &url, const ImageCallback& callback, bool cacheToLocal);
+    void getImageAsync(const QString &url, const ImageCallback& callback, bool cacheToLocal, const QString &fileName);
     void clearPendingDownloads();
 
 signals:
@@ -22,7 +22,6 @@ private slots:
     void onDownloadComplete(const QString &url, const QPixmap &pixmap);
 
 private:
-    static QString getCachePath(const QString &url);
     QNetworkAccessManager networkManager;
     QHash<QString, QList<ImageCallback>> pendingCallbacks;
 };

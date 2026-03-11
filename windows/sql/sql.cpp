@@ -44,11 +44,17 @@ void DatabaseManager::initTables()
     for (const auto &sql : tables) query.exec(sql);
     const QStringList publicTables = {
         // episode公共数据表
-        "CREATE TABLE IF NOT EXISTS episode_public_date ("
-        "subject_id INTEGER NOT NULL, id INTEGER NOT NULL, airdate INTEGER NOT NULL, sort INTEGER, PRIMARY KEY (subject_id, id))",
+        "CREATE TABLE IF NOT EXISTS episode_public_date (subject_id INTEGER, id INTEGER, airdate INTEGER, sort INTEGER, PRIMARY KEY (subject_id, id))",
         // subject公共数据表
-        "CREATE TABLE IF NOT EXISTS subject_public_date ("
-        "id INTEGER PRIMARY KEY, name TEXT, name_cn TEXT, summary BLOB, tags TEXT, meta_tags TEXT, score INTEGER, rank INTEGER, date INTEGER, rating_total INTEGER, doing INTEGER, done INTEGER, dropped INTEGER, on_hold INTEGER, wish INTEGER)"
+        "CREATE TABLE IF NOT EXISTS subject_public_date (subject_id INTEGER PRIMARY KEY, name TEXT, name_cn TEXT, summary BLOB, tags TEXT, meta_tags TEXT, score INTEGER, rank INTEGER, date INTEGER, rating_total INTEGER, doing INTEGER, done INTEGER, dropped INTEGER, on_hold INTEGER, wish INTEGER)",
+        // character公共数据表
+        "CREATE TABLE IF NOT EXISTS character_public_date (character_id INTEGER PRIMARY KEY, name TEXT, name_cn TEXT)",
+        // subject character对应表
+        "CREATE TABLE IF NOT EXISTS subject_character (subject_id INTEGER, character_id INTEGER, type INTEGER, PRIMARY KEY (subject_id, character_id))",
+        // person公共数据表
+        "CREATE TABLE IF NOT EXISTS person (person_id INTEGER PRIMARY KEY, name TEXT, name_cn TEXT)",
+        // person character对应表
+        "CREATE TABLE IF NOT EXISTS person_character (person_id INTEGER, subject_id INTEGER, character_id INTEGER, PRIMARY KEY (person_id, subject_id))"
     };
     QSqlQuery publicQuery(QSqlDatabase::database("public_date_connection"));
     for (const auto &sql : publicTables) publicQuery.exec(sql);
@@ -350,11 +356,11 @@ bool DatabaseManager::insertOrUpdateSubject(const QJsonObject &apiData) const
 SubjectsData DatabaseManager::getSubjectById(const int subjectId) const
 {   // // 根据ID获取subject信息
     QSqlQuery query(episodePublicDate);
-    query.prepare("SELECT * FROM subject_public_date WHERE id = ?");
+    query.prepare("SELECT * FROM subject_public_date WHERE subject_id = ?");
     query.addBindValue(subjectId);
     if (!query.exec() || !query.next()) return {};
     SubjectsData data;
-    data.id = query.value("id").toInt();
+    data.subject_id = query.value("subject_id").toInt();
     data.name = query.value("name").toString();
     data.name_cn = query.value("name_cn").toString();
     const QByteArray compressedSummary = query.value("summary").toByteArray();
@@ -372,4 +378,42 @@ SubjectsData DatabaseManager::getSubjectById(const int subjectId) const
     data.on_hold = query.value("on_hold").toInt();
     data.wish = query.value("wish").toInt();
     return data;
+}
+
+// =============== character相关 ===============
+QVector<CharacterData> DatabaseManager::getCharactersWithPersonsBySubjectId(const int subjectId) const
+{   // 获取角色信息
+    QSqlQuery query(episodePublicDate);
+    query.prepare(
+        "SELECT c.character_id, c.name AS char_name, c.name_cn AS char_name_cn, sc.type, json_group_array(json_object('person_id', p.person_id, 'person_name', p.name, 'person_name_cn', p.name_cn)) AS persons_json "
+        "FROM subject_character sc "
+        "JOIN character_public_date c ON sc.character_id = c.character_id "
+        "LEFT JOIN person_character pc ON pc.character_id = c.character_id AND pc.subject_id = sc.subject_id "
+        "LEFT JOIN person p ON pc.person_id = p.person_id "
+        "WHERE sc.subject_id = ? "
+        "GROUP BY c.character_id, c.name, c.name_cn, sc.type "
+        "ORDER BY sc.type"
+    );
+    query.addBindValue(subjectId);
+    if (!query.exec()) return {};
+    QVector<CharacterData> results;
+    while (query.next()) {
+        CharacterData data;
+        data.character_id = query.value("character_id").toInt();
+        data.character_name = query.value("char_name").toString();
+        data.character_name_cn = query.value("char_name_cn").toString();
+        data.type = query.value("type").toInt();
+        QString personsJsonStr = query.value("persons_json").toString();
+        QJsonArray personsArray = QJsonDocument::fromJson(personsJsonStr.toUtf8()).array();
+        for (const auto &val : personsArray) {
+            QJsonObject obj = val.toObject();
+            PersonInfo info;
+            info.person_id = obj["person_id"].toInt();
+            info.person_name = obj["person_name"].toString();
+            info.person_name_cn = obj["person_name_cn"].toString();
+            data.persons.append(info);
+        }
+        results.append(data);
+    }
+    return results;
 }

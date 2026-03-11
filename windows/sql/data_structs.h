@@ -19,7 +19,7 @@ struct CollectionData {
 };
 
 struct SubjectsData {
-    int id = 0;
+    int subject_id = 0;
     QString name;
     QString name_cn;
     QString summary;
@@ -48,6 +48,20 @@ struct EpisodeData {
     int episode_type = 0;
     int collection_type = 0;
     QString created_at;
+};
+
+struct PersonInfo {
+    int person_id = 0;
+    QString person_name;
+    QString person_name_cn;
+};
+
+struct CharacterData {
+    int character_id = 0;
+    QString character_name;
+    QString character_name_cn;
+    int type = 0;
+    QVector<PersonInfo> persons;
 };
 
 Q_DECLARE_METATYPE(EpisodeData)

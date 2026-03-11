@@ -158,6 +158,7 @@ void EpisodeOverlay::resizeEvent(QResizeEvent *event)
 void EpisodeOverlay::loadEpisodesData()
 {   // 加载剧集数据
     const int subjectId = collectionData.subject_id;
+    episodeModel->clear();
     episodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
     if (!episodes.isEmpty()) {
         updateEpisodeView();

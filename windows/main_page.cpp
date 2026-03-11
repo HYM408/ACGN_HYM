@@ -226,7 +226,7 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
     if (collection.subject_images_common.isEmpty()) {
         card.coverLabel->setText("暂无图片");
         card.coverLabel->setStyleSheet("QLabel {color: gray}");
-    } else ImageUtil::loadImageWithCache(cacheImageUtil, collection.subject_images_common, card.coverLabel, 40, false, true);
+    } else ImageUtil::loadImageWithCache(cacheImageUtil, collection.subject_images_common, card.coverLabel, 40, false, true, QString("s%1.jpg").arg(collection.subject_id));
     card.titleLabel->setText(collection.subject_name_cn.isEmpty() ? collection.subject_name : collection.subject_name_cn);
     card.progressLabel->setText(computeProgressText(collection, airdatesJson));
     card.card->setProperty("progressLabel", QVariant::fromValue(card.progressLabel));

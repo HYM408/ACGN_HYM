@@ -9,12 +9,18 @@
 #ifndef DETAIL_UI_H
 #define DETAIL_UI_H
 
+#include <QtCore/QVariant>
+#include <QtGui/QIcon>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QScrollArea>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTextEdit>
 #include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
 
@@ -22,6 +28,8 @@ class Ui_DetailPage
 {
 public:
     QVBoxLayout *verticalLayout_11;
+    QFrame *frame_6;
+    QVBoxLayout *verticalLayout;
     QFrame *frame_3;
     QHBoxLayout *horizontalLayout_11;
     QPushButton *pushButton_19;
@@ -47,6 +55,9 @@ public:
     QFrame *frame_5;
     QTextEdit *textEdit_2;
     QWidget *tab_2;
+    QVBoxLayout *verticalLayout_2;
+    QScrollArea *scrollArea;
+    QWidget *scrollAreaWidgetContents;
     QWidget *tab_3;
     QWidget *tab_4;
 
@@ -60,10 +71,20 @@ public:
         verticalLayout_11->setSpacing(0);
         verticalLayout_11->setObjectName("verticalLayout_11");
         verticalLayout_11->setContentsMargins(0, 0, 0, 0);
-        frame_3 = new QFrame(DetailPage);
+        frame_6 = new QFrame(DetailPage);
+        frame_6->setObjectName("frame_6");
+        frame_6->setMinimumSize(QSize(0, 114));
+        frame_6->setStyleSheet(QString::fromUtf8("background-color: rgb(253, 247, 255);"));
+        frame_6->setFrameShape(QFrame::Shape::StyledPanel);
+        frame_6->setFrameShadow(QFrame::Shadow::Raised);
+        verticalLayout = new QVBoxLayout(frame_6);
+        verticalLayout->setSpacing(0);
+        verticalLayout->setObjectName("verticalLayout");
+        verticalLayout->setContentsMargins(0, 0, 0, 0);
+        frame_3 = new QFrame(frame_6);
         frame_3->setObjectName("frame_3");
-        frame_3->setStyleSheet(QString::fromUtf8("background-color: white;\n"
-"       border: none;"));
+        frame_3->setStyleSheet(QString::fromUtf8("background-color: transparent;\n"
+"border: none;"));
         frame_3->setFrameShape(QFrame::Shape::StyledPanel);
         frame_3->setFrameShadow(QFrame::Shadow::Raised);
         horizontalLayout_11 = new QHBoxLayout(frame_3);
@@ -75,14 +96,14 @@ public:
         pushButton_19->setMinimumSize(QSize(45, 45));
         pushButton_19->setMaximumSize(QSize(45, 45));
         pushButton_19->setStyleSheet(QString::fromUtf8("QPushButton {\n"
-"          background-color: white;\n"
-"          border:none;\n"
-"          border-radius:22px\n"
-"          }\n"
+"	background-color: transparent;\n"
+"	border:none;\n"
+"	border-radius:22px\n"
+"}\n"
 "\n"
-"          QPushButton:hover {\n"
-"          background-color: rgb(237, 237, 238);\n"
-"          }"));
+"QPushButton:hover {\n"
+"	background-color: rgb(237, 237, 238);\n"
+"}"));
         QIcon icon;
         icon.addFile(QString::fromUtf8("icons/back.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         pushButton_19->setIcon(icon);
@@ -95,14 +116,14 @@ public:
         pushButton_20->setMinimumSize(QSize(45, 45));
         pushButton_20->setMaximumSize(QSize(45, 45));
         pushButton_20->setStyleSheet(QString::fromUtf8("QPushButton {\n"
-"          background-color: white;\n"
-"          border:none;\n"
-"          border-radius:22px\n"
-"          }\n"
+"	background-color: transparent;\n"
+"	border:none;\n"
+"	border-radius:22px\n"
+"}\n"
 "\n"
-"          QPushButton:hover {\n"
-"          background-color: rgb(237, 237, 238);\n"
-"          }"));
+"QPushButton:hover {\n"
+"	background-color: rgb(237, 237, 238);\n"
+"}"));
         QIcon icon1;
         icon1.addFile(QString::fromUtf8("icons/openUrl.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         pushButton_20->setIcon(icon1);
@@ -111,16 +132,16 @@ public:
         horizontalLayout_11->addWidget(pushButton_20, 0, Qt::AlignmentFlag::AlignRight);
 
 
-        verticalLayout_11->addWidget(frame_3);
+        verticalLayout->addWidget(frame_3);
 
-        frame_4 = new QFrame(DetailPage);
+        frame_4 = new QFrame(frame_6);
         frame_4->setObjectName("frame_4");
         frame_4->setMinimumSize(QSize(0, 310));
         frame_4->setMaximumSize(QSize(16777215, 310));
         frame_4->setStyleSheet(QString::fromUtf8("QFrame {\n"
-"       background-color: white;\n"
-"       border: none;\n"
-"       }"));
+"	background-color: transparent;\n"
+"	border: none;\n"
+"}"));
         frame_4->setFrameShape(QFrame::Shape::StyledPanel);
         frame_4->setFrameShadow(QFrame::Shadow::Raised);
         horizontalLayout_14 = new QHBoxLayout(frame_4);
@@ -159,14 +180,15 @@ public:
 
         pushButton_23 = new QLabel(frame);
         pushButton_23->setObjectName("pushButton_23");
-        pushButton_23->setMinimumSize(QSize(80, 35));
+        pushButton_23->setMinimumSize(QSize(0, 35));
         QFont font1;
         font1.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font1.setPointSize(15);
         font1.setBold(false);
         pushButton_23->setFont(font1);
         pushButton_23->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
-"             border-radius:8px;"));
+"border-radius:8px;\n"
+"padding: 2px 10px;"));
         pushButton_23->setAlignment(Qt::AlignmentFlag::AlignCenter);
 
         verticalLayout_13->addWidget(pushButton_23, 0, Qt::AlignmentFlag::AlignLeft);
@@ -243,9 +265,9 @@ public:
         horizontalLayout_14->addWidget(frame);
 
 
-        verticalLayout_11->addWidget(frame_4);
+        verticalLayout->addWidget(frame_4);
 
-        tabWidget = new QTabWidget(DetailPage);
+        tabWidget = new QTabWidget(frame_6);
         tabWidget->setObjectName("tabWidget");
         tabWidget->setMinimumSize(QSize(0, 100));
         QFont font4;
@@ -254,14 +276,18 @@ public:
         font4.setBold(false);
         tabWidget->setFont(font4);
         tabWidget->setStyleSheet(QString::fromUtf8("QTabWidget::tab-bar {\n"
-"       alignment: center;\n"
-"       }"));
+"	alignment: center;\n"
+"}\n"
+"\n"
+"QTabWidget {\n"
+"	border:none;\n"
+"}"));
         tab = new QWidget();
         tab->setObjectName("tab");
         verticalLayout_14 = new QVBoxLayout(tab);
         verticalLayout_14->setSpacing(10);
         verticalLayout_14->setObjectName("verticalLayout_14");
-        verticalLayout_14->setContentsMargins(50, 20, 50, 0);
+        verticalLayout_14->setContentsMargins(50, 20, 20, 0);
         frame_5 = new QFrame(tab);
         frame_5->setObjectName("frame_5");
         frame_5->setStyleSheet(QString::fromUtf8("border: none;"));
@@ -313,6 +339,47 @@ public:
         tabWidget->addTab(tab, QString());
         tab_2 = new QWidget();
         tab_2->setObjectName("tab_2");
+        verticalLayout_2 = new QVBoxLayout(tab_2);
+        verticalLayout_2->setSpacing(10);
+        verticalLayout_2->setObjectName("verticalLayout_2");
+        verticalLayout_2->setContentsMargins(50, 20, 20, 0);
+        scrollArea = new QScrollArea(tab_2);
+        scrollArea->setObjectName("scrollArea");
+        scrollArea->setStyleSheet(QString::fromUtf8("QScrollArea {\n"
+"	border: none;\n"
+"}\n"
+"\n"
+"QScrollBar:vertical {\n"
+"    border: none;\n"
+"    background: #f0f0f0;\n"
+"    width: 11px;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:vertical {\n"
+"    background: #c0c0c0;\n"
+"    border-radius: 5px;\n"
+"    min-height: 20px;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:vertical:hover {\n"
+"    background: #a0a0a0;\n"
+"}\n"
+"\n"
+"QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {\n"
+"    border: none;\n"
+"    background: none;\n"
+"    height: 0px;\n"
+"}\n"
+"\n"
+""));
+        scrollArea->setWidgetResizable(true);
+        scrollAreaWidgetContents = new QWidget();
+        scrollAreaWidgetContents->setObjectName("scrollAreaWidgetContents");
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 1451, 534));
+        scrollArea->setWidget(scrollAreaWidgetContents);
+
+        verticalLayout_2->addWidget(scrollArea);
+
         tabWidget->addTab(tab_2, QString());
         tab_3 = new QWidget();
         tab_3->setObjectName("tab_3");
@@ -321,18 +388,21 @@ public:
         tab_4->setObjectName("tab_4");
         tabWidget->addTab(tab_4, QString());
 
-        verticalLayout_11->addWidget(tabWidget);
+        verticalLayout->addWidget(tabWidget);
+
+
+        verticalLayout_11->addWidget(frame_6);
 
 
         retranslateUi(DetailPage);
 
-        tabWidget->setCurrentIndex(0);
+        tabWidget->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(DetailPage);
     } // setupUi
 
-    void retranslateUi(QWidget *DetailPage) const
+    void retranslateUi(QWidget *DetailPage)
     {
         pushButton_19->setText(QString());
         pushButton_20->setText(QString());

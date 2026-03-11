@@ -4,7 +4,7 @@
 #include <QPainterPath>
 #include "cache_image_util.h"
 
-QPixmap ImageUtil::createRoundedPixmap(const QPixmap& pixmap, const int radius, const bool allCorners)
+QPixmap ImageUtil::createRoundedPixmap(const QPixmap &pixmap, const int radius, const bool allCorners)
 {   // 图片圆角
     QPixmap result(pixmap.size());
     result.fill(Qt::transparent);
@@ -29,15 +29,16 @@ QPixmap ImageUtil::createRoundedPixmap(const QPixmap& pixmap, const int radius, 
     return result;
 }
 
-void ImageUtil::loadImageWithCache(CacheImageUtil* cacheImageUtil, const QString& url, QLabel* label, int radius, bool allCorners, const bool cacheToLocal)
+void ImageUtil::loadImageWithCache(CacheImageUtil *cacheImageUtil, const QString &url, QLabel *label, int radius, bool allCorners, const bool cacheToLocal, const QString &fileName)
 {   // 加载图片
     auto onLoaded = [label, radius, allCorners](const QPixmap& pixmap) {
+        if (pixmap.isNull()) return;
         QPixmap processed = pixmap;
-        if (pixmap.height() > pixmap.width()) {
+        if (pixmap.height() >= pixmap.width()) {
             if (radius > 0) processed = createRoundedPixmap(pixmap, radius, allCorners);
             processed = processed.scaled(label->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         } else processed = pixmap.scaledToWidth(label->width(), Qt::SmoothTransformation);
         label->setPixmap(processed);
     };
-    cacheImageUtil->getImageAsync(url, onLoaded, cacheToLocal);
+    cacheImageUtil->getImageAsync(url, onLoaded, cacheToLocal, fileName);
 }

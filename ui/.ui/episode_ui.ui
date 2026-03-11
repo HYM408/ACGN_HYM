@@ -187,7 +187,7 @@
          </font>
         </property>
         <property name="text">
-         <string>幸运星</string>
+         <string/>
         </property>
         <property name="alignment">
          <set>Qt::AlignmentFlag::AlignCenter</set>

@@ -167,7 +167,7 @@ void PlayerPage::createSiteDetailTab(const QString &siteId)
         if (tabIndex < 0 || tabIndex >= detailTabWidget->count()) return;
         QTransform transform;
         detailTabWidget->setTabIcon(tabIndex, QIcon(pixmap.transformed(transform.rotate(90))));
-    }, false);
+    }, false, "");
 }
 
 QWidget* PlayerPage::createSiteCard(const QString &siteId)
@@ -189,7 +189,7 @@ QWidget* PlayerPage::createSiteCard(const QString &siteId)
     topLayout->addWidget(iconBtn);
     const QString iconUrl = getSiteIconUrl(siteId);
     QPointer btnPtr(iconBtn);
-    cacheImageUtil->getImageAsync(iconUrl, [btnPtr](const QPixmap &pixmap) {if (btnPtr) btnPtr->setIcon(QIcon(pixmap));}, false);
+    cacheImageUtil->getImageAsync(iconUrl, [btnPtr](const QPixmap &pixmap) {if (btnPtr) btnPtr->setIcon(QIcon(pixmap));}, false, "");
     connect(iconBtn, &QPushButton::clicked, this, [this, siteId]{
         ui.tabWidget->setCurrentIndex(1);
         detailTabWidget->setCurrentIndex(siteDetailTabIndex[siteId]);

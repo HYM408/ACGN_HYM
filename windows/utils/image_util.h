@@ -9,7 +9,7 @@ class CacheImageUtil;
 class ImageUtil {
 public:
     static QPixmap createRoundedPixmap(const QPixmap &pixmap, int radius, bool allCorners);
-    static void loadImageWithCache(CacheImageUtil *cacheImageUtil, const QString &url, QLabel *label, int radius, bool allCorners, bool cacheToLocal);
+    static void loadImageWithCache(CacheImageUtil *cacheImageUtil, const QString &url, QLabel *label, int radius, bool allCorners, bool cacheToLocal, const QString &fileName);
 };
 
 #endif // IMAGE_UTIL_H

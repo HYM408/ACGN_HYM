@@ -9,17 +9,12 @@
 #ifndef EPISODE_UI_H
 #define EPISODE_UI_H
 
-#include <QtCore/QVariant>
-#include <QtGui/QIcon>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QFrame>
-#include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QScrollArea>
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
 
@@ -174,12 +169,12 @@ public:
         QMetaObject::connectSlotsByName(EpisodePage);
     } // setupUi
 
-    void retranslateUi(QWidget *EpisodePage)
+    void retranslateUi(QWidget *EpisodePage) const
     {
         pushButton_14->setText(QString());
         pushButton_12->setText(QCoreApplication::translate("EpisodePage", "\351\200\211\351\233\206", nullptr));
         pushButton_15->setText(QString());
-        pushButton_13->setText(QCoreApplication::translate("EpisodePage", "\345\271\270\350\277\220\346\230\237", nullptr));
+        pushButton_13->setText(QString());
         (void)EpisodePage;
     } // retranslateUi
 

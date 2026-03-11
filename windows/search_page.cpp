@@ -110,7 +110,7 @@ QFrame *SearchPage::createResultFrame(const QVariantMap &result)
     coverLabel->setCursor(Qt::PointingHandCursor);
     const QVariantMap images = result["images"].toMap();
     const QString imageUrl = images.value("common").toString();
-    if (!imageUrl.isEmpty()) ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, coverLabel, 15, false, true);
+    if (!imageUrl.isEmpty()) ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, coverLabel, 15, false, true, QString("s%1.jpg").arg(subjectId));
     else coverLabel->setText("暂无封面");
     horizontalLayout->addWidget(coverLabel);
     // 垂直布局
@@ -146,7 +146,7 @@ bool SearchPage::eventFilter(QObject *watched, QEvent *event)
                         data.subject_images_common = original["images"].toMap()["common"].toString();
                         data.subject_type = original["type"].toInt();
                         data.subject_volumes = original["volumes"].toInt();
-                        data.subject_eps = original["eps"].toDouble();
+                        data.subject_eps = original["eps"].toInt();
                         data.subject_date = original["date"].toString();
                     }
                     const QString progressText = computeProgressText(data, dbManager->getEpisodeAirdates({subjectId}));

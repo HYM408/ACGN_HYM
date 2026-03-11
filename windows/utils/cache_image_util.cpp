@@ -9,33 +9,23 @@ CacheImageUtil::CacheImageUtil(QObject *parent) : QObject(parent)
     QDir().mkpath("data/images");
 }
 
-QString CacheImageUtil::getCachePath(const QString &url)
-{   // 获取缓存路径
-    const qsizetype lastSlash = url.lastIndexOf('/');
-    if (lastSlash == -1) return "";
-    const QString fileName = url.mid(lastSlash + 1);
-    const qsizetype underscore = fileName.indexOf('_');
-    if (underscore == -1) return "";
-    const QString subjectId = fileName.left(underscore);
-    return QString("data/images/%1.jpg").arg(subjectId);
-}
-
-void CacheImageUtil::getImageAsync(const QString &url, const ImageCallback& callback, bool cacheToLocal)
+void CacheImageUtil::getImageAsync(const QString &url, const ImageCallback& callback, bool cacheToLocal, const QString &fileName)
 {   // 获取图片
-    QRunnable* task = QRunnable::create([this, url, callback, cacheToLocal] {
-        if (cacheToLocal) {
-            QString path = getCachePath(url);
-            if (QFile::exists(path)) {
-                QMetaObject::invokeMethod(this, [path, callback] {callback(QPixmap(path));}, Qt::QueuedConnection);
+    QRunnable* task = QRunnable::create([this, url, callback, cacheToLocal, fileName] {
+        if (cacheToLocal && !fileName.isEmpty()) {
+            QString fullPath = "data/images/" + fileName;
+            if (QFile::exists(fullPath)) {
+                QMetaObject::invokeMethod(this, [callback, fullPath] {callback(QPixmap(fullPath));}, Qt::QueuedConnection);
                 return;
             }
         }
-        QMetaObject::invokeMethod(this, [this, url, callback, cacheToLocal] {
+        QMetaObject::invokeMethod(this, [this, url, callback, cacheToLocal, fileName] {
             pendingCallbacks[url].append(callback);
             if (pendingCallbacks[url].size() == 1) {
                 QNetworkRequest request(url);
                 request.setAttribute(QNetworkRequest::Attribute::User, url);
-                request.setAttribute(static_cast<QNetworkRequest::Attribute>(QNetworkRequest::User + 1), cacheToLocal);
+                request.setAttribute(static_cast<QNetworkRequest::Attribute>(QNetworkRequest::User + 1), QVariant::fromValue(cacheToLocal));
+                request.setAttribute(static_cast<QNetworkRequest::Attribute>(QNetworkRequest::User + 2), fileName);
                 networkManager.get(request);
             }
         }, Qt::QueuedConnection);
@@ -47,12 +37,16 @@ void CacheImageUtil::onDownloadFinished(QNetworkReply *reply)
 {   // 下载完成处理
     const QString url = reply->request().attribute(QNetworkRequest::Attribute::User).toString();
     const bool cacheToLocal = reply->request().attribute(static_cast<QNetworkRequest::Attribute>(QNetworkRequest::User + 1), true).toBool();
+    const QString fileName = reply->request().attribute(static_cast<QNetworkRequest::Attribute>(QNetworkRequest::User + 2)).toString();
     QPixmap pixmap;
     if (!reply->error()) {
         const QByteArray imageData = reply->readAll();
         if (pixmap.loadFromData(imageData)) {
-            if (cacheToLocal) {
-                QFile file(getCachePath(url));
+            if (cacheToLocal && !fileName.isEmpty()) {
+                const QString fullPath = "data/images/" + fileName;
+                const QFileInfo fileInfo(fullPath);
+                QDir().mkpath(fileInfo.absolutePath());
+                QFile file(fullPath);
                 if (file.open(QIODevice::WriteOnly)) file.write(imageData);
             }
         }
