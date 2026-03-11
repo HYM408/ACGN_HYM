@@ -50,7 +50,7 @@ QJsonArray BangumiAPI::getUserCollections(const bool getAll, const int maxRetrie
         QJsonObject response = sendRequest(manager, request, "GET", QByteArray(), maxRetries, nullptr);
         QJsonArray items = response["data"].toArray();
         const int total = response["total"].toInt();
-        if (progressCallback) progressCallback(offset, total);
+        if (progressCallback) progressCallback(static_cast<int>(offset + items.size()), total);
         for (const auto &item : items) allItems.append(item);
         if (!getAll || offset + 50 >= total) break;
         offset += 50;
