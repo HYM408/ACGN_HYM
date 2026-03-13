@@ -12,7 +12,6 @@
 
 EpisodeOverlay::EpisodeOverlay(QWidget *parent) : QWidget(parent)
 {
-    applyTheme();
     episodeContainer = new QWidget(this);
     ui.setupUi(episodeContainer);
     episodeContainer->setFixedSize(600, 200);
@@ -38,6 +37,7 @@ EpisodeOverlay::EpisodeOverlay(QWidget *parent) : QWidget(parent)
     connect(ui.pushButton_14, &QPushButton::clicked, this, &EpisodeOverlay::closeOverlay);
     connect(ui.pushButton_15, &QPushButton::clicked, this, &EpisodeOverlay::onUpdateButtonClicked);
     connect(episodeDelegate, &EpisodeDelegate::episodeClicked, this, &EpisodeOverlay::onEpisodeItemClicked);
+    applyTheme();
 }
 
 EpisodeDelegate::EpisodeDelegate(QObject *parent) : QStyledItemDelegate(parent) {}

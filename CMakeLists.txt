@@ -22,6 +22,9 @@ set(VLC_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
 set(VLC_LIBRARIES "${CMAKE_SOURCE_DIR}/lib/vlc/libvlc.lib"
                   "${CMAKE_SOURCE_DIR}/lib/vlc/libvlccore.lib")
 
+set(ONNXRUNTIME_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include/ONNX Runtime")
+set(ONNXRUNTIME_LIBRARY "${CMAKE_SOURCE_DIR}/lib/ONNX Runtime/onnxruntime.lib")
+
 # 主程序
 add_executable(appACGN_HYM
         windows/main.cpp
@@ -46,6 +49,10 @@ add_executable(appACGN_HYM
         windows/sql/data_structs.h
         windows/sql/sql.h
         windows/sql/sql.cpp
+        windows/utils/captcha_util/captcha_util.h
+        windows/utils/captcha_util/captcha_util.cpp
+        windows/utils/captcha_util/charset_data.h
+        windows/utils/captcha_util/charset_data.cpp
         windows/utils/cache_image_util.h
         windows/utils/cache_image_util.cpp
         windows/utils/image_util.h
@@ -87,12 +94,14 @@ target_link_libraries(appACGN_HYM
         Qt6::Network
         ${LIBXML2_LIBRARIES}
         ${VLC_LIBRARIES}
+        ${ONNXRUNTIME_LIBRARY}
 )
 
 target_include_directories(appACGN_HYM PRIVATE
         ui
         ${LIBXML2_INCLUDE_DIR}
         ${VLC_INCLUDE_DIR}
+        ${ONNXRUNTIME_INCLUDE_DIR}
 )
 
 # WebEngine进程
@@ -111,16 +120,18 @@ add_dependencies(appACGN_HYM videoStream)
 if(WIN32)
     add_custom_command(TARGET appACGN_HYM POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${CMAKE_SOURCE_DIR}/lib/libxml2/libxml2.dll"
-                "${CMAKE_SOURCE_DIR}/lib/libxml2/iconv-2.dll"
-                "${CMAKE_SOURCE_DIR}/lib/libxml2/zlib1.dll"
-                "${CMAKE_SOURCE_DIR}/lib/vlc/libvlc.dll"
-                "${CMAKE_SOURCE_DIR}/lib/vlc/libvlccore.dll"
-                "${CMAKE_SOURCE_DIR}/windows/crawler/XPath.json"
+            "${CMAKE_SOURCE_DIR}/lib/libxml2/libxml2.dll"
+            "${CMAKE_SOURCE_DIR}/lib/libxml2/iconv-2.dll"
+            "${CMAKE_SOURCE_DIR}/lib/libxml2/zlib1.dll"
+            "${CMAKE_SOURCE_DIR}/lib/vlc/libvlc.dll"
+            "${CMAKE_SOURCE_DIR}/lib/vlc/libvlccore.dll"
+            "${CMAKE_SOURCE_DIR}/windows/crawler/XPath.json"
+            "${CMAKE_SOURCE_DIR}/lib/ONNX Runtime/onnxruntime.dll"
+            "${CMAKE_SOURCE_DIR}/captcha/common_old.onnx"
             $<TARGET_FILE_DIR:appACGN_HYM>
 
             COMMAND ${CMAKE_COMMAND} -E copy_directory
-                "${CMAKE_SOURCE_DIR}/icons"
+            "${CMAKE_SOURCE_DIR}/icons"
             $<TARGET_FILE_DIR:appACGN_HYM>/icons
 
             COMMAND ${CMAKE_COMMAND} -E copy_directory

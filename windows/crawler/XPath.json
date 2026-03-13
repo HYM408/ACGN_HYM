@@ -1,6 +1,6 @@
 {
   "api_configs": {
-    "girigirilove": {
+    "girigiriloveAPI": {
       "icon": "https://bgm.girigirilove.com/upload/anime.girigirilove.com_.png",
       "base_url": "https://bgm.girigirilove.com",
       "search_api": "https://m3u8.girigirilove.com/api.php/Vod/get_list?vod_name={keyword}&offset=0&limit=10",
@@ -8,10 +8,35 @@
     }
   },
   "site_configs": {
+    "girigirilove": {
+      "icon": "https://bgm.girigirilove.com/upload/anime.girigirilove.com_.png",
+      "base_url": "https://bgm.girigirilove.com",
+      "search_path": "/search/-------------/?wd={keyword}",
+      "need_captcha": true,
+      "title": "//h3[@class='slide-info-title hide']",
+      "link": "//a[contains(@href,'/GV')]/@href",
+      "route_tabs": "//div[contains(@class, 'anthology-tab')]//div[contains(@class, 'swiper-wrapper')]/a[contains(@class, 'swiper-slide')]",
+      "episode_containers": "//div[contains(@class, 'anthology-list') and contains(@class, 'top20')]//div[contains(@class, 'anthology-list-box')]",
+      "episode_items": ".//ul[contains(@class, 'anthology-list-play')]/li/a[contains(@class, 'this-link')]",
+      "video_type": 1
+    },
+    "稀饭动漫": {
+      "icon": "https://dm.xifanacg.com/template/dsn2/static/img/fav.png",
+      "base_url": "https://dm.xifanacg.com",
+      "search_path": "/search.html?wd={keyword}",
+      "need_captcha": true,
+      "title": "//h3[@class='slide-info-title hide']/text()",
+      "link": "//h3[@class='slide-info-title hide']/parent::a/@href",
+      "route_tabs": "//div[contains(@class, 'anthology-tab')]//div[contains(@class, 'swiper-wrapper')]/a[contains(@class, 'swiper-slide')]",
+      "episode_containers": "//div[contains(@class, 'anthology-list') and contains(@class, 'top20')]//div[contains(@class, 'anthology-list-box')]",
+      "episode_items": ".//ul[contains(@class, 'anthology-list-play')]/li/a[contains(@class, 'this-link')]",
+      "video_type": 0
+    },
     "omofun": {
       "icon": "https://omofun.icu/template/mxpro/mxtheme/images/favicon.png",
       "base_url": "https://omofun.icu",
       "search_path": "/vod/search.html?wd={keyword}",
+      "need_captcha": false,
       "title": "//div[@class='module-card-item-title']/a/strong",
       "link": "//div[@class='module-card-item-title']/a/@href",
       "route_tabs": "//div[@id='y-playList']/div[contains(@class,'module-tab-item')]",
@@ -23,6 +48,7 @@
       "icon": "https://acgfta.com/template/ft-v2/icon/acgfantuan-icon-72.png",
       "base_url": "https://acgfta.com",
       "search_path": "/search.html?wd={keyword}",
+      "need_captcha": false,
       "title": "//a[@class='stretched-link']/text()",
       "link": "//a[@class='stretched-link']/@href",
       "route_tabs": "//ul[contains(@class,'nav-pills')]/li/button",
@@ -34,6 +60,7 @@
       "icon": "https://www.fqdm.cc/upload/mxprocms/20240530-1/3d17fab3cb763e6ad7031974bf87f322.jpg",
       "base_url": "https://www.fqdm.cc",
       "search_path": "/index.php/vod/search.html?wd={keyword}",
+      "need_captcha": false,
       "title": "//div[contains(@class,'module-card-item-title')]//strong/text()",
       "link": "//div[contains(@class,'module-card-item-title')]/a/@href",
       "route_tabs": "//div[@id='y-playList']//div[contains(@class,'module-tab-item') and contains(@class,'tab-item')]",
@@ -45,6 +72,7 @@
       "icon": "https://www.88mv.me/favicon.ico",
       "base_url": "https://www.88mv.me",
       "search_path": "/search/search.php?q=wd-{keyword}",
+      "need_captcha": false,
       "title": "//li[contains(@class,'p1') and contains(@class,'m1')]//p[@class='name']/text()",
       "link": "//li[contains(@class,'p1') and contains(@class,'m1')]/a/@href",
       "route_tabs": "//div[contains(@class,'playfrom')]//ul/li",
@@ -56,6 +84,7 @@
       "icon": "https://www.yinghua228.com/statics/img/favicon.ico",
       "base_url": "https://www.yinghua228.com",
       "search_path": "/index.php/vod/search.html?wd={keyword}",
+      "need_captcha": false,
       "title": "//div[@class='detail']/h3[@class='title']/a",
       "link": "//div[@class='detail']/h3[@class='title']/a/@href",
       "route_tabs": "//div[contains(@class, 'stui-pannel-box') and contains(@class, 'playlist')]/div[@class='stui-pannel_hd']/div/h3[@class='title']",
@@ -67,6 +96,7 @@
       "icon": "https://www.7sefun.top/favicon.ico",
       "base_url": "https://www.7sefun.top",
       "search_path": "/vodsearch/-------------.html?wd={keyword}",
+      "need_captcha": false,
       "title": "//div[contains(@class,'video anim')]//div[@class='video-by']",
       "link": "//div[contains(@class,'video anim')]//a[@class='video-wrapper']/@href",
       "route_tabs": "//div[contains(@class, 'chat-stream')]//div[contains(@class, 'chat-header')]/span[@class='chat-stream-bfq']",
@@ -78,6 +108,7 @@
       "icon": "https://www.gugu3.com/upload/site/20240809-1/7128d3562abaed14571d6227e1240aab.png",
       "base_url": "https://www.gugu3.com",
       "search_path": "/index.php/vod/search/wd/{keyword}",
+      "need_captcha": false,
       "title": "//h3[@class='slide-info-title hide']/text()",
       "link": "//h3[@class='slide-info-title hide']/parent::a/@href",
       "route_tabs": "//div[contains(@class, 'anthology-tab')]//div[contains(@class, 'swiper-wrapper')]/a[contains(@class, 'swiper-slide')]",

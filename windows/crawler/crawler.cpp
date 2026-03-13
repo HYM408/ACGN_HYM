@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <QCoreApplication>
 #include "../utils/xml_util.h"
+#include "../utils/captcha_util/captcha_util.h"
 
 static QJsonObject loadConfig()
 {   // 加载配置文件
@@ -65,7 +66,7 @@ QList<RouteInfo> Crawler::getRoutes(const QString &page_url, const QString &site
         RouteInfo ri;
         ri.route = routeNames[i].replace("&nbsp;", " ").trimmed();
         QList<xmlNodePtr> episodeNodes = XmlUtil::xpathNodes(containers[i], config["episode_items"].toString());
-        for (const xmlNodePtr node : episodeNodes) {
+        for (xmlNode *node : episodeNodes) {
             EpisodeInfo ep;
             ep.name = XmlUtil::nodeContent(node).trimmed();
             QString href = XmlUtil::nodeAttribute(node, "href");
@@ -83,22 +84,28 @@ QList<SearchResult> Crawler::searchSite(const QString &site_id, const QString &k
     QJsonObject config = loadSiteConfig(site_id);
     const QString baseUrl = config["base_url"].toString();
     QString searchPath = config["search_path"].toString();
-    searchPath.replace("{keyword}", keyword);
-    const QString url = XmlUtil::joinUrl(baseUrl, searchPath);
-    const QString html = sendRequest(url, abortFlag);
-    if (html.isEmpty()) return results;
+    QString html;
+    if (config["need_captcha"].toBool()) {
+        html = performCaptcha(baseUrl, searchPath, keyword, abortFlag);
+        if (html.isEmpty()) return results;
+    } else {
+        searchPath.replace("{keyword}", keyword);
+        const QString url = XmlUtil::joinUrl(baseUrl, searchPath);
+        html = sendRequest(url, abortFlag);
+        if (html.isEmpty()) return results;
+    }
     QList<SearchResult> searchResults = extractSearchResults(site_id, html);
     for (SearchResult &result : searchResults) {
         QList<RouteInfo> routes = getRoutes(result.link, site_id, abortFlag);
         QList<QJsonObject> routeObjs;
-        for (const RouteInfo &route : routes) {
+        for (const auto & [route, episodes] : routes) {
             QJsonObject routeObj;
-            routeObj["route"] = route.route;
+            routeObj["route"] = route;
             QJsonArray epArray;
-            for (const EpisodeInfo &ep : route.episodes) {
+            for (const auto & [name, link] : episodes) {
                 QJsonObject epObj;
-                epObj["name"] = ep.name;
-                epObj["link"] = ep.link;
+                epObj["name"] = name;
+                epObj["link"] = link;
                 epArray.append(epObj);
             }
             routeObj["episodes"] = epArray;
@@ -175,7 +182,7 @@ QList<BTResult> Crawler::searchBT(const QString &site_id, const QString &keyword
     if (html.isEmpty()) return results;
     const auto doc = XmlUtil::parseHtml(html);
     QList<xmlNodePtr> rows = XmlUtil::xpathNodes(doc.data(), config["row_selector"].toString());
-    for (const xmlNodePtr row : rows) {
+    for (xmlNode *row : rows) {
         BTResult res;
         auto nameNodes = XmlUtil::xpathNodes(row, config["name_selector"].toString());
         if (!nameNodes.isEmpty()) res.name = XmlUtil::nodeContent(nameNodes[0]).trimmed();

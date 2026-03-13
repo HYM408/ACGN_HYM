@@ -31,6 +31,7 @@
 - UI 使用 [Qt 6.10.2](https://doc.qt.io/qt-6)
 - XPath选择器 使用 [libxml2](https://github.com/GNOME/libxml2)
 - 视频播放器 使用 [VLC](https://www.videolan.org/vlc)
+- 验证码处理 使用 [ddddocr](https://github.com/sml2h3/ddddocr)
 
 ## 参与开发
 欢迎提交 PR 参与开发
