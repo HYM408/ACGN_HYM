@@ -13,9 +13,6 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true"/>
-  </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="spacing">
     <number>0</number>
@@ -72,7 +69,6 @@
      </property>
      <property name="styleSheet">
       <string notr="true">QFrame {
-	background-color: white;
 	border:none;
 }</string>
      </property>
@@ -115,9 +111,6 @@
          <number>0</number>
         </property>
         <widget class="QWidget" name="tab">
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
          <attribute name="title">
           <string>基础</string>
          </attribute>
@@ -140,11 +133,7 @@
           <item>
            <widget class="QScrollArea" name="scrollArea">
             <property name="styleSheet">
-             <string notr="true">QScrollArea &gt; QWidget &gt; QWidget {
-    background-color: white;
-}
-
-QScrollBar:vertical {
+             <string notr="true">QScrollBar:vertical {
     border: none;
     background: #f0f0f0;
     width: 11px;
@@ -195,6 +184,9 @@ QScrollBar::handle:horizontal:hover {
                <width>381</width>
                <height>919</height>
               </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: transparent;</string>
              </property>
             </widget>
            </widget>

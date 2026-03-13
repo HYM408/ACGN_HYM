@@ -16,10 +16,9 @@
 PlayerPage::PlayerPage(QWidget *parent): QWidget(parent)
 {
     ui.setupUi(this);
-    // 初始化播放器
     vlcPlayer = new VLCPlayer(ui.video_container);
     qobject_cast<QVBoxLayout*>(ui.video_container->layout())->addWidget(vlcPlayer);
-    // 设置控制面板
+    applyTheme();
     setupControlOverlay();
 }
 
@@ -46,6 +45,12 @@ void PlayerPage::setupControlOverlay()
     connect(vlcPlayer, &VLCPlayer::positionChanged, controlOverlay, &ControlOverlay::setProgress);
     connect(vlcPlayer, &VLCPlayer::exitFullscreenRequested, this, [this] {if (fullscreen_mode) toggleFullscreen();});
     connect(vlcPlayer, &VLCPlayer::volumeChanged, controlOverlay, &ControlOverlay::setVolume);
+}
+
+void PlayerPage::applyTheme() const
+{   // 主题
+    const QColor color1 = getColor("color1", QColor("#fdf7ff"));
+    ui.frame->setStyleSheet(QString("QFrame {background-color: %1; border: none}").arg(color1.name()));
 }
 
 void PlayerPage::setSiteLoadingState(const QString &siteId) const

@@ -1,7 +1,6 @@
 #include <QStyle>
 #include <QScreen>
 #include "window.h"
-#include <QElapsedTimer>
 
 int main(int argc, char *argv[])
 {

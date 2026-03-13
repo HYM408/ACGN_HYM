@@ -40,7 +40,7 @@ public:
     QScrollArea *searchresult_scrollArea;
     QWidget *scrollAreaWidgetContents;
     QVBoxLayout *verticalLayout_10;
-    QSpacerItem *verticalSpacer_4;
+    QSpacerItem *spacer;
     QStackedWidget *stackedWidget;
     QWidget *page;
     QWidget *page_2;
@@ -58,7 +58,6 @@ public:
         search_frame->setObjectName("search_frame");
         search_frame->setMinimumSize(QSize(400, 0));
         search_frame->setMaximumSize(QSize(400, 16777215));
-        search_frame->setStyleSheet(QString::fromUtf8("background-color: white;"));
         search_frame->setFrameShape(QFrame::Shape::StyledPanel);
         search_frame->setFrameShadow(QFrame::Shadow::Raised);
         verticalLayout_6 = new QVBoxLayout(search_frame);
@@ -69,7 +68,7 @@ public:
         searchback_frame->setObjectName("searchback_frame");
         searchback_frame->setMinimumSize(QSize(0, 50));
         searchback_frame->setMaximumSize(QSize(300, 16777215));
-        searchback_frame->setStyleSheet(QString::fromUtf8("background-color: white;"));
+        searchback_frame->setStyleSheet(QString::fromUtf8(""));
         searchback_frame->setFrameShape(QFrame::Shape::StyledPanel);
         searchback_frame->setFrameShadow(QFrame::Shadow::Raised);
         horizontalLayout_7 = new QHBoxLayout(searchback_frame);
@@ -85,7 +84,6 @@ public:
         font.setKerning(false);
         back_Button->setFont(font);
         back_Button->setStyleSheet(QString::fromUtf8("QPushButton {\n"
-"	background-color: white;\n"
 "	border:none;\n"
 "	border-radius:22px\n"
 "}\n"
@@ -130,10 +128,8 @@ public:
         search_lineEdit->setMaximumSize(QSize(450, 16777215));
         search_lineEdit->setFont(font1);
         search_lineEdit->setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
-        search_lineEdit->setStyleSheet(QString::fromUtf8("background-color: rgb(236, 230, 238);\n"
-"border-radius:25px;\n"
-"padding-left: 10px;\n"
-""));
+        search_lineEdit->setStyleSheet(QString::fromUtf8("border-radius:25px;\n"
+"padding-left: 10px;"));
 
         horizontalLayout_10->addWidget(search_lineEdit);
 
@@ -148,7 +144,6 @@ public:
         font2.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font2.setPointSize(15);
         comboBox->setFont(font2);
-        comboBox->setStyleSheet(QString::fromUtf8("border-color:none;"));
 
         horizontalLayout_10->addWidget(comboBox);
 
@@ -182,10 +177,6 @@ public:
 "	border: none;\n"
 "}\n"
 "\n"
-"QScrollArea > QWidget > QWidget {\n"
-"    background-color: white;\n"
-"}\n"
-"\n"
 "QScrollBar:vertical {\n"
 "    border: none;\n"
 "    background: #f0f0f0;\n"
@@ -206,21 +197,20 @@ public:
 "    border: none;\n"
 "    background: none;\n"
 "    height: 0px;\n"
-"}\n"
-"\n"
-""));
+"}"));
         searchresult_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
         searchresult_scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName("scrollAreaWidgetContents");
         scrollAreaWidgetContents->setGeometry(QRect(0, 0, 398, 764));
+        scrollAreaWidgetContents->setStyleSheet(QString::fromUtf8("background-color: transparent;"));
         verticalLayout_10 = new QVBoxLayout(scrollAreaWidgetContents);
         verticalLayout_10->setSpacing(0);
         verticalLayout_10->setObjectName("verticalLayout_10");
         verticalLayout_10->setContentsMargins(5, 0, 0, 0);
-        verticalSpacer_4 = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
+        spacer = new QSpacerItem(0, 0, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
-        verticalLayout_10->addItem(verticalSpacer_4);
+        verticalLayout_10->addItem(spacer);
 
         searchresult_scrollArea->setWidget(scrollAreaWidgetContents);
 

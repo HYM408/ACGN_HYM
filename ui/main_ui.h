@@ -187,7 +187,6 @@ public:
         toolbar_frame->setSizePolicy(sizePolicy);
         toolbar_frame->setMinimumSize(QSize(80, 0));
         toolbar_frame->setMaximumSize(QSize(80, 16777215));
-        toolbar_frame->setStyleSheet(QString::fromUtf8("background-color: rgb(242, 236, 244);"));
         toolbar_frame->setFrameShape(QFrame::Shape::NoFrame);
         verticalLayout_3 = new QVBoxLayout(toolbar_frame);
         verticalLayout_3->setSpacing(0);
@@ -202,15 +201,6 @@ public:
         search_Button->setSizePolicy(sizePolicy1);
         search_Button->setMinimumSize(QSize(50, 50));
         search_Button->setMaximumSize(QSize(50, 50));
-        search_Button->setStyleSheet(QString::fromUtf8("QPushButton {\n"
-"               background-color: rgb(233, 221, 255);\n"
-"               border: none;\n"
-"               border-radius:15px\n"
-"               }\n"
-"\n"
-"               QPushButton:hover {\n"
-"               background-color: rgb(221, 208, 246);\n"
-"               }"));
         QIcon icon3;
         icon3.addFile(QString::fromUtf8("icons/search.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         search_Button->setIcon(icon3);
@@ -222,7 +212,6 @@ public:
         acgnselect_frame = new QFrame(toolbar_frame);
         acgnselect_frame->setObjectName("acgnselect_frame");
         acgnselect_frame->setMinimumSize(QSize(80, 0));
-        acgnselect_frame->setStyleSheet(QString::fromUtf8("background-color: rgb(242, 236, 244);"));
         acgnselect_frame->setFrameShape(QFrame::Shape::NoFrame);
         verticalLayout_4 = new QVBoxLayout(acgnselect_frame);
         verticalLayout_4->setSpacing(40);
@@ -240,23 +229,6 @@ public:
         font.setPointSize(15);
         font.setBold(true);
         animation_Button->setFont(font);
-        animation_Button->setStyleSheet(QString::fromUtf8("QPushButton {\n"
-"                  background-color: rgb(242, 236, 244);\n"
-"                  border: none;\n"
-"                  border-radius:15px\n"
-"                  }\n"
-"\n"
-"                  QPushButton:checked {\n"
-"                  background-color: rgb(233, 221, 255);\n"
-"                  }\n"
-"\n"
-"                  QPushButton:hover {\n"
-"                  background-color: rgb(225, 219, 228);\n"
-"                  }\n"
-"\n"
-"                  QPushButton:checked:hover {\n"
-"                  background-color: rgb(216, 207, 232);\n"
-"                  }"));
         animation_Button->setCheckable(true);
 
         verticalLayout_4->addWidget(animation_Button);
@@ -267,23 +239,6 @@ public:
         novel_Button->setMinimumSize(QSize(0, 50));
         novel_Button->setMaximumSize(QSize(80, 50));
         novel_Button->setFont(font);
-        novel_Button->setStyleSheet(QString::fromUtf8("QPushButton {\n"
-"                  background-color: rgb(242, 236, 244);\n"
-"                  border: none;\n"
-"                  border-radius:15px\n"
-"                  }\n"
-"\n"
-"                  QPushButton:checked {\n"
-"                  background-color: rgb(233, 221, 255);\n"
-"                  }\n"
-"\n"
-"                  QPushButton:hover {\n"
-"                  background-color: rgb(225, 219, 228);\n"
-"                  }\n"
-"\n"
-"                  QPushButton:checked:hover {\n"
-"                  background-color: rgb(216, 207, 232);\n"
-"                  }"));
         novel_Button->setCheckable(true);
 
         verticalLayout_4->addWidget(novel_Button);
@@ -294,23 +249,6 @@ public:
         game_Button->setMinimumSize(QSize(0, 50));
         game_Button->setMaximumSize(QSize(80, 50));
         game_Button->setFont(font);
-        game_Button->setStyleSheet(QString::fromUtf8("QPushButton {\n"
-"                  background-color: rgb(242, 236, 244);\n"
-"                  border: none;\n"
-"                  border-radius:15px\n"
-"                  }\n"
-"\n"
-"                  QPushButton:checked {\n"
-"                  background-color: rgb(233, 221, 255);\n"
-"                  }\n"
-"\n"
-"                  QPushButton:hover {\n"
-"                  background-color: rgb(225, 219, 228);\n"
-"                  }\n"
-"\n"
-"                  QPushButton:checked:hover {\n"
-"                  background-color: rgb(216, 207, 232);\n"
-"                  }"));
         game_Button->setCheckable(true);
 
         verticalLayout_4->addWidget(game_Button);
@@ -321,23 +259,6 @@ public:
         comic_Button->setMinimumSize(QSize(0, 50));
         comic_Button->setMaximumSize(QSize(80, 50));
         comic_Button->setFont(font);
-        comic_Button->setStyleSheet(QString::fromUtf8("QPushButton {\n"
-"                  background-color: rgb(242, 236, 244);\n"
-"                  border: none;\n"
-"                  border-radius:15px\n"
-"                  }\n"
-"\n"
-"                  QPushButton:checked {\n"
-"                  background-color: rgb(233, 221, 255);\n"
-"                  }\n"
-"\n"
-"                  QPushButton:hover {\n"
-"                  background-color: rgb(225, 219, 228);\n"
-"                  }\n"
-"\n"
-"                  QPushButton:checked:hover {\n"
-"                  background-color: rgb(216, 207, 232);\n"
-"                  }"));
         comic_Button->setCheckable(true);
 
         verticalLayout_4->addWidget(comic_Button);
@@ -348,23 +269,6 @@ public:
         pushButton_9->setMinimumSize(QSize(0, 50));
         pushButton_9->setMaximumSize(QSize(80, 50));
         pushButton_9->setFont(font);
-        pushButton_9->setStyleSheet(QString::fromUtf8("QPushButton {\n"
-"                  background-color: rgb(242, 236, 244);\n"
-"                  border: none;\n"
-"                  border-radius:15px\n"
-"                  }\n"
-"\n"
-"                  QPushButton:checked {\n"
-"                  background-color: rgb(233, 221, 255);\n"
-"                  }\n"
-"\n"
-"                  QPushButton:hover {\n"
-"                  background-color: rgb(225, 219, 228);\n"
-"                  }\n"
-"\n"
-"                  QPushButton:checked:hover {\n"
-"                  background-color: rgb(216, 207, 232);\n"
-"                  }"));
         pushButton_9->setCheckable(true);
 
         verticalLayout_4->addWidget(pushButton_9);
@@ -380,15 +284,6 @@ public:
         settings_Button->setObjectName("settings_Button");
         settings_Button->setMinimumSize(QSize(50, 50));
         settings_Button->setMaximumSize(QSize(50, 50));
-        settings_Button->setStyleSheet(QString::fromUtf8("QPushButton {\n"
-"               background-color: rgb(242, 236, 244);\n"
-"               border: none;\n"
-"               border-radius:15px\n"
-"               }\n"
-"\n"
-"               QPushButton:hover {\n"
-"               background-color: rgb(225, 219, 228);\n"
-"               }"));
         QIcon icon4;
         icon4.addFile(QString::fromUtf8("icons/settings.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         settings_Button->setIcon(icon4);
@@ -474,9 +369,6 @@ public:
         QFont font2;
         font2.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         pushButton_10->setFont(font2);
-        pushButton_10->setStyleSheet(QString::fromUtf8("border:none;\n"
-"                         border-radius:15px;\n"
-"                         background-color: rgb(242, 236, 244)"));
         pushButton_10->setAlignment(Qt::AlignmentFlag::AlignCenter);
 
         horizontalLayout_7->addWidget(pushButton_10);
@@ -507,9 +399,6 @@ public:
         pushButton_11->setMinimumSize(QSize(30, 30));
         pushButton_11->setMaximumSize(QSize(30, 30));
         pushButton_11->setFont(font2);
-        pushButton_11->setStyleSheet(QString::fromUtf8("border:none;\n"
-"                         border-radius:15px;\n"
-"                         background-color: rgb(242, 236, 244)"));
         pushButton_11->setAlignment(Qt::AlignmentFlag::AlignCenter);
 
         horizontalLayout_8->addWidget(pushButton_11);
@@ -540,9 +429,6 @@ public:
         pushButton_12->setMinimumSize(QSize(30, 30));
         pushButton_12->setMaximumSize(QSize(30, 30));
         pushButton_12->setFont(font2);
-        pushButton_12->setStyleSheet(QString::fromUtf8("border:none;\n"
-"                         border-radius:15px;\n"
-"                         background-color: rgb(242, 236, 244)"));
         pushButton_12->setAlignment(Qt::AlignmentFlag::AlignCenter);
 
         horizontalLayout_9->addWidget(pushButton_12);
@@ -573,9 +459,6 @@ public:
         pushButton_13->setMinimumSize(QSize(30, 30));
         pushButton_13->setMaximumSize(QSize(30, 30));
         pushButton_13->setFont(font2);
-        pushButton_13->setStyleSheet(QString::fromUtf8("border:none;\n"
-"                         border-radius:15px;\n"
-"                         background-color: rgb(242, 236, 244)"));
         pushButton_13->setAlignment(Qt::AlignmentFlag::AlignCenter);
 
         horizontalLayout_10->addWidget(pushButton_13);
@@ -607,9 +490,6 @@ public:
         pushButton_14->setMinimumSize(QSize(30, 30));
         pushButton_14->setMaximumSize(QSize(30, 30));
         pushButton_14->setFont(font2);
-        pushButton_14->setStyleSheet(QString::fromUtf8("border:none;\n"
-"                         border-radius:15px;\n"
-"                         background-color: rgb(242, 236, 244)"));
         pushButton_14->setAlignment(Qt::AlignmentFlag::AlignCenter);
 
         horizontalLayout_2->addWidget(pushButton_14, 0, Qt::AlignmentFlag::AlignRight);

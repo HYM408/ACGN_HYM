@@ -9,6 +9,7 @@
 DownloadPage::DownloadPage(QWidget *parent): QWidget(parent)
 {
     ui.setupUi(this);
+    applyTheme();
     setupDownloadPathUI();
     setupDownloadList();
 }
@@ -16,6 +17,12 @@ DownloadPage::DownloadPage(QWidget *parent): QWidget(parent)
 void DownloadPage::setManagers(PikPakApi *pikpakapi)
 {   // 初始化实例
     pikpakApi = pikpakapi;
+}
+
+void DownloadPage::applyTheme() const
+{   // 主题
+    const QColor color1 = getColor("color1", QColor("#fdf7ff"));
+    ui.frame_2->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
 }
 
 void DownloadPage::setupDownloadPathUI()

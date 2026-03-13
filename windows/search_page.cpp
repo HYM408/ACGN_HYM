@@ -1,6 +1,7 @@
 #include "search_page.h"
 #include <QJsonArray>
 #include <QMouseEvent>
+#include "config.h"
 #include "sql/sql.h"
 #include "detail_page.h"
 #include "api/bangumi_api.h"
@@ -9,9 +10,8 @@
 
 SearchPage::SearchPage(QWidget *parent) : QWidget(parent)
 {
-    // 初始化UI
     ui.setupUi(this);
-    // 初始化连接
+    applyTheme();
     setupConnections();
 }
 
@@ -34,6 +34,12 @@ void SearchPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, Databa
         connect(detailPage, &DetailPage::showEpisodePageRequested, this, &SearchPage::showEpisodePageRequested);
         connect(detailPage, &DetailPage::tagClicked, this, [this](const QString &tag, const int subjectType) {searchByTag(tag, subjectType);});
     }
+}
+
+void SearchPage::applyTheme() const
+{   // 主题
+    const QColor color1 = getColor("color1", QColor("#fdf7ff"));
+    ui.search_frame->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
 }
 
 void SearchPage::setupConnections()

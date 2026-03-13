@@ -48,9 +48,6 @@ public:
         horizontalLayout->setContentsMargins(0, 0, 0, 0);
         frame_2 = new QFrame(DownloaderPage);
         frame_2->setObjectName("frame_2");
-        frame_2->setStyleSheet(QString::fromUtf8("QFrame {\n"
-"       background-color: white;\n"
-"       }"));
         frame_2->setFrameShape(QFrame::Shape::StyledPanel);
         frame_2->setFrameShadow(QFrame::Shadow::Raised);
         horizontalLayout_3 = new QHBoxLayout(frame_2);

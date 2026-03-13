@@ -15,17 +15,12 @@ const QString SettingsPage::BANGUMI_ARCHIVE_URL = "https://raw.githubusercontent
 
 SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent)
 {
-    // 初始化UI
     ui.setupUi(this);
-    // 初始化Bangumi OAuth
     bangumiOAuth = new BangumiOAuth(this);
-    // 设置UI连接
+    applyTheme();
     setupConnections();
-    // 设置下载路径
     setupDownloadPathUi();
-    // 更新token显示
     updateTokenDisplay();
-    // Bangumi域名
     setBangumiBaseUrl();
 }
 
@@ -40,6 +35,17 @@ void SettingsPage::setManagers(BangumiAPI *api, PikPakApi *pikpakapi, DatabaseMa
     bangumiAPI = api;
     pikpakApi = pikpakapi;
     dbManager = db;
+}
+
+void SettingsPage::applyTheme() const
+{   // 主题
+    const QColor color1 = getColor("color1", QColor("#fdf7ff"));
+    const QColor color4 = getColor("color4", QColor("#e9ddff"));
+    ui.stackedWidget_2->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
+    const QString buttonStyle = QString("QPushButton:hover {background-color: rgba(0, 0, 0, 20)}"
+                                        "QPushButton:checked {background-color: %1}"
+                                        "QPushButton {border:none; border-radius: 10px}").arg(color4.name());
+    for (const auto button : {ui.pushButton_3, ui.pushButton_4, ui.pushButton_13}) button->setStyleSheet(buttonStyle);
 }
 
 void SettingsPage::setupConnections()

@@ -1,8 +1,18 @@
 #include "config.h"
+#include <QColor>
 
 void initConfig()
 {   // 初始化配置文件
     QSettings settings("./config.ini", QSettings::IniFormat);
+    // 主题
+    settings.beginGroup("Theme");
+    setDefaultIfMissing(settings, "color1", "#fdf7ff");
+    setDefaultIfMissing(settings, "color2", "#f2ecf4");
+    setDefaultIfMissing(settings, "color3", "#e1dbe4");
+    setDefaultIfMissing(settings, "color4", "#e9ddff");
+    setDefaultIfMissing(settings, "color5", "#ddd0f6");
+    setDefaultIfMissing(settings, "color6", "#674fa5");
+    settings.endGroup();
     // Bangumi
     settings.beginGroup("Bangumi");
     setDefaultIfMissing(settings, "user_id", "");
@@ -47,4 +57,11 @@ void setConfig(const QString &key, const QVariant &value)
 {   // 写入
     QSettings settings("./config.ini", QSettings::IniFormat);
     settings.setValue(key, value);
+}
+
+QColor getColor(const QString &key, const QColor &defaultValue)
+{   // 读取颜色
+    const QSettings settings("./config.ini", QSettings::IniFormat);
+    const QString colorStr = settings.value("Theme/" + key, defaultValue.name()).toString();
+    return {colorStr};
 }

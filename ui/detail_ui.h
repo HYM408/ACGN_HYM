@@ -9,18 +9,13 @@
 #ifndef DETAIL_UI_H
 #define DETAIL_UI_H
 
-#include <QtCore/QVariant>
-#include <QtGui/QIcon>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QFrame>
-#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QScrollArea>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTextEdit>
 #include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
 
@@ -66,7 +61,6 @@ public:
         if (DetailPage->objectName().isEmpty())
             DetailPage->setObjectName("DetailPage");
         DetailPage->resize(1525, 942);
-        DetailPage->setStyleSheet(QString::fromUtf8("background-color: rgb(255, 255, 255);"));
         verticalLayout_11 = new QVBoxLayout(DetailPage);
         verticalLayout_11->setSpacing(0);
         verticalLayout_11->setObjectName("verticalLayout_11");
@@ -74,7 +68,6 @@ public:
         frame_6 = new QFrame(DetailPage);
         frame_6->setObjectName("frame_6");
         frame_6->setMinimumSize(QSize(0, 114));
-        frame_6->setStyleSheet(QString::fromUtf8("background-color: rgb(253, 247, 255);"));
         frame_6->setFrameShape(QFrame::Shape::StyledPanel);
         frame_6->setFrameShadow(QFrame::Shadow::Raised);
         verticalLayout = new QVBoxLayout(frame_6);
@@ -247,12 +240,13 @@ public:
         pushButton_26->setMinimumSize(QSize(80, 35));
         pushButton_26->setFont(font2);
         pushButton_26->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
-"             border-radius:15px"));
+"border-radius:15px"));
 
         verticalLayout_13->addWidget(pushButton_26, 0, Qt::AlignmentFlag::AlignLeft);
 
         pushButton_27 = new QPushButton(frame);
         pushButton_27->setObjectName("pushButton_27");
+        pushButton_27->setMinimumSize(QSize(80, 0));
         QFont font3;
         font3.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font3.setPointSize(14);
@@ -304,11 +298,7 @@ public:
         font5.setBold(true);
         textEdit_2->setFont(font5);
         textEdit_2->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
-        textEdit_2->setStyleSheet(QString::fromUtf8("QScrollArea > QWidget > QWidget {\n"
-"    background-color: white;\n"
-"}\n"
-"\n"
-"QScrollBar:vertical {\n"
+        textEdit_2->setStyleSheet(QString::fromUtf8("QScrollBar:vertical {\n"
 "    border: none;\n"
 "    background: #f0f0f0;\n"
 "    width: 11px;\n"
@@ -376,6 +366,7 @@ public:
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName("scrollAreaWidgetContents");
         scrollAreaWidgetContents->setGeometry(QRect(0, 0, 1451, 534));
+        scrollAreaWidgetContents->setStyleSheet(QString::fromUtf8("background-color: transparent;"));
         scrollArea->setWidget(scrollAreaWidgetContents);
 
         verticalLayout_2->addWidget(scrollArea);
@@ -402,7 +393,7 @@ public:
         QMetaObject::connectSlotsByName(DetailPage);
     } // setupUi
 
-    void retranslateUi(QWidget *DetailPage)
+    void retranslateUi(QWidget *DetailPage) const
     {
         pushButton_19->setText(QString());
         pushButton_20->setText(QString());

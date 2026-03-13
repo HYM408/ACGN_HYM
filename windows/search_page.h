@@ -18,6 +18,7 @@ public:
     explicit SearchPage(QWidget *parent = nullptr);
     ~SearchPage() override;
     void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db);
+    void applyTheme() const;
     void updateComboBoxByType(int currentType) const;
     void searchByTag(const QString &tag, int subjectType);
 

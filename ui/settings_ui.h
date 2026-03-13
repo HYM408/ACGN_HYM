@@ -174,18 +174,6 @@ public:
         font2.setPointSize(15);
         font2.setBold(true);
         pushButton_3->setFont(font2);
-        pushButton_3->setStyleSheet(QString::fromUtf8("QPushButton:hover {\n"
-"             background-color: rgba(0, 0, 0,20);\n"
-"             }\n"
-"\n"
-"             QPushButton:checked {\n"
-"             background-color: rgb(233, 221, 255);\n"
-"             }\n"
-"\n"
-"             QPushButton {\n"
-"             border:none;\n"
-"             border-radius: 10px;\n"
-"             }"));
         pushButton_3->setCheckable(true);
 
         verticalLayout_2->addWidget(pushButton_3);
@@ -196,18 +184,6 @@ public:
         pushButton_4->setMinimumSize(QSize(0, 50));
         pushButton_4->setMaximumSize(QSize(16777215, 50));
         pushButton_4->setFont(font2);
-        pushButton_4->setStyleSheet(QString::fromUtf8("QPushButton:hover {\n"
-"             background-color: rgba(0, 0, 0,20);\n"
-"             }\n"
-"\n"
-"             QPushButton:checked {\n"
-"             background-color: rgb(233, 221, 255);\n"
-"             }\n"
-"\n"
-"             QPushButton {\n"
-"             border:none;\n"
-"             border-radius: 10px;\n"
-"             }"));
         pushButton_4->setCheckable(true);
 
         verticalLayout_2->addWidget(pushButton_4);
@@ -218,18 +194,6 @@ public:
         pushButton_13->setMinimumSize(QSize(0, 50));
         pushButton_13->setMaximumSize(QSize(16777215, 50));
         pushButton_13->setFont(font2);
-        pushButton_13->setStyleSheet(QString::fromUtf8("QPushButton:hover {\n"
-"             background-color: rgba(0, 0, 0,20);\n"
-"             }\n"
-"\n"
-"             QPushButton:checked {\n"
-"             background-color: rgb(233, 221, 255);\n"
-"             }\n"
-"\n"
-"             QPushButton {\n"
-"             border:none;\n"
-"             border-radius: 10px;\n"
-"             }"));
         pushButton_13->setCheckable(true);
 
         verticalLayout_2->addWidget(pushButton_13);
@@ -246,13 +210,9 @@ public:
 
         stackedWidget_2 = new QStackedWidget(SettingsPage);
         stackedWidget_2->setObjectName("stackedWidget_2");
-        stackedWidget_2->setStyleSheet(QString::fromUtf8("QStackedWidget {\n"
-"       background-color: rgb(248, 242, 250);\n"
-"       }\n"
-"\n"
-"       QStackedWidget > QWidget {\n"
-"       background-color: transparent;\n"
-"       }"));
+        stackedWidget_2->setStyleSheet(QString::fromUtf8("QStackedWidget > QWidget {\n"
+"	background-color: transparent;\n"
+"}"));
         login_page = new QWidget();
         login_page->setObjectName("login_page");
         verticalLayout_7 = new QVBoxLayout(login_page);

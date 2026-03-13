@@ -6,11 +6,13 @@
 #include <QJsonArray>
 #include <QResizeEvent>
 #include <QStandardItemModel>
+#include "config.h"
 #include "sql/sql.h"
 #include "api/bangumi_api.h"
 
 EpisodeOverlay::EpisodeOverlay(QWidget *parent) : QWidget(parent)
 {
+    applyTheme();
     episodeContainer = new QWidget(this);
     ui.setupUi(episodeContainer);
     episodeContainer->setFixedSize(600, 200);
@@ -43,6 +45,12 @@ EpisodeDelegate::EpisodeDelegate(QObject *parent) : QStyledItemDelegate(parent) 
 void EpisodeOverlay::setManagers(BangumiAPI *api)
 {   // 初始化实例
     bangumiAPI = api;
+}
+
+void EpisodeOverlay::applyTheme() const
+{   // 主题
+    const QColor color1 = getColor("color1", QColor("#fdf7ff"));
+    ui.frame_2->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
 }
 
 void EpisodeDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const

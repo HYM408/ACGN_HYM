@@ -40,9 +40,6 @@
        <height>16777215</height>
       </size>
      </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: white;</string>
-     </property>
      <property name="frameShape">
       <enum>QFrame::Shape::StyledPanel</enum>
      </property>
@@ -80,7 +77,7 @@
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: white;</string>
+         <string notr="true"/>
         </property>
         <property name="frameShape">
          <enum>QFrame::Shape::StyledPanel</enum>
@@ -126,7 +123,6 @@
            </property>
            <property name="styleSheet">
             <string notr="true">QPushButton {
-	background-color: white;
 	border:none;
 	border-radius:22px
 }
@@ -216,10 +212,8 @@ QPushButton:hover {
             <enum>Qt::ContextMenuPolicy::NoContextMenu</enum>
            </property>
            <property name="styleSheet">
-            <string notr="true">background-color: rgb(236, 230, 238);
-border-radius:25px;
-padding-left: 10px;
-</string>
+            <string notr="true">border-radius:25px;
+padding-left: 10px;</string>
            </property>
            <property name="placeholderText">
             <string>回车搜索</string>
@@ -245,9 +239,6 @@ padding-left: 10px;
              <family>微软雅黑</family>
              <pointsize>15</pointsize>
             </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">border-color:none;</string>
            </property>
            <item>
             <property name="text">
@@ -317,10 +308,6 @@ padding-left: 10px;
 	border: none;
 }
 
-QScrollArea &gt; QWidget &gt; QWidget {
-    background-color: white;
-}
-
 QScrollBar:vertical {
     border: none;
     background: #f0f0f0;
@@ -341,9 +328,7 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
     border: none;
     background: none;
     height: 0px;
-}
-
-</string>
+}</string>
         </property>
         <property name="horizontalScrollBarPolicy">
          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
@@ -359,6 +344,9 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
            <width>398</width>
            <height>764</height>
           </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: transparent;</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <property name="spacing">
@@ -377,17 +365,7 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
            <number>0</number>
           </property>
           <item>
-           <spacer name="verticalSpacer_4">
-            <property name="orientation">
-             <enum>Qt::Orientation::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
+           <spacer name="spacer"/>
           </item>
          </layout>
         </widget>

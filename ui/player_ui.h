@@ -37,7 +37,6 @@ public:
         if (choicePage->objectName().isEmpty())
             choicePage->setObjectName("choicePage");
         choicePage->resize(1525, 942);
-        choicePage->setStyleSheet(QString::fromUtf8(""));
         horizontalLayout = new QHBoxLayout(choicePage);
         horizontalLayout->setSpacing(0);
         horizontalLayout->setObjectName("horizontalLayout");
@@ -65,7 +64,6 @@ public:
         sizePolicy1.setHeightForWidth(frame->sizePolicy().hasHeightForWidth());
         frame->setSizePolicy(sizePolicy1);
         frame->setStyleSheet(QString::fromUtf8("QFrame {\n"
-"	background-color: white;\n"
 "	border:none;\n"
 "}"));
         frame->setFrameShape(QFrame::Shape::StyledPanel);
@@ -86,18 +84,13 @@ public:
 "}"));
         tab = new QWidget();
         tab->setObjectName("tab");
-        tab->setStyleSheet(QString::fromUtf8(""));
         verticalLayout = new QVBoxLayout(tab);
         verticalLayout->setSpacing(0);
         verticalLayout->setObjectName("verticalLayout");
         verticalLayout->setContentsMargins(0, 0, 0, 0);
         scrollArea = new QScrollArea(tab);
         scrollArea->setObjectName("scrollArea");
-        scrollArea->setStyleSheet(QString::fromUtf8("QScrollArea > QWidget > QWidget {\n"
-"    background-color: white;\n"
-"}\n"
-"\n"
-"QScrollBar:vertical {\n"
+        scrollArea->setStyleSheet(QString::fromUtf8("QScrollBar:vertical {\n"
 "    border: none;\n"
 "    background: #f0f0f0;\n"
 "    width: 11px;\n"
@@ -140,6 +133,7 @@ public:
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName("scrollAreaWidgetContents");
         scrollAreaWidgetContents->setGeometry(QRect(0, 0, 381, 919));
+        scrollAreaWidgetContents->setStyleSheet(QString::fromUtf8("background-color: transparent;"));
         scrollArea->setWidget(scrollAreaWidgetContents);
 
         verticalLayout->addWidget(scrollArea);

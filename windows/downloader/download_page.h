@@ -13,6 +13,7 @@ class DownloadPage : public QWidget
 public:
     explicit DownloadPage(QWidget *parent = nullptr);
     void setManagers(PikPakApi *pikpakapi);
+    void applyTheme() const;
     void loadRecentFiles();
 
 protected:

@@ -19,6 +19,7 @@ public:
     explicit PlayerPage(QWidget *parent = nullptr);
     void setManagers(CacheImageUtil *cacheImage, PikPakApi *pikpakapi);
     void setupControlOverlay();
+    void applyTheme() const;
     void fetchRoutes(const CollectionData& collectionData, const EpisodeData& episodeData);
     void cancelAllSearches() const;
 

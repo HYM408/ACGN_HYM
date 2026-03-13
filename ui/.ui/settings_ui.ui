@@ -174,20 +174,6 @@
              <bold>true</bold>
             </font>
            </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton:hover {
-             background-color: rgba(0, 0, 0,20);
-             }
-
-             QPushButton:checked {
-             background-color: rgb(233, 221, 255);
-             }
-
-             QPushButton {
-             border:none;
-             border-radius: 10px;
-             }</string>
-           </property>
            <property name="text">
             <string>Bangumi</string>
            </property>
@@ -220,20 +206,6 @@
              <bold>true</bold>
             </font>
            </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton:hover {
-             background-color: rgba(0, 0, 0,20);
-             }
-
-             QPushButton:checked {
-             background-color: rgb(233, 221, 255);
-             }
-
-             QPushButton {
-             border:none;
-             border-radius: 10px;
-             }</string>
-           </property>
            <property name="text">
             <string>PikPak</string>
            </property>
@@ -265,20 +237,6 @@
              <pointsize>15</pointsize>
              <bold>true</bold>
             </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton:hover {
-             background-color: rgba(0, 0, 0,20);
-             }
-
-             QPushButton:checked {
-             background-color: rgb(233, 221, 255);
-             }
-
-             QPushButton {
-             border:none;
-             border-radius: 10px;
-             }</string>
            </property>
            <property name="text">
             <string>下载</string>
@@ -313,13 +271,9 @@
    <item>
     <widget class="QStackedWidget" name="stackedWidget_2">
      <property name="styleSheet">
-      <string notr="true">QStackedWidget {
-       background-color: rgb(248, 242, 250);
-       }
-
-       QStackedWidget &gt; QWidget {
-       background-color: transparent;
-       }</string>
+      <string notr="true">QStackedWidget &gt; QWidget {
+	background-color: transparent;
+}</string>
      </property>
      <property name="currentIndex">
       <number>0</number>

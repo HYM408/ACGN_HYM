@@ -22,9 +22,6 @@
     <height>16777215</height>
    </size>
   </property>
-  <property name="styleSheet">
-   <string notr="true"/>
-  </property>
   <layout class="QHBoxLayout" name="horizontalLayout_5">
    <property name="spacing">
     <number>0</number>
@@ -54,11 +51,6 @@
        <width>600</width>
        <height>16777215</height>
       </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">QFrame {
-       background-color:rgb(230, 224, 233)
-       }</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::Shape::StyledPanel</enum>
@@ -92,14 +84,13 @@
            </property>
            <property name="styleSheet">
             <string notr="true">QPushButton {
-             background-color: rgb(230, 224, 233);
-             border:none;
-             border-radius:22px
-             }
+	border:none;
+	border-radius:22px
+}
 
-             QPushButton:hover {
-             background-color: rgb(225, 219, 228);
-             }</string>
+QPushButton:hover {
+	background-color: rgb(237, 237, 238);
+}</string>
            </property>
            <property name="text">
             <string/>
@@ -197,31 +188,35 @@
       <item>
        <widget class="QScrollArea" name="scrollArea">
         <property name="styleSheet">
-         <string notr="true">
-          QScrollArea {
-          border: none;
-          background-color: transparent;
-          }
-          QScrollArea &gt; QWidget &gt; QWidget {
-          background-color: transparent;
-          }
-          QScrollBar:vertical {
-          border: none;
-          background-color: rgba(200, 200, 200, 100);
-          width: 8px;
-          border-radius: 4px;
-          }
-          QScrollBar::handle:vertical {
-          background-color: rgba(150, 150, 150, 150);
-          border-radius: 4px;
-          min-height: 20px;
-          }
-          QScrollBar::handle:vertical:hover {
-          background-color: rgba(120, 120, 120, 200);
-          }
-          QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-          height: 0px;
-          }
+         <string notr="true">QScrollArea {
+	border: none;
+	background-color: transparent;
+}
+
+QScrollArea &gt; QWidget &gt; QWidget {
+	background-color: transparent;
+}
+
+QScrollBar:vertical {
+	border: none;
+	background-color: rgba(200, 200, 200, 100);
+	width: 8px;
+	border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+	background-color: rgba(150, 150, 150, 150);
+	border-radius: 4px;
+	min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+	background-color: rgba(120, 120, 120, 200);
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+	height: 0px;
+}
          </string>
         </property>
         <property name="widgetResizable">

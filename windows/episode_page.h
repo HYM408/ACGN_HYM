@@ -30,6 +30,7 @@ class EpisodeOverlay : public QWidget
 public:
     explicit EpisodeOverlay(QWidget *parent = nullptr);
     void setManagers(BangumiAPI *api);
+    void applyTheme() const;
     void showWithCollectionData(const CollectionData &collData);
     void closeOverlay();
     enum EpisodeRole {EpisodeDataRole = Qt::UserRole + 1};

@@ -1,4 +1,5 @@
 #include "main_page.h"
+#include "config.h"
 #include "sql/sql.h"
 #include "utils/menu_util.h"
 #include "utils/image_util.h"
@@ -7,14 +8,37 @@
 
 MainPageManager::MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI, DatabaseManager *dbManager): QObject(nullptr), mainWindow(mainWindow), dbManager(dbManager), cacheImageUtil(cacheImageUtil), bangumiAPI(bangumiAPI)
 {
-    // 初始化状态映射
     statusNamesMap = {
         {2, {{1, "想看"}, {2, "看过"}, {3, "在看"}}},
         {4, {{1, "想玩"}, {2, "玩过"}, {3, "在玩"}}},
         {7, {{1, "想读"}, {2, "读过"}, {3, "在读"}}},
         {8, {{1, "想读"}, {2, "读过"}, {3, "在读"}}}};
-    // 初始化连接
+    applyTheme();
     setupConnections();
+}
+
+void MainPageManager::applyTheme()
+{   // 主题
+    m_color2 = getColor("color2", QColor("#f2ecf4"));
+    m_color3 = getColor("color3", QColor("#e1dbe4"));
+    const QColor color4 = getColor("color4", QColor("#e9ddff"));
+    const QColor color5 = getColor("color5", QColor("#ddd0f6"));
+    m_color6 = getColor("color6", QColor("#f2ecf4"));
+    QColor hoverColor = m_color6;
+    hoverColor.setAlpha(30);
+    m_color6A = QString("rgba(%1, %2, %3, %4)").arg(hoverColor.red()).arg(hoverColor.green()).arg(hoverColor.blue()).arg(hoverColor.alpha());
+    mainWindow->toolbar_frame->setStyleSheet(QString("QFrame {background-color: %1}").arg(m_color2.name()));
+    mainWindow->search_Button->setStyleSheet(QString("QPushButton {background-color: %1; border: none; border-radius:15px}"
+                                                     "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
+    mainWindow->settings_Button->setStyleSheet(QString("QPushButton {border: none; border-radius:15px}"
+                                                     "QPushButton:hover {background-color: %1}").arg(m_color3.name()));
+    const QString buttonStyle = QString("QPushButton {background-color: %1; border: none; border-radius:15px}"
+                                        "QPushButton:checked {background-color: %2}"
+                                        "QPushButton:hover {background-color: %3}"
+                                        "QPushButton:checked:hover {background-color: %4}").arg(m_color2.name(), color4.name(), m_color3.name(), color5.name());
+    for (auto button : {mainWindow->animation_Button, mainWindow->novel_Button, mainWindow->game_Button, mainWindow->comic_Button, mainWindow->pushButton_9}) button->setStyleSheet(buttonStyle);
+    const QString StatusCountsQLabelStyle = QString("QLabel {border:none; border-radius:15px; background-color: %1}").arg(m_color2.name());
+    for (auto QLabel : {mainWindow->pushButton_10, mainWindow->pushButton_11, mainWindow->pushButton_12, mainWindow->pushButton_13, mainWindow->pushButton_14}) QLabel->setStyleSheet(StatusCountsQLabelStyle);
 }
 
 void MainPageManager::initStatusFrames()
@@ -61,9 +85,9 @@ bool MainPageManager::eventFilter(QObject *obj, QEvent *event)
     }
     for (auto &[statusType, info] : statusFrames.toStdMap()) {
         if (info.frame == obj) {
-            const QString baseStyle = statusType == currentStatusType ? ";border-bottom: 3px solid rgb(103, 79, 165)" : "";
+            const QString baseStyle = statusType == currentStatusType ? QString("; border-bottom: 3px solid %1").arg(m_color6.name()) : "";
             if (event->type() == QEvent::Enter) {
-                info.frame->setStyleSheet(QString("QFrame{background-color: rgba(103, 79, 165, 30)%1}").arg(baseStyle));
+                info.frame->setStyleSheet(QString("QFrame{background-color: %1%2}").arg(m_color6A, baseStyle));
                 return true;
             }
             if (event->type() == QEvent::Leave) {
@@ -115,8 +139,8 @@ void MainPageManager::loadCollections(const int subjectType, const int statusTyp
         info.countButton->setText(QString::number(count));
         const bool isHovered = info.frame->underMouse();
         const bool selected = key == statusType;
-        QString backgroundColor = isHovered ? "rgba(103, 79, 165, 30)" : "transparent";
-        QString borderStyle = selected ? ";border-bottom: 3px solid rgb(103, 79, 165)" : "";
+        QString backgroundColor = isHovered ? m_color6A : "transparent";
+        QString borderStyle = selected ? QString("; border-bottom: 3px solid %1").arg(m_color6.name()) : "";
         info.frame->setStyleSheet(QString("QFrame{background-color: %1%2}").arg(backgroundColor, borderStyle));
     }
     allCollections = DatabaseManager::getCollectionBySubjectTypeAndType(subjectType, statusType);
@@ -175,7 +199,7 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
     // 主框架
     card.card = new QFrame(mainWindow->centralwidget);
     card.card->setFixedSize(420, 170);
-    card.card->setStyleSheet("QFrame{background-color: rgb(242, 236, 244);border-radius: 15px}");
+    card.card->setStyleSheet(QString("background-color: %1;border-radius: 15px").arg(m_color2.name()));
     card.card->setCursor(Qt::PointingHandCursor);
     card.card->installEventFilter(this);
     card.card->setProperty("isCard", true);
@@ -185,7 +209,7 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
     // 图片
     card.coverLabel = new QLabel();
     card.coverLabel->setFixedSize(125, 170);
-    card.coverLabel->setStyleSheet("background-color: rgb(242, 236, 244); border-top-left-radius: 15px; border-bottom-left-radius: 15px");
+    card.coverLabel->setStyleSheet(QString("background-color: %1; border-top-left-radius: 15px; border-bottom-left-radius: 15px").arg(m_color2.name()));
     card.coverLabel->setAlignment(Qt::AlignCenter);
     layout->addWidget(card.coverLabel);
     // 信息框架
@@ -211,8 +235,8 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
     // 状态
     card.moreButton = new QPushButton();
     card.moreButton->setFixedSize(40, 40);
-    card.moreButton->setStyleSheet("QPushButton {background-color: rgb(242, 236, 244); border-radius: 20px}"
-                                   "QPushButton:hover {background-color: rgb(216, 207, 232)}");
+    card.moreButton->setStyleSheet(QString("QPushButton {border-radius: 20px}"
+                                           "QPushButton:hover {background-color: %1}").arg(m_color3.name()));
     card.moreButton->setIcon(QIcon("icons/more.png"));
     buttonLayout->addWidget(card.moreButton);
     // 选集.进度
@@ -231,9 +255,9 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
     if (collection.subject_type == 2) card.episodeButton->setText("选集");
     else if (collection.subject_type == 4) card.episodeButton->setText("");
     else card.episodeButton->setText("进度");
-    if (collection.subject_type == 4) card.episodeButton->setStyleSheet("QPushButton {background-color: rgb(242, 236, 244); border-radius: 20px}");
-    else card.episodeButton->setStyleSheet("QPushButton {background-color: rgb(242, 236, 244); border-radius: 20px}"
-                                          "QPushButton:hover {background-color: rgb(216, 207, 232)}");
+    if (collection.subject_type == 4) card.episodeButton->setStyleSheet(QString("QPushButton {border-radius: 20px}"));
+    else card.episodeButton->setStyleSheet(QString("QPushButton {border-radius: 20px}"
+                                                   "QPushButton:hover {background-color: %1}").arg(m_color3.name()));
     // 连接信号
     connect(card.moreButton, &QPushButton::clicked, this, [this, card]() mutable {
         const auto data = card.card->property("collectionData").value<CollectionData>();

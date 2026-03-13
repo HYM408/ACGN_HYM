@@ -232,9 +232,6 @@
             <height>16777215</height>
            </size>
           </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(242, 236, 244);</string>
-          </property>
           <property name="frameShape">
            <enum>QFrame::Shape::NoFrame</enum>
           </property>
@@ -271,17 +268,6 @@
                <height>50</height>
               </size>
              </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-               background-color: rgb(233, 221, 255);
-               border: none;
-               border-radius:15px
-               }
-
-               QPushButton:hover {
-               background-color: rgb(221, 208, 246);
-               }</string>
-             </property>
              <property name="icon">
               <iconset>
                <normaloff>icons/search.png</normaloff>icons/search.png</iconset>
@@ -304,9 +290,6 @@
                <width>80</width>
                <height>0</height>
               </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(242, 236, 244);</string>
              </property>
              <property name="frameShape">
               <enum>QFrame::Shape::NoFrame</enum>
@@ -338,25 +321,6 @@
                   <pointsize>15</pointsize>
                   <bold>true</bold>
                  </font>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">QPushButton {
-                  background-color: rgb(242, 236, 244);
-                  border: none;
-                  border-radius:15px
-                  }
-
-                  QPushButton:checked {
-                  background-color: rgb(233, 221, 255);
-                  }
-
-                  QPushButton:hover {
-                  background-color: rgb(225, 219, 228);
-                  }
-
-                  QPushButton:checked:hover {
-                  background-color: rgb(216, 207, 232);
-                  }</string>
                 </property>
                 <property name="text">
                  <string>动画</string>
@@ -390,25 +354,6 @@
                   <bold>true</bold>
                  </font>
                 </property>
-                <property name="styleSheet">
-                 <string notr="true">QPushButton {
-                  background-color: rgb(242, 236, 244);
-                  border: none;
-                  border-radius:15px
-                  }
-
-                  QPushButton:checked {
-                  background-color: rgb(233, 221, 255);
-                  }
-
-                  QPushButton:hover {
-                  background-color: rgb(225, 219, 228);
-                  }
-
-                  QPushButton:checked:hover {
-                  background-color: rgb(216, 207, 232);
-                  }</string>
-                </property>
                 <property name="text">
                  <string>小说</string>
                 </property>
@@ -440,25 +385,6 @@
                   <pointsize>15</pointsize>
                   <bold>true</bold>
                  </font>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">QPushButton {
-                  background-color: rgb(242, 236, 244);
-                  border: none;
-                  border-radius:15px
-                  }
-
-                  QPushButton:checked {
-                  background-color: rgb(233, 221, 255);
-                  }
-
-                  QPushButton:hover {
-                  background-color: rgb(225, 219, 228);
-                  }
-
-                  QPushButton:checked:hover {
-                  background-color: rgb(216, 207, 232);
-                  }</string>
                 </property>
                 <property name="text">
                  <string>游戏</string>
@@ -492,25 +418,6 @@
                   <bold>true</bold>
                  </font>
                 </property>
-                <property name="styleSheet">
-                 <string notr="true">QPushButton {
-                  background-color: rgb(242, 236, 244);
-                  border: none;
-                  border-radius:15px
-                  }
-
-                  QPushButton:checked {
-                  background-color: rgb(233, 221, 255);
-                  }
-
-                  QPushButton:hover {
-                  background-color: rgb(225, 219, 228);
-                  }
-
-                  QPushButton:checked:hover {
-                  background-color: rgb(216, 207, 232);
-                  }</string>
-                </property>
                 <property name="text">
                  <string>漫画</string>
                 </property>
@@ -542,25 +449,6 @@
                   <pointsize>15</pointsize>
                   <bold>true</bold>
                  </font>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">QPushButton {
-                  background-color: rgb(242, 236, 244);
-                  border: none;
-                  border-radius:15px
-                  }
-
-                  QPushButton:checked {
-                  background-color: rgb(233, 221, 255);
-                  }
-
-                  QPushButton:hover {
-                  background-color: rgb(225, 219, 228);
-                  }
-
-                  QPushButton:checked:hover {
-                  background-color: rgb(216, 207, 232);
-                  }</string>
                 </property>
                 <property name="text">
                  <string>下载</string>
@@ -602,17 +490,6 @@
                <width>50</width>
                <height>50</height>
               </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-               background-color: rgb(242, 236, 244);
-               border: none;
-               border-radius:15px
-               }
-
-               QPushButton:hover {
-               background-color: rgb(225, 219, 228);
-               }</string>
              </property>
              <property name="text">
               <string/>
@@ -819,11 +696,6 @@
                          <family>微软雅黑</family>
                         </font>
                        </property>
-                       <property name="styleSheet">
-                        <string notr="true">border:none;
-                         border-radius:15px;
-                         background-color: rgb(242, 236, 244)</string>
-                       </property>
                        <property name="text">
                         <string/>
                        </property>
@@ -907,11 +779,6 @@
                         <font>
                          <family>微软雅黑</family>
                         </font>
-                       </property>
-                       <property name="styleSheet">
-                        <string notr="true">border:none;
-                         border-radius:15px;
-                         background-color: rgb(242, 236, 244)</string>
                        </property>
                        <property name="text">
                         <string/>
@@ -997,11 +864,6 @@
                          <family>微软雅黑</family>
                         </font>
                        </property>
-                       <property name="styleSheet">
-                        <string notr="true">border:none;
-                         border-radius:15px;
-                         background-color: rgb(242, 236, 244)</string>
-                       </property>
                        <property name="text">
                         <string/>
                        </property>
@@ -1085,11 +947,6 @@
                         <font>
                          <family>微软雅黑</family>
                         </font>
-                       </property>
-                       <property name="styleSheet">
-                        <string notr="true">border:none;
-                         border-radius:15px;
-                         background-color: rgb(242, 236, 244)</string>
                        </property>
                        <property name="text">
                         <string/>
@@ -1177,11 +1034,6 @@
                         <font>
                          <family>微软雅黑</family>
                         </font>
-                       </property>
-                       <property name="styleSheet">
-                        <string notr="true">border:none;
-                         border-radius:15px;
-                         background-color: rgb(242, 236, 244)</string>
                        </property>
                        <property name="text">
                         <string/>

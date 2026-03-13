@@ -41,7 +41,6 @@ public:
         EpisodePage->resize(600, 600);
         EpisodePage->setMinimumSize(QSize(600, 0));
         EpisodePage->setMaximumSize(QSize(600, 16777215));
-        EpisodePage->setStyleSheet(QString::fromUtf8(""));
         horizontalLayout_5 = new QHBoxLayout(EpisodePage);
         horizontalLayout_5->setSpacing(0);
         horizontalLayout_5->setObjectName("horizontalLayout_5");
@@ -50,9 +49,6 @@ public:
         frame_2->setObjectName("frame_2");
         frame_2->setMinimumSize(QSize(600, 0));
         frame_2->setMaximumSize(QSize(600, 16777215));
-        frame_2->setStyleSheet(QString::fromUtf8("QFrame {\n"
-"       background-color:rgb(230, 224, 233)\n"
-"       }"));
         frame_2->setFrameShape(QFrame::Shape::StyledPanel);
         frame_2->setFrameShadow(QFrame::Shadow::Raised);
         verticalLayout_9 = new QVBoxLayout(frame_2);
@@ -67,14 +63,13 @@ public:
         pushButton_14->setMinimumSize(QSize(44, 44));
         pushButton_14->setMaximumSize(QSize(44, 44));
         pushButton_14->setStyleSheet(QString::fromUtf8("QPushButton {\n"
-"             background-color: rgb(230, 224, 233);\n"
-"             border:none;\n"
-"             border-radius:22px\n"
-"             }\n"
+"	border:none;\n"
+"	border-radius:22px\n"
+"}\n"
 "\n"
-"             QPushButton:hover {\n"
-"             background-color: rgb(225, 219, 228);\n"
-"             }"));
+"QPushButton:hover {\n"
+"	background-color: rgb(237, 237, 238);\n"
+"}"));
         QIcon icon;
         icon.addFile(QString::fromUtf8("icons/back.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         pushButton_14->setIcon(icon);
@@ -124,31 +119,35 @@ public:
 
         scrollArea = new QScrollArea(frame_2);
         scrollArea->setObjectName("scrollArea");
-        scrollArea->setStyleSheet(QString::fromUtf8("\n"
-"          QScrollArea {\n"
-"          border: none;\n"
-"          background-color: transparent;\n"
-"          }\n"
-"          QScrollArea > QWidget > QWidget {\n"
-"          background-color: transparent;\n"
-"          }\n"
-"          QScrollBar:vertical {\n"
-"          border: none;\n"
-"          background-color: rgba(200, 200, 200, 100);\n"
-"          width: 8px;\n"
-"          border-radius: 4px;\n"
-"          }\n"
-"          QScrollBar::handle:vertical {\n"
-"          background-color: rgba(150, 150, 150, 150);\n"
-"          border-radius: 4px;\n"
-"          min-height: 20px;\n"
-"          }\n"
-"          QScrollBar::handle:vertical:hover {\n"
-"          background-color: rgba(120, 120, 120, 200);\n"
-"          }\n"
-"          QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {\n"
-"          height: 0px;\n"
-"          }\n"
+        scrollArea->setStyleSheet(QString::fromUtf8("QScrollArea {\n"
+"	border: none;\n"
+"	background-color: transparent;\n"
+"}\n"
+"\n"
+"QScrollArea > QWidget > QWidget {\n"
+"	background-color: transparent;\n"
+"}\n"
+"\n"
+"QScrollBar:vertical {\n"
+"	border: none;\n"
+"	background-color: rgba(200, 200, 200, 100);\n"
+"	width: 8px;\n"
+"	border-radius: 4px;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:vertical {\n"
+"	background-color: rgba(150, 150, 150, 150);\n"
+"	border-radius: 4px;\n"
+"	min-height: 20px;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:vertical:hover {\n"
+"	background-color: rgba(120, 120, 120, 200);\n"
+"}\n"
+"\n"
+"QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {\n"
+"	height: 0px;\n"
+"}\n"
 "         "));
         scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents_2 = new QWidget();

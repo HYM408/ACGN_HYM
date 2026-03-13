@@ -23,16 +23,14 @@ void ClickableLabel::mousePressEvent(QMouseEvent *event)
 
 DetailPage::DetailPage(QWidget *parent) : QWidget(parent)
 {
-    // 初始化UI
     ui.setupUi(this);
-    // 初始化状态映射
     statusNamesMap = {
         {1, {{0, "收藏"}, {1, "想读"}, {2, "读过"}, {3, "在读"}, {4, "搁置"}, {5, "抛弃"}}},
         {2, {{0, "追番"}, {1, "想看"}, {2, "看过"}, {3, "在看"}, {4, "搁置"}, {5, "抛弃"}}},
         {4, {{0, "收藏"}, {1, "想玩"}, {2, "玩过"}, {3, "在玩"}, {4, "搁置"}, {5, "抛弃"}}},
         {7, {{0, "收藏"}, {1, "想读"}, {2, "读过"}, {3, "在读"}, {4, "搁置"}, {5, "抛弃"}}},
         {8, {{0, "收藏"}, {1, "想读"}, {2, "读过"}, {3, "在读"}, {4, "搁置"}, {5, "抛弃"}}}};
-    // 初始化连接
+    applyTheme();
     setupConnections();
 }
 
@@ -47,6 +45,12 @@ void DetailPage::showEvent(QShowEvent *event)
 {   // 显示
     QWidget::showEvent(event);
     loadData();
+}
+
+void DetailPage::applyTheme() const
+{   // 主题
+    const QColor color1 = getColor("color1", QColor("#fdf7ff"));
+    ui.frame_6->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
 }
 
 void DetailPage::setupConnections()

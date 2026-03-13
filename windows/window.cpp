@@ -175,6 +175,7 @@ void MainWindow::onDownloadButtonClicked()
 
 void MainWindow::onShowEpisodePageRequested(const CollectionData &collectionData)
 {   // 创建选集遮罩层
+    repaint();
     episodeOverlay = new EpisodeOverlay(this);
     episodeOverlay->setManagers(bangumiAPI);
     connect(episodeOverlay, &EpisodeOverlay::episodeClicked, this, &MainWindow::onEpisodeClicked);

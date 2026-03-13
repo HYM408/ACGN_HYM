@@ -24,6 +24,7 @@ class MainPageManager : public QObject
 
 public:
     explicit MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI, DatabaseManager *dbManager);
+    void applyTheme();
     void setupConnections();
     [[nodiscard]] CacheImageUtil *getCacheImageUtil() const {return cacheImageUtil;}
     [[nodiscard]] int getCurrentSubjectType() const {return currentSubjectType;}
@@ -69,6 +70,10 @@ private:
     QMap<int, QMap<int, QString>> statusNamesMap;
     QMap<int, StatusFrameInfo> statusFrames;
     QJsonObject airdatesJson;
+    QColor m_color2;
+    QColor m_color3;
+    QColor m_color6;
+    QString m_color6A;
 };
 
 #endif // MAIN_PAGE_H

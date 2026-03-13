@@ -10,9 +10,6 @@
     <height>942</height>
    </rect>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-color: rgb(255, 255, 255);</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout_11">
    <property name="spacing">
     <number>0</number>
@@ -36,9 +33,6 @@
        <width>0</width>
        <height>114</height>
       </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: rgb(253, 247, 255);</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::Shape::StyledPanel</enum>
@@ -426,7 +420,7 @@ QPushButton:hover {
               </property>
               <property name="styleSheet">
                <string notr="true">border: 1px solid gray;
-             border-radius:15px</string>
+border-radius:15px</string>
               </property>
               <property name="text">
                <string/>
@@ -435,6 +429,12 @@ QPushButton:hover {
             </item>
             <item alignment="Qt::AlignmentFlag::AlignLeft">
              <widget class="QPushButton" name="pushButton_27">
+              <property name="minimumSize">
+               <size>
+                <width>80</width>
+                <height>0</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <family>微软雅黑</family>
@@ -528,11 +528,7 @@ QTabWidget {
              <enum>Qt::ContextMenuPolicy::CustomContextMenu</enum>
             </property>
             <property name="styleSheet">
-             <string notr="true">QScrollArea &gt; QWidget &gt; QWidget {
-    background-color: white;
-}
-
-QScrollBar:vertical {
+             <string notr="true">QScrollBar:vertical {
     border: none;
     background: #f0f0f0;
     width: 11px;
@@ -628,6 +624,9 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                <width>1451</width>
                <height>534</height>
               </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: transparent;</string>
              </property>
             </widget>
            </widget>

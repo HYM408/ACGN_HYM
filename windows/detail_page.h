@@ -33,6 +33,7 @@ private slots:
 
 protected:
     void showEvent(QShowEvent *event) override;
+    void applyTheme() const;
 
 private:
     void setupConnections();
