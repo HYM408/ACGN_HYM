@@ -273,7 +273,7 @@ void EpisodeOverlay::onMarkAllWatchedClicked()
     ui.pushButton_15->setEnabled(false);
     const int subjectId = collectionData.subject_id;
     QJsonArray episodeIds;
-    for (const auto &ep : episodes) episodeIds.append(ep.id);
+    for (const auto &ep : episodes) episodeIds.append(ep.episode_id);
     const QJsonObject apiRequestData{{"episode_id", episodeIds}, {"type", 2}};
     const QPointer guard(this);
     const bool success = bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData, 3);

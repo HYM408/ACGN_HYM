@@ -39,7 +39,7 @@ struct SubjectsData {
 
 struct EpisodeData {
     int subject_id = 0;
-    int id = 0;
+    int episode_id = 0;
     double ep = 0.0;
     double sort = 0.0;
     QString name;
@@ -61,6 +61,12 @@ struct CharacterData {
     QString character_name_cn;
     int type = 0;
     QVector<PersonInfo> persons;
+};
+
+struct GameData {
+    int subject_id = 0;
+    QString launch_path;
+    double play_duration = 0.0;
 };
 
 Q_DECLARE_METATYPE(EpisodeData)

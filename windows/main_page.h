@@ -8,6 +8,7 @@ class QLabel;
 class BangumiAPI;
 class CacheImageUtil;
 class DatabaseManager;
+class GameMonitorUtil;
 
 struct CardComponents {
     QFrame *card = nullptr;
@@ -23,7 +24,7 @@ class MainPageManager : public QObject
     Q_OBJECT
 
 public:
-    explicit MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI, DatabaseManager *dbManager);
+    explicit MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, GameMonitorUtil *gameMonitor);
     void applyTheme();
     void setupConnections();
     [[nodiscard]] CacheImageUtil *getCacheImageUtil() const {return cacheImageUtil;}
@@ -60,6 +61,7 @@ private:
     DatabaseManager *dbManager = nullptr;
     CacheImageUtil *cacheImageUtil = nullptr;
     BangumiAPI *bangumiAPI = nullptr;
+    GameMonitorUtil *gameMonitor = nullptr;
     int currentSubjectType = 2;
     int currentStatusType = 3;
     int currentPage = 1;

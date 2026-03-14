@@ -8,6 +8,7 @@ class BangumiAPI;
 class QListWidget;
 class CacheImageUtil;
 class DatabaseManager;
+class GameMonitorUtil;
 class StarRatingWidget;
 
 class DetailPage : public QWidget
@@ -17,7 +18,7 @@ class DetailPage : public QWidget
 public:
     explicit DetailPage(QWidget *parent = nullptr);
     void setCollectionData(const CollectionData &data, const QString &progressText);
-    void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db);
+    void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db, GameMonitorUtil *gameMonitor);
     void resetUI() const;
 
 signals:
@@ -50,6 +51,7 @@ private:
     CacheImageUtil *cacheImageUtil = nullptr;
     BangumiAPI *bangumiAPI = nullptr;
     DatabaseManager *dbManager = nullptr;
+    GameMonitorUtil *gameMonitorUtil = nullptr;
     QMap<int, QMap<int, QString>> statusNamesMap;
     QListWidget *tagListWidget = nullptr;
     StarRatingWidget *m_starRating = nullptr;

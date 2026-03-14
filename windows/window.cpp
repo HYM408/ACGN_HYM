@@ -14,6 +14,7 @@
 #include "api/bangumi_api.h"
 #include "player/player_page.h"
 #include "utils/cache_image_util.h"
+#include "utils/game_monitor_util.h"
 #include "downloader/download_page.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -24,11 +25,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     cacheImageUtil = new CacheImageUtil(this);
     pikpakApi = new PikPakApi(this);
     rss = new Rss(bangumiAPI, this);
+    gameMonitorUtil = new GameMonitorUtil(dbManager, this, this);
     dbManager->openDatabase();
     DatabaseManager::initTables();
     QTimer::singleShot(5000, rss, &Rss::startRSS);
     setupUi(this);
-    mainPageManager = new MainPageManager(this, cacheImageUtil, bangumiAPI, dbManager);
+    mainPageManager = new MainPageManager(this, cacheImageUtil, bangumiAPI, dbManager, gameMonitorUtil);
     setWindowFlags(Qt::FramelessWindowHint);
     titlebar_frame->installEventFilter(this);
     setupConnections();
@@ -88,7 +90,7 @@ void MainWindow::checkCacheCleanup() const
 void MainWindow::ensureSearchPage()
 {   // 确保搜索页面
     searchPage = new SearchPage();
-    searchPage->setManagers(cacheImageUtil, bangumiAPI, dbManager);
+    searchPage->setManagers(cacheImageUtil, bangumiAPI, dbManager, gameMonitorUtil);
     main_stackedWidget->addWidget(searchPage);
     connect(searchPage, &SearchPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
     connect(searchPage, &SearchPage::showEpisodePageRequested, this, &MainWindow::onShowEpisodePageRequested);
@@ -170,7 +172,7 @@ void MainWindow::onShowDetailPageRequested(const CollectionData &collectionData,
 {   // 主页面 to 详情页面
     if (!detailPage) {
         detailPage = new DetailPage();
-        detailPage->setManagers(cacheImageUtil, bangumiAPI, dbManager);
+        detailPage->setManagers(cacheImageUtil, bangumiAPI, dbManager, gameMonitorUtil);
         main_stackedWidget->addWidget(detailPage);
         connect(detailPage, &DetailPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
         connect(detailPage, &DetailPage::showEpisodePageRequested, this, &MainWindow::onShowEpisodePageRequested);

@@ -11,6 +11,7 @@ class PlayerPage;
 class SettingsPage;
 class DownloadPage;
 class EpisodeOverlay;
+class GameMonitorUtil;
 
 class MainWindow : public QMainWindow, public Ui::MainWindow
 {
@@ -61,6 +62,7 @@ private:
     MainPageManager *mainPageManager = nullptr;
     EpisodeOverlay *episodeOverlay = nullptr;
     QList<QWidget*> pageHistory;
+    GameMonitorUtil *gameMonitorUtil = nullptr;
 };
 
 #endif // WINDOW_H

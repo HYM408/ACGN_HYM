@@ -9,6 +9,7 @@ class BangumiAPI;
 class DetailPage;
 class CacheImageUtil;
 class DatabaseManager;
+class GameMonitorUtil;
 
 class SearchPage : public QWidget
 {
@@ -17,7 +18,7 @@ class SearchPage : public QWidget
 public:
     explicit SearchPage(QWidget *parent = nullptr);
     ~SearchPage() override;
-    void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db);
+    void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db, GameMonitorUtil *gameMonitor);
     void applyTheme() const;
     void updateComboBoxByType(int currentType) const;
     void searchByTag(const QString &tag, int subjectType);
@@ -41,6 +42,7 @@ private:
     BangumiAPI *bangumiApi = nullptr;
     CacheImageUtil *cacheImageUtil = nullptr;
     DatabaseManager *dbManager = nullptr;
+    GameMonitorUtil *gameMonitorUtil = nullptr;
     QLabel *statusLabel = nullptr;
     DetailPage *detailPage = nullptr;
     QMap<int, QVariantMap> resultDataMap;

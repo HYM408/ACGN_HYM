@@ -5,8 +5,9 @@
 #include "utils/image_util.h"
 #include "utils/progress_util.h"
 #include "utils/cache_image_util.h"
+#include "utils/game_monitor_util.h"
 
-MainPageManager::MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI, DatabaseManager *dbManager): QObject(nullptr), mainWindow(mainWindow), dbManager(dbManager), cacheImageUtil(cacheImageUtil), bangumiAPI(bangumiAPI)
+MainPageManager::MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, GameMonitorUtil *gameMonitor) : QObject(nullptr), mainWindow(mainWindow), dbManager(dbManager), cacheImageUtil(cacheImageUtil), bangumiAPI(bangumiAPI), gameMonitor(gameMonitor)
 {
     statusNamesMap = {
         {2, {{1, "想看"}, {2, "看过"}, {3, "在看"}}},
@@ -147,7 +148,8 @@ void MainPageManager::loadCollections(const int subjectType, const int statusTyp
     if (!allCollections.isEmpty()) {
         QList<int> subjectIds;
         for (const auto &col : allCollections) subjectIds.append(col.subject_id);
-        airdatesJson = dbManager->getEpisodeAirdates(subjectIds);
+        if (subjectType == 4) QVector<GameData> gameDataList = DatabaseManager::getGameData(subjectIds);
+        else airdatesJson = dbManager->getEpisodeAirdates(subjectIds);
     } else airdatesJson = QJsonObject();
     if (!typeChanged) {
         if (oldSearchText.isEmpty()) filteredCollections = allCollections;
@@ -253,20 +255,13 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
     card.progressLabel->setText(computeProgressText(collection, airdatesJson));
     card.card->setProperty("progressLabel", QVariant::fromValue(card.progressLabel));
     if (collection.subject_type == 2) card.episodeButton->setText("选集");
-    else if (collection.subject_type == 4) card.episodeButton->setText("");
+    else if (collection.subject_type == 4) card.episodeButton->setText("启动");
     else card.episodeButton->setText("进度");
-    if (collection.subject_type == 4) card.episodeButton->setStyleSheet(QString("QPushButton {border-radius: 20px}"));
-    else card.episodeButton->setStyleSheet(QString("QPushButton {border-radius: 20px}"
-                                                   "QPushButton:hover {background-color: %1}").arg(m_color3.name()));
+    card.episodeButton->setStyleSheet(QString("QPushButton {border-radius: 20px}"
+                                              "QPushButton:hover {background-color: %1}").arg(m_color3.name()));
     // 连接信号
-    connect(card.moreButton, &QPushButton::clicked, this, [this, card]() mutable {
-        const auto data = card.card->property("collectionData").value<CollectionData>();
-        StatusSelector::showStatusSelector(card.moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, dbManager, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);}, -37);});
-    connect(card.episodeButton, &QPushButton::clicked, this, [this, card]() mutable {
-        const auto data = card.card->property("collectionData").value<CollectionData>();
-        if (data.subject_type == 4) showDetailPage(data, card.progressLabel->text());
-        else showEpisodePage(data);
-    });
+    if (collection.subject_type == 4) connect(card.episodeButton, &QPushButton::clicked, this, [this, subjectId = collection.subject_id] {gameMonitor->startGame(subjectId);});
+    else connect(card.episodeButton, &QPushButton::clicked, this, [this, data = collection] {showEpisodePage(data);});
 }
 
 void MainPageManager::clearDisplayArea()

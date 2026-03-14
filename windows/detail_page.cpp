@@ -9,6 +9,7 @@
 #include "api/bangumi_api.h"
 #include "utils/image_util.h"
 #include "utils/star_rating_util.h"
+#include "utils/game_monitor_util.h"
 
 ClickableLabel::ClickableLabel(const QString &text, QWidget *parent): QLabel(text, parent)
 {   // tag组件
@@ -34,11 +35,12 @@ DetailPage::DetailPage(QWidget *parent) : QWidget(parent)
     setupConnections();
 }
 
-void DetailPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db)
+void DetailPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db, GameMonitorUtil *gameMonitor)
 {   // 初始化实例
     cacheImageUtil = cacheImage;
     bangumiAPI = api;
     dbManager = db;
+    gameMonitorUtil = gameMonitor;
 }
 
 void DetailPage::showEvent(QShowEvent *event)
@@ -72,19 +74,9 @@ void DetailPage::setCollectionData(const CollectionData &data, const QString &pr
     ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, ui.cover_label_3, 15, true, true, QString("s%1.jpg").arg(currentData.subject_id));
     ui.textEdit->setText(currentData.subject_name_cn.isEmpty() ? currentData.subject_name : currentData.subject_name_cn);
     ui.pushButton_26->setText(statusNamesMap.value(currentData.subject_type).value(currentData.type));
-    if (currentData.subject_type == 2) {
-        ui.pushButton_27->setText("选集");
-        ui.pushButton_27->setEnabled(true);
-    }
-    else if (currentData.subject_type == 4) {
-        ui.pushButton_27->setText("");
-        ui.pushButton_27->setEnabled(false);
-    }
-    else {
-        ui.pushButton_27->setText("进度");
-        ui.pushButton_27->setEnabled(true);
-    }
-    ui.pushButton_24->setText(progressText);
+    ui.pushButton_27->setText(currentData.subject_type == 2 ? "选集" : currentData.subject_type == 4 ? "启动" : "进度");
+    QLabel* targetButton = currentData.subject_type == 4 ? ui.pushButton_23 : ui.pushButton_24;
+    targetButton->setText(progressText);
     const QString rateText = currentData.rate > 0 ? QString("我的评价: %1 分").arg(currentData.rate) : "未评价";
     ui.pushButton->setText(rateText);
     loadData();
@@ -102,12 +94,13 @@ void DetailPage::loadData()
             updateDetailPage(dbManager->getSubjectById(currentData.subject_id));
         });
     }
-    QTimer::singleShot(10, this, [this] {m_characters = dbManager->getCharactersWithPersonsBySubjectId(currentData.subject_id);});
+    QTimer::singleShot(50, this, [this] {m_characters = dbManager->getCharactersWithPersonsBySubjectId(currentData.subject_id);});
 }
 
 void DetailPage::onEpisodeClicked()
 {   // 打开选集页
-    emit showEpisodePageRequested(currentData);
+    if (currentData.subject_type == 4) gameMonitorUtil->startGame(currentData.subject_id);
+    else emit showEpisodePageRequested(currentData);
 }
 
 void DetailPage::onOpenBangumiPage() const
@@ -144,7 +137,11 @@ void DetailPage::updateDetailPage(const SubjectsData &subjectData)
     allTagPairs.append(tagPairs);
     tagsDisplay(allTagPairs);
     const QString timeTag = getTimeInfo(tagPairs, subjectData.date);
-    ui.pushButton_23->setText(timeTag);
+    if (currentData.subject_type == 4) {
+        QVector<GameData> gameDataList = DatabaseManager::getGameData({currentData.subject_id});
+        if (!gameDataList.isEmpty())ui.pushButton_24->setText(QString("已玩 %1 小时").arg(gameDataList.first().play_duration));
+        else ui.pushButton_24->setText("0 小时");
+    } else ui.pushButton_23->setText(timeTag);
 }
 
 void DetailPage::tagsDisplay(const QList<QPair<QString, int>> &tagPairs)

@@ -91,7 +91,7 @@ void StatusSelector::updateStatus(int statusValue)
                 episodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
             }
             QJsonArray episodeIds;
-            for (const auto &ep : episodes) episodeIds.append(ep.id);
+            for (const auto &ep : episodes) episodeIds.append(ep.episode_id);
             if (!episodeIds.isEmpty()) {
                 const QJsonObject apiRequestData{{"episode_id", episodeIds}, {"type", 2}};
                 if (bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData, 3)) DatabaseManager::updateAllEpisodesStatus(subjectId, 2);

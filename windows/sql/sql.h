@@ -29,6 +29,9 @@ public:
     static bool deleteEpisodesBySubjectId(int subjectId);
     static bool updateAllEpisodesStatus(int subjectId, int collectionType);
     void clearEpisodeCollectionTable() const;
+    // game_data表
+    static bool updateGameData(int subjectId, const QJsonObject& fields);
+    static QVector<GameData> getGameData(const QList<int>& subjectIds);
     // 公共数据表
     [[nodiscard]] QJsonObject getEpisodeAirdates(const QList<int> &subjectIds) const;
     [[nodiscard]] bool insertOrUpdateSubject(const QJsonObject &apiData) const;

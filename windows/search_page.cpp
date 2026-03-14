@@ -7,6 +7,7 @@
 #include "api/bangumi_api.h"
 #include "utils/image_util.h"
 #include "utils/progress_util.h"
+#include "utils/game_monitor_util.h"
 
 SearchPage::SearchPage(QWidget *parent) : QWidget(parent)
 {
@@ -20,15 +21,16 @@ SearchPage::~SearchPage()
     delete statusLabel;
 }
 
-void SearchPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db)
+void SearchPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db, GameMonitorUtil *gameMonitor)
 {   // 初始化实例
     cacheImageUtil = cacheImage;
     bangumiApi = api;
     dbManager = db;
+    gameMonitorUtil = gameMonitor;
     // 详情页
     if (!detailPage) {
         detailPage = new DetailPage(this);
-        detailPage->setManagers(cacheImageUtil, bangumiApi, dbManager);
+        detailPage->setManagers(cacheImageUtil, bangumiApi, dbManager, gameMonitorUtil);
         ui.stackedWidget->addWidget(detailPage);
         connect(detailPage, &DetailPage::backButtonClicked, this, [this] {ui.stackedWidget->setCurrentIndex(0);});
         connect(detailPage, &DetailPage::showEpisodePageRequested, this, &SearchPage::showEpisodePageRequested);

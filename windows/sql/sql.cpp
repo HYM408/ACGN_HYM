@@ -35,16 +35,16 @@ void DatabaseManager::initTables()
     QSqlQuery query;
     const QStringList tables = {
         // collection表
-        "CREATE TABLE IF NOT EXISTS collection ("
-        "subject_id INTEGER PRIMARY KEY, vol_status INTEGER, ep_status INTEGER, subject_type INTEGER, type INTEGER, rate INTEGER, subject_date INTEGER, subject_name TEXT, subject_name_cn TEXT, subject_eps INTEGER, subject_volumes INTEGER, updated_at INTEGER)",
+        "CREATE TABLE IF NOT EXISTS collection (subject_id INTEGER PRIMARY KEY, vol_status INTEGER, ep_status INTEGER, subject_type INTEGER, type INTEGER, rate INTEGER, subject_date INTEGER, subject_name TEXT, subject_name_cn TEXT, subject_eps INTEGER, subject_volumes INTEGER, updated_at INTEGER)",
         // episode表
-        "CREATE TABLE IF NOT EXISTS episode_collection ("
-        "subject_id INTEGER, id INTEGER, ep INTEGER, sort INTEGER, name TEXT, name_cn TEXT, episode_type INTEGER, collection_type INTEGER, created_at INTEGER DEFAULT (strftime('%s','now')), PRIMARY KEY(subject_id, id))",
+        "CREATE TABLE IF NOT EXISTS episode_collection (subject_id INTEGER, episode_id INTEGER, ep INTEGER, sort INTEGER, name TEXT, name_cn TEXT, episode_type INTEGER, collection_type INTEGER, created_at INTEGER DEFAULT (strftime('%s','now')), PRIMARY KEY(subject_id, episode_id))",
+        // game_data表
+        "CREATE TABLE IF NOT EXISTS game_data (subject_id INTEGER PRIMARY KEY, launch_path TEXT, play_duration INTEGER)"
     };
-    for (const auto &sql : tables) query.exec(sql);
+    for (const QString &sql : tables) query.exec(sql);
     const QStringList publicTables = {
         // episode公共数据表
-        "CREATE TABLE IF NOT EXISTS episode_public_date (subject_id INTEGER, id INTEGER, airdate INTEGER, sort INTEGER, PRIMARY KEY (subject_id, id))",
+        "CREATE TABLE IF NOT EXISTS episode_public_date (subject_id INTEGER, episode_id INTEGER, airdate INTEGER, sort INTEGER, PRIMARY KEY (subject_id, episode_id))",
         // subject公共数据表
         "CREATE TABLE IF NOT EXISTS subject_public_date (subject_id INTEGER PRIMARY KEY, name TEXT, name_cn TEXT, summary BLOB, tags TEXT, meta_tags TEXT, score INTEGER, rank INTEGER, date INTEGER, rating_total INTEGER, doing INTEGER, done INTEGER, dropped INTEGER, on_hold INTEGER, wish INTEGER)",
         // character公共数据表
@@ -247,7 +247,7 @@ bool DatabaseManager::insertManyEpisodes(const int subjectId, const QJsonArray &
         QJsonObject item = v.toObject();
         QJsonObject ep = item["episode"].toObject();
         query.addBindValue(subjectId);
-        query.addBindValue(ep["id"].toInt());
+        query.addBindValue(ep["episode_id"].toInt());
         query.addBindValue(ep["ep"].toDouble() * 10.0);
         query.addBindValue(ep["sort"].toDouble() * 10.0);
         query.addBindValue(ep["name"].toString());
@@ -270,7 +270,7 @@ QVector<EpisodeData> DatabaseManager::getEpisodesBySubjectId(const int subjectId
     while (query.next()) {
         EpisodeData ep;
         ep.subject_id = query.value("subject_id").toInt();
-        ep.id = query.value("id").toInt();
+        ep.episode_id = query.value("episode_id").toInt();
         ep.ep = query.value("ep").toInt() / 10.0;
         ep.sort = query.value("sort").toInt() / 10.0;
         ep.name = query.value("name").toString();
@@ -306,6 +306,56 @@ void DatabaseManager::clearEpisodeCollectionTable() const
     query.exec("VACUUM");
 }
 
+// =============== game_data表 ===============
+bool DatabaseManager::updateGameData(const int subjectId, const QJsonObject &fields)
+{   // 更新game数据
+    QStringList setParts;
+    QVariantList values;
+    for (QJsonObject::const_iterator it = fields.begin(); it != fields.end(); ++it) {
+        setParts << it.key() + " = ?";
+        values << it.value().toVariant();
+    }
+    QSqlQuery query;
+    query.prepare(QString("UPDATE game_data SET %1 WHERE subject_id = ?").arg(setParts.join(", ")));
+    for (const QVariant &v : values) query.addBindValue(v);
+    query.addBindValue(subjectId);
+    if (!executeQuery(query, "更新game数据失败")) return false;
+    if (query.numRowsAffected() == 0) {
+        QStringList insertFields = {"subject_id"};
+        QVariantList insertValues = {subjectId};
+        for (QJsonObject::const_iterator it = fields.begin(); it != fields.end(); ++it) {
+            insertFields << it.key();
+            insertValues << it.value().toVariant();
+        }
+        QStringList placeholders;
+        placeholders.fill("?", insertFields.size());
+        QSqlQuery insertQuery;
+        insertQuery.prepare(QString("INSERT INTO game_data (%1) VALUES (%2)").arg(insertFields.join(", ")).arg(placeholders.join(", ")));
+        for (const QVariant &v : insertValues) insertQuery.addBindValue(v);
+        return executeQuery(insertQuery, "插入game data失败");
+    }
+    return true;
+}
+
+QVector<GameData> DatabaseManager::getGameData(const QList<int> &subjectIds)
+{   // 根据subject_id获取game数据
+    QVector<GameData> results;
+    QStringList placeholders;
+    placeholders.fill("?", subjectIds.size());
+    QSqlQuery query;
+    query.prepare(QString("SELECT subject_id, launch_path, play_duration FROM game_data WHERE subject_id IN (%1)").arg(placeholders.join(", ")));
+    for (const int id : subjectIds) query.addBindValue(id);
+    if (!executeQuery(query, "获取game data失败")) return results;
+    while (query.next()) {
+        GameData data;
+        data.subject_id = query.value("subject_id").toInt();
+        data.launch_path = query.value("launch_path").toString();
+        data.play_duration = static_cast<double>(query.value("play_duration").toLongLong()) / 3600.0;
+        results.append(data);
+    }
+    return results;
+}
+
 // =============== episode公共数据表 ===============
 QJsonObject DatabaseManager::getEpisodeAirdates(const QList<int> &subjectIds) const
 {   // 获取播出日期
@@ -313,7 +363,7 @@ QJsonObject DatabaseManager::getEpisodeAirdates(const QList<int> &subjectIds) co
     QStringList placeholders;
     placeholders.fill(QString('?'), subjectIds.size());
     query.prepare(QString("SELECT * FROM episode_public_date WHERE subject_id IN (%1)").arg(placeholders.join(", ")));
-    for (const int id : subjectIds) query.addBindValue(id);
+    for (const int episode_id : subjectIds) query.addBindValue(episode_id);
     query.exec();
     QJsonObject result;
     while (query.next()) {
@@ -321,7 +371,7 @@ QJsonObject DatabaseManager::getEpisodeAirdates(const QList<int> &subjectIds) co
         QString airdateStr = timestampToDateString(query.value("airdate").toLongLong());
         QJsonArray arr = result[key].toArray();
         double sort = query.value("sort").toInt();
-        arr.append(QJsonObject{{"id", query.value("id").toInt()}, {"airdate", airdateStr}, {"sort", sort}});
+        arr.append(QJsonObject{{"episode_id", query.value("episode_id").toInt()}, {"airdate", airdateStr}, {"sort", sort}});
         result[key] = arr;
     }
     return result;

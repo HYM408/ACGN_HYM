@@ -55,6 +55,8 @@ add_executable(appACGN_HYM
         windows/utils/captcha_utils/charset_data.cpp
         windows/utils/cache_image_util.h
         windows/utils/cache_image_util.cpp
+        windows/utils/game_monitor_util.h
+        windows/utils/game_monitor_util.cpp
         windows/utils/image_util.h
         windows/utils/image_util.cpp
         windows/utils/menu_util.h
