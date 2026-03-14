@@ -1,6 +1,7 @@
 #include "cache_image_util.h"
 #include <QPixmap>
 #include <QtConcurrent/QtConcurrent>
+#include "../config.h"
 
 CacheImageUtil::CacheImageUtil(QObject *parent) : QObject(parent)
 {   // 初始化图片缓存管理器
@@ -26,6 +27,7 @@ void CacheImageUtil::getImageAsync(const QString &url, const ImageCallback& call
                 request.setAttribute(QNetworkRequest::Attribute::User, url);
                 request.setAttribute(static_cast<QNetworkRequest::Attribute>(QNetworkRequest::User + 1), QVariant::fromValue(cacheToLocal));
                 request.setAttribute(static_cast<QNetworkRequest::Attribute>(QNetworkRequest::User + 2), fileName);
+                request.setRawHeader("Authorization", ("Bearer " + getConfig("Bangumi/access_token").toString()).toUtf8());
                 networkManager.get(request);
             }
         }, Qt::QueuedConnection);
