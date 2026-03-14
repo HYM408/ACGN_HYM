@@ -2,7 +2,6 @@
 #define SETTINGS_PAGE_H
 
 #include "settings_ui.h"
-#include <QFutureWatcher>
 
 class PikPakApi;
 class BangumiAPI;

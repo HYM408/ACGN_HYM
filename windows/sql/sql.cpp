@@ -235,6 +235,7 @@ void DatabaseManager::clearCollectionTable() const
 {   // 清空collection表
     QSqlQuery query(database);
     query.exec("DELETE FROM collection");
+    query.exec("VACUUM");
 }
 
 // =============== episode_collection表 ===============
@@ -296,6 +297,13 @@ bool DatabaseManager::updateAllEpisodesStatus(const int subjectId, const int col
     query.addBindValue(collectionType);
     query.addBindValue(subjectId);
     return executeQuery(query, "更新剧集状态失败");
+}
+
+void DatabaseManager::clearEpisodeCollectionTable() const
+{   // 清空episode_collection表
+    QSqlQuery query(database);
+    query.exec("DELETE FROM episode_collection");
+    query.exec("VACUUM");
 }
 
 // =============== episode公共数据表 ===============

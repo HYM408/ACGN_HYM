@@ -44,6 +44,7 @@ private slots:
 
 private:
     void setupConnections();
+    void checkCacheCleanup() const;
     void ensureSearchPage();
     QPoint dragPosition;
     bool isDragging = false;

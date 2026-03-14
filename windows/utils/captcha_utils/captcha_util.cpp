@@ -1,5 +1,4 @@
 #include "captcha_util.h"
-#include <QFile>
 #include <QImage>
 #include <QUrlQuery>
 #include <QNetworkCookieJar>

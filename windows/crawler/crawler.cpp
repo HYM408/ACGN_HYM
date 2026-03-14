@@ -5,7 +5,7 @@
 #include <QJsonObject>
 #include <QCoreApplication>
 #include "../utils/xml_util.h"
-#include "../utils/captcha_util/captcha_util.h"
+#include "../utils/captcha_utils/captcha_util.h"
 
 static QJsonObject loadConfig()
 {   // 加载配置文件

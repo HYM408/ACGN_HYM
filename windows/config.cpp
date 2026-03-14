@@ -4,6 +4,10 @@
 void initConfig()
 {   // 初始化配置文件
     QSettings settings("./config.ini", QSettings::IniFormat);
+    // 清理缓存
+    settings.beginGroup("Cache");
+    setDefaultIfMissing(settings, "next_cleanup_timestamp", 0);
+    settings.endGroup();
     // 主题
     settings.beginGroup("Theme");
     setDefaultIfMissing(settings, "color1", "#fdf7ff");

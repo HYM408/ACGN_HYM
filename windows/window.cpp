@@ -1,5 +1,7 @@
 #include "window.h"
+#include <QDir>
 #include <QTimer>
+#include <QTimeZone>
 #include <QMouseEvent>
 #include "rss.h"
 #include "config.h"
@@ -16,9 +18,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-    // 初始化配置文件
     initConfig();
-    // 初始化管理器
     bangumiAPI = new BangumiAPI(this);
     dbManager = new DatabaseManager(this);
     cacheImageUtil = new CacheImageUtil(this);
@@ -26,16 +26,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     rss = new Rss(bangumiAPI, this);
     dbManager->openDatabase();
     DatabaseManager::initTables();
-    // 启动 RSS
     QTimer::singleShot(5000, rss, &Rss::startRSS);
-    // 设置主页面
     setupUi(this);
     mainPageManager = new MainPageManager(this, cacheImageUtil, bangumiAPI, dbManager);
-    // 标题栏
     setWindowFlags(Qt::FramelessWindowHint);
     titlebar_frame->installEventFilter(this);
-    // 连接信号
     setupConnections();
+    checkCacheCleanup();
 }
 
 MainWindow::~MainWindow()
@@ -65,6 +62,27 @@ void MainWindow::setupConnections()
     connect(mainPageManager, &MainPageManager::showDetailPageRequested, this, &MainWindow::onShowDetailPageRequested);
     // 选集
     connect(mainPageManager, &MainPageManager::showEpisodePageRequested, this, &MainWindow::onShowEpisodePageRequested);
+}
+
+void MainWindow::checkCacheCleanup() const
+{   // 检查缓存清理
+    const qlonglong next = getConfig("Cache/next_cleanup_timestamp", 0).toLongLong();
+    const qlonglong now = QDateTime::currentSecsSinceEpoch();
+    if (now < next && next != 0) return;
+    QDateTime dt = QDateTime::currentDateTime().toTimeZone(QTimeZone("Asia/Shanghai"));
+    int days = (Qt::Wednesday - dt.date().dayOfWeek() + 7) % 7;
+    if (days == 0) days = 7;
+    dt = dt.addDays(days);
+    dt.setTime(QTime(6, 0));
+    const qlonglong nextCleanup = dt.toSecsSinceEpoch();
+    if (now >= next) {
+        QDir imageDir("data/images");
+        imageDir.removeRecursively();
+        imageDir.mkpath(".");
+        dbManager->clearEpisodeCollectionTable();
+    }
+    setConfig("Cache/next_cleanup_timestamp", nextCleanup);
+    mainPageManager->loadCollections(mainPageManager->getCurrentSubjectType(), mainPageManager->getCurrentStatusType(), false);
 }
 
 void MainWindow::ensureSearchPage()

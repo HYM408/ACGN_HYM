@@ -49,10 +49,10 @@ add_executable(appACGN_HYM
         windows/sql/data_structs.h
         windows/sql/sql.h
         windows/sql/sql.cpp
-        windows/utils/captcha_util/captcha_util.h
-        windows/utils/captcha_util/captcha_util.cpp
-        windows/utils/captcha_util/charset_data.h
-        windows/utils/captcha_util/charset_data.cpp
+        windows/utils/captcha_utils/captcha_util.h
+        windows/utils/captcha_utils/captcha_util.cpp
+        windows/utils/captcha_utils/charset_data.h
+        windows/utils/captcha_utils/charset_data.cpp
         windows/utils/cache_image_util.h
         windows/utils/cache_image_util.cpp
         windows/utils/image_util.h

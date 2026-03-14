@@ -270,7 +270,8 @@ void SettingsPage::setupDownloadPathUi() const
 void SettingsPage::onSelectDownloadPath()
 {   // 选择下载路径
     const QString currentPath = ui.lineEdit->text();
-    if (const QString dirPath = QFileDialog::getExistingDirectory(this, "选择下载路径", currentPath); !dirPath.isEmpty()) {
+    const QString dirPath = QFileDialog::getExistingDirectory(this, "选择下载路径", currentPath);
+    if (!dirPath.isEmpty()) {
         ui.lineEdit->setText(dirPath);
         setConfig("Download/download_path", dirPath);
     }
