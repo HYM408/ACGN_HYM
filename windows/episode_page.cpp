@@ -1,4 +1,5 @@
 #include "episode_page.h"
+#include <QTimer>
 #include <QPainter>
 #include <QPointer>
 #include <QLineEdit>
@@ -119,6 +120,17 @@ void EpisodeOverlay::keyPressEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_Escape) closeOverlay();
 }
 
+bool EpisodeOverlay::eventFilter(QObject *obj, QEvent *event)
+{   // 事件过滤器
+    if (event->type() == QEvent::MouseButtonPress) {
+        if (const auto *edit = qobject_cast<QLineEdit*>(obj)) {
+            QTimer::singleShot(0, edit, &QLineEdit::selectAll);
+            return false;
+        }
+    }
+    return QWidget::eventFilter(obj, event);
+}
+
 void EpisodeOverlay::onUpdateButtonClicked()
 {   // 更新按钮点击
     if (collectionData.subject_type == 2) onMarkAllWatchedClicked();
@@ -213,6 +225,8 @@ void EpisodeOverlay::loadVolEpData()
     };
     createField("Vol.", collectionData.vol_status, collectionData.subject_volumes, volEdit);
     createField("Chap.", collectionData.ep_status, collectionData.subject_eps, epEdit);
+    volEdit->installEventFilter(this);
+    epEdit->installEventFilter(this);
     auto *hBox = new QHBoxLayout;
     hBox->addStretch();
     hBox->addWidget(container);
