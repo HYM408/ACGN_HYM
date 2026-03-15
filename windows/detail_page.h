@@ -34,7 +34,7 @@ private slots:
 
 protected:
     void showEvent(QShowEvent *event) override;
-    void applyTheme() const;
+    void applyTheme();
 
 private:
     void setupConnections();
@@ -56,6 +56,8 @@ private:
     QListWidget *tagListWidget = nullptr;
     StarRatingWidget *m_starRating = nullptr;
     QVector<CharacterData> m_characters;
+    QString m_tagLabelStyle;
+    QString m_cardStyle;
 };
 
 class ClickableLabel : public QLabel

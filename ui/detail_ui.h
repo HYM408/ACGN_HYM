@@ -213,15 +213,8 @@ public:
 
         pushButton = new QPushButton(frame_2);
         pushButton->setObjectName("pushButton");
+        pushButton->setMinimumSize(QSize(80, 35));
         pushButton->setFont(font2);
-        pushButton->setStyleSheet(QString::fromUtf8("QPushButton {\n"
-"	padding: 3px 5px;\n"
-"	border: none;\n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"	background-color: #f5f5f5;\n"
-"}"));
 
         horizontalLayout->addWidget(pushButton);
 
@@ -239,19 +232,16 @@ public:
         pushButton_26->setObjectName("pushButton_26");
         pushButton_26->setMinimumSize(QSize(80, 35));
         pushButton_26->setFont(font2);
-        pushButton_26->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
-"border-radius:15px"));
 
         verticalLayout_13->addWidget(pushButton_26, 0, Qt::AlignmentFlag::AlignLeft);
 
         pushButton_27 = new QPushButton(frame);
         pushButton_27->setObjectName("pushButton_27");
-        pushButton_27->setMinimumSize(QSize(80, 0));
+        pushButton_27->setMinimumSize(QSize(80, 35));
         QFont font3;
         font3.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font3.setPointSize(14);
         pushButton_27->setFont(font3);
-        pushButton_27->setStyleSheet(QString::fromUtf8("border: none;"));
 
         verticalLayout_13->addWidget(pushButton_27, 0, Qt::AlignmentFlag::AlignLeft);
 
@@ -401,10 +391,7 @@ public:
         pushButton_23->setText(QCoreApplication::translate("DetailPage", "TBA", nullptr));
         pushButton_24->setText(QCoreApplication::translate("DetailPage", "\345\205\250-\350\257\235", nullptr));
         pushButton_21->setText(QCoreApplication::translate("DetailPage", "|\344\272\272\350\257\204|#", nullptr));
-        pushButton->setText(QString());
         pushButton_25->setText(QCoreApplication::translate("DetailPage", "\346\224\266\350\227\217/\345\234\250\347\234\213/\346\212\233\345\274\203", nullptr));
-        pushButton_26->setText(QString());
-        pushButton_27->setText(QString());
         tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("DetailPage", "\350\257\246\346\203\205", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("DetailPage", "\350\247\222\350\211\262", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_3), QCoreApplication::translate("DetailPage", "\347\233\270\345\205\263\346\235\241\347\233\256", nullptr));

@@ -364,24 +364,17 @@ padding: 2px 10px;</string>
                </item>
                <item>
                 <widget class="QPushButton" name="pushButton">
+                 <property name="minimumSize">
+                  <size>
+                   <width>80</width>
+                   <height>35</height>
+                  </size>
+                 </property>
                  <property name="font">
                   <font>
                    <family>微软雅黑</family>
                    <pointsize>15</pointsize>
                   </font>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">QPushButton {
-	padding: 3px 5px;
-	border: none;
-}
-
-QPushButton:hover {
-	background-color: #f5f5f5;
-}</string>
-                 </property>
-                 <property name="text">
-                  <string/>
                  </property>
                 </widget>
                </item>
@@ -418,13 +411,6 @@ QPushButton:hover {
                 <pointsize>15</pointsize>
                </font>
               </property>
-              <property name="styleSheet">
-               <string notr="true">border: 1px solid gray;
-border-radius:15px</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
              </widget>
             </item>
             <item alignment="Qt::AlignmentFlag::AlignLeft">
@@ -432,7 +418,7 @@ border-radius:15px</string>
               <property name="minimumSize">
                <size>
                 <width>80</width>
-                <height>0</height>
+                <height>35</height>
                </size>
               </property>
               <property name="font">
@@ -440,12 +426,6 @@ border-radius:15px</string>
                 <family>微软雅黑</family>
                 <pointsize>14</pointsize>
                </font>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">border: none;</string>
-              </property>
-              <property name="text">
-               <string/>
               </property>
              </widget>
             </item>

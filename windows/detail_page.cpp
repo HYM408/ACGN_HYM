@@ -49,10 +49,23 @@ void DetailPage::showEvent(QShowEvent *event)
     loadData();
 }
 
-void DetailPage::applyTheme() const
+void DetailPage::applyTheme()
 {   // 主题
     const QColor color1 = getColor("color1", QColor("#fdf7ff"));
+    const QColor color2 = getColor("color2", QColor("#f2ecf4"));
+    const QColor color3 = getColor("color3", QColor("#e1dbe4"));
+    const QColor color4 = getColor("color4", QColor("#f2ecf4"));
+    const QColor color5 = getColor("color5", QColor("#e1dbe4"));
     ui.frame_6->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
+    ui.pushButton_26->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px}"
+                                            "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
+    ui.pushButton_27->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px}"
+                                            "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
+    ui.pushButton->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px}"
+                                        "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
+    m_tagLabelStyle = QString("QLabel {background-color: %1; border-radius: 10px; padding: 2px 8px}"
+                              "QLabel:hover {background-color: %2}").arg(color2.name(), color3.name());
+    m_cardStyle = QString("QWidget {background-color: %1; border-radius: 8px}").arg(color2.name());
 }
 
 void DetailPage::setupConnections()
@@ -148,15 +161,16 @@ void DetailPage::tagsDisplay(const QList<QPair<QString, int>> &tagPairs)
 {   // tag显示
     clearLayout();
     auto *mainLayout = new QVBoxLayout(ui.frame_5);
-    mainLayout->setSpacing(5);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
-    const QFontMetrics fm(ui.frame_5->font());
+    constexpr int fontSize = 14;
+    QFont font = ui.frame_5->font();
+    font.setPixelSize(fontSize);
+    const QFontMetrics fm(font);
     const int maxWidth = ui.frame_5->width();
     QHBoxLayout *currentLayout = nullptr;
     QWidget *currentWidget = nullptr;
     int currentWidth = 0;
     QVector<QPair<QString, int>> labelData;
-    for (const auto & [fst, snd] : tagPairs) {
+    for (const auto &[fst, snd] : tagPairs) {
         QString displayText;
         int textWidth;
         if (snd > 0) {
@@ -169,25 +183,24 @@ void DetailPage::tagsDisplay(const QList<QPair<QString, int>> &tagPairs)
         labelData.append(qMakePair(displayText, textWidth));
     }
     for (int i = 0; i < labelData.size(); ++i) {
-        const auto & [fst, snd] = labelData[i];
-        if (!currentLayout || currentWidth + snd > maxWidth) {
+        const auto &[displayText, textWidth] = labelData[i];
+        if (!currentLayout || currentWidth + textWidth > maxWidth) {
             currentWidget = new QWidget();
             currentLayout = new QHBoxLayout(currentWidget);
-            currentLayout->setSpacing(8);
             currentLayout->setContentsMargins(0, 0, 0, 0);
             currentLayout->addStretch(1);
             mainLayout->addWidget(currentWidget);
             currentWidth = 0;
         }
-        auto *tagLabel = new ClickableLabel(fst, currentWidget);
-        tagLabel->setFixedSize(snd, fm.height() + 10);
-        tagLabel->setStyleSheet("QLabel {border: 1px solid gray; border-radius: 10px; padding: 2px 8px; background-color: white}"
-                                "QLabel:hover {background-color: #f0f0f0}");
+        auto *tagLabel = new ClickableLabel(displayText, currentWidget);
+        tagLabel->setFont(font);
+        tagLabel->setFixedSize(textWidth, fm.height() + 10);
+        tagLabel->setStyleSheet(m_tagLabelStyle);
         QString tagName = tagPairs[i].first;
         tagLabel->setProperty("tagName", tagName);
         connect(tagLabel, &ClickableLabel::clicked, this, [this, tagName] {emit tagClicked(tagName, currentData.subject_type);});
         currentLayout->insertWidget(currentLayout->count() - 1, tagLabel);
-        currentWidth += snd + 10;
+        currentWidth += textWidth + 10;
     }
 }
 
@@ -240,7 +253,7 @@ void DetailPage::onCharacterTab(const int index)
     auto createCard = [this](const CharacterData &characterData) -> QWidget* {
         auto *card = new QWidget();
         card->setFixedWidth(cardWidth);
-        card->setStyleSheet("QWidget {background-color: #f9f9f9; border-radius: 8px}");
+        card->setStyleSheet(m_cardStyle);
         auto *layout = new QHBoxLayout(card);
         auto *imageLabel = new QLabel(card);
         imageLabel->setFixedSize(imageSize, imageSize);
@@ -283,7 +296,6 @@ void DetailPage::onCharacterTab(const int index)
             row++;
         }
     }
-    if (col != 0) gridLayout->addItem(new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum), row, col);
     auto *vSpacer = new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding);
     gridLayout->addItem(vSpacer, row + 1, 0, 1, maxCols);
     content->setLayout(gridLayout);

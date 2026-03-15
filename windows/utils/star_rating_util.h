@@ -1,7 +1,7 @@
 #ifndef STAR_RATING_UTIL_H
 #define STAR_RATING_UTIL_H
 
-#include <QWidget>
+#include <QLabel>
 
 class StarRatingWidget : public QWidget
 {
@@ -9,6 +9,7 @@ class StarRatingWidget : public QWidget
 
 public:
     explicit StarRatingWidget(int maxStars, QWidget *parent = nullptr);
+    ~StarRatingWidget() override;
     void setRate(int rate);
 
 signals:
@@ -21,12 +22,15 @@ protected:
     void leaveEvent(QEvent *event) override;
 
 private:
-    int starAtPosition(int x, int y) const;
+    [[nodiscard]] int starAtPosition(int x, int y) const;
     int m_maxStars;
     int m_rating = 0;
     int m_hoverIndex = -1;
     int m_starSize = 30;
     int m_spacing = 2;
+    QWidget* m_hoverWindow;
+    QLabel* m_hoverLabel;
+    QStringList m_descriptions;
 };
 
-#endif //STAR_RATING_UTIL_H
+#endif // STAR_RATING_UTIL_H

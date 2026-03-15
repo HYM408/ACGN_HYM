@@ -42,6 +42,9 @@ QString computeProgressText(const CollectionData &collection, const QJsonObject 
         QString totalEps = collection.subject_eps > 0 ? QString::number(collection.subject_eps) : "--";
         return QString("全 %1 卷 · 全 %2 话").arg(totalVols, totalEps);
     }
-    if (collection.subject_type == 4) return QString("%1 发售").arg(collection.subject_date);
+    if (collection.subject_type == 4) {
+        const QString date = collection.subject_date;
+        return QString("%1 发售").arg(date.isEmpty() || date == "0" ? "--" : date);
+    }
     return {};
 }
