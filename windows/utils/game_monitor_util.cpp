@@ -30,6 +30,7 @@ void GameMonitorUtil::startGame(int subjectId)
     if (!QProcess::startDetached(launchPath, {}, fileInfo.absolutePath(), &pid)) return;
     gameStartTimes[subjectId] = QDateTime::currentMSecsSinceEpoch();
     monitoredGames.insert(subjectId, pid);
+    emit gameStarted();
     if (!gameMonitorTimer->isActive()) gameMonitorTimer->start(2000);
 }
 
@@ -49,10 +50,11 @@ void GameMonitorUtil::checkGamesStatus()
             } else {
                 const qint64 elapsedSec = (now - gameStartTimes.take(subjectId)) / 1000;
                 QVector<GameData> current = DatabaseManager::getGameData({subjectId});
-                qint64 total = current.isEmpty() ? 0 : current.first().play_duration;
+                qint64 total = current.isEmpty() ? 0 : static_cast<qint64>(current.first().play_duration);
                 total += elapsedSec;
                 DatabaseManager::updateGameData(subjectId, {{"play_duration", total}});
                 qDebug() << subjectId << "已退出，运行:" << elapsedSec << "秒，总计:" << total << "秒";
+                emit gameExited();
             }
         }
     }

@@ -260,6 +260,9 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
     card.episodeButton->setStyleSheet(QString("QPushButton {border-radius: 20px}"
                                               "QPushButton:hover {background-color: %1}").arg(m_color3.name()));
     // 连接信号
+    connect(card.moreButton, &QPushButton::clicked, this, [this, card]() mutable {
+        const auto data = card.card->property("collectionData").value<CollectionData>();
+        StatusSelector::showStatusSelector(card.moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, dbManager, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);}, -37);});
     if (collection.subject_type == 4) connect(card.episodeButton, &QPushButton::clicked, this, [this, subjectId = collection.subject_id] {gameMonitor->startGame(subjectId);});
     else connect(card.episodeButton, &QPushButton::clicked, this, [this, data = collection] {showEpisodePage(data);});
 }

@@ -4,6 +4,11 @@
 void initConfig()
 {   // 初始化配置文件
     QSettings settings("./config.ini", QSettings::IniFormat);
+    // 关闭动作
+    settings.beginGroup("CloseAction");
+    setDefaultIfMissing(settings, "remember", false);
+    setDefaultIfMissing(settings, "action", 1);
+    settings.endGroup();
     // 清理缓存
     settings.beginGroup("Cache");
     setDefaultIfMissing(settings, "next_cleanup_timestamp", 0);

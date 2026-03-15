@@ -2,6 +2,7 @@
 #define WINDOW_H
 
 #include "main_page.h"
+#include <QSystemTrayIcon>
 
 class Rss;
 class PikPakApi;
@@ -28,6 +29,8 @@ public:
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
     void resizeEvent(QResizeEvent* event) override;
+    void showCloseOptionDialog();
+    void focusInEvent(QFocusEvent *event) override;
 
 private slots:
     void minimizeWindow();
@@ -42,8 +45,15 @@ private slots:
     void onShowEpisodePageRequested(const CollectionData &collectionData);
     void precreatePlayerPage();
     void onEpisodeClicked(const CollectionData &collectionData, const EpisodeData &episodeData);
+    void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
+    void closeOptionSelection(int result);
+    void onGameStarted();
+    void onGameFocusTimeout();
+    void gameExited();
 
 private:
+    void initializeManagers();
+    void setupTrayIcon() const;
     void setupConnections();
     void checkCacheCleanup() const;
     void ensureSearchPage();
@@ -63,6 +73,11 @@ private:
     EpisodeOverlay *episodeOverlay = nullptr;
     QList<QWidget*> pageHistory;
     GameMonitorUtil *gameMonitorUtil = nullptr;
+    QSystemTrayIcon *trayIcon = nullptr;
+    QMenu *trayMenu = nullptr;
+    QTimer *gameFocusTimer = nullptr;
+    bool m_wasMaximized = false;
+    QRect m_savedNormalGeometry = QRect();
 };
 
 #endif // WINDOW_H

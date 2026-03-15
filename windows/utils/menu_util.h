@@ -2,6 +2,7 @@
 #define MENU_UTIL_H
 
 #include <QWidget>
+#include <QPointer>
 
 class BangumiAPI;
 class QVBoxLayout;
@@ -23,6 +24,7 @@ private:
     BangumiAPI *bangumiAPI = nullptr;
     DatabaseManager *dbManager = nullptr;
     std::function<void(int)> callback = nullptr;
+    QPointer<QWidget> mainWindow;
 };
 
 #endif // MENU_UTIL_H

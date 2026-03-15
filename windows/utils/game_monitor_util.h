@@ -14,6 +14,10 @@ public:
     ~GameMonitorUtil() override;
     void startGame(int subjectId);
 
+signals:
+    void gameStarted();
+    void gameExited();
+
 private slots:
     void checkGamesStatus();
 

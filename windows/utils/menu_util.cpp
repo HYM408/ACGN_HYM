@@ -18,7 +18,7 @@ static const QMap<int, QMap<int, QString>> statusNamesMap = {
     {7, {{0, "取消收藏"}, {1, "想读"}, {2, "读过"}, {3, "在读"}, {4, "搁置"}, {5, "抛弃"}}},
     {8, {{0, "取消收藏"}, {1, "想读"}, {2, "读过"}, {3, "在读"}, {4, "搁置"}, {5, "抛弃"}}}};
 
-StatusSelector::StatusSelector(const QPushButton *parentButton, const int subjectType, const int collectionType, const int subjectId, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, std::function<void(int)> callback, const int xOffset): QWidget(nullptr), subjectId(subjectId), collectionType(collectionType), bangumiAPI(bangumiAPI), dbManager(dbManager), callback(std::move(callback))
+StatusSelector::StatusSelector(const QPushButton *parentButton, const int subjectType, const int collectionType, const int subjectId, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, std::function<void(int)> callback, const int xOffset): QWidget(nullptr), subjectId(subjectId), collectionType(collectionType), bangumiAPI(bangumiAPI), dbManager(dbManager), callback(std::move(callback)), mainWindow(parentButton->window())
 {   // 下拉菜单
     setWindowFlags(Qt::Popup | Qt::FramelessWindowHint);
     setFixedWidth(120);
@@ -63,14 +63,10 @@ void StatusSelector::updateStatus(int statusValue)
         connect(&buttonBox, &QDialogButtonBox::accepted, &confirmDialog, &QDialog::accept);
         connect(&buttonBox, &QDialogButtonBox::rejected, &confirmDialog, &QDialog::reject);
         if (confirmDialog.exec() == QDialog::Accepted) dbManager->deleteCollectionBySubjectId(subjectId);
-        else{
-            for (QWidget *widget : QApplication::topLevelWidgets()) {
-                if (!widget->inherits("QDialog")) {
-                    widget->raise();
-                    widget->activateWindow();
-                    break;
-                }
-            }
+        else {
+            mainWindow->showNormal();
+            mainWindow->raise();
+            mainWindow->activateWindow();
         }
         deleteLater();
         return;
