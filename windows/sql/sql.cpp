@@ -247,7 +247,7 @@ bool DatabaseManager::insertManyEpisodes(const int subjectId, const QJsonArray &
         QJsonObject item = v.toObject();
         QJsonObject ep = item["episode"].toObject();
         query.addBindValue(subjectId);
-        query.addBindValue(ep["episode_id"].toInt());
+        query.addBindValue(ep["id"].toInt());
         query.addBindValue(ep["ep"].toDouble() * 10.0);
         query.addBindValue(ep["sort"].toDouble() * 10.0);
         query.addBindValue(ep["name"].toString());
