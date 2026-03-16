@@ -5,6 +5,7 @@ project(ACGN_HYM VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>)
 
 find_package(Qt6 REQUIRED COMPONENTS
         Core
@@ -55,6 +56,8 @@ add_executable(appACGN_HYM
         windows/utils/captcha_utils/charset_data.cpp
         windows/utils/cache_image_util.h
         windows/utils/cache_image_util.cpp
+        windows/utils/context_menu_util.h
+        windows/utils/context_menu_util.cpp
         windows/utils/game_monitor_util.h
         windows/utils/game_monitor_util.cpp
         windows/utils/image_util.h

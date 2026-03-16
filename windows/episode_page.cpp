@@ -10,6 +10,7 @@
 #include "config.h"
 #include "sql/sql.h"
 #include "api/bangumi_api.h"
+#include "utils/context_menu_util.h"
 
 EpisodeOverlay::EpisodeOverlay(QWidget *parent) : QWidget(parent)
 {
@@ -225,6 +226,8 @@ void EpisodeOverlay::loadVolEpData()
     };
     createField("Vol.", collectionData.vol_status, collectionData.subject_volumes, volEdit);
     createField("Chap.", collectionData.ep_status, collectionData.subject_eps, epEdit);
+    setupLineEditCustomContextMenu(volEdit, CMO_Cut | CMO_Copy | CMO_Paste);
+    setupLineEditCustomContextMenu(epEdit, CMO_Cut | CMO_Copy | CMO_Paste);
     volEdit->installEventFilter(this);
     epEdit->installEventFilter(this);
     auto *hBox = new QHBoxLayout;

@@ -6,6 +6,7 @@
 #include "utils/progress_util.h"
 #include "utils/cache_image_util.h"
 #include "utils/game_monitor_util.h"
+#include "utils/context_menu_util.h"
 
 MainPageManager::MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, GameMonitorUtil *gameMonitor) : QObject(nullptr), mainWindow(mainWindow), dbManager(dbManager), cacheImageUtil(cacheImageUtil), bangumiAPI(bangumiAPI), gameMonitor(gameMonitor)
 {
@@ -72,6 +73,7 @@ void MainPageManager::setupConnections()
     connect(mainWindow->previous_Button, &QPushButton::clicked, this, &MainPageManager::previousPage);
     connect(mainWindow->next_Button, &QPushButton::clicked, this, &MainPageManager::nextPage);
     connect(mainWindow->searchlist_lineEdit, &QLineEdit::textChanged, this, &MainPageManager::onSearchTextChanged);
+    setupLineEditCustomContextMenu(mainWindow->searchlist_lineEdit, CMO_Default);
     mainWindow->animation_Button->setChecked(true);
     loadCollections(2, 3, true);
 }
@@ -262,7 +264,7 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
     // 连接信号
     connect(card.moreButton, &QPushButton::clicked, this, [this, card]() mutable {
         const auto data = card.card->property("collectionData").value<CollectionData>();
-        StatusSelector::showStatusSelector(card.moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, dbManager, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);}, -37);});
+        StatusSelector::showStatusSelector(card.moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, dbManager, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);});});
     if (collection.subject_type == 4) connect(card.episodeButton, &QPushButton::clicked, this, [this, subjectId = collection.subject_id] {gameMonitor->startGame(subjectId);});
     else connect(card.episodeButton, &QPushButton::clicked, this, [this, data = collection] {showEpisodePage(data);});
 }

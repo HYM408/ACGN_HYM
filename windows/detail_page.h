@@ -56,8 +56,8 @@ private:
     QListWidget *tagListWidget = nullptr;
     StarRatingWidget *m_starRating = nullptr;
     QVector<CharacterData> m_characters;
-    QString m_tagLabelStyle;
-    QString m_cardStyle;
+    QColor m_color2;
+    QColor m_color3;
 };
 
 class ClickableLabel : public QLabel

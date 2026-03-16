@@ -8,6 +8,7 @@
 #include "utils/image_util.h"
 #include "utils/progress_util.h"
 #include "utils/game_monitor_util.h"
+#include "utils/context_menu_util.h"
 
 SearchPage::SearchPage(QWidget *parent) : QWidget(parent)
 {
@@ -49,6 +50,7 @@ void SearchPage::setupConnections()
     connect(ui.search_pushButton, &QPushButton::clicked, this, &SearchPage::onSearchLineEditReturnPressed);
     connect(ui.search_lineEdit, &QLineEdit::returnPressed, this, &SearchPage::onSearchLineEditReturnPressed);
     connect(ui.back_Button, &QPushButton::clicked, this, &SearchPage::onBackButtonClicked);
+    setupLineEditCustomContextMenu(ui.search_lineEdit, CMO_Default);
 }
 
 void SearchPage::updateComboBoxByType(const int currentType) const

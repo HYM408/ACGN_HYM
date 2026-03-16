@@ -10,6 +10,7 @@
 #include "utils/image_util.h"
 #include "utils/star_rating_util.h"
 #include "utils/game_monitor_util.h"
+#include "utils/context_menu_util.h"
 
 ClickableLabel::ClickableLabel(const QString &text, QWidget *parent): QLabel(text, parent)
 {   // tag组件
@@ -52,8 +53,8 @@ void DetailPage::showEvent(QShowEvent *event)
 void DetailPage::applyTheme()
 {   // 主题
     const QColor color1 = getColor("color1", QColor("#fdf7ff"));
-    const QColor color2 = getColor("color2", QColor("#f2ecf4"));
-    const QColor color3 = getColor("color3", QColor("#e1dbe4"));
+    m_color2 = getColor("color2", QColor("#f2ecf4"));
+    m_color3 = getColor("color3", QColor("#e1dbe4"));
     const QColor color4 = getColor("color4", QColor("#f2ecf4"));
     const QColor color5 = getColor("color5", QColor("#e1dbe4"));
     ui.frame_6->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
@@ -63,9 +64,6 @@ void DetailPage::applyTheme()
                                             "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
     ui.pushButton->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px}"
                                         "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
-    m_tagLabelStyle = QString("QLabel {background-color: %1; border-radius: 10px; padding: 2px 8px}"
-                              "QLabel:hover {background-color: %2}").arg(color2.name(), color3.name());
-    m_cardStyle = QString("QWidget {background-color: %1; border-radius: 8px}").arg(color2.name());
 }
 
 void DetailPage::setupConnections()
@@ -76,6 +74,8 @@ void DetailPage::setupConnections()
     connect(ui.pushButton_26, &QPushButton::clicked, this, &DetailPage::onStatusButtonClicked);
     connect(ui.pushButton, &QPushButton::clicked, this, &DetailPage::onRatingButtonClicked);
     connect(ui.tabWidget, &QTabWidget::currentChanged, this, &DetailPage::onCharacterTab);
+    setupTextEditCustomContextMenu(ui.textEdit, CMO_Default);
+    setupTextEditCustomContextMenu(ui.textEdit_2, CMO_Default);
 }
 
 void DetailPage::setCollectionData(const CollectionData &data, const QString &progressText)
@@ -129,7 +129,7 @@ void DetailPage::onStatusButtonClicked()
     StatusSelector::showStatusSelector(ui.pushButton_26, subjectType, currentStatus, currentData.subject_id, bangumiAPI, dbManager,[this, subjectType](const int selectedStatus) {
         currentData.type = selectedStatus;
         ui.pushButton_26->setText(statusNamesMap.value(subjectType).value(selectedStatus));
-    }, -20);
+    });
 }
 
 void DetailPage::updateDetailPage(const SubjectsData &subjectData)
@@ -195,7 +195,8 @@ void DetailPage::tagsDisplay(const QList<QPair<QString, int>> &tagPairs)
         auto *tagLabel = new ClickableLabel(displayText, currentWidget);
         tagLabel->setFont(font);
         tagLabel->setFixedSize(textWidth, fm.height() + 10);
-        tagLabel->setStyleSheet(m_tagLabelStyle);
+        tagLabel->setStyleSheet(QString("QLabel {background-color: %1; border-radius: 10px; padding: 2px 8px}"
+                              "QLabel:hover {background-color: %2}").arg(m_color2.name(), m_color3.name()));
         QString tagName = tagPairs[i].first;
         tagLabel->setProperty("tagName", tagName);
         connect(tagLabel, &ClickableLabel::clicked, this, [this, tagName] {emit tagClicked(tagName, currentData.subject_type);});
@@ -253,7 +254,7 @@ void DetailPage::onCharacterTab(const int index)
     auto createCard = [this](const CharacterData &characterData) -> QWidget* {
         auto *card = new QWidget();
         card->setFixedWidth(cardWidth);
-        card->setStyleSheet(m_cardStyle);
+        card->setStyleSheet(QString("QWidget {background-color: %1; border-radius: 8px}").arg(m_color2.name()));
         auto *layout = new QHBoxLayout(card);
         auto *imageLabel = new QLabel(card);
         imageLabel->setFixedSize(imageSize, imageSize);

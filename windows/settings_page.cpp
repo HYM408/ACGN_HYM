@@ -9,6 +9,7 @@
 #include "api/bangumi_api.h"
 #include "api/bangumi_oauth.h"
 #include "utils/network_util.h"
+#include "utils/context_menu_util.h"
 #include "downloader/chunk_download.h"
 
 const QString SettingsPage::BANGUMI_ARCHIVE_URL = "https://raw.githubusercontent.com/HYM408/BangumiDateProcessing/refs/heads/main/latest.json";
@@ -65,6 +66,7 @@ void SettingsPage::setupConnections()
     connect(ui.pushButton_4, &QPushButton::clicked, [this] {ui.stackedWidget_2->setCurrentWidget(ui.pikpak_page);});
     connect(ui.login_Button_2, &QPushButton::clicked, this, &SettingsPage::onPikPakLoginButtonClicked);
     // 下载
+    setupLineEditCustomContextMenu(ui.lineEdit, CMO_Copy | CMO_SelectAll);
     connect(ui.pushButton_13, &QPushButton::clicked, [this] {ui.stackedWidget_2->setCurrentWidget(ui.download_page);});
     connect(ui.login_Button_3, &QPushButton::clicked, this, &SettingsPage::onSelectDownloadPath);
 }

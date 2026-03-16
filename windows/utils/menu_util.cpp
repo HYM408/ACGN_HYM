@@ -4,9 +4,9 @@
 #include <QJsonArray>
 #include <QVBoxLayout>
 #include <QPushButton>
-#include <QApplication>
 #include <QDialogButtonBox>
 #include <QDesktopServices>
+#include <QGraphicsDropShadowEffect>
 #include "../config.h"
 #include "../sql/sql.h"
 #include "../api/bangumi_api.h"
@@ -18,28 +18,41 @@ static const QMap<int, QMap<int, QString>> statusNamesMap = {
     {7, {{0, "取消收藏"}, {1, "想读"}, {2, "读过"}, {3, "在读"}, {4, "搁置"}, {5, "抛弃"}}},
     {8, {{0, "取消收藏"}, {1, "想读"}, {2, "读过"}, {3, "在读"}, {4, "搁置"}, {5, "抛弃"}}}};
 
-StatusSelector::StatusSelector(const QPushButton *parentButton, const int subjectType, const int collectionType, const int subjectId, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, std::function<void(int)> callback, const int xOffset): QWidget(nullptr), subjectId(subjectId), collectionType(collectionType), bangumiAPI(bangumiAPI), dbManager(dbManager), callback(std::move(callback)), mainWindow(parentButton->window())
+StatusSelector::StatusSelector(const QPushButton *parentButton, const int subjectType, const int collectionType, const int subjectId, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, std::function<void(int)> callback) : QWidget(nullptr), subjectId(subjectId), collectionType(collectionType), bangumiAPI(bangumiAPI), dbManager(dbManager), callback(std::move(callback)), mainWindow(parentButton->window())
 {   // 下拉菜单
     setWindowFlags(Qt::Popup | Qt::FramelessWindowHint);
-    setFixedWidth(120);
-    layout = new QVBoxLayout(this);
-    layout->setSpacing(0);
-    layout->setContentsMargins(0, 0, 0, 0);
-    setStyleSheet("QPushButton {background-color: white; border: none; padding: 10px 12px; font-size: 13px; color: #333}"
-                  "QPushButton:hover {background-color: #f5f5f5}");
+    setAttribute(Qt::WA_TranslucentBackground);
+    setFixedWidth(160);
+    auto *container = new QFrame(this);
+    const QColor color2 = getColor("color2", QColor("#f2ecf4"));
+    container->setStyleSheet(QString("QFrame {background-color: %1; border: 1px solid #ccc; border-radius: 4px}").arg(color2.name()));
+    auto *shadowEffect = new QGraphicsDropShadowEffect(container);
+    shadowEffect->setBlurRadius(15);
+    shadowEffect->setColor(QColor(0, 0, 0, 80));
+    shadowEffect->setOffset(0, 2);
+    container->setGraphicsEffect(shadowEffect);
+    auto *containerLayout = new QVBoxLayout(container);
+    containerLayout->setSpacing(0);
+    containerLayout->setContentsMargins(0, 0, 0, 0);
     const auto statusMap = statusNamesMap.value(subjectType, statusNamesMap[2]);
     for (auto statusValue : {1, 3, 2, 4, 5, 0}) {
         if (statusValue == 0 && collectionType == 0) continue;
         auto *btn = new QPushButton(statusMap.value(statusValue));
+        const QColor color3 = getColor("color3", QColor("#e1dbe4"));
+        btn->setStyleSheet(QString("QPushButton {border: none; padding: 10px 12px; font-size: 13px}"
+                                   "QPushButton:hover {background-color: %1}").arg(color3.name()));
         connect(btn, &QPushButton::clicked, this, [this, statusValue] {updateStatus(statusValue);});
-        layout->addWidget(btn);
+        containerLayout->addWidget(btn);
     }
-    move(parentButton->mapToGlobal(QPoint(xOffset, parentButton->height())));
+    auto *mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(20, 20, 20, 20);
+    mainLayout->addWidget(container);
+    move(parentButton->mapToGlobal(QPoint(parentButton->width() / 2, parentButton->height())) - QPoint(width() / 2, 15));
 }
 
-void StatusSelector::showStatusSelector(const QPushButton *parentButton, const int subjectType, const int collectionType, const int subjectId, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, std::function<void(int)> callback, const int xOffset)
+void StatusSelector::showStatusSelector(const QPushButton *parentButton, const int subjectType, const int collectionType, const int subjectId, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, std::function<void(int)> callback)
 {   // 显示下拉菜单
-    const auto selector = new StatusSelector(parentButton, subjectType, collectionType, subjectId, bangumiAPI, dbManager, std::move(callback), xOffset);
+    const auto selector = new StatusSelector(parentButton, subjectType, collectionType, subjectId, bangumiAPI, dbManager, std::move(callback));
     selector->setAttribute(Qt::WA_DeleteOnClose);
     selector->show();
 }
