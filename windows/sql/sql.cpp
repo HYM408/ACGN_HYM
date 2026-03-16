@@ -122,6 +122,13 @@ QString DatabaseManager::decompressString(const QByteArray &data)
     return QString::fromUtf8(uncompressed);
 }
 
+QString DatabaseManager::sanitizeString(const QString &str)
+{   // 清理字符
+    QString result = str;
+    result.replace(QStringLiteral("♭"), QStringLiteral("b"));
+    return result;
+}
+
 // =============== collection表 ===============
 bool DatabaseManager::insertManyCollectionData(const QJsonArray &jsonArray)
 {   // 批量插入多条数据
@@ -141,8 +148,8 @@ bool DatabaseManager::insertManyCollectionData(const QJsonArray &jsonArray)
         query.addBindValue(data["type"].toInt());
         query.addBindValue(data["rate"].toInt());
         query.addBindValue(dateTimestamp);
-        query.addBindValue(subject["name"].toString());
-        query.addBindValue(subject["name_cn"].toString());
+        query.addBindValue(sanitizeString(subject["name"].toString()));
+        query.addBindValue(sanitizeString(subject["name_cn"].toString()));
         query.addBindValue(subject["eps"].toInt());
         query.addBindValue(subject["volumes"].toInt());
         query.addBindValue(updatedTimestamp);

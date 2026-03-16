@@ -52,6 +52,7 @@ private:
     static QString timestampToDateString(qint64 timestamp);
     static QByteArray compressString(const QString& str);
     static QString decompressString(const QByteArray& data);
+    static QString sanitizeString(const QString& str);
 };
 
 #endif // SQL_H
