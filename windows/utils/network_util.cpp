@@ -1,86 +1,77 @@
 #include "network_util.h"
 #include <QTimer>
 #include <QJsonObject>
-#include <QElapsedTimer>
+#include <QNetworkReply>
 
-QByteArray sendRequestUtil(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, const int maxRetries, int *statusCode, const std::function<void()> &onAuthFailure, const AbortFlag &abortFlag)
-{   // 发送请求
-    auto waitBeforeRetry = [&] {
-        QEventLoop loop;
-        QTimer::singleShot(5000, &loop, &QEventLoop::quit);
-        QTimer exitCheckTimer;
-        exitCheckTimer.start(100);
-        QObject::connect(&exitCheckTimer, &QTimer::timeout, [&] {
-            if (abortFlag && abortFlag->load()) loop.quit();
-        });
-        loop.exec();
-    };
-    for (int retry = 0; retry < maxRetries; ++retry) {
-        QNetworkReply *reply = nullptr;
-        if (method == "GET") reply = manager.get(request);
-        else if (method == "POST") reply = manager.post(request, data);
-        else if (method == "PATCH") reply = manager.sendCustomRequest(request, "PATCH", data);
-        QEventLoop loop;
-        QTimer checkTimer;
-        checkTimer.start(100);
-        QElapsedTimer elapsed;
-        elapsed.start();
-        bool timeout = false, aborted = false;
-        auto abortAndQuit = [&] {
-            reply->abort();
-            checkTimer.stop();
-            loop.quit();
-        };
-        QObject::connect(&checkTimer, &QTimer::timeout, [&] {
-            if (elapsed.hasExpired(15000)) {
-                timeout = true;
-                abortAndQuit();
-            } else if (abortFlag && abortFlag->load()) {
-                aborted = true;
-                abortAndQuit();
-            }
-        });
-        QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-        loop.exec();
-        if (aborted) {
-            reply->deleteLater();
-            return {};
-        }
-        if (timeout) {
-            reply->deleteLater();
-            if (retry + 1 < maxRetries) {
-                waitBeforeRetry();
-                continue;
-            }
-            break;
-        }
-        const int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-        if (statusCode) *statusCode = httpStatus;
-        if (reply->error() == QNetworkReply::NoError) {
-            QByteArray response = reply->readAll();
-            reply->deleteLater();
-            return response;
-        }
-        const bool authFailure = httpStatus == 401;
-        reply->deleteLater();
-        if (authFailure && onAuthFailure) onAuthFailure();
-        if (retry + 1 < maxRetries) {
-            waitBeforeRetry();
-            continue;
-        }
-        break;
+RequestHandler::RequestHandler(QNetworkAccessManager &manager, const QNetworkRequest &request, QString method, QByteArray data, const int maxRetries, std::function<void(const QByteArray&, int, const QString&)> callback, std::function<void()> onAuthFailure) : QObject(nullptr), m_manager(manager), m_request(request), m_method(std::move(method)), m_data(std::move(data)), m_remainingTries(maxRetries), m_callback(std::move(callback)), m_onAuthFailure(std::move(onAuthFailure))
+{
+    startRequest();
+}
+
+void RequestHandler::startRequest()
+{   // 开始请求
+    if (m_method == "GET") m_reply = m_manager.get(m_request);
+    else if (m_method == "POST") m_reply = m_manager.post(m_request, m_data);
+    else if (m_method == "PATCH") m_reply = m_manager.sendCustomRequest(m_request, "PATCH", m_data);
+    connect(m_reply, &QNetworkReply::finished, this, &RequestHandler::onReplyFinished);
+    m_timeoutTimer = new QTimer(this);
+    m_timeoutTimer->setSingleShot(true);
+    connect(m_timeoutTimer, &QTimer::timeout, this, [this] {m_reply->abort();});
+    m_timeoutTimer->start(15000);
+}
+
+void RequestHandler::onReplyFinished()
+{   // 网络请求完成
+    if (!m_reply) return;
+    if (m_timeoutTimer) {
+        m_timeoutTimer->stop();
+        m_timeoutTimer->deleteLater();
+        m_timeoutTimer = nullptr;
     }
-    return {};
+    QNetworkReply *reply = m_reply;
+    m_reply = nullptr;
+    const int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    const QNetworkReply::NetworkError err = reply->error();
+    const QString errorMsg = err != QNetworkReply::NoError ? reply->errorString() : QString();
+    if (httpStatus == 401 && m_onAuthFailure) m_onAuthFailure();
+    reply->deleteLater();
+    if (err == QNetworkReply::NoError) {
+        if (m_callback) m_callback(reply->readAll(), httpStatus, QString());
+        deleteLater();
+        return;
+    }
+    if (--m_remainingTries > 0) QTimer::singleShot(5000, this, [this] {startRequest();});
+    else {
+        if (m_callback) m_callback(QByteArray(), httpStatus, errorMsg);
+        deleteLater();
+    }
 }
 
-QJsonObject sendRequestJson(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, const int maxRetries, int *statusCode, const std::function<void()> &onAuthFailure, const AbortFlag &abortFlag)
-{   // JSON包装
-    const QByteArray raw = sendRequestUtil(manager, request, method, data, maxRetries, statusCode, onAuthFailure, abortFlag);
-    return QJsonDocument::fromJson(raw).object();
+template<typename Callback, typename Transformer>
+static void sendRequestGeneric(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, const Callback& callback, Transformer transformer, std::function<void()> onAuthFailure)
+{
+    new RequestHandler(manager, request, method, data, maxRetries, [callback, transformer](const QByteArray &raw, int status, const QString &error) {
+        callback(transformer(raw, status, error), status, error);
+    }, std::move(onAuthFailure));
 }
 
-QString sendRequestHtml(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, const int maxRetries, int *statusCode, const std::function<void()> &onAuthFailure, const AbortFlag &abortFlag)
-{   // HTML包装
-    const QByteArray raw = sendRequestUtil(manager, request, method, data, maxRetries, statusCode, onAuthFailure, abortFlag);
-    return QString::fromUtf8(raw);
+void sendRequestUtil(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, const int maxRetries, const std::function<void(const QByteArray&, int, const QString&)> &callback, std::function<void()> onAuthFailure)
+{   // 原始数据封装
+    sendRequestGeneric(manager, request, method, data, maxRetries, callback, [](const QByteArray &raw, int, const QString&) {
+        return raw;
+    }, std::move(onAuthFailure));
+}
+
+void sendRequestJson(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, const int maxRetries, const std::function<void(const QJsonObject&, int, const QString&)> &callback, std::function<void()> onAuthFailure)
+{   // JSON封装
+    sendRequestGeneric(manager, request, method, data, maxRetries, callback, [](const QByteArray &raw, int, const QString&) {
+        return QJsonDocument::fromJson(raw).object();
+    }, std::move(onAuthFailure));
+}
+
+void sendRequestHtml(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, const int maxRetries, const std::function<void(const QString&, int, const QString&)> &callback, std::function<void()> onAuthFailure)
+{   // HTML封装
+    sendRequestGeneric(manager, request, method, data, maxRetries, callback, [](const QByteArray &raw, int, const QString&) {
+        return QString::fromUtf8(raw);
+    }, std::move(onAuthFailure));
 }

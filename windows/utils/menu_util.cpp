@@ -52,60 +52,121 @@ StatusSelector::StatusSelector(const QPushButton *parentButton, const int subjec
 
 void StatusSelector::showStatusSelector(const QPushButton *parentButton, const int subjectType, const int collectionType, const int subjectId, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, std::function<void(int)> callback)
 {   // 显示下拉菜单
-    const auto selector = new StatusSelector(parentButton, subjectType, collectionType, subjectId, bangumiAPI, dbManager, std::move(callback));
+    auto *selector = new StatusSelector(parentButton, subjectType, collectionType, subjectId, bangumiAPI, dbManager, std::move(callback));
     selector->setAttribute(Qt::WA_DeleteOnClose);
     selector->show();
 }
 
-void StatusSelector::updateStatus(int statusValue)
-{   // 状态更新
+void StatusSelector::updateStatus(const int statusValue)
+{   // 更新状态
     hide();
-    if (statusValue == 0) {
-        QDesktopServices::openUrl(QString("%1subject/%2").arg(getConfig("Bangumi/bangumi_base_url").toString()).arg(subjectId));
-        QDialog confirmDialog;
-        confirmDialog.setWindowFlags(confirmDialog.windowFlags() | Qt::WindowStaysOnTopHint);
-        confirmDialog.setWindowTitle("删除收藏");
-        confirmDialog.setFixedSize(300, 100);
-        QVBoxLayout dialogLayout(&confirmDialog);
-        QLabel label("请从浏览器中执行删除收藏操作");
-        dialogLayout.addWidget(&label);
-        QDialogButtonBox buttonBox;
-        buttonBox.addButton("确认删除", QDialogButtonBox::AcceptRole);
-        buttonBox.addButton("取消", QDialogButtonBox::RejectRole);
-        dialogLayout.addWidget(&buttonBox);
-        connect(&buttonBox, &QDialogButtonBox::accepted, &confirmDialog, &QDialog::accept);
-        connect(&buttonBox, &QDialogButtonBox::rejected, &confirmDialog, &QDialog::reject);
-        if (confirmDialog.exec() == QDialog::Accepted) dbManager->deleteCollectionBySubjectId(subjectId);
-        else {
-            mainWindow->showNormal();
-            mainWindow->raise();
-            mainWindow->activateWindow();
-        }
-        deleteLater();
-        return;
-    }
-    const QJsonObject collectionData{{"type", statusValue}};
-    bool success = false;
-    if (collectionType >= 1 && collectionType <= 5) success = bangumiAPI->updateCollection(subjectId, collectionData, 3) && (DatabaseManager::updateCollectionFields(subjectId, {{"type", statusValue}}, true), true);
-    else success = bangumiAPI->createOrUpdateCollection(subjectId, collectionData, 3) && (DatabaseManager::insertManyCollectionData(QJsonArray{bangumiAPI->getUserCollection(subjectId, 3)}), true);
-    qDebug() << subjectId << "状态更新" << (success ? "成功" : "失败");
-    if (success) {
-        callback(statusValue);
-        if (statusValue == 2) {
-            QVector<EpisodeData> episodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
-            QJsonArray apiEpisodes;
-            if (episodes.isEmpty()) apiEpisodes = bangumiAPI->getSubjectEpisodes(subjectId, 3);
-            if (!apiEpisodes.isEmpty()) {
-                DatabaseManager::insertManyEpisodes(subjectId, apiEpisodes);
-                episodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
-            }
-            QJsonArray episodeIds;
-            for (const auto &ep : episodes) episodeIds.append(ep.episode_id);
-            if (!episodeIds.isEmpty()) {
-                const QJsonObject apiRequestData{{"episode_id", episodeIds}, {"type", 2}};
-                if (bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData, 3)) DatabaseManager::updateAllEpisodesStatus(subjectId, 2);
-            }
-        }
+    if (statusValue == 0) deleteCollect();
+    else performUpdate(statusValue);
+}
+
+void StatusSelector::deleteCollect()
+{   // 删除收藏
+    QDesktopServices::openUrl(QString("%1subject/%2").arg(getConfig("Bangumi/bangumi_base_url").toString()).arg(subjectId));
+    QDialog confirmDialog;
+    confirmDialog.setWindowFlags(confirmDialog.windowFlags() | Qt::WindowStaysOnTopHint);
+    confirmDialog.setWindowTitle("删除收藏");
+    confirmDialog.setFixedSize(300, 100);
+    QVBoxLayout dialogLayout(&confirmDialog);
+    QLabel label("请从浏览器中执行删除收藏操作");
+    dialogLayout.addWidget(&label);
+    QDialogButtonBox buttonBox;
+    buttonBox.addButton("确认删除", QDialogButtonBox::AcceptRole);
+    buttonBox.addButton("取消", QDialogButtonBox::RejectRole);
+    dialogLayout.addWidget(&buttonBox);
+    connect(&buttonBox, &QDialogButtonBox::accepted, &confirmDialog, &QDialog::accept);
+    connect(&buttonBox, &QDialogButtonBox::rejected, &confirmDialog, &QDialog::reject);
+    if (confirmDialog.exec() == QDialog::Accepted) dbManager->deleteCollectionBySubjectId(subjectId);
+    else {
+        mainWindow->showNormal();
+        mainWindow->raise();
+        mainWindow->activateWindow();
     }
     deleteLater();
+}
+
+void StatusSelector::performUpdate(int statusValue) const
+{   // 更新/创建收藏
+    QPointer guard(this);
+    const QJsonObject collectionData{{"type", statusValue}};
+    if (collectionType >= 1 && collectionType <= 5) {
+        bangumiAPI->updateCollection(subjectId, collectionData, 3, [this, guard, statusValue](const bool success, const QString &error) {
+            if (!guard) return;
+            if (!success) {
+                qDebug() << subjectId << "状态更新失败:" << error;
+                const_cast<StatusSelector*>(this)->deleteLater();
+                return;
+            }
+            DatabaseManager::updateCollectionFields(subjectId, {{"type", statusValue}}, true);
+            onCollectionUpdateSuccess(statusValue);
+            }
+        );
+    } else {
+        bangumiAPI->createOrUpdateCollection(subjectId, collectionData, 3, [this, guard, statusValue](const bool success, const QString &error) {
+            if (!guard) return;
+            if (!success) {
+                qDebug() << subjectId << "状态更新失败:" << error;
+                const_cast<StatusSelector*>(this)->deleteLater();
+                return;
+            }
+            bangumiAPI->getUserCollection(subjectId, 3, [this, guard, statusValue](const QJsonObject &collection, const QString &err) {
+                if (!guard) return;
+                if (!err.isEmpty()) {
+                    qDebug() << "获取收藏详情失败:" << err;
+                    const_cast<StatusSelector*>(this)->deleteLater();
+                    return;
+                }
+                DatabaseManager::insertManyCollectionData(QJsonArray{collection});
+                onCollectionUpdateSuccess(statusValue);
+            });
+        });
+    }
+}
+
+void StatusSelector::onCollectionUpdateSuccess(const int statusValue) const
+{   // 收藏成功处理
+    if (callback) callback(statusValue);
+    if (statusValue == 2) updateEpisodesIfNeeded(statusValue);
+    else const_cast<StatusSelector*>(this)->deleteLater();
+}
+
+void StatusSelector::updateEpisodesIfNeeded(int statusValue) const
+{   // 根据需要标注全部已看(to 看过)
+    QPointer guard(this);
+    const auto episodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
+    if (episodes.isEmpty()) {
+        bangumiAPI->getSubjectEpisodes(subjectId, 3, [this, guard, statusValue](const QJsonArray &apiEpisodes, const QString &error) {
+            if (!guard) return;
+            if (!error.isEmpty()) {
+                qDebug() << "获取章节失败:" << error;
+                const_cast<StatusSelector*>(this)->deleteLater();
+                return;
+            }
+            DatabaseManager::insertManyEpisodes(subjectId, apiEpisodes);
+            const auto newEpisodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
+            updateEpisodesBatch(newEpisodes, statusValue);
+        });
+    } else updateEpisodesBatch(episodes, statusValue);
+}
+
+void StatusSelector::updateEpisodesBatch(const QVector<EpisodeData> &episodes, int statusValue) const
+{   // 全部已看
+    QPointer guard(this);
+    QJsonArray episodeIds;
+    for (const auto &ep : episodes) episodeIds.append(ep.episode_id);
+    if (episodeIds.isEmpty()) {
+        const_cast<StatusSelector*>(this)->deleteLater();
+        return;
+    }
+    const QJsonObject apiRequestData{{"episode_id", episodeIds}, {"type", statusValue}};
+    bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData, 3, [this, guard](const bool success, const QString &error) {
+        if (!guard) return;
+        if (success) DatabaseManager::updateAllEpisodesStatus(subjectId, 2);
+        else qDebug() << "更新章节状态失败:" << error;
+        const_cast<StatusSelector*>(this)->deleteLater();
+    });
 }

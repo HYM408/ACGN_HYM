@@ -83,17 +83,16 @@ void SearchPage::doSearch(const QString &keyword, const QString &tag)
     const QMap<int, int> typeMapping{{1, 1}, {2, 4}};
     const int searchType = typeMapping.value(ui.comboBox->currentIndex(), 2);
     showSearchStatus("搜索中...");
-    QJsonArray results = bangumiApi->searchSubjects(keyword, tag, searchType, 3);
-    clearSearchResults();
-    if (!isVisible()) return;
-    auto *layout = qobject_cast<QVBoxLayout*>(ui.scrollAreaWidgetContents->layout());
-    const qsizetype resultCount = results.size();
-    for (int i = 0; i < resultCount; ++i) {
-        QVariantMap result = results[i].toObject().toVariantMap();
-        layout->addWidget(createResultFrame(result));
-    }
-    if (resultCount == 0) showSearchStatus("未找到结果");
-    layout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
+    bangumiApi->searchSubjects(keyword, tag, searchType, 3, [this](const QJsonArray &results, const QString &error) {
+        if (!error.isEmpty()) return showSearchStatus("搜索失败: " + error);
+        clearSearchResults();
+        if (!isVisible()) return;
+        auto *layout = qobject_cast<QVBoxLayout*>(ui.scrollAreaWidgetContents->layout());
+        const qsizetype resultCount = results.size();
+        for (int i = 0; i < resultCount; ++i) layout->addWidget(createResultFrame(results[i].toObject().toVariantMap()));
+        if (resultCount == 0) showSearchStatus("未找到结果");
+        else layout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
+    });
 }
 
 QFrame *SearchPage::createResultFrame(const QVariantMap &result)

@@ -1,6 +1,8 @@
 #include "download_page.h"
 #include <QLabel>
+#include <QPointer>
 #include <QJsonArray>
+#include <QJsonObject>
 #include <QFileDialog>
 #include "../config.h"
 #include "chunk_download.h"
@@ -85,51 +87,69 @@ void DownloadPage::displayItems(const QJsonArray &items, const QString &emptyMes
 
 void DownloadPage::loadRecentFiles()
 {   // 显示最近添加
-    QJsonObject result = pikpakApi->getRecentFiles();
-    QJsonArray events = result["events"].toArray();
-    QJsonArray items;
-    for (const auto &val : events) {
-        QJsonObject event = val.toObject();
-        QJsonObject ref = event["reference_resource"].toObject();
-        QJsonObject item;
-        item["id"] = event["file_id"].toString();
-        item["name"] = event["file_name"].toString();
-        item["kind"] = ref["kind"].toString();
-        item["size"] = ref["size"].toString();
-        items.append(item);
-    }
-    displayItems(items, "暂无最近添加的文件");
+    QPointer guard(this);
+    pikpakApi->getRecentFiles([guard](const QJsonObject &result, const int statusCode, const QString &error) {
+        if (!guard) return;
+        if (statusCode == 200 && error.isEmpty()) {
+            QJsonArray events = result["events"].toArray();
+            QJsonArray items;
+            for (const auto &val : events) {
+                QJsonObject event = val.toObject();
+                QJsonObject ref = event["reference_resource"].toObject();
+                QJsonObject item;
+                item["id"] = event["file_id"].toString();
+                item["name"] = event["file_name"].toString();
+                item["kind"] = ref["kind"].toString();
+                item["size"] = ref["size"].toString();
+                items.append(item);
+            }
+            guard->displayItems(items, "暂无最近添加的文件");
+        } else guard->displayItems(QJsonArray(), "获取最近文件失败：" + error);
+    });
 }
 
 void DownloadPage::fetchAndDownload(const QString &fileId, const QString &fileName)
 {   // 获取链接并下载
-    updateDownloadStatus(taskWidgets.value(fileName, nullptr), "获取链接");
-    QJsonObject fileInfo = pikpakApi->getDownloadUrl(fileId);
-    const auto medias = fileInfo["medias"].toArray();
-    QString downloadUrl;
-    if (!medias.isEmpty()) {
-        auto link = medias.first().toObject()["link"].toObject();
-        auto mirrors = link["mirrors"].toArray();
-        if (!mirrors.isEmpty()) downloadUrl = mirrors[mirrors.size() >= 2 ? 1 : 0].toString();
-        else downloadUrl = link["url"].toString();
-    }
-    if (downloadUrl.isEmpty()) downloadUrl = fileInfo["web_content_link"].toString();
-    const QString savePath = downloadPath + "/" + fileName;
-    auto *task = new ChunkDownload(downloadUrl, savePath, 4, this);
-    downloadTasks[fileName] = task;
-    connect(task, &ChunkDownload::progressChanged, this, [this, fileName](const int percent, const qint64 downloaded, const qint64 total) {
-        if (const QFrame *widget = taskWidgets.value(fileName, nullptr)) updateDownloadProgress(widget, percent, downloaded, total);});
-    connect(task, &ChunkDownload::statusChanged, this, [this, fileName](const QString &status) {
-        if (QFrame *widget = taskWidgets.value(fileName, nullptr)) updateDownloadStatus(widget, status);});
-    task->start();
+    QFrame *widget = taskWidgets.value(fileName, nullptr);
+    updateDownloadStatus(widget, "获取链接");
+    const QPointer guard(this);
+    pikpakApi->getDownloadUrl(fileId, [=](const QJsonObject &fileInfo, const int statusCode, const QString &error) {
+        if (!guard) return;
+        if (statusCode != 200 || !error.isEmpty()) {
+            updateDownloadStatus(widget, "获取链接失败");
+            return;
+        }
+        QString downloadUrl;
+        const auto medias = fileInfo["medias"].toArray();
+        if (!medias.isEmpty()) {
+            auto link = medias.first().toObject()["link"].toObject();
+            auto mirrors = link["mirrors"].toArray();
+            if (!mirrors.isEmpty()) downloadUrl = mirrors[mirrors.size() >= 2 ? 1 : 0].toString();
+            else downloadUrl = link["url"].toString();
+        }
+        if (downloadUrl.isEmpty()) downloadUrl = fileInfo["web_content_link"].toString();
+        const QString savePath = downloadPath + "/" + fileName;
+        auto *task = new ChunkDownload(downloadUrl, savePath, 4, this);
+        downloadTasks[fileName] = task;
+        connect(task, &ChunkDownload::progressChanged, this, [this, fileName](const int percent, const qint64 downloaded, const qint64 total) {
+            if (const QFrame *w = taskWidgets.value(fileName, nullptr)) updateDownloadProgress(w, percent, downloaded, total);});
+        connect(task, &ChunkDownload::statusChanged, this, [this, fileName](const QString &status) {
+            if (QFrame *w = taskWidgets.value(fileName, nullptr)) updateDownloadStatus(w, status);});
+        task->start();
+    });
 }
 
 void DownloadPage::loadFolderContent(const QString &folderId)
 {   // 显示文件夹内容
-    QJsonObject result = pikpakApi->getFileList(folderId, 100, "");
-    const QJsonArray files = result["files"].toArray();
-    displayItems(files, "文件夹为空");
-    currentFolderId = folderId;
+    QPointer guard(this);
+    pikpakApi->getFileList(folderId, 100, "", [guard, folderId](const QJsonObject &result, const int statusCode, const QString &error) {
+        if (!guard) return;
+        if (statusCode == 200 && error.isEmpty()) {
+            const QJsonArray files = result["files"].toArray();
+            guard->displayItems(files, "文件夹为空");
+            guard->currentFolderId = folderId;
+        } else guard->displayItems(QJsonArray(), "获取文件夹内容失败：" + (error.isEmpty() ? QString::number(statusCode) : error));
+    });
 }
 
 bool DownloadPage::eventFilter(QObject *obj, QEvent *event)

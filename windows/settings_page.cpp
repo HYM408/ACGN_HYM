@@ -1,8 +1,8 @@
 #include "settings_page.h"
+#include <QJsonArray>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDesktopServices>
-#include <QtConcurrent/QtConcurrent>
 #include "config.h"
 #include "sql/sql.h"
 #include "api/pikpak_api.h"
@@ -161,16 +161,18 @@ bool SettingsPage::ensureBangumiCredentials()
 void SettingsPage::onCollectionButtonClicked() const
 {   // 获取Bangumi收藏
     ui.collection_Button->setEnabled(false);
-    ui.collection_Button->setText("进度：0/--");
-    const QJsonArray collections = bangumiAPI->getUserCollections(true, 3, [this](const int offset, const int total) {
-        ui.collection_Button->setText(QString("进度：%1/%2").arg(offset).arg(total));
+    ui.collection_Button->setText("进度：0");
+    bangumiAPI->getUserCollections(true, 3, [this](const int current, const int total) {
+        ui.collection_Button->setText(QString("进度：%1/%2").arg(current).arg(total));
+    }, [this](const QJsonArray &collections, const QString &error) {
+        if (!error.isEmpty()) ui.collection_Button->setText("获取收藏失败: " + error);
+        else if (!collections.isEmpty()) {
+            dbManager->clearCollectionTable();
+            if (DatabaseManager::insertManyCollectionData(collections)) ui.collection_Button->setText(QString("获取完成，共%1条").arg(collections.size()));
+            else ui.collection_Button->setText("保存收藏到数据库失败");
+        } else ui.collection_Button->setText("获取收藏失败");
+        ui.collection_Button->setEnabled(true);
     });
-    if (!collections.isEmpty()) {
-        dbManager->clearCollectionTable();
-        if (DatabaseManager::insertManyCollectionData(collections)) ui.collection_Button->setText(QString("获取完成，共%1条").arg(collections.size()));
-        else ui.collection_Button->setText("保存收藏到数据库失败");
-    } else ui.collection_Button->setText("获取收藏失败");
-    ui.collection_Button->setEnabled(true);
 }
 
 void SettingsPage::downloadPublicDate(const bool useMirror)
@@ -182,38 +184,39 @@ void SettingsPage::downloadPublicDate(const bool useMirror)
     if (selectedTypes.isEmpty()) return ui.pushButton_20->setText("请至少选择一种要导入的类型");
     if (m_currentDownload) clearDownloadTasks(true);
     ui.pushButton_20->setText("获取下载链接");
-    QNetworkAccessManager manager;
-    const QNetworkRequest request(useMirror ? "https://hk.gh-proxy.org/" + BANGUMI_ARCHIVE_URL : BANGUMI_ARCHIVE_URL);
-    QJsonObject json = sendRequestJson(manager, request, "GET", QByteArray(), 2, nullptr, nullptr);
-    if (json.isEmpty()) return ui.pushButton_20->setText("错误：无法获取下载链接");
-    QStringList typeStrs;
-    for (const int type : selectedTypes) typeStrs << QString::number(type);
-    typeStrs.sort();
-    const QString key = "public_date_" + typeStrs.join("");
-    const QString downloadUrl = json[key].toString();
-    const QString targetDir = QDir::currentPath() + "/data";
-    const QString targetPath = targetDir + "/public_date.db";
-    const QString tempPath   = targetDir + "/public_date.db.tmp";
-    const QDir dir(targetDir);
-    if (!dir.exists()) dir.mkpath(".");
-    const QString finalDownloadUrl = useMirror ? "https://hk.gh-proxy.org/" + downloadUrl : downloadUrl;
-    m_currentDownload = new ChunkDownload(finalDownloadUrl, tempPath, 4, this);
-    connect(m_currentDownload, &ChunkDownload::progressChanged, this, [this](const int percent, qint64, qint64) {ui.pushButton_20->setText(QString("下载中 %1%").arg(percent));});
-    connect(m_currentDownload, &ChunkDownload::statusChanged, this, [this, targetPath, tempPath](const QString &status) {
-        if (status == "完成") {
-            dbManager->closePublicDatabase();
-            QFile::remove(targetPath);
-            QFile tempFile(tempPath);
-            tempFile.rename(targetPath);
-            dbManager->openDatabase();
-            ui.pushButton_20->setText("完成");
-        } else if (status == "错误") {
-            ui.pushButton_20->setText("失败");
-            QFile::remove(tempPath);
-            clearDownloadTasks(false);
-        }
-    });
-    m_currentDownload->start();
+    const QString url = useMirror ? "https://hk.gh-proxy.org/" + BANGUMI_ARCHIVE_URL : BANGUMI_ARCHIVE_URL;
+    const QNetworkRequest request(url);
+    sendRequestJson(m_networkManager, request, "GET", QByteArray(), 2, [this, useMirror, selectedTypes](const QJsonObject &json, int, const QString &error) {
+        if (!error.isEmpty() || json.isEmpty()) return ui.pushButton_20->setText("错误：无法获取下载链接");
+        QStringList typeStrs;
+        for (const int type : selectedTypes) typeStrs << QString::number(type);
+        typeStrs.sort();
+        const QString key = "public_date_" + typeStrs.join("");
+        const QString downloadUrl = json[key].toString();
+        const QString targetDir = QDir::currentPath() + "/data";
+        const QString targetPath = targetDir + "/public_date.db";
+        const QString tempPath   = targetDir + "/public_date.db.tmp";
+        const QDir dir(targetDir);
+        if (!dir.exists()) dir.mkpath(".");
+        const QString finalDownloadUrl = useMirror ? "https://hk.gh-proxy.org/" + downloadUrl : downloadUrl;
+        m_currentDownload = new ChunkDownload(finalDownloadUrl, tempPath, 4, this);
+        connect(m_currentDownload, &ChunkDownload::progressChanged, this, [this](const int percent, qint64, qint64) {ui.pushButton_20->setText(QString("下载中 %1%").arg(percent));});
+        connect(m_currentDownload, &ChunkDownload::statusChanged, this, [this, targetPath, tempPath](const QString &status) {
+            if (status == "完成") {
+                dbManager->closePublicDatabase();
+                QFile::remove(targetPath);
+                QFile tempFile(tempPath);
+                tempFile.rename(targetPath);
+                dbManager->openDatabase();
+                ui.pushButton_20->setText("完成");
+            } else if (status == "错误") {
+                ui.pushButton_20->setText("失败");
+                QFile::remove(tempPath);
+                clearDownloadTasks(false);
+            }
+        });
+        m_currentDownload->start();
+    }, nullptr);
 }
 
 void SettingsPage::onPikPakLoginButtonClicked()
@@ -221,11 +224,13 @@ void SettingsPage::onPikPakLoginButtonClicked()
     if (!ensurePikPakCredentials()) return;
     ui.login_Button_2->setText("登录中...");
     ui.login_Button_2->setEnabled(false);
-    if (pikpakApi->loginPikPak()) {
-        updateTokenDisplay();
-        ui.login_Button_2->setText("PikPak 登录成功！");
-    } else ui.login_Button_2->setText("PikPak 登录失败");
-    ui.login_Button_2->setEnabled(true);
+    pikpakApi->loginPikPak([this](const bool success, const QString &error) {
+        if (success) {
+            updateTokenDisplay();
+            ui.login_Button_2->setText("PikPak 登录成功！");
+        } else ui.login_Button_2->setText("PikPak 登录失败:" + error);
+        ui.login_Button_2->setEnabled(true);
+    });
 }
 
 bool SettingsPage::ensurePikPakCredentials()

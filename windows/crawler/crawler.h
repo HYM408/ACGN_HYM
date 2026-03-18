@@ -30,21 +30,22 @@ struct BTResult {
 class Crawler
 {
 public:
-    static QString sendRequest(const QString &url, const AbortFlag& abortFlag);
     static QJsonObject loadSiteConfig(const QString &site_id);
     static QStringList getAllSiteIds();
     static QJsonObject loadBTConfig(const QString &site_id);
     static QStringList getAllBTSiteIds();
     static QJsonObject loadAPIConfig(const QString &site_id);
     static QStringList getAllAPISiteIds();
-    static QList<SearchResult> searchSite(const QString &site_id, const QString &keyword, const AbortFlag& abortFlag);
+    static void sendRequest(const QString &url, const std::function<void(const QString &html, const QString &error)>& callback);
+    using SearchSiteCallback = std::function<void(const QList<SearchResult>&, const QString& error)>;
+    static void searchSite(const QString &site_id, const QString &keyword, const SearchSiteCallback& callback);
     static QList<SearchResult> extractSearchResults(const QString &site_id, const QString &html);
-    static QList<RouteInfo> getRoutes(const QString &page_url, const QString &site_id, const AbortFlag& abortFlag);
-    static QString extractVideoUrl(const QString &url, const AbortFlag& abortFlag);
-    static void processVideoUrl(const QString &site_id, const QString &url, const std::function<void(const QString&)> &callback, const AbortFlag& abortFlag);
+    static void getRoutes(const QString &page_url, const QString &site_id, const std::function<void(const QList<RouteInfo>&, const QString& error)>& callback);
+    static void extractVideoUrl(const QString &url, const std::function<void(const QString& videoUrl, const QString& error)>& callback);
+    static void processVideoUrl(const QString &site_id, const QString &url, const std::function<void(const QString&)> &callback);
     static void videoStreamDetector(const QString &site_id, const QString &url, const std::function<void(const QString&)> &onVideoUrl);
-    static QList<BTResult> searchBT(const QString &site_id, const QString &keyword, const AbortFlag& abortFlag);
-    static QList<SearchResult> searchAPI(const QString &site_id, const QString &keyword, const AbortFlag& abortFlag);
+    static void searchBT(const QString &site_id, const QString &keyword, const std::function<void(const QList<BTResult>&, const QString& error)>& callback);
+    static void searchAPI(const QString &site_id, const QString &keyword, const SearchSiteCallback& callback);
 };
 
 #endif // CRAWLER_H

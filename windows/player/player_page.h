@@ -21,7 +21,6 @@ public:
     void setupControlOverlay();
     void applyTheme() const;
     void fetchRoutes(const CollectionData& collectionData, const EpisodeData& episodeData);
-    void cancelAllSearches() const;
 
 signals:
     void backButtonClicked();
@@ -63,7 +62,6 @@ private:
     QLayout *original_layout = nullptr;
     bool fullscreen_mode = false;
     EpisodeData m_episodeData;
-    std::shared_ptr<std::atomic<bool>> m_abortFlag;
     QString m_keyword;
 };
 

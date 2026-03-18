@@ -2,6 +2,7 @@
 #include <QImage>
 #include <QUrlQuery>
 #include <QNetworkCookieJar>
+#include <QNetworkAccessManager>
 #include "charset_data.h"
 #include <onnxruntime_cxx_api.h>
 
@@ -48,67 +49,73 @@ static QString recognizeCaptcha(const QByteArray &imageData)
 {   // 验证码识别
     QImage img;
     if (!img.loadFromData(imageData) || img.isNull()) return {};
-#ifdef _WIN32
-    static const std::wstring model_path = L"common_old.onnx";
-#else
-    static const std::string model_path = "common_old.onnx";
-#endif
     static Ort::Env env(ORT_LOGGING_LEVEL_ERROR, "captcha-ocr");
     static Ort::SessionOptions session_options;
-    static Ort::Session session(env, model_path.c_str(), session_options);
+    static Ort::Session session(env, ORT_TSTR("common_old.onnx"), session_options);
     static const int targetHeight = [] {
-        const auto inputInfo = session.GetInputTypeInfo(0);
-        const std::vector<int64_t> shape = inputInfo.GetTensorTypeAndShapeInfo().GetShape();
+        const auto shape = session.GetInputTypeInfo(0).GetTensorTypeAndShapeInfo().GetShape();
         return static_cast<int>(shape[2]);
     }();
-    const QStringList &charset = CHARSET;
     int actualWidth = 0;
     std::vector<float> inputValues = ImagePreprocess(img, targetHeight, actualWidth);
     const std::vector<int64_t> inputShape = {1, 1, targetHeight, actualWidth};
     const auto memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
     const Ort::Value inputTensor = Ort::Value::CreateTensor<float>(memoryInfo, inputValues.data(), inputValues.size(), inputShape.data(), inputShape.size());
     const Ort::AllocatorWithDefaultOptions allocator;
-    const Ort::AllocatedStringPtr inputName = session.GetInputNameAllocated(0, allocator);
-    const Ort::AllocatedStringPtr outputName = session.GetOutputNameAllocated(0, allocator);
-    const char *inputNames[] = {inputName.get()};
-    const char *outputNames[] = {outputName.get()};
-    const Ort::RunOptions runOptions;
-    std::vector<Ort::Value> outputTensors = session.Run(runOptions, inputNames, &inputTensor, 1, outputNames, 1);
+    const auto inputNamePtr = session.GetInputNameAllocated(0, allocator);
+    const auto outputNamePtr = session.GetOutputNameAllocated(0, allocator);
+    const char* inputNames[] = {inputNamePtr.get()};
+    const char* outputNames[] = {outputNamePtr.get()};
+    auto outputTensors = session.Run(Ort::RunOptions{}, inputNames, &inputTensor, 1, outputNames, 1);
     const float *outputData = outputTensors[0].GetTensorMutableData<float>();
-    const std::vector<int64_t> actualShape = outputTensors[0].GetTensorTypeAndShapeInfo().GetShape();
+    const auto actualShape = outputTensors[0].GetTensorTypeAndShapeInfo().GetShape();
     if (actualShape.size() != 3 || actualShape[1] != 1) return {};
     const int seqLen = static_cast<int>(actualShape[0]);
     const int numClasses = static_cast<int>(actualShape[2]);
+    const QStringList &charset = CHARSET;
     if (charset.size() + 1 != numClasses) return {};
     return decodeCTC(outputData, seqLen, numClasses, charset);
 }
 
-QString performCaptcha(const QString &baseUrl, const QString &searchUrl,const QString &keyword, const AbortFlag &abortFlag)
+void performCaptchaAsync(const QString &baseUrl, const QString &searchUrl, const QString &keyword, const std::function<void(const QString &html, const QString &error)> &callback)
 {   // 验证码流程
-    QNetworkAccessManager manager;
-    auto *cookieJar = new QNetworkCookieJar(&manager);
-    manager.setCookieJar(cookieJar);
+    auto *manager = new QNetworkAccessManager();
+    manager->setCookieJar(new QNetworkCookieJar(manager));
     QNetworkRequest captchaRequest(QUrl(baseUrl + "/verify/index.html"));
     captchaRequest.setRawHeader("User-Agent", userAgent);
-    const QByteArray imageData = sendRequestUtil(manager, captchaRequest, "GET", QByteArray(), 2, nullptr, nullptr, abortFlag);
-    if (imageData.isEmpty()) return {};
-    const QString captchaText = recognizeCaptcha(imageData);
-    if (captchaText.isEmpty()) return {};
-    const QUrl checkUrl(baseUrl + "/index.php/ajax/verify_check");
-    QUrlQuery params;
-    params.addQueryItem("type", "search");
-    params.addQueryItem("verify", captchaText);
-    QNetworkRequest checkRequest(checkUrl);
-    checkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    checkRequest.setRawHeader("User-Agent", userAgent);
-    const QByteArray postData = params.toString(QUrl::FullyEncoded).toUtf8();
-    const QByteArray checkResponse = sendRequestUtil(manager, checkRequest, "POST", postData, 1, nullptr, nullptr, abortFlag);
-    if (checkResponse.isEmpty()) return {};
-    QString searchPath = baseUrl + searchUrl;
-    searchPath.replace("{keyword}", keyword);
-    QNetworkRequest searchRequest(searchPath);
-    searchRequest.setRawHeader("User-Agent", userAgent);
-    QString html = sendRequestHtml(manager, searchRequest, "GET", QByteArray(), 1, nullptr, nullptr, abortFlag);
-    if (html.isEmpty()) return {};
-    return html;
+    sendRequestUtil(*manager, captchaRequest, "GET", {}, 1, [=](const QByteArray &imageData, int, const QString &err1) {
+        if (!err1.isEmpty() || imageData.isEmpty()) {
+            callback({}, "获取验证码失败:" + err1);
+            manager->deleteLater();
+            return;
+        }
+        const QString captchaText = recognizeCaptcha(imageData);
+        if (captchaText.isEmpty()) {
+            callback({}, "验证码识别失败");
+            manager->deleteLater();
+            return;
+        }
+        QUrlQuery params;
+        params.addQueryItem("type", "search");
+        params.addQueryItem("verify", captchaText);
+        QNetworkRequest checkRequest(baseUrl + "/index.php/ajax/verify_check");
+        checkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+        checkRequest.setRawHeader("User-Agent", userAgent);
+        sendRequestUtil(*manager, checkRequest, "POST", params.toString().toUtf8(), 1, [=](const QByteArray &, int, const QString &err2) {
+            if (!err2.isEmpty()) {
+                callback({}, "验证码提交失败: " + err2);
+                manager->deleteLater();
+                return;
+            }
+            QString fullSearchUrl = baseUrl + searchUrl;
+            fullSearchUrl.replace("{keyword}", keyword);
+            QNetworkRequest searchRequest(fullSearchUrl);
+            searchRequest.setRawHeader("User-Agent", userAgent);
+            sendRequestHtml(*manager, searchRequest, "GET", {}, 1, [=](const QString &html, int, const QString &err3) {
+                if (!err3.isEmpty()) callback({}, "搜索失败: " + err3);
+                else callback(html, {});
+                manager->deleteLater();
+            }, nullptr);
+        }, nullptr);
+    }, nullptr);
 }

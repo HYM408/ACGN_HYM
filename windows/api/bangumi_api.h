@@ -8,19 +8,26 @@ class BangumiAPI : public QObject {
 
 public:
     explicit BangumiAPI(QObject *parent = nullptr);
-    QJsonArray getUserCollections(bool getAll, int maxRetries, const std::function<void(int offset, int total)>& progressCallback);
-    QJsonObject getUserCollection(int subjectId, int maxRetries);
-    QJsonObject getSubjectInfo(int subjectId, int maxRetries);
-    QJsonArray searchSubjects(const QString &keyword, const QString &tag, int subjectType, int maxRetries);
-    QJsonArray getSubjectEpisodes(int subjectId, int maxRetries);
-    bool createOrUpdateCollection(int subjectId, const QJsonObject &collectionData, int maxRetries);
-    bool updateCollection(int subjectId, const QJsonObject &collectionData, int maxRetries);
-    bool updateSubjectEpisodes(int subjectId, const QJsonObject &episodesData, int maxRetries);
+    using CollectionsCallback = std::function<void(const QJsonArray&, const QString &error)>;
+    using CollectionCallback = std::function<void(const QJsonObject&, const QString &error)>;
+    using SubjectCallback = std::function<void(const QJsonObject&, const QString &error)>;
+    using EpisodesCallback = std::function<void(const QJsonArray&, const QString &error)>;
+    using BoolCallback = std::function<void(bool success, const QString &error)>;
+    using ProgressCallback = std::function<void(int current, int total)>;
+    void getUserCollections(bool getAll, int maxRetries, const ProgressCallback &progressCallback, const CollectionsCallback &completionCallback);
+    void getUserCollection(int subjectId, int maxRetries, const CollectionCallback &callback);
+    void getSubjectInfo(int subjectId, int maxRetries, const SubjectCallback &callback);
+    void searchSubjects(const QString &keyword, const QString &tag, int subjectType, int maxRetries, const CollectionsCallback &callback);
+    void getSubjectEpisodes(int subjectId, int maxRetries, const EpisodesCallback& callback);
+    void createOrUpdateCollection(int subjectId, const QJsonObject &collectionData, int maxRetries, const BoolCallback &callback);
+    void updateCollection(int subjectId, const QJsonObject &collectionData, int maxRetries, const BoolCallback &callback);
+    void updateSubjectEpisodes(int subjectId, const QJsonObject &episodesData, int maxRetries, const BoolCallback &callback);
 
 private:
     void refreshAndReload();
     [[nodiscard]] QNetworkRequest createRequest(const QString &url) const;
-    QJsonObject sendRequest(QNetworkAccessManager &manager, QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, int *statusCode);
+    void fetchCollectionsPage(int offset, QJsonArray allItems, bool getAll, int maxRetries, const ProgressCallback &progress, const CollectionsCallback &completion);
+    QNetworkAccessManager manager;
     QString userId;
     QString accessToken;
     QString refreshToken;

@@ -3,6 +3,6 @@
 
 #include "../network_util.h"
 
-QString performCaptcha(const QString &baseUrl, const QString &searchUrl, const QString &keyword, const AbortFlag &abortFlag);
+void performCaptchaAsync(const QString &baseUrl, const QString &searchUrl, const QString &keyword, const std::function<void(const QString &html, const QString &error)>& callback);
 
 #endif // CAPTCHA_UTIL_H

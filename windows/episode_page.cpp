@@ -185,24 +185,30 @@ void EpisodeOverlay::loadEpisodesData()
         updateEpisodeView();
         return;
     }
-    const QPointer guard(this);
-    const QJsonArray apiEpisodes = bangumiAPI->getSubjectEpisodes(subjectId, 3);
-    if (!apiEpisodes.isEmpty()) DatabaseManager::insertManyEpisodes(subjectId, apiEpisodes);
-    if (!guard) return;
-    if (!apiEpisodes.isEmpty()) {
+    QPointer guard(this);
+    bangumiAPI->getSubjectEpisodes(subjectId, 3, [this, subjectId, guard](const QJsonArray &apiEpisodes, const QString &error) {
+        if (!guard) return;
+        if (!error.isEmpty() || apiEpisodes.isEmpty()) {
+            episodeListView->hide();
+            if (!noEpisodesLabel) {
+                noEpisodesLabel = new QLabel("暂无剧集信息", episodeContainer);
+                noEpisodesLabel->setAlignment(Qt::AlignCenter);
+                noEpisodesLabel->setStyleSheet("color: #666");
+                ui.gridLayout_3->addWidget(noEpisodesLabel, 0, 0);
+            }
+            episodeContainer->setFixedHeight(MIN_CONTAINER_HEIGHT);
+            resizeEvent(nullptr);
+            return;
+        }
+        if (noEpisodesLabel) {
+            delete noEpisodesLabel;
+            noEpisodesLabel = nullptr;
+        }
+        episodeListView->show();
+        DatabaseManager::insertManyEpisodes(subjectId, apiEpisodes);
         episodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
         updateEpisodeView();
-    } else {
-        episodeListView->hide();
-        if (!noEpisodesLabel) {
-            noEpisodesLabel = new QLabel("暂无剧集信息", episodeContainer);
-            noEpisodesLabel->setAlignment(Qt::AlignCenter);
-            noEpisodesLabel->setStyleSheet("color: #666");
-            ui.gridLayout_3->addWidget(noEpisodesLabel, 0, 0);
-        }
-        episodeContainer->setFixedHeight(MIN_CONTAINER_HEIGHT);
-        resizeEvent(nullptr);
-    }
+    });
 }
 
 void EpisodeOverlay::loadVolEpData()
@@ -272,48 +278,50 @@ void EpisodeOverlay::onEpisodeItemClicked(const EpisodeData &episodeData)
 void EpisodeOverlay::onMarkAllWatchedClicked()
 {   // 标记全部已看
     if (episodes.isEmpty()) return;
-    ui.pushButton_15->setText(tr("标记中..."));
+    ui.pushButton_15->setText("标记中...");
     ui.pushButton_15->setEnabled(false);
     const int subjectId = collectionData.subject_id;
     QJsonArray episodeIds;
     for (const auto &ep : episodes) episodeIds.append(ep.episode_id);
     const QJsonObject apiRequestData{{"episode_id", episodeIds}, {"type", 2}};
-    const QPointer guard(this);
-    const bool success = bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData, 3);
-    DatabaseManager::updateAllEpisodesStatus(subjectId, 2);
-    DatabaseManager::updateCollectionFields(subjectId, {{"ep_status", episodes.size()}}, true);
-    if (!guard) return;
-    if (!success) {
-        ui.pushButton_15->setText(tr("失败"));
+    QPointer guard(this);
+    bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData, 3, [this, subjectId, guard](const bool success, const QString &error) {
+        DatabaseManager::updateAllEpisodesStatus(subjectId, 2);
+        DatabaseManager::updateCollectionFields(subjectId, {{"ep_status", episodes.size()}}, true);
+        if (!guard) return;
+        if (!success || !error.isEmpty()) {
+            ui.pushButton_15->setText("失败");
+            ui.pushButton_15->setEnabled(true);
+            return;
+        }
+        emit collectionDataChanged();
+        loadEpisodesData();
+        ui.pushButton_15->setText("全部已看");
         ui.pushButton_15->setEnabled(true);
-        return;
-    }
-    emit collectionDataChanged();
-    loadEpisodesData();
-    ui.pushButton_15->setText("全部已看");
-    ui.pushButton_15->setEnabled(true);
+    });
 }
 
 void EpisodeOverlay::onUpdateClicked()
 {   // 更新进度
-    ui.pushButton_15->setText(tr("更新中..."));
+    ui.pushButton_15->setText("更新中...");
     ui.pushButton_15->setEnabled(false);
     const int subjectId = collectionData.subject_id;
     int newEpStatus  = epEdit->text().toInt();
     int newVolStatus = volEdit->text().toInt();
     const QJsonObject apiRequestData{{"vol_status", newVolStatus}, {"ep_status", newEpStatus}};
-    const QPointer guard(this);
-    const bool success = bangumiAPI->updateCollection(subjectId, apiRequestData, 3);
-    DatabaseManager::updateCollectionFields(subjectId, {{"vol_status", newVolStatus}, {"ep_status", newEpStatus}}, true);
-    if (!guard) return;
-    if (!success) {
-        ui.pushButton_15->setText("失败");
+    QPointer guard(this);
+    bangumiAPI->updateCollection(subjectId, apiRequestData, 3, [this, subjectId, newVolStatus, newEpStatus, guard](const bool success, const QString &error) {
+        DatabaseManager::updateCollectionFields(subjectId, {{"vol_status", newVolStatus}, {"ep_status", newEpStatus}}, true);
+        if (!guard) return;
+        if (!success || !error.isEmpty()) {
+            ui.pushButton_15->setText("失败");
+            ui.pushButton_15->setEnabled(true);
+            return;
+        }
+        emit collectionDataChanged();
+        ui.pushButton_15->setText("更新");
         ui.pushButton_15->setEnabled(true);
-        return;
-    }
-    emit collectionDataChanged();
-    ui.pushButton_15->setText("更新");
-    ui.pushButton_15->setEnabled(true);
+    });
 }
 
 void EpisodeOverlay::closeOverlay()

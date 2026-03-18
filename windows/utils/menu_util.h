@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QPointer>
+#include "../sql/data_structs.h"
 
 class BangumiAPI;
 class QVBoxLayout;
@@ -15,6 +16,11 @@ class StatusSelector : public QWidget
 public:
     explicit StatusSelector(const QPushButton *parentButton, int subjectType, int collectionType, int subjectId, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, std::function<void(int)> callback);
     static void showStatusSelector(const QPushButton *parentButton, int subjectType, int collectionType, int subjectId, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, std::function<void(int)> callback);
+    void deleteCollect();
+    void updateEpisodesBatch(const QVector<EpisodeData>& episodes, int statusValue) const;
+    void updateEpisodesIfNeeded(int statusValue) const;
+    void onCollectionUpdateSuccess(int statusValue) const;
+    void performUpdate(int statusValue) const;
 
 private:
     void updateStatus(int statusValue);

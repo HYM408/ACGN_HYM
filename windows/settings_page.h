@@ -2,6 +2,7 @@
 #define SETTINGS_PAGE_H
 
 #include "settings_ui.h"
+#include <QNetworkAccessManager>
 
 class PikPakApi;
 class BangumiAPI;
@@ -46,6 +47,7 @@ private:
     PikPakApi *pikpakApi = nullptr;
     ChunkDownload *m_currentDownload = nullptr;
     static const QString BANGUMI_ARCHIVE_URL;
+    QNetworkAccessManager m_networkManager;
 };
 
 #endif // SETTINGS_PAGE_H

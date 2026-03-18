@@ -23,7 +23,7 @@ PlayerPage::PlayerPage(QWidget *parent): QWidget(parent)
 }
 
 void PlayerPage::setManagers(CacheImageUtil *cacheImage, PikPakApi *pikpakapi)
-{   // 初始化实例
+{
     cacheImageUtil = cacheImage;
     pikpakApi = pikpakapi;
 }
@@ -71,28 +71,38 @@ void PlayerPage::setSiteLoadingState(const QString &siteId) const
 
 void PlayerPage::startSiteSearch(const QString &siteId)
 {   // 搜索
+    if (m_keyword.isEmpty()) return;
     setSiteLoadingState(siteId);
-    if (Crawler::getAllAPISiteIds().contains(siteId)) {QThreadPool::globalInstance()->start([=] {
-        const auto results = Crawler::searchAPI(siteId, m_keyword, m_abortFlag);
-        QMetaObject::invokeMethod(this, "handleSearchResult", Qt::QueuedConnection, Q_ARG(QString, siteId), Q_ARG(QList<SearchResult>, results));});
-    } else if (Crawler::getAllSiteIds().contains(siteId)) {QThreadPool::globalInstance()->start([=] {
-        const auto results = Crawler::searchSite(siteId, m_keyword, m_abortFlag);
-        QMetaObject::invokeMethod(this, "handleSearchResult", Qt::QueuedConnection, Q_ARG(QString, siteId), Q_ARG(QList<SearchResult>, results));});
-    } else if (Crawler::getAllBTSiteIds().contains(siteId)) {QThreadPool::globalInstance()->start([=] {
-        const auto results = Crawler::searchBT(siteId, m_keyword, m_abortFlag);
-        QMetaObject::invokeMethod(this, "handleBTSearchResult", Qt::QueuedConnection, Q_ARG(QString, siteId), Q_ARG(QList<BTResult>, results));});
+    if (Crawler::getAllAPISiteIds().contains(siteId)) {
+        QPointer guard(this);
+        Crawler::searchAPI(siteId, m_keyword, [guard, siteId](const QList<SearchResult> &results, const QString &error) {
+            if (!guard) return;
+            if (!error.isEmpty()) qDebug() << "API搜索出错:" << siteId << error;
+            guard->handleSearchResult(siteId, results);
+        });
+    } else if (Crawler::getAllSiteIds().contains(siteId)) {
+        QPointer guard(this);
+        Crawler::searchSite(siteId, m_keyword, [guard, siteId](const QList<SearchResult> &results, const QString &error) {
+            if (!guard) return;
+            if (!error.isEmpty()) qDebug() << "搜索出错:" << siteId << error;
+            guard->handleSearchResult(siteId, results);
+        });
+    } else if (Crawler::getAllBTSiteIds().contains(siteId)) {
+        QPointer guard(this);
+        Crawler::searchBT(siteId, m_keyword, [guard, siteId](const QList<BTResult> &results, const QString &error) {
+            if (!guard) return;
+            if (!error.isEmpty()) qDebug() << "BT搜索出错:" << siteId << error;
+            guard->handleBTSearchResult(siteId, results);
+        });
     }
 }
 
 void PlayerPage::fetchRoutes(const CollectionData &collectionData, const EpisodeData &episodeData)
 {   // 创建组件
     show();
-    m_abortFlag = std::make_shared<std::atomic<bool>>(false);
     m_episodeData = episodeData;
     m_keyword = collectionData.subject_name_cn;
     if (m_keyword.isEmpty()) m_keyword = collectionData.subject_name;
-    *m_abortFlag = true;
-    m_abortFlag->store(false);
     const QStringList allApiIds = Crawler::getAllAPISiteIds();
     const QStringList allSiteIds = Crawler::getAllSiteIds();
     const QStringList allBtIds = Crawler::getAllBTSiteIds();
@@ -133,7 +143,6 @@ void PlayerPage::fetchRoutes(const CollectionData &collectionData, const Episode
 
 void PlayerPage::reSearchSite(const QString &siteId)
 {   // 再次搜索
-    if (m_keyword.isEmpty()) return;
     startSiteSearch(siteId);
 }
 
@@ -397,7 +406,7 @@ void PlayerPage::onRouteSelected(const QString &siteId, const QJsonObject &route
     Crawler::processVideoUrl(siteId, episodeUrl, [this](const QString &videoUrl) {
         qDebug() << videoUrl;
         vlcPlayer->playVideo(videoUrl);
-    }, nullptr);
+    });
     vlcPlayer->setFocus();
 }
 
@@ -454,9 +463,12 @@ void PlayerPage::onBTResultClicked(const QString &magnet, const QString &playLin
         const QString finalUrl = pikpakBtn->property("finalUrl").toString();
         pikpakBtn->setText("转存中...");
         pikpakBtn->setEnabled(false);
-        if (pikpakApi->transferShareLink(finalUrl, "")) pikpakBtn->setText("转存成功");
-        else pikpakBtn->setText("转存失败");
-        pikpakBtn->setEnabled(true);
+        QPointer btnPtr(pikpakBtn);
+        pikpakApi->transferShareLink(finalUrl, "", [btnPtr](const bool success) {
+            if (!btnPtr) return;
+            btnPtr->setText(success ? "转存成功" : "转存失败");
+            btnPtr->setEnabled(true);
+        });
     });
     dialog->exec();
 }
@@ -505,15 +517,9 @@ void PlayerPage::cleanupPage()
     siteDetailFrames.clear();
 }
 
-void PlayerPage::cancelAllSearches() const
-{   // 取消所有搜索
-    if (m_abortFlag) *m_abortFlag = true;
-}
-
 void PlayerPage::onBackButtonClicked()
 {   // 返回
     if (fullscreen_mode) toggleFullscreen();
-    cancelAllSearches();
     cleanupPage();
     emit backButtonClicked();
 }

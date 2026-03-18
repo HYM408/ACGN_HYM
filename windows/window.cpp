@@ -38,7 +38,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 MainWindow::~MainWindow()
 {
-    if (playerPage) playerPage->cancelAllSearches();
     cacheImageUtil->clearPendingDownloads();
 }
 
@@ -206,9 +205,8 @@ void MainWindow::closeOptionSelection(const int result)
     m_wasMaximized = isMaximized();
     m_savedNormalGeometry = normalGeometry();
     hide();
-    if (playerPage) playerPage->cancelAllSearches();
     if (result == 1) return;
-    QTimer::singleShot(1000, [] {QApplication::quit();});
+    QApplication::quit();
 }
 
 void MainWindow::onTrayIconActivated(const QSystemTrayIcon::ActivationReason reason)

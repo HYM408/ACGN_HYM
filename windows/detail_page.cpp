@@ -62,7 +62,7 @@ void DetailPage::applyTheme()
                                             "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
     ui.pushButton_27->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px}"
                                             "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
-    ui.pushButton->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px}"
+    ui.pushButton->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px; padding: 2px 10px}"
                                         "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
 }
 
@@ -100,8 +100,8 @@ void DetailPage::loadData()
     const SubjectsData subjectData = dbManager->getSubjectById(currentData.subject_id);
     if (subjectData.subject_id != 0) updateDetailPage(subjectData);
     else {
-        QTimer::singleShot(0, this, [this] {
-            const QJsonObject subjectInfo = bangumiAPI->getSubjectInfo(currentData.subject_id, 3);
+        bangumiAPI->getSubjectInfo(currentData.subject_id, 3, [this](const QJsonObject &subjectInfo, const QString &error) {
+            if (!error.isEmpty() || subjectInfo.isEmpty()) return;
             if (!dbManager->insertOrUpdateSubject(subjectInfo)) qDebug() << currentData.subject_id << "失败";
             if (!isVisible()) return;
             updateDetailPage(dbManager->getSubjectById(currentData.subject_id));
@@ -227,11 +227,13 @@ void DetailPage::onRatingButtonClicked()
         ui.pushButton->setText(QString("我的评价: %1 分").arg(rate));
         m_starRating->close();
         ui.pushButton->setText("更改中...");
-        if (bangumiAPI->updateCollection(currentData.subject_id, {{"rate", rate}}, 3)) {
-            DatabaseManager::updateCollectionFields(currentData.subject_id, {{"rate", rate}}, false);
-            ui.pushButton->setText(QString("我的评价: %1 分").arg(rate));
-        }
-        else ui.pushButton->setText("更改失败");
+        bangumiAPI->updateCollection(currentData.subject_id, {{"rate", rate}}, 3, [this, rate](const bool success, const QString &error) {
+            if (success && error.isEmpty()) {
+                DatabaseManager::updateCollectionFields(currentData.subject_id, {{"rate", rate}}, false);
+                if (!isVisible()) return;
+                ui.pushButton->setText(QString("我的评价: %1 分").arg(rate));
+            } else ui.pushButton->setText("更改失败");
+        });
     });
     connect(m_starRating, &QObject::destroyed, this, [this] {m_starRating = nullptr;});
     const QPoint btnTopRight = ui.pushButton->mapToGlobal(QPoint(ui.pushButton->width(), 0));
