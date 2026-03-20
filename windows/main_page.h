@@ -32,7 +32,7 @@ public:
     [[nodiscard]] int getCurrentStatusType() const {return currentStatusType;}
 
 signals:
-    void showDetailPageRequested(const CollectionData &collectionData, const QString &progressText);
+    void showDetailPageRequested(const int &subject_id, const CollectionData &searchData, const QString &progressText);
     void showEpisodePageRequested(const CollectionData &collectionData);
     void showMainPageRequested();
 
@@ -55,8 +55,6 @@ private:
     void clearDisplayArea();
     void createCardComponents(CardComponents &card, const CollectionData &collection);
     bool eventFilter(QObject *obj, QEvent *event) override;
-    void showDetailPage(const CollectionData &collectionData, const QString &progressText);
-    void showEpisodePage(const CollectionData &collectionData);
     Ui::MainWindow *mainWindow = nullptr;
     DatabaseManager *dbManager = nullptr;
     CacheImageUtil *cacheImageUtil = nullptr;

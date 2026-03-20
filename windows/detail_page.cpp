@@ -78,11 +78,12 @@ void DetailPage::setupConnections()
     setupTextEditCustomContextMenu(ui.textEdit_2, CMO_Default);
 }
 
-void DetailPage::setCollectionData(const CollectionData &data, const QString &progressText)
+void DetailPage::setData(const int &subject_id, const CollectionData &searchData, const QString &progressText)
 {   // 显示传入数据
     ui.tabWidget->setCurrentIndex(0);
     resetUI();
-    currentData = data;
+    if (subject_id != 0) currentData = dbManager->getCollectionBySubjectId(subject_id);
+    else currentData = searchData;
     const QString imageUrl = QString("https://api.bgm.tv/v0/subjects/%1/image?type=large").arg(currentData.subject_id);
     ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, ui.cover_label_3, 15, true, true, QString("s%1.jpg").arg(currentData.subject_id));
     ui.textEdit->setText(currentData.subject_name_cn.isEmpty() ? currentData.subject_name : currentData.subject_name_cn);

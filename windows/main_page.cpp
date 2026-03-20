@@ -83,7 +83,7 @@ bool MainPageManager::eventFilter(QObject *obj, QEvent *event)
     if (obj->property("isCard").toBool() && event->type() == QEvent::MouseButtonPress) {
         const auto *frame = qobject_cast<QFrame*>(obj);
         const auto *progressLabel = frame->property("progressLabel").value<QLabel*>();
-        showDetailPage(frame->property("collectionData").value<CollectionData>(), progressLabel ? progressLabel->text() : QString());
+        emit showDetailPageRequested(frame->property("collectionData").value<CollectionData>().subject_id, {}, progressLabel ? progressLabel->text() : QString());
         return true;
     }
     for (auto &[statusType, info] : statusFrames.toStdMap()) {
@@ -266,7 +266,7 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
         const auto data = card.card->property("collectionData").value<CollectionData>();
         StatusSelector::showStatusSelector(card.moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, dbManager, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);});});
     if (collection.subject_type == 4) connect(card.episodeButton, &QPushButton::clicked, this, [this, subjectId = collection.subject_id] {gameMonitor->startGame(subjectId);});
-    else connect(card.episodeButton, &QPushButton::clicked, this, [this, data = collection] {showEpisodePage(data);});
+    else connect(card.episodeButton, &QPushButton::clicked, this, [this, data = collection] {emit showEpisodePageRequested(data);});
 }
 
 void MainPageManager::clearDisplayArea()
@@ -304,14 +304,4 @@ void MainPageManager::nextPage()
         ++currentPage;
         displayCurrentPage();
     }
-}
-
-void MainPageManager::showDetailPage(const CollectionData &collectionData, const QString &progressText)
-{   // 跳转详情页面
-    emit showDetailPageRequested(collectionData, progressText);
-}
-
-void MainPageManager::showEpisodePage(const CollectionData &collectionData)
-{   // 跳转选集页面
-    emit showEpisodePageRequested(collectionData);
 }
