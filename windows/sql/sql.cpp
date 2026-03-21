@@ -398,7 +398,7 @@ QVector<EpisodeData> DatabaseManager::getEpisodeData(const int subjectId) const
 {   // 获取剧集公共数据
     QVector<EpisodeData> results;
     QSqlQuery query(episodePublicDate);
-    query.prepare("SELECT * FROM episode_public_date WHERE subject_id = ?");
+    query.prepare("SELECT * FROM episode_public_date WHERE subject_id = ?  ORDER BY type ASC");
     query.addBindValue(subjectId);
     if (!executeQuery(query, "获取剧集失败")) return results;
     while (query.next()) {

@@ -78,21 +78,21 @@ void PlayerPage::startSiteSearch(const QString &siteId)
         Crawler::searchAPI(siteId, m_keyword, [guard, siteId](const QList<SearchResult> &results, const QString &error) {
             if (!guard) return;
             if (!error.isEmpty()) qDebug() << "API搜索出错:" << siteId << error;
-            guard->handleSearchResult(siteId, results);
+            guard->handleSearchResult(siteId, results, error);
         });
     } else if (Crawler::getAllSiteIds().contains(siteId)) {
         QPointer guard(this);
         Crawler::searchSite(siteId, m_keyword, [guard, siteId](const QList<SearchResult> &results, const QString &error) {
             if (!guard) return;
             if (!error.isEmpty()) qDebug() << "搜索出错:" << siteId << error;
-            guard->handleSearchResult(siteId, results);
+            guard->handleSearchResult(siteId, results, error);
         });
     } else if (Crawler::getAllBTSiteIds().contains(siteId)) {
         QPointer guard(this);
         Crawler::searchBT(siteId, m_keyword, [guard, siteId](const QList<BTResult> &results, const QString &error) {
             if (!guard) return;
             if (!error.isEmpty()) qDebug() << "BT搜索出错:" << siteId << error;
-            guard->handleBTSearchResult(siteId, results);
+            guard->handleBTSearchResult(siteId, results, error);
         });
     }
 }
@@ -211,9 +211,8 @@ QWidget* PlayerPage::createSiteCard(const QString &siteId)
     // 站点名称
     auto *siteBtn = new QPushButton(siteId);
     siteBtn->setFont(QFont("", 14, QFont::Bold));
-    siteBtn->setStyleSheet(
-        "QPushButton {color: #333; text-align: left; border: none; padding: 5px 5px}"
-        "QPushButton:hover {background-color: #f0f0f0; border-radius: 5px}");
+    siteBtn->setStyleSheet("QPushButton {color: #333; text-align: left; border: none; padding: 5px 5px}"
+                           "QPushButton:hover {background-color: #f0f0f0; border-radius: 5px}");
     siteBtn->setFlat(true);
     connect(siteBtn, &QPushButton::clicked, this, [this, siteId] {reSearchSite(siteId);});
     topLayout->addWidget(siteBtn);
@@ -235,9 +234,9 @@ QWidget* PlayerPage::createSiteCard(const QString &siteId)
     return card;
 }
 
-void PlayerPage::updateCardContent(const QWidget *card, const QString &status, const QList<SearchResult> &results)
+void PlayerPage::updateCardContent(const QWidget *card, const QString &status, const QList<SearchResult> &results, const QString &error)
 {   // 更新基础卡片
-    if (auto *statusBtn = card->findChild<QPushButton*>("statusBtn")) statusBtn->setText(status == "loading" ? "搜索中..." : status == "success" ? results.first().title : "✗");
+    if (auto *statusBtn = card->findChild<QPushButton*>("statusBtn")) statusBtn->setText(status == "loading" ? "搜索中..." : status == "success" ? results.first().title : error);
     auto *routesContainer = card->findChild<QWidget*>("routesContainer");
     auto *routesLayout = qobject_cast<QHBoxLayout*>(routesContainer->layout());
     clearLayout(routesLayout);
@@ -256,21 +255,21 @@ void PlayerPage::updateCardContent(const QWidget *card, const QString &status, c
     } else routesContainer->setVisible(false);
 }
 
-void PlayerPage::updateBTCardContent(const QWidget *card, const QString &status, const QList<BTResult> &results)
+void PlayerPage::updateBTCardContent(const QWidget *card, const QString &status, const QList<BTResult> &results, const QString &error)
 {   // 更新BT基础卡片
-    if (auto *statusBtn = card->findChild<QPushButton*>("statusBtn")) statusBtn->setText(status == "loading" ? "搜索中..." : status == "success" ? QString::number(results.size()) + "个结果" : "✗");
+    if (auto *statusBtn = card->findChild<QPushButton*>("statusBtn")) statusBtn->setText(status == "loading" ? "搜索中..." : status == "success" ? QString::number(results.size()) + "个结果" : error);
     card->findChild<QWidget*>("routesContainer")->setVisible(false);
 }
 
-void PlayerPage::handleSearchResult(const QString &siteId, const QList<SearchResult> &results)
+void PlayerPage::handleSearchResult(const QString &siteId, const QList<SearchResult> &results, const QString &error)
 {   // 处理搜索结果
-    if (const auto *card = siteWidgets.value(siteId)) updateCardContent(card, results.isEmpty() ? "error" : "success", results);
+    if (const auto *card = siteWidgets.value(siteId)) updateCardContent(card, results.isEmpty() ? "error" : "success", results, error);
     const auto *contentFrame = siteDetailFrames.value(siteId);
     if (!contentFrame) return;
     auto *contentLayout = qobject_cast<QVBoxLayout*>(contentFrame->layout());
     clearLayout(contentLayout);
     if (results.isEmpty()) {
-        auto *errorBtn = new QPushButton("搜索失败或无结果");
+        auto *errorBtn = new QPushButton(error);
         errorBtn->setFlat(true);
         errorBtn->setStyleSheet("color: #ff4444; padding: 10px; border: none");
         contentLayout->addWidget(errorBtn);
@@ -278,17 +277,17 @@ void PlayerPage::handleSearchResult(const QString &siteId, const QList<SearchRes
     contentLayout->addStretch();
 }
 
-void PlayerPage::handleBTSearchResult(const QString &siteId, const QList<BTResult> &results)
+void PlayerPage::handleBTSearchResult(const QString &siteId, const QList<BTResult> &results, const QString &error)
 {   // 处理BT搜索结果
     QList<BTResult> filtered, excluded;
     filterBTResults(results, filtered, excluded);
-    if (const auto *card = siteWidgets.value(siteId)) updateBTCardContent(card, results.isEmpty() ? "error" : "success", results);
+    if (const auto *card = siteWidgets.value(siteId)) updateBTCardContent(card, results.isEmpty() ? "error" : "success", results, error);
     const auto *contentFrame = siteDetailFrames.value(siteId);
     if (!contentFrame) return;
     auto *contentLayout = qobject_cast<QVBoxLayout*>(contentFrame->layout());
     clearLayout(contentLayout);
     if (results.isEmpty()) {
-        auto *errorBtn = new QPushButton("搜索失败或无结果");
+        auto *errorBtn = new QPushButton("无结果");
         errorBtn->setFlat(true);
         errorBtn->setStyleSheet("color: #ff4444; padding: 10px; border: none");
         contentLayout->addWidget(errorBtn);

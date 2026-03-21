@@ -91,7 +91,7 @@ void Crawler::searchSite(const QString &site_id, const QString &keyword, const S
         }
         QList<SearchResult> baseResults = extractSearchResults(site_id, html);
         if (baseResults.isEmpty()) {
-            callback({}, "未找到搜索结果");
+            callback({}, "无结果");
             return;
         }
         struct Context {

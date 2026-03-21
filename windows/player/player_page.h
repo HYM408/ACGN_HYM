@@ -29,8 +29,8 @@ private slots:
     void reSearchSite(const QString &siteId);
     void onRouteSelected(const QString &siteId, const QJsonObject &route) const;
     void onBTResultClicked(const QString &magnet, const QString &playLink);
-    void handleSearchResult(const QString &siteId, const QList<SearchResult> &results);
-    void handleBTSearchResult(const QString &siteId, const QList<BTResult> &results);
+    void handleSearchResult(const QString &siteId, const QList<SearchResult> &results, const QString &error);
+    void handleBTSearchResult(const QString &siteId, const QList<BTResult> &results, const QString &error);
     void toggleFullscreen();
     void onBackButtonClicked();
 
@@ -39,9 +39,9 @@ private:
     void startSiteSearch(const QString &siteId);
     static QString getSiteIconUrl(const QString &siteId);
     void createSiteDetailTab(const QString &siteId);
-    QWidget* createSiteCard(const QString &siteId);
-    void updateCardContent(const QWidget *card, const QString &status, const QList<SearchResult> &results);
-    static void updateBTCardContent(const QWidget *card, const QString &status, const QList<BTResult> &results);
+    QWidget *createSiteCard(const QString &siteId);
+    void updateCardContent(const QWidget *card, const QString &status, const QList<SearchResult> &results, const QString& error);
+    static void updateBTCardContent(const QWidget *card, const QString &status, const QList<BTResult> &results, const QString &error);
     static void filterBTResults(const QList<BTResult> &results, QList<BTResult> &filtered, QList<BTResult> &excluded);
     QFrame* createRouteComponent(const QString &siteId, const QJsonObject &route, const QString &title);
     QFrame* createBTResultComponent(const BTResult &result);
