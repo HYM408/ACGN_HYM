@@ -46,7 +46,7 @@ void DatabaseManager::initTables()
         // episode公共数据表
         "CREATE TABLE IF NOT EXISTS episode_public_date (subject_id INTEGER, episode_id INTEGER, airdate INTEGER, sort INTEGER, PRIMARY KEY (subject_id, episode_id))",
         // subject公共数据表
-        "CREATE TABLE IF NOT EXISTS subject_public_date (subject_id INTEGER PRIMARY KEY, name TEXT, name_cn TEXT, summary BLOB, tags TEXT, meta_tags TEXT, score INTEGER, rank INTEGER, date INTEGER, rating_total INTEGER, doing INTEGER, done INTEGER, dropped INTEGER, on_hold INTEGER, wish INTEGER)",
+        "CREATE TABLE IF NOT EXISTS subject_public_date (subject_id INTEGER PRIMARY KEY, name TEXT, name_cn TEXT, summary BLOB, tags TEXT, meta_tags TEXT, score INTEGER, rank INTEGER, date INTEGER, score_details TEXT, doing INTEGER, done INTEGER, dropped INTEGER, on_hold INTEGER, wish INTEGER)",
         // character公共数据表
         "CREATE TABLE IF NOT EXISTS character_public_date (character_id INTEGER PRIMARY KEY, name TEXT, name_cn TEXT)",
         // subject character对应表
@@ -77,6 +77,16 @@ int DatabaseManager::determineSubjectType(const int originalType, const QJsonArr
     if (originalType != 1) return originalType;
     for (const auto &tag : tags) if (tag.toObject()["name"].toString().trimmed() == "漫画") return 8;
     return 7;
+}
+
+QString DatabaseManager::compactScoreDetails(const QJsonObject &scoreDetails)
+{   // 评分详情处理
+    int scores[10] = {};
+    for (auto it = scoreDetails.begin(); it != scoreDetails.end(); ++it) scores[it.key().toInt() - 1] = it.value().toInt();
+    QStringList parts;
+    parts.reserve(10);
+    for (const int score : scores) parts << QString::number(score);
+    return parts.join(',');
 }
 
 bool DatabaseManager::executeQuery(QSqlQuery &query, const QString &errorMsg)
@@ -399,7 +409,7 @@ bool DatabaseManager::insertOrUpdateSubject(const QJsonObject &apiData) const
     query.addBindValue(rating["score"].toDouble() * 10.0);
     query.addBindValue(rating["rank"].toInt());
     query.addBindValue(dateStringToTimestamp(apiData["date"].toString()));
-    query.addBindValue(rating["total"].toInt());
+    query.addBindValue(compactScoreDetails(rating["count"].toObject()));
     QJsonObject collection = apiData["collection"].toObject();
     query.addBindValue(collection["doing"].toInt());
     query.addBindValue(collection["collect"].toInt());
@@ -427,7 +437,7 @@ SubjectsData DatabaseManager::getSubjectById(const int subjectId) const
     data.rating_score = query.value("score").toInt() / 10.0;
     data.rating_rank = query.value("rank").toInt();
     data.date = timestampToDateString(query.value("date").toLongLong());
-    data.rating_total = query.value("rating_total").toInt();
+    for (const QString &part : query.value("score_details").toString().split(',')) data.score_details.append(part.toInt());
     data.doing = query.value("doing").toInt();
     data.collect = query.value("done").toInt();;
     data.dropped = query.value("dropped").toInt();

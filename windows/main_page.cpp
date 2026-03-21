@@ -83,7 +83,7 @@ bool MainPageManager::eventFilter(QObject *obj, QEvent *event)
     if (obj->property("isCard").toBool() && event->type() == QEvent::MouseButtonPress) {
         const auto *frame = qobject_cast<QFrame*>(obj);
         const auto *progressLabel = frame->property("progressLabel").value<QLabel*>();
-        emit showDetailPageRequested(frame->property("collectionData").value<CollectionData>().subject_id, {}, progressLabel ? progressLabel->text() : QString());
+        emit showDetailPageRequested(frame->property("collectionData").value<CollectionData>(), progressLabel ? progressLabel->text() : QString());
         return true;
     }
     for (auto &[statusType, info] : statusFrames.toStdMap()) {

@@ -79,7 +79,7 @@ void StarRatingWidget::mousePressEvent(QMouseEvent *event)
 }
 
 void StarRatingWidget::leaveEvent(QEvent *)
-{   // 当鼠标离开事件
+{   // 鼠标离开事件
     m_hoverIndex = -1;
     m_hoverWindow->hide();
     update();

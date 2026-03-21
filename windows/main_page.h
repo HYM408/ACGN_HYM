@@ -32,7 +32,7 @@ public:
     [[nodiscard]] int getCurrentStatusType() const {return currentStatusType;}
 
 signals:
-    void showDetailPageRequested(const int &subject_id, const CollectionData &searchData, const QString &progressText);
+    void showDetailPageRequested(const CollectionData &collectionData, const QString &progressText);
     void showEpisodePageRequested(const CollectionData &collectionData);
     void showMainPageRequested();
 

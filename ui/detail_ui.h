@@ -140,7 +140,7 @@ public:
         horizontalLayout_14 = new QHBoxLayout(frame_4);
         horizontalLayout_14->setSpacing(0);
         horizontalLayout_14->setObjectName("horizontalLayout_14");
-        horizontalLayout_14->setContentsMargins(50, 0, 50, 0);
+        horizontalLayout_14->setContentsMargins(50, 0, 150, 0);
         cover_label_3 = new QLabel(frame_4);
         cover_label_3->setObjectName("cover_label_3");
         cover_label_3->setMinimumSize(QSize(220, 310));

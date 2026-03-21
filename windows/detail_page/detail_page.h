@@ -2,7 +2,8 @@
 #define DETAIL_PAGE_H
 
 #include "detail_ui.h"
-#include "sql/data_structs.h"
+#include "score_chart_widget.h"
+#include "../sql/data_structs.h"
 
 class BangumiAPI;
 class QListWidget;
@@ -10,6 +11,7 @@ class CacheImageUtil;
 class DatabaseManager;
 class GameMonitorUtil;
 class StarRatingWidget;
+class RatingChartWidget;
 
 class DetailPage : public QWidget
 {
@@ -17,14 +19,15 @@ class DetailPage : public QWidget
 
 public:
     explicit DetailPage(QWidget *parent = nullptr);
-    void setData(const int &subject_id, const CollectionData &searchData, const QString &progressText);
+    void setCollectionData(const CollectionData &data, const QString &progressText);
     void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db, GameMonitorUtil *gameMonitor);
-    void resetUI() const;
+    void resetUI();
 
 signals:
     void backButtonClicked();
     void tagClicked(const QString &tag, int subjectType);
     void showEpisodePageRequested(const CollectionData &collectionData);
+    void refresh();
 
 private slots:
     void onEpisodeClicked();
@@ -33,12 +36,12 @@ private slots:
     void onCharacterTab(int index);
 
 protected:
-    void showEvent(QShowEvent *event) override;
     void applyTheme();
 
 private:
     void setupConnections();
     void updateDetailPage(const SubjectsData &subjectData);
+    void setupScoreChart(const QVector<int>& scoreDetails, int total);
     void tagsDisplay(const QList<QPair<QString, int>> &tagPairs);
     static QString getTimeInfo(const QList<QPair<QString, int>> &tagPairs, const QString &dateStr);
     void onRatingButtonClicked();
@@ -55,6 +58,7 @@ private:
     QMap<int, QMap<int, QString>> statusNamesMap;
     QListWidget *tagListWidget = nullptr;
     StarRatingWidget *m_starRating = nullptr;
+    ScoreChartWidget *m_scoreChartWidget = nullptr;
     QVector<CharacterData> m_characters;
     QColor m_color2;
     QColor m_color3;

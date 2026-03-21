@@ -37,6 +37,10 @@ add_executable(appACGN_HYM
         windows/api/pikpak_api.cpp
         windows/crawler/crawler.h
         windows/crawler/crawler.cpp
+        windows/detail_page/detail_page.h
+        windows/detail_page/detail_page.cpp
+        windows/detail_page/score_chart_widget.h
+        windows/detail_page/score_chart_widget.cpp
         windows/downloader/chunk_download.h
         windows/downloader/chunk_download.cpp
         windows/downloader/download_page.h
@@ -74,8 +78,6 @@ add_executable(appACGN_HYM
         windows/utils/xml_util.cpp
         windows/config.h
         windows/config.cpp
-        windows/detail_page.h
-        windows/detail_page.cpp
         windows/episode_page.h
         windows/episode_page.cpp
         windows/main_page.h

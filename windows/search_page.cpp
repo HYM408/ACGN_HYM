@@ -3,7 +3,7 @@
 #include <QMouseEvent>
 #include "config.h"
 #include "sql/sql.h"
-#include "detail_page.h"
+#include "detail_page/detail_page.h"
 #include "api/bangumi_api.h"
 #include "utils/image_util.h"
 #include "utils/progress_util.h"
@@ -147,18 +147,18 @@ bool SearchPage::eventFilter(QObject *watched, QEvent *event)
                 if (int subjectId = frame->property("subjectId").toInt(); subjectId > 0 && resultDataMap.contains(subjectId)) {
                     QVariantMap original = resultDataMap[subjectId];
                     const CollectionData collectionData = DatabaseManager::getCollectionBySubjectId(subjectId);
-                    CollectionData searchData = collectionData;
+                    CollectionData data = collectionData;
                     if (collectionData.type == 0) {
-                        searchData.subject_id = subjectId;
-                        searchData.subject_name = original["name"].toString();
-                        searchData.subject_name_cn = original["name_cn"].toString();
-                        searchData.subject_type = original["type"].toInt();
-                        searchData.subject_volumes = original["volumes"].toInt();
-                        searchData.subject_eps = original["eps"].toInt();
-                        searchData.subject_date = original["date"].toString();
+                        data.subject_id = subjectId;
+                        data.subject_name = original["name"].toString();
+                        data.subject_name_cn = original["name_cn"].toString();
+                        data.subject_type = original["type"].toInt();
+                        data.subject_volumes = original["volumes"].toInt();
+                        data.subject_eps = original["eps"].toInt();
+                        data.subject_date = original["date"].toString();
                     }
-                    const QString progressText = computeProgressText(searchData, dbManager->getEpisodeAirdates({subjectId}));
-                    detailPage->setData(0, searchData, progressText);
+                    const QString progressText = computeProgressText(data, dbManager->getEpisodeAirdates({subjectId}));
+                    detailPage->setCollectionData(data, progressText);
                     ui.stackedWidget->setCurrentWidget(detailPage);
                     return true;
                 }

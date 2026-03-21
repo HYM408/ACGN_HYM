@@ -8,7 +8,7 @@
 #include "rss.h"
 #include "config.h"
 #include "sql/sql.h"
-#include "detail_page.h"
+#include "detail_page/detail_page.h"
 #include "search_page.h"
 #include "episode_page.h"
 #include "settings_page.h"
@@ -297,7 +297,7 @@ void MainWindow::onSettingsButtonClicked()
     main_stackedWidget->setCurrentWidget(settingsPage);
 }
 
-void MainWindow::onShowDetailPageRequested(const int &subject_id, const CollectionData &searchData, const QString &progressText)
+void MainWindow::onShowDetailPageRequested(const CollectionData &collectionData, const QString &progressText)
 {   // 主页面 to 详情页面
     if (!detailPage) {
         detailPage = new DetailPage();
@@ -306,8 +306,9 @@ void MainWindow::onShowDetailPageRequested(const int &subject_id, const Collecti
         connect(detailPage, &DetailPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
         connect(detailPage, &DetailPage::showEpisodePageRequested, this, &MainWindow::onShowEpisodePageRequested);
         connect(detailPage, &DetailPage::tagClicked, this, &MainWindow::onTagClicked);
+        connect(detailPage, &DetailPage::refresh, this, [this] {mainPageManager->loadCollections(mainPageManager->getCurrentSubjectType(), mainPageManager->getCurrentStatusType(), false);});
     }
-    detailPage->setData(subject_id, searchData, progressText);
+    detailPage->setCollectionData(collectionData, progressText);
     main_stackedWidget->setCurrentWidget(detailPage);
 }
 

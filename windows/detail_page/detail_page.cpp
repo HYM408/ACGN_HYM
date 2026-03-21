@@ -3,14 +3,15 @@
 #include <QJsonArray>
 #include <QMouseEvent>
 #include <QDesktopServices>
-#include "config.h"
-#include "sql/sql.h"
-#include "utils/menu_util.h"
-#include "api/bangumi_api.h"
-#include "utils/image_util.h"
-#include "utils/star_rating_util.h"
-#include "utils/game_monitor_util.h"
-#include "utils/context_menu_util.h"
+#include "../config.h"
+#include "../sql/sql.h"
+#include "../utils/menu_util.h"
+#include "../api/bangumi_api.h"
+#include "score_chart_widget.h"
+#include "../utils/image_util.h"
+#include "../utils/star_rating_util.h"
+#include "../utils/game_monitor_util.h"
+#include "../utils/context_menu_util.h"
 
 ClickableLabel::ClickableLabel(const QString &text, QWidget *parent): QLabel(text, parent)
 {   // tag组件
@@ -44,12 +45,6 @@ void DetailPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, Databa
     gameMonitorUtil = gameMonitor;
 }
 
-void DetailPage::showEvent(QShowEvent *event)
-{   // 显示
-    QWidget::showEvent(event);
-    loadData();
-}
-
 void DetailPage::applyTheme()
 {   // 主题
     const QColor color1 = getColor("color1", QColor("#fdf7ff"));
@@ -78,12 +73,11 @@ void DetailPage::setupConnections()
     setupTextEditCustomContextMenu(ui.textEdit_2, CMO_Default);
 }
 
-void DetailPage::setData(const int &subject_id, const CollectionData &searchData, const QString &progressText)
+void DetailPage::setCollectionData(const CollectionData &data, const QString &progressText)
 {   // 显示传入数据
     ui.tabWidget->setCurrentIndex(0);
     resetUI();
-    if (subject_id != 0) currentData = dbManager->getCollectionBySubjectId(subject_id);
-    else currentData = searchData;
+    currentData = data;
     const QString imageUrl = QString("https://api.bgm.tv/v0/subjects/%1/image?type=large").arg(currentData.subject_id);
     ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, ui.cover_label_3, 15, true, true, QString("s%1.jpg").arg(currentData.subject_id));
     ui.textEdit->setText(currentData.subject_name_cn.isEmpty() ? currentData.subject_name : currentData.subject_name_cn);
@@ -130,15 +124,14 @@ void DetailPage::onStatusButtonClicked()
     StatusSelector::showStatusSelector(ui.pushButton_26, subjectType, currentStatus, currentData.subject_id, bangumiAPI, dbManager,[this, subjectType](const int selectedStatus) {
         currentData.type = selectedStatus;
         ui.pushButton_26->setText(statusNamesMap.value(subjectType).value(selectedStatus));
+        emit refresh();
     });
 }
 
 void DetailPage::updateDetailPage(const SubjectsData &subjectData)
 {   // 显示数据
-    QString score = QString::number(subjectData.rating_score);
-    QString total = QString::number(subjectData.rating_total);
-    QString rank = QString::number(subjectData.rating_rank);
-    ui.pushButton_21->setText(QString("%1 | %2人评 | #%3").arg(score, total, rank));
+    const int total = std::reduce(subjectData.score_details.begin(), subjectData.score_details.end(), 0);
+    ui.pushButton_21->setText(QString("%1 | %2人评 | #%3").arg(subjectData.rating_score).arg(total).arg(subjectData.rating_rank));
     const int dropped = subjectData.dropped;
     const int doing = subjectData.doing;
     ui.pushButton_25->setText(QString("%1收藏 / %2在看 / %3抛弃").arg(subjectData.collect + subjectData.on_hold + dropped + subjectData.wish + doing).arg(doing).arg(dropped));
@@ -153,9 +146,19 @@ void DetailPage::updateDetailPage(const SubjectsData &subjectData)
     const QString timeTag = getTimeInfo(tagPairs, subjectData.date);
     if (currentData.subject_type == 4) {
         QVector<GameData> gameDataList = DatabaseManager::getGameData({currentData.subject_id});
-        if (!gameDataList.isEmpty())ui.pushButton_24->setText(QString("已玩 %1 小时").arg(gameDataList.first().play_duration));
+        if (!gameDataList.isEmpty()) ui.pushButton_24->setText(QString("已玩 %1 小时").arg(gameDataList.first().play_duration));
         else ui.pushButton_24->setText("0 小时");
     } else ui.pushButton_23->setText(timeTag);
+    setupScoreChart(subjectData.score_details, total);
+}
+
+void DetailPage::setupScoreChart(const QVector<int> &scoreDetails, const int total)
+{   // 设置评分分布表
+    auto *chart = new ScoreChartWidget(this);
+    chart->setData(scoreDetails, total);
+    auto *layout = qobject_cast<QHBoxLayout*>(ui.frame_4->layout());
+    layout->insertWidget(layout->count(), chart);
+    m_scoreChartWidget = chart;
 }
 
 void DetailPage::tagsDisplay(const QList<QPair<QString, int>> &tagPairs)
@@ -233,6 +236,7 @@ void DetailPage::onRatingButtonClicked()
                 DatabaseManager::updateCollectionFields(currentData.subject_id, {{"rate", rate}}, false);
                 if (!isVisible()) return;
                 ui.pushButton->setText(QString("我的评价: %1 分").arg(rate));
+                emit refresh();
             } else ui.pushButton->setText("更改失败");
         });
     });
@@ -324,7 +328,7 @@ void DetailPage::clearTab2() const
     if (content->layout()) delete content->layout();
 }
 
-void DetailPage::resetUI() const
+void DetailPage::resetUI()
 {   // 重置ui
     clearLayout();
     ui.textEdit->clear();
@@ -334,6 +338,10 @@ void DetailPage::resetUI() const
     ui.pushButton_23->setText("TBA");
     ui.pushButton_21->setText(" | 人评 | #");
     ui.pushButton_25->setText("收藏 / 在看 / 抛弃");
+    if (!m_scoreChartWidget) return;
+    m_scoreChartWidget->parentWidget()->layout()->removeWidget(m_scoreChartWidget);
+    m_scoreChartWidget->deleteLater();
+    m_scoreChartWidget = nullptr;
 }
 
 void DetailPage::onBackButtonClicked()

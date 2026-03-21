@@ -204,7 +204,7 @@ QPushButton:hover {
           <number>0</number>
          </property>
          <property name="rightMargin">
-          <number>50</number>
+          <number>150</number>
          </property>
          <property name="bottomMargin">
           <number>0</number>

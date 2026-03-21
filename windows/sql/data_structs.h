@@ -29,7 +29,7 @@ struct SubjectsData {
     double rating_score = 0.0;
     int rating_rank = 0;
     QString date;
-    int rating_total = 0;
+    QVector<int> score_details;
     int doing = 0;
     int collect = 0;
     int dropped = 0;
