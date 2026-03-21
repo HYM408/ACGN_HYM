@@ -143,7 +143,7 @@ void DetailPage::updateDetailPage(const SubjectsData &subjectData)
     std::sort(tagPairs.begin(), tagPairs.end(), [](const QPair<QString, int> &a, const QPair<QString, int> &b) {return b.second < a.second;});
     allTagPairs.append(tagPairs);
     m_currentTagPairs = allTagPairs;
-    tagsDisplay(m_currentTagPairs);
+    QTimer::singleShot(0, this, [this] {tagsDisplay(m_currentTagPairs);});
     const QString timeTag = getTimeInfo(tagPairs, subjectData.date);
     if (currentData.subject_type == 4) {
         QVector<GameData> gameDataList = DatabaseManager::getGameData({currentData.subject_id});
@@ -169,7 +169,7 @@ void DetailPage::tagsDisplay(const QList<QPair<QString, int>> &tagPairs)
     QFont font = ui.frame_5->font();
     font.setPixelSize(14);
     const QFontMetrics fm(font);
-    const int maxWidth = window()->width() - 74;
+    const int maxWidth = ui.frame_5->width();
     QHBoxLayout *currentLayout = nullptr;
     QWidget *currentWidget = nullptr;
     int currentWidth = 0;
