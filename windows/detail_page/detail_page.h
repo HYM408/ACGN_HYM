@@ -37,6 +37,7 @@ private slots:
 
 protected:
     void applyTheme();
+    void resizeEvent(QResizeEvent *event) override;
 
 private:
     void setupConnections();
@@ -55,11 +56,12 @@ private:
     BangumiAPI *bangumiAPI = nullptr;
     DatabaseManager *dbManager = nullptr;
     GameMonitorUtil *gameMonitorUtil = nullptr;
-    QMap<int, QMap<int, QString>> statusNamesMap;
     QListWidget *tagListWidget = nullptr;
     StarRatingWidget *m_starRating = nullptr;
     ScoreChartWidget *m_scoreChartWidget = nullptr;
+    QMap<int, QMap<int, QString>> statusNamesMap;
     QVector<CharacterData> m_characters;
+    QList<QPair<QString, int>> m_currentTagPairs;
     QColor m_color2;
     QColor m_color3;
 };

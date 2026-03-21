@@ -142,7 +142,8 @@ void DetailPage::updateDetailPage(const SubjectsData &subjectData)
     for (auto it = tagsObject.begin(); it != tagsObject.end(); ++it) tagPairs.append(qMakePair(it.key(), it.value().toInt()));
     std::sort(tagPairs.begin(), tagPairs.end(), [](const QPair<QString, int> &a, const QPair<QString, int> &b) {return b.second < a.second;});
     allTagPairs.append(tagPairs);
-    tagsDisplay(allTagPairs);
+    m_currentTagPairs = allTagPairs;
+    tagsDisplay(m_currentTagPairs);
     const QString timeTag = getTimeInfo(tagPairs, subjectData.date);
     if (currentData.subject_type == 4) {
         QVector<GameData> gameDataList = DatabaseManager::getGameData({currentData.subject_id});
@@ -165,11 +166,10 @@ void DetailPage::tagsDisplay(const QList<QPair<QString, int>> &tagPairs)
 {   // tag显示
     clearLayout();
     auto *mainLayout = new QVBoxLayout(ui.frame_5);
-    constexpr int fontSize = 14;
     QFont font = ui.frame_5->font();
-    font.setPixelSize(fontSize);
+    font.setPixelSize(14);
     const QFontMetrics fm(font);
-    const int maxWidth = ui.frame_5->width();
+    const int maxWidth = window()->width() - 74;
     QHBoxLayout *currentLayout = nullptr;
     QWidget *currentWidget = nullptr;
     int currentWidth = 0;
@@ -207,6 +207,11 @@ void DetailPage::tagsDisplay(const QList<QPair<QString, int>> &tagPairs)
         currentLayout->insertWidget(currentLayout->count() - 1, tagLabel);
         currentWidth += textWidth + 10;
     }
+}
+
+void DetailPage::resizeEvent(QResizeEvent *event)
+{   // 窗口大小改变事件
+    if (!m_currentTagPairs.isEmpty() && isVisible()) tagsDisplay(m_currentTagPairs);
 }
 
 QString DetailPage::getTimeInfo(const QList<QPair<QString, int>> &tagPairs, const QString &dateStr)
@@ -255,9 +260,7 @@ void DetailPage::onCharacterTab(const int index)
     auto *gridLayout = new QGridLayout(content);
     gridLayout->setSpacing(20);
     gridLayout->setContentsMargins(0, 20, 20, 20);
-    constexpr int maxCols = 2;
-    constexpr int cardWidth = 400;
-    constexpr int imageSize = 60;
+    constexpr int maxCols = 2, cardWidth = 400, imageSize = 60;
     auto createCard = [this](const CharacterData &characterData) -> QWidget* {
         auto *card = new QWidget();
         card->setFixedWidth(cardWidth);
