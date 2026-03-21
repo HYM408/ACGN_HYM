@@ -46,7 +46,6 @@ struct EpisodeData {
     QString name_cn;
     int episode_type = 0;
     int collection_type = 0;
-    QString created_at;
 };
 
 struct PersonInfo {

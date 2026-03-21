@@ -37,14 +37,14 @@ void DatabaseManager::initTables()
         // collection表
         "CREATE TABLE IF NOT EXISTS collection (subject_id INTEGER PRIMARY KEY, vol_status INTEGER, ep_status INTEGER, subject_type INTEGER, type INTEGER, rate INTEGER, subject_date INTEGER, subject_name TEXT, subject_name_cn TEXT, subject_eps INTEGER, subject_volumes INTEGER, updated_at INTEGER)",
         // episode表
-        "CREATE TABLE IF NOT EXISTS episode_collection (subject_id INTEGER, episode_id INTEGER, ep INTEGER, sort INTEGER, name TEXT, name_cn TEXT, episode_type INTEGER, collection_type INTEGER, created_at INTEGER DEFAULT (strftime('%s','now')), PRIMARY KEY(subject_id, episode_id))",
+        "CREATE TABLE IF NOT EXISTS episode_collection (subject_id INTEGER, episode_id INTEGER, ep INTEGER, sort INTEGER, name TEXT, name_cn TEXT, episode_type INTEGER, collection_type INTEGER, PRIMARY KEY(subject_id, episode_id))",
         // game_data表
         "CREATE TABLE IF NOT EXISTS game_data (subject_id INTEGER PRIMARY KEY, launch_path TEXT, play_duration INTEGER)"
     };
     for (const QString &sql : tables) query.exec(sql);
     const QStringList publicTables = {
         // episode公共数据表
-        "CREATE TABLE IF NOT EXISTS episode_public_date (subject_id INTEGER, episode_id INTEGER, airdate INTEGER, sort INTEGER, PRIMARY KEY (subject_id, episode_id))",
+        "CREATE TABLE IF NOT EXISTS episode_public_date (subject_id INTEGER, episode_id INTEGER, airdate INTEGER, sort INTEGER, type INTEGER, PRIMARY KEY (subject_id, episode_id))",
         // subject公共数据表
         "CREATE TABLE IF NOT EXISTS subject_public_date (subject_id INTEGER PRIMARY KEY, name TEXT, name_cn TEXT, summary BLOB, tags TEXT, meta_tags TEXT, score INTEGER, rank INTEGER, date INTEGER, score_details TEXT, doing INTEGER, done INTEGER, dropped INTEGER, on_hold INTEGER, wish INTEGER)",
         // character公共数据表
@@ -259,7 +259,7 @@ void DatabaseManager::clearCollectionTable() const
 bool DatabaseManager::insertManyEpisodes(const int subjectId, const QJsonArray &episodesArray)
 {   // 插入剧集数据
     QSqlQuery query;
-    query.prepare("INSERT OR REPLACE INTO episode_collection VALUES (?,?,?,?,?,?,?,?,strftime('%s','now'))");
+    query.prepare("INSERT OR REPLACE INTO episode_collection VALUES (?,?,?,?,?,?,?,?)");
     for (const auto &v : episodesArray) {
         QJsonObject item = v.toObject();
         QJsonObject ep = item["episode"].toObject();
@@ -392,6 +392,24 @@ QJsonObject DatabaseManager::getEpisodeAirdates(const QList<int> &subjectIds) co
         result[key] = arr;
     }
     return result;
+}
+
+QVector<EpisodeData> DatabaseManager::getEpisodeData(const int subjectId) const
+{   // 获取剧集公共数据
+    QVector<EpisodeData> results;
+    QSqlQuery query(episodePublicDate);
+    query.prepare("SELECT * FROM episode_public_date WHERE subject_id = ?");
+    query.addBindValue(subjectId);
+    if (!executeQuery(query, "获取剧集失败")) return results;
+    while (query.next()) {
+        EpisodeData ep;
+        ep.subject_id = query.value("subject_id").toInt();
+        ep.episode_id = query.value("episode_id").toInt();
+        ep.sort = query.value("sort").toInt() / 10.0;
+        ep.episode_type = query.value("type").toInt();
+        results.append(ep);
+    }
+    return results;
 }
 
 // =============== subject公共数据表 ===============

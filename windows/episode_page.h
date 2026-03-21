@@ -7,6 +7,7 @@
 
 class QListView;
 class BangumiAPI;
+class DatabaseManager;
 class QStandardItemModel;
 
 class EpisodeDelegate : public QStyledItemDelegate
@@ -29,7 +30,7 @@ class EpisodeOverlay : public QWidget
 
 public:
     explicit EpisodeOverlay(QWidget *parent = nullptr);
-    void setManagers(BangumiAPI *api);
+    void setManagers(BangumiAPI *api, DatabaseManager *db);
     void applyTheme() const;
     void showWithCollectionData(const CollectionData &collData);
     void closeOverlay();
@@ -59,6 +60,7 @@ private:
     void onUpdateClicked();
     Ui::EpisodePage ui{};
     BangumiAPI *bangumiAPI = nullptr;
+    DatabaseManager *dbManager = nullptr;
     QWidget *episodeContainer = nullptr;
     CollectionData collectionData;
     QVector<EpisodeData> episodes;

@@ -34,6 +34,7 @@ public:
     static QVector<GameData> getGameData(const QList<int>& subjectIds);
     // 公共数据表
     [[nodiscard]] QJsonObject getEpisodeAirdates(const QList<int> &subjectIds) const;
+    [[nodiscard]] QVector<EpisodeData> getEpisodeData(int subjectId) const;
     [[nodiscard]] bool insertOrUpdateSubject(const QJsonObject &apiData) const;
     [[nodiscard]] SubjectsData getSubjectById(int subjectId) const;
     [[nodiscard]] QVector<CharacterData> getCharactersWithPersonsBySubjectId(int subjectId) const;

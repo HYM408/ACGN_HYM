@@ -327,7 +327,7 @@ void MainWindow::onShowEpisodePageRequested(const CollectionData &collectionData
 {   // 创建选集遮罩层
     repaint();
     episodeOverlay = new EpisodeOverlay(this);
-    episodeOverlay->setManagers(bangumiAPI);
+    episodeOverlay->setManagers(bangumiAPI, dbManager);
     connect(episodeOverlay, &EpisodeOverlay::episodeClicked, this, &MainWindow::onEpisodeClicked);
     connect(episodeOverlay, &EpisodeOverlay::overlayClosed, this, [this] {
         episodeOverlay->deleteLater();
