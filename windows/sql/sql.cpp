@@ -52,9 +52,11 @@ void DatabaseManager::initTables()
         // subject character对应表
         "CREATE TABLE IF NOT EXISTS subject_character (subject_id INTEGER, character_id INTEGER, type INTEGER, PRIMARY KEY (subject_id, character_id))",
         // person公共数据表
-        "CREATE TABLE IF NOT EXISTS person (person_id INTEGER PRIMARY KEY, name TEXT, name_cn TEXT)",
+        "CREATE TABLE IF NOT EXISTS person_public_date (person_id INTEGER PRIMARY KEY, name TEXT, name_cn TEXT)",
         // person character对应表
-        "CREATE TABLE IF NOT EXISTS person_character (person_id INTEGER, subject_id INTEGER, character_id INTEGER, PRIMARY KEY (person_id, subject_id))"
+        "CREATE TABLE IF NOT EXISTS person_character (person_id INTEGER, subject_id INTEGER, character_id INTEGER, PRIMARY KEY (person_id, subject_id))",
+        // subject person对应表
+        "CREATE TABLE IF NOT EXISTS subject_persons (subject_id INTEGER, person_id INTEGER, position INTEGER, PRIMARY KEY (subject_id, person_id, position))"
     };
     QSqlQuery publicQuery(QSqlDatabase::database("public_date_connection"));
     for (const auto &sql : publicTables) publicQuery.exec(sql);
@@ -381,7 +383,7 @@ QJsonObject DatabaseManager::getEpisodeAirdates(const QList<int> &subjectIds) co
     placeholders.fill(QString('?'), subjectIds.size());
     query.prepare(QString("SELECT * FROM episode_public_date WHERE subject_id IN (%1)").arg(placeholders.join(", ")));
     for (const int episode_id : subjectIds) query.addBindValue(episode_id);
-    query.exec();
+    if (!executeQuery(query, "获取播出日期失败")) return {};
     QJsonObject result;
     while (query.next()) {
         QString key = QString::number(query.value("subject_id").toInt());
@@ -442,7 +444,8 @@ SubjectsData DatabaseManager::getSubjectById(const int subjectId) const
     QSqlQuery query(episodePublicDate);
     query.prepare("SELECT * FROM subject_public_date WHERE subject_id = ?");
     query.addBindValue(subjectId);
-    if (!query.exec() || !query.next()) return {};
+    if (!executeQuery(query, "获取subject失败")) return {};
+    if (!query.next()) return {};
     SubjectsData data;
     data.subject_id = query.value("subject_id").toInt();
     data.name = query.value("name").toString();
@@ -465,7 +468,7 @@ SubjectsData DatabaseManager::getSubjectById(const int subjectId) const
 }
 
 // =============== character相关 ===============
-QVector<CharacterData> DatabaseManager::getCharactersWithPersonsBySubjectId(const int subjectId) const
+QVector<CharacterData> DatabaseManager::getCharacters(const int subjectId) const
 {   // 获取角色信息
     QSqlQuery query(episodePublicDate);
     query.prepare(
@@ -473,13 +476,12 @@ QVector<CharacterData> DatabaseManager::getCharactersWithPersonsBySubjectId(cons
         "FROM subject_character sc "
         "JOIN character_public_date c ON sc.character_id = c.character_id "
         "LEFT JOIN person_character pc ON pc.character_id = c.character_id AND pc.subject_id = sc.subject_id "
-        "LEFT JOIN person p ON pc.person_id = p.person_id "
+        "LEFT JOIN person_public_date p ON pc.person_id = p.person_id "
         "WHERE sc.subject_id = ? "
         "GROUP BY c.character_id, c.name, c.name_cn, sc.type "
-        "ORDER BY sc.type"
-    );
+        "ORDER BY sc.type");
     query.addBindValue(subjectId);
-    if (!query.exec()) return {};
+    if (!executeQuery(query, "获取角色信息失败")) return {};
     QVector<CharacterData> results;
     while (query.next()) {
         CharacterData data;
@@ -498,6 +500,28 @@ QVector<CharacterData> DatabaseManager::getCharactersWithPersonsBySubjectId(cons
             data.persons.append(info);
         }
         results.append(data);
+    }
+    return results;
+}
+
+QVector<PersonData> DatabaseManager::getPersons(const int subjectId) const
+{   // 获取制作人员信息
+    QVector<PersonData> results;
+    QSqlQuery query(episodePublicDate);
+    query.prepare(
+        "SELECT sp.person_id, sp.position, pp.name, pp.name_cn "
+        "FROM subject_persons sp "
+        "JOIN person_public_date pp ON sp.person_id = pp.person_id "
+        "WHERE sp.subject_id = ?");
+    query.addBindValue(subjectId);
+    if (!executeQuery(query, "获取制作人员信息失败")) return results;
+    while (query.next()) {
+        PersonData info;
+        info.person_id = query.value("person_id").toInt();
+        info.position = query.value("position").toInt();
+        info.name = query.value("name").toString();
+        info.name_cn = query.value("name_cn").toString();
+        results.append(info);
     }
     return results;
 }

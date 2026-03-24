@@ -33,7 +33,7 @@ private slots:
     void onEpisodeClicked();
     void onOpenBangumiPage() const;
     void onStatusButtonClicked();
-    void onCharacterTab(int index);
+    void clickOnTab(int index);
 
 protected:
     void applyTheme();
@@ -46,8 +46,10 @@ private:
     void tagsDisplay(const QList<QPair<QString, int>> &tagPairs);
     static QString getTimeInfo(const QList<QPair<QString, int>> &tagPairs, const QString &dateStr);
     void onRatingButtonClicked();
+    void onCharacterTab();
+    void onStaffTab();
     void clearLayout() const;
-    void clearTab2() const;
+    static void clearTab(const QWidget *content) ;
     void loadData();
     void onBackButtonClicked();
     Ui::DetailPage ui{};
@@ -61,6 +63,9 @@ private:
     ScoreChartWidget *m_scoreChartWidget = nullptr;
     QMap<int, QMap<int, QString>> statusNamesMap;
     QVector<CharacterData> m_characters;
+    QVector<PersonData> m_persons;
+    bool characterTabInitialized = false;
+    bool staffTabInitialized = false;
     QList<QPair<QString, int>> m_currentTagPairs;
     QColor m_color2;
     QColor m_color3;

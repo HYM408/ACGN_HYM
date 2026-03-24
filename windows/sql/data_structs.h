@@ -62,6 +62,13 @@ struct CharacterData {
     QVector<PersonInfo> persons;
 };
 
+struct PersonData {
+    int person_id = 0;
+    int position = 0;
+    QString name;
+    QString name_cn;
+};
+
 struct GameData {
     int subject_id = 0;
     QString launch_path;

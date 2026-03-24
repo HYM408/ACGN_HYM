@@ -55,6 +55,9 @@ public:
     QWidget *scrollAreaWidgetContents;
     QWidget *tab_3;
     QWidget *tab_4;
+    QVBoxLayout *verticalLayout_3;
+    QScrollArea *scrollArea_2;
+    QWidget *scrollAreaWidgetContents_2;
 
     void setupUi(QWidget *DetailPage)
     {
@@ -367,6 +370,48 @@ public:
         tabWidget->addTab(tab_3, QString());
         tab_4 = new QWidget();
         tab_4->setObjectName("tab_4");
+        verticalLayout_3 = new QVBoxLayout(tab_4);
+        verticalLayout_3->setSpacing(10);
+        verticalLayout_3->setObjectName("verticalLayout_3");
+        verticalLayout_3->setContentsMargins(50, 20, 20, 0);
+        scrollArea_2 = new QScrollArea(tab_4);
+        scrollArea_2->setObjectName("scrollArea_2");
+        scrollArea_2->setStyleSheet(QString::fromUtf8("QScrollArea {\n"
+"	border: none;\n"
+"}\n"
+"\n"
+"QScrollBar:vertical {\n"
+"    border: none;\n"
+"    background: #f0f0f0;\n"
+"    width: 11px;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:vertical {\n"
+"    background: #c0c0c0;\n"
+"    border-radius: 5px;\n"
+"    min-height: 20px;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:vertical:hover {\n"
+"    background: #a0a0a0;\n"
+"}\n"
+"\n"
+"QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {\n"
+"    border: none;\n"
+"    background: none;\n"
+"    height: 0px;\n"
+"}\n"
+"\n"
+""));
+        scrollArea_2->setWidgetResizable(true);
+        scrollAreaWidgetContents_2 = new QWidget();
+        scrollAreaWidgetContents_2->setObjectName("scrollAreaWidgetContents_2");
+        scrollAreaWidgetContents_2->setGeometry(QRect(0, 0, 1451, 534));
+        scrollAreaWidgetContents_2->setStyleSheet(QString::fromUtf8("background-color: transparent;"));
+        scrollArea_2->setWidget(scrollAreaWidgetContents_2);
+
+        verticalLayout_3->addWidget(scrollArea_2);
+
         tabWidget->addTab(tab_4, QString());
 
         verticalLayout->addWidget(tabWidget);
@@ -377,7 +422,7 @@ public:
 
         retranslateUi(DetailPage);
 
-        tabWidget->setCurrentIndex(1);
+        tabWidget->setCurrentIndex(3);
 
 
         QMetaObject::connectSlotsByName(DetailPage);

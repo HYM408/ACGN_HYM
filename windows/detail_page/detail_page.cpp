@@ -58,7 +58,7 @@ void DetailPage::applyTheme()
     ui.pushButton_27->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px}"
                                             "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
     ui.pushButton->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px; padding: 2px 10px}"
-                                        "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
+                                         "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
 }
 
 void DetailPage::setupConnections()
@@ -68,7 +68,7 @@ void DetailPage::setupConnections()
     connect(ui.pushButton_20, &QPushButton::clicked, this, &DetailPage::onOpenBangumiPage);
     connect(ui.pushButton_26, &QPushButton::clicked, this, &DetailPage::onStatusButtonClicked);
     connect(ui.pushButton, &QPushButton::clicked, this, &DetailPage::onRatingButtonClicked);
-    connect(ui.tabWidget, &QTabWidget::currentChanged, this, &DetailPage::onCharacterTab);
+    connect(ui.tabWidget, &QTabWidget::currentChanged, this, &DetailPage::clickOnTab);
     setupTextEditCustomContextMenu(ui.textEdit, CMO_Default);
     setupTextEditCustomContextMenu(ui.textEdit_2, CMO_Default);
 }
@@ -102,7 +102,10 @@ void DetailPage::loadData()
             updateDetailPage(dbManager->getSubjectById(currentData.subject_id));
         });
     }
-    QTimer::singleShot(50, this, [this] {m_characters = dbManager->getCharactersWithPersonsBySubjectId(currentData.subject_id);});
+    QTimer::singleShot(50, this, [this] {
+        m_characters = dbManager->getCharacters(currentData.subject_id);
+        m_persons = dbManager->getPersons(currentData.subject_id);
+    });
 }
 
 void DetailPage::onEpisodeClicked()
@@ -200,7 +203,7 @@ void DetailPage::tagsDisplay(const QList<QPair<QString, int>> &tagPairs)
         tagLabel->setFont(font);
         tagLabel->setFixedSize(textWidth, fm.height() + 10);
         tagLabel->setStyleSheet(QString("QLabel {background-color: %1; border-radius: 10px; padding: 2px 8px}"
-                              "QLabel:hover {background-color: %2}").arg(m_color2.name(), m_color3.name()));
+                                        "QLabel:hover {background-color: %2}").arg(m_color2.name(), m_color3.name()));
         QString tagName = tagPairs[i].first;
         tagLabel->setProperty("tagName", tagName);
         connect(tagLabel, &ClickableLabel::clicked, this, [this, tagName] {emit tagClicked(tagName, currentData.subject_type);});
@@ -252,22 +255,35 @@ void DetailPage::onRatingButtonClicked()
     m_starRating->show();
 }
 
-void DetailPage::onCharacterTab(const int index)
+void DetailPage::clickOnTab(const int index)
+{   // 点击Tab
+    if (index == 1) {
+        if (characterTabInitialized) return;
+        onCharacterTab();
+        characterTabInitialized = true;
+    }
+    else if (index == 3) {
+        if (staffTabInitialized) return;
+        onStaffTab();
+        staffTabInitialized = true;
+    }
+}
+
+void DetailPage::onCharacterTab()
 {   // 角色Tab
-    if (index != 1) return;
-    clearTab2();
+    static const QMap<int, QString> roleTypeMap = {{1, "主角"}, {2, "配角"}, {3, "客串"}, {4, "闲角"}};
     QWidget *content = ui.scrollAreaWidgetContents;
     auto *gridLayout = new QGridLayout(content);
     gridLayout->setSpacing(20);
     gridLayout->setContentsMargins(0, 20, 20, 20);
-    constexpr int maxCols = 2, cardWidth = 400, imageSize = 60;
+    constexpr int maxCols = 2;
     auto createCard = [this](const CharacterData &characterData) -> QWidget* {
         auto *card = new QWidget();
-        card->setFixedWidth(cardWidth);
+        card->setFixedWidth(400);
         card->setStyleSheet(QString("QWidget {background-color: %1; border-radius: 8px}").arg(m_color2.name()));
         auto *layout = new QHBoxLayout(card);
         auto *imageLabel = new QLabel(card);
-        imageLabel->setFixedSize(imageSize, imageSize);
+        imageLabel->setFixedSize(60, 60);
         layout->addWidget(imageLabel);
         const QString imageUrl = QString("https://api.bgm.tv/v0/characters/%1/image?type=grid").arg(characterData.character_id);
         ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, imageLabel, 10, true, true, QString("c%1.jpg").arg(characterData.character_id));
@@ -287,7 +303,6 @@ void DetailPage::onCharacterTab(const int index)
             if (firstPerson.isEmpty()) firstPerson = disp;
             allPersons << disp;
         }
-        static QMap<int, QString> roleTypeMap = {{1, "主角"}, {2, "配角"}, {3, "客串"}, {4, "闲角"}};
         QString typeAndPerson = roleTypeMap.value(characterData.type, QString::number(characterData.type));
         if (!firstPerson.isEmpty()) typeAndPerson += " · " + firstPerson;
         auto *personLabel = new QLabel(typeAndPerson, card);
@@ -312,6 +327,66 @@ void DetailPage::onCharacterTab(const int index)
     content->setLayout(gridLayout);
 }
 
+void DetailPage::onStaffTab()
+{   // 制作人员Tab
+    static const QMap<int, QString> positionMap = {
+        {1, "原作"}, {2, "导演"}, {3, "脚本"}, {4, "分镜"}, {5, "演出"}, {6, "音乐"}, {7, "人物原案"}, {8, "人物设定"}, {9, "构图"}, {10, "系列构成"},
+        {11, "美术监督"}, {13, "色彩设计"}, {14, "总作画监督"}, {15, "作画监督"}, {16, "机械设定"}, {17, "摄影监督"}, {18, "监修"}, {19, "道具设计"}, {20, "原画"},
+        {21, "第二原画"}, {22, "动画检查"}, {23, "助理制片人"}, {24, "制作助理"}, {25, "背景美术"}, {26, "色彩指定"}, {27, "数码绘图"}, {28, "剪辑"}, {29, "原案"}, {30, "主题歌编曲"},
+        {31, "主题歌作曲"}, {32, "主题歌作词"}, {33, "主题歌演出"}, {34, "插入歌演出"}, {35, "企画"}, {36, "企划制作人"}, {37, "制作管理"}, {38, "宣传"}, {39, "录音"}, {40, "录音助理"},
+        {41, "系列监督"}, {42, "製作"}, {43, "设定"}, {44, "音响监督"}, {45, "音响"}, {46, "音效"}, {47, "特效"}, {48, "配音监督"}, {49, "联合导演"}, {50, "背景设定"},
+        {51, "补间动画"}, {52, "执行制片人"}, {53, "助理制片人"}, {54, "制片人"}, {55, "音乐助理"}, {56, "制作进行"}, {57, "演员监督"}, {58, "总制片人"}, {59, "联合制片人"}, {60, "台词编辑"},
+        {61, "后期制片协调"}, {62, "制作助理"}, {63, "制作"}, {64, "制作协调"}, {65, "音乐制作"}, {66, "特别鸣谢"}, {67, "动画制作"}, {69, "CG 导演"}, {70, "机械作画监督"},
+        {71, "美术设计"}, {72, "副导演"}, {73, "OP・ED 分镜"}, {74, "总导演"}, {75, "3DCG"}, {76, "制作协力"}, {77, "动作作画监督"}, {80, "监制"},
+        {81, "协力"}, {82, "摄影"}, {83, "制作进行协力"}, {84, "设定制作"}, {85, "音乐制作人"}, {86, "3DCG 导演"}, {87, "动画制片人"}, {88, "特效作画监督"}, {89, "主演出"}, {90, "作画监督助理"},
+        {91, "演出助理"}, {92, "主动画师"}, {93, "上色"}, {94, "上色检查"}, {95, "色彩检查"}, {96, "美术板"}, {97, "美术"}, {98, "印象板"}, {99, "2D 设计"}, {100, "3D 设计"},
+        {101, "技术导演"}, {102, "特技导演"}, {103, "色彩脚本"}, {104, "分镜协力"}, {105, "分镜抄写"}, {106, "副人物设定"}, {107, "客座人物设定"}, {108, "构图监修"}, {109, "构图作画监督"}, {110, "总作画监督助理"},
+        {111, "道具作画监督"}, {112, "概念设计"}, {113, "服装设计"}, {114, "标题设计"}, {115, "设定协力"}, {116, "音乐监督"}, {117, "选曲"}, {118, "插入歌作词"}, {119, "插入歌作曲"}, {120, "插入歌编曲"},
+        {121, "创意制片人"}, {122, "副制片人"}, {123, "制作统括"}, {124, "现场制片人"}, {125, "文艺制作"}, {127, "企画协力"}, {128, "OP・ED 演出"}, {129, "Bank 分镜演出"}, {130, "Live 分镜演出"},
+        {131, "剧中剧分镜演出"}, {132, "剧中剧人设"}, {133, "视觉导演"}, {134, "创意总监"}, {135, "特摄效果"}, {136, "视觉效果"}, {137, "动作导演"}, {138, "转场绘"}, {139, "插画"}, {140, "角色作画监督"},
+        {141, "作画监修"}, {142, "机设原案"}, {143, "概念艺术"}, {144, "视觉概念"}, {145, "画面设计"}, {146, "怪物设计"}, {147, "故事概念"}, {148, "剧本协调"}, {149, "脚本协力"}, {150, "副系列构成"},
+        {151, "构成协力"}, {152, "录音工作室"}, {153, "整音"}, {154, "音响制作担当"}, {155, "在线剪辑"}, {156, "离线剪辑"}, {157, "3D 动画师"}, {158, "CG 制作人"}, {159, "宣传制片人"}, {160, "美术制作人"},
+        {161, "音响制作人"}, {162, "CG 制作进行"}, {163, "美术制作进行"}, {164, "美术监督助理"}, {165, "色彩设计助理"}, {166, "摄影监督助理"}, {167, "制作管理助理"}, {168, "设定制作助理"},
+        {1001, "开发"}, {1002, "发行"}, {1003, "游戏设计师"}, {1004, "剧本"}, {1005, "美工"}, {1006, "音乐"}, {1007, "关卡设计"}, {1008, "人物设定"}, {1009, "主题歌作曲"}, {1010, "主题歌作词"},
+        {1011, "主题歌演出"}, {1012, "插入歌演出"}, {1013, "原画"}, {1014, "动画制作"}, {1015, "原作"}, {1016, "导演"}, {1017, "动画监督"}, {1018, "制作总指挥"}, {1019, "QC"}, {1020, "动画剧本"},
+        {1021, "程序"}, {1022, "协力"}, {1023, "CG 监修"}, {1024, "SD原画"}, {1025, "背景"}, {1026, "监修"}, {1027, "系列构成"}, {1028, "企画"}, {1029, "机械设定"}, {1030, "音响监督"},
+        {1031, "作画监督"}, {1032, "制作人"}, {1033, "海报"},
+        {2001, "作者"}, {2002, "作画"}, {2003, "插图"}, {2004, "出版社"}, {2005, "连载杂志"}, {2006, "译者"}, {2007, "原作"}, {2008, "客串"}, {2009, "人物原案"}, {2010, "脚本"},
+        {2011, "书系"}, {2012, "出品方"}, {2013, "图书品牌"}
+    };
+    QWidget *content = ui.scrollAreaWidgetContents_2;
+    QMap<int, QVector<QPair<int, QString>>> grouped;
+    for (const auto &[person_id, position, name, name_cn] : m_persons) grouped[position].append({person_id, name_cn.isEmpty() ? name : name_cn});
+    QList<int> displayOrder;
+    displayOrder << 67;
+    QList<int> remainingKeys = grouped.keys();
+    std::sort(remainingKeys.begin(), remainingKeys.end());
+    for (int key : remainingKeys) if (!displayOrder.contains(key)) displayOrder.append(key);
+    auto *mainLayout = new QVBoxLayout(content);
+    const QString bangumiBaseUrl = getConfig("Bangumi/bangumi_base_url").toString();
+    for (int posKey : displayOrder) {
+        const auto &persons = grouped[posKey];
+        auto *row = new QFrame(content);
+        row->setStyleSheet(QString("QFrame {background-color: %1; font-size: 15px}").arg(m_color2.name()));
+        auto *layout = new QHBoxLayout(row);
+        auto *posLabel = new QLabel(positionMap.value(posKey, QString::number(posKey)), row);
+        posLabel->setFixedWidth(110);
+        QFont font = posLabel->font();
+        font.setBold(true);
+        posLabel->setFont(font);
+        auto *nameLabel = new QLabel(row);
+        nameLabel->setWordWrap(true);
+        nameLabel->setOpenExternalLinks(true);
+        QStringList personLinks;
+        for (const auto &[personId, personName] : persons) personLinks << QString("<a href=\"%1person/%2\">%3</a>").arg(bangumiBaseUrl).arg(personId).arg(personName);
+        nameLabel->setText(personLinks.join("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"));
+        layout->addWidget(posLabel);
+        layout->addWidget(nameLabel, 1);
+        mainLayout->addWidget(row);
+    }
+    mainLayout->addStretch();
+}
+
 void DetailPage::clearLayout() const
 {   // 清空组件
     if (QLayout *layout = ui.frame_5->layout()) {
@@ -324,9 +399,8 @@ void DetailPage::clearLayout() const
     }
 }
 
-void DetailPage::clearTab2() const
-{   // 清理角色Tab
-    const QWidget *content = ui.scrollAreaWidgetContents;
+void DetailPage::clearTab(const QWidget *content)
+{   // 清理Tab
     qDeleteAll(content->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly));
     if (content->layout()) delete content->layout();
 }
@@ -334,6 +408,8 @@ void DetailPage::clearTab2() const
 void DetailPage::resetUI()
 {   // 重置ui
     clearLayout();
+    clearTab(ui.scrollAreaWidgetContents);
+    clearTab(ui.scrollAreaWidgetContents_2);
     ui.textEdit->clear();
     ui.textEdit_2->clear();
     ui.cover_label_3->clear();
@@ -350,7 +426,9 @@ void DetailPage::resetUI()
 void DetailPage::onBackButtonClicked()
 {   // 返回
     m_characters.clear();
-    clearTab2();
+    characterTabInitialized = false;
+    m_persons.clear();
+    staffTabInitialized = false;
     resetUI();
     emit backButtonClicked();
 }
