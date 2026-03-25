@@ -1,7 +1,8 @@
 #include "progress_util.h"
 #include <QJsonArray>
+#include "../sql/sql.h"
 
-QString computeProgressText(const CollectionData &collection, const QJsonObject &airdatesJson)
+QString computeProgressText(CollectionData &collection, const QJsonObject &airdatesJson, const DatabaseManager *db)
 {   // 计算进度
     if (collection.subject_type == 2) {
         const QDate currentDate = QDate::currentDate();
@@ -38,6 +39,7 @@ QString computeProgressText(const CollectionData &collection, const QJsonObject 
         return QString("连载至第 %1 话 · 全 %2 话 · %3").arg(airedCount).arg(totalEpsStr, progress);
     }
     if (collection.subject_type == 7 || collection.subject_type == 8 || collection.subject_type == 1) {
+        collection.subject_volumes = db->countSubjectRelations(collection.subject_id);
         QString totalVols = collection.subject_volumes > 0 ? QString::number(collection.subject_volumes) : "--";
         QString totalEps = collection.subject_eps > 0 ? QString::number(collection.subject_eps) : "--";
         return QString("全 %1 卷 · 全 %2 话").arg(totalVols, totalEps);

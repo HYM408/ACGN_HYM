@@ -2,7 +2,7 @@
 #define DETAIL_PAGE_H
 
 #include "detail_ui.h"
-#include "score_chart_widget.h"
+#include <QStack>
 #include "../sql/data_structs.h"
 
 class BangumiAPI;
@@ -11,6 +11,7 @@ class CacheImageUtil;
 class DatabaseManager;
 class GameMonitorUtil;
 class StarRatingWidget;
+class ScoreChartWidget;
 class RatingChartWidget;
 
 class DetailPage : public QWidget
@@ -19,9 +20,10 @@ class DetailPage : public QWidget
 
 public:
     explicit DetailPage(QWidget *parent = nullptr);
-    void setCollectionData(const CollectionData &data, const QString &progressText);
+    void setCollectionData(int subjectId, const QString &progressText);
     void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db, GameMonitorUtil *gameMonitor);
     void resetUI();
+    void clearHistory();
 
 signals:
     void backButtonClicked();
@@ -34,26 +36,29 @@ private slots:
     void onOpenBangumiPage() const;
     void onStatusButtonClicked();
     void clickOnTab(int index);
+    void onBackButtonClicked();
 
 protected:
     void applyTheme();
     void resizeEvent(QResizeEvent *event) override;
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
     void setupConnections();
-    void updateDetailPage(const SubjectsData &subjectData);
-    void setupScoreChart(const QVector<int>& scoreDetails, int total);
+    void updateDetailPage(const QString &progressText);
+    void setupScoreChart(const QVector<int> &scoreDetails, int total);
     void tagsDisplay(const QList<QPair<QString, int>> &tagPairs);
     static QString getTimeInfo(const QList<QPair<QString, int>> &tagPairs, const QString &dateStr);
     void onRatingButtonClicked();
+    template<typename DataType, typename CreateFunc>
+    void setupTabTemplate(QWidget *content, const QVector<DataType> &data, CreateFunc createCardFunc);
     void onCharacterTab();
+    void onRelationTab();
     void onStaffTab();
     void clearLayout() const;
     static void clearTab(const QWidget *content) ;
-    void loadData();
-    void onBackButtonClicked();
+    void loadData(int subjectId, const QString &progressText);
     Ui::DetailPage ui{};
-    CollectionData currentData;
     CacheImageUtil *cacheImageUtil = nullptr;
     BangumiAPI *bangumiAPI = nullptr;
     DatabaseManager *dbManager = nullptr;
@@ -61,28 +66,19 @@ private:
     QListWidget *tagListWidget = nullptr;
     StarRatingWidget *m_starRating = nullptr;
     ScoreChartWidget *m_scoreChartWidget = nullptr;
+    QStack<int> m_historyStack;
+    CollectionData currentData;
+    SubjectsData subjectData;
     QMap<int, QMap<int, QString>> statusNamesMap;
     QVector<CharacterData> m_characters;
+    QVector<SubjectRelationData> m_relations;
     QVector<PersonData> m_persons;
     bool characterTabInitialized = false;
+    bool relationTabInitialized = false;
     bool staffTabInitialized = false;
     QList<QPair<QString, int>> m_currentTagPairs;
     QColor m_color2;
     QColor m_color3;
-};
-
-class ClickableLabel : public QLabel
-{
-    Q_OBJECT
-
-public:
-    explicit ClickableLabel(const QString &text, QWidget *parent = nullptr);
-
-signals:
-    void clicked();
-
-protected:
-    void mousePressEvent(QMouseEvent *event) override;
 };
 
 #endif // DETAIL_PAGE_H

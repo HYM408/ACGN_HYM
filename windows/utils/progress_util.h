@@ -3,6 +3,8 @@
 
 #include "../sql/data_structs.h"
 
-QString computeProgressText(const CollectionData &collection, const QJsonObject &airdatesJson);
+class DatabaseManager;
+
+QString computeProgressText(CollectionData &collection, const QJsonObject &airdatesJson, const DatabaseManager *db);
 
 #endif // PROGRESS_UTIL_H

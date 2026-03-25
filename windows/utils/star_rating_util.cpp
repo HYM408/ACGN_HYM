@@ -12,7 +12,8 @@ StarRatingWidget::StarRatingWidget(const int maxStars, QWidget *parent) : QWidge
     const int totalWidth = m_maxStars * m_starSize + (m_maxStars - 1) * m_spacing + 10;
     setFixedWidth(totalWidth);
     m_descriptions = {"不忍直视 1 (请谨慎评价)", "很差 2", "差 3", "较差 4", "不过不失 5", "还行 6", "推荐 7", "力荐 8", "神作 9", "超神作 10 (请谨慎评价)"};
-    m_hoverWindow = new QWidget(nullptr, Qt::ToolTip);
+    m_hoverWindow = new QWidget(nullptr, Qt::ToolTip | Qt::FramelessWindowHint);
+    m_hoverWindow->setAttribute(Qt::WA_TranslucentBackground);
     m_hoverLabel = new QLabel(m_hoverWindow);
     m_hoverWindow->hide();
 }

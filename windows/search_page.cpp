@@ -6,7 +6,6 @@
 #include "detail_page/detail_page.h"
 #include "api/bangumi_api.h"
 #include "utils/image_util.h"
-#include "utils/progress_util.h"
 #include "utils/game_monitor_util.h"
 #include "utils/context_menu_util.h"
 
@@ -144,21 +143,9 @@ bool SearchPage::eventFilter(QObject *watched, QEvent *event)
     if (event->type() == QEvent::MouseButtonPress) {
         if (const auto *mouseEvent = dynamic_cast<QMouseEvent*>(event); mouseEvent->button() == Qt::LeftButton) {
             if (const auto *frame = qobject_cast<QFrame*>(watched)) {
-                if (int subjectId = frame->property("subjectId").toInt(); subjectId > 0 && resultDataMap.contains(subjectId)) {
-                    QVariantMap original = resultDataMap[subjectId];
-                    const CollectionData collectionData = DatabaseManager::getCollectionBySubjectId(subjectId);
-                    CollectionData data = collectionData;
-                    if (collectionData.type == 0) {
-                        data.subject_id = subjectId;
-                        data.subject_name = original["name"].toString();
-                        data.subject_name_cn = original["name_cn"].toString();
-                        data.subject_type = original["type"].toInt();
-                        data.subject_volumes = original["volumes"].toInt();
-                        data.subject_eps = original["eps"].toInt();
-                        data.subject_date = original["date"].toString();
-                    }
-                    const QString progressText = computeProgressText(data, dbManager->getEpisodeAirdates({subjectId}));
-                    detailPage->setCollectionData(data, progressText);
+                const int subjectId = frame->property("subjectId").toInt();
+                if (subjectId > 0 && resultDataMap.contains(subjectId)) {
+                    detailPage->setCollectionData(subjectId, "");
                     ui.stackedWidget->setCurrentWidget(detailPage);
                     return true;
                 }

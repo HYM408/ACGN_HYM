@@ -297,8 +297,8 @@ void MainWindow::onSettingsButtonClicked()
     main_stackedWidget->setCurrentWidget(settingsPage);
 }
 
-void MainWindow::onShowDetailPageRequested(const CollectionData &collectionData, const QString &progressText)
-{   // 主页面 to 详情页面
+void MainWindow::onShowDetailPageRequested(const int subjectId, const QString &progressText)
+{   // 切换到详情页面
     if (!detailPage) {
         detailPage = new DetailPage();
         detailPage->setManagers(cacheImageUtil, bangumiAPI, dbManager, gameMonitorUtil);
@@ -308,7 +308,8 @@ void MainWindow::onShowDetailPageRequested(const CollectionData &collectionData,
         connect(detailPage, &DetailPage::tagClicked, this, &MainWindow::onTagClicked);
         connect(detailPage, &DetailPage::refresh, this, [this] {mainPageManager->loadCollections(mainPageManager->getCurrentSubjectType(), mainPageManager->getCurrentStatusType(), false);});
     }
-    detailPage->setCollectionData(collectionData, progressText);
+    detailPage->clearHistory();
+    detailPage->setCollectionData(subjectId, progressText);
     main_stackedWidget->setCurrentWidget(detailPage);
 }
 

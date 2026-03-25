@@ -36,9 +36,12 @@ public:
     [[nodiscard]] QJsonObject getEpisodeAirdates(const QList<int> &subjectIds) const;
     [[nodiscard]] QVector<EpisodeData> getEpisodeData(int subjectId) const;
     [[nodiscard]] bool insertOrUpdateSubject(const QJsonObject &apiData) const;
+    static SubjectsData buildSubjectsDataFromQuery(const QSqlQuery& query);
     [[nodiscard]] SubjectsData getSubjectById(int subjectId) const;
     [[nodiscard]] QVector<CharacterData> getCharacters(int subjectId) const;
     [[nodiscard]] QVector<PersonData> getPersons(int subjectId) const;
+    [[nodiscard]] QVector<SubjectRelationData> getSubjectRelations(int subjectId) const;
+    [[nodiscard]] int countSubjectRelations(int subjectdId) const;
 
 signals:
     void collectionDeleted();

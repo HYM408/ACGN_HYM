@@ -32,7 +32,7 @@ public:
     [[nodiscard]] int getCurrentStatusType() const {return currentStatusType;}
 
 signals:
-    void showDetailPageRequested(const CollectionData &collectionData, const QString &progressText);
+    void showDetailPageRequested(int subjectId, const QString &progressText);
     void showEpisodePageRequested(const CollectionData &collectionData);
     void showMainPageRequested();
 
@@ -53,7 +53,7 @@ private:
     void updatePageInfo() const;
     void displayCurrentPage();
     void clearDisplayArea();
-    void createCardComponents(CardComponents &card, const CollectionData &collection);
+    void createCardComponents(CardComponents &card, CollectionData &collection);
     bool eventFilter(QObject *obj, QEvent *event) override;
     Ui::MainWindow *mainWindow = nullptr;
     DatabaseManager *dbManager = nullptr;

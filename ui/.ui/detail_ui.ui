@@ -204,7 +204,7 @@ QPushButton:hover {
           <number>0</number>
          </property>
          <property name="rightMargin">
-          <number>150</number>
+          <number>0</number>
          </property>
          <property name="bottomMargin">
           <number>0</number>
@@ -236,30 +236,24 @@ QPushButton:hover {
          </item>
          <item>
           <widget class="QFrame" name="frame">
-           <layout class="QVBoxLayout" name="verticalLayout_13">
+           <layout class="QVBoxLayout" name="verticalLayout_5">
             <property name="spacing">
-             <number>13</number>
+             <number>0</number>
             </property>
             <property name="leftMargin">
              <number>10</number>
             </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
             <property name="bottomMargin">
-             <number>1</number>
+             <number>0</number>
             </property>
             <item>
-             <widget class="QTextEdit" name="textEdit">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>45</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>45</height>
-               </size>
-              </property>
+             <widget class="QLineEdit" name="lineEdit">
               <property name="font">
                <font>
                 <family>微软雅黑</family>
@@ -267,72 +261,26 @@ QPushButton:hover {
                 <bold>true</bold>
                </font>
               </property>
-              <property name="contextMenuPolicy">
-               <enum>Qt::ContextMenuPolicy::CustomContextMenu</enum>
-              </property>
-              <property name="frameShape">
-               <enum>QFrame::Shape::NoFrame</enum>
+              <property name="styleSheet">
+               <string notr="true">border:none;
+background-color: transparent;</string>
               </property>
               <property name="readOnly">
                <bool>true</bool>
               </property>
              </widget>
             </item>
-            <item alignment="Qt::AlignmentFlag::AlignLeft">
-             <widget class="QLabel" name="pushButton_23">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>35</height>
-               </size>
-              </property>
-              <property name="font">
-               <font>
-                <family>微软雅黑</family>
-                <pointsize>15</pointsize>
-                <bold>false</bold>
-               </font>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">border: 1px solid gray;
-border-radius:8px;
-padding: 2px 10px;</string>
-              </property>
-              <property name="text">
-               <string>TBA</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item alignment="Qt::AlignmentFlag::AlignLeft">
-             <widget class="QLabel" name="pushButton_24">
-              <property name="font">
-               <font>
-                <family>微软雅黑</family>
-                <pointsize>15</pointsize>
-               </font>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">border: none;</string>
-              </property>
-              <property name="text">
-               <string>全-话</string>
-              </property>
-             </widget>
-            </item>
-            <item alignment="Qt::AlignmentFlag::AlignLeft">
-             <widget class="QFrame" name="frame_2">
+            <item>
+             <widget class="QFrame" name="frame_8">
               <property name="frameShape">
                <enum>QFrame::Shape::StyledPanel</enum>
               </property>
               <property name="frameShadow">
                <enum>QFrame::Shadow::Raised</enum>
               </property>
-              <layout class="QHBoxLayout" name="horizontalLayout">
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
                <property name="spacing">
-                <number>20</number>
+                <number>0</number>
                </property>
                <property name="leftMargin">
                 <number>0</number>
@@ -341,92 +289,184 @@ padding: 2px 10px;</string>
                 <number>0</number>
                </property>
                <property name="rightMargin">
-                <number>0</number>
+                <number>150</number>
                </property>
                <property name="bottomMargin">
                 <number>0</number>
                </property>
                <item>
-                <widget class="QLabel" name="pushButton_21">
-                 <property name="font">
-                  <font>
-                   <family>微软雅黑</family>
-                   <pointsize>15</pointsize>
-                  </font>
+                <widget class="QFrame" name="frame_7">
+                 <property name="frameShape">
+                  <enum>QFrame::Shape::StyledPanel</enum>
                  </property>
-                 <property name="styleSheet">
-                  <string notr="true">border: none;</string>
+                 <property name="frameShadow">
+                  <enum>QFrame::Shadow::Raised</enum>
                  </property>
-                 <property name="text">
-                  <string>|人评|#</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton">
-                 <property name="minimumSize">
-                  <size>
-                   <width>80</width>
-                   <height>35</height>
-                  </size>
-                 </property>
-                 <property name="font">
-                  <font>
-                   <family>微软雅黑</family>
-                   <pointsize>15</pointsize>
-                  </font>
-                 </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_4">
+                  <property name="spacing">
+                   <number>13</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item alignment="Qt::AlignmentFlag::AlignLeft">
+                   <widget class="QLabel" name="pushButton_23">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>35</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <family>微软雅黑</family>
+                      <pointsize>15</pointsize>
+                      <bold>false</bold>
+                     </font>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">border: 1px solid gray;
+border-radius:8px;
+padding: 2px 10px;</string>
+                    </property>
+                    <property name="text">
+                     <string>TBA</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignmentFlag::AlignCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignLeft">
+                   <widget class="QLabel" name="pushButton_24">
+                    <property name="font">
+                     <font>
+                      <family>微软雅黑</family>
+                      <pointsize>15</pointsize>
+                     </font>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">border: none;</string>
+                    </property>
+                    <property name="text">
+                     <string>全-话</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignLeft">
+                   <widget class="QFrame" name="frame_2">
+                    <property name="frameShape">
+                     <enum>QFrame::Shape::StyledPanel</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Shadow::Raised</enum>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout">
+                     <property name="spacing">
+                      <number>20</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="pushButton_21">
+                       <property name="font">
+                        <font>
+                         <family>微软雅黑</family>
+                         <pointsize>15</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">border: none;</string>
+                       </property>
+                       <property name="text">
+                        <string>|人评|#</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="pushButton">
+                       <property name="minimumSize">
+                        <size>
+                         <width>80</width>
+                         <height>35</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <family>微软雅黑</family>
+                         <pointsize>15</pointsize>
+                        </font>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignLeft">
+                   <widget class="QLabel" name="pushButton_25">
+                    <property name="font">
+                     <font>
+                      <family>微软雅黑</family>
+                      <pointsize>15</pointsize>
+                     </font>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">border: none;</string>
+                    </property>
+                    <property name="text">
+                     <string>收藏/在看/抛弃</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignLeft">
+                   <widget class="QPushButton" name="pushButton_26">
+                    <property name="minimumSize">
+                     <size>
+                      <width>80</width>
+                      <height>35</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <family>微软雅黑</family>
+                      <pointsize>15</pointsize>
+                     </font>
+                    </property>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignLeft">
+                   <widget class="QPushButton" name="pushButton_27">
+                    <property name="minimumSize">
+                     <size>
+                      <width>80</width>
+                      <height>35</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <family>微软雅黑</family>
+                      <pointsize>14</pointsize>
+                     </font>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </widget>
                </item>
               </layout>
-             </widget>
-            </item>
-            <item alignment="Qt::AlignmentFlag::AlignLeft">
-             <widget class="QLabel" name="pushButton_25">
-              <property name="font">
-               <font>
-                <family>微软雅黑</family>
-                <pointsize>15</pointsize>
-               </font>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">border: none;</string>
-              </property>
-              <property name="text">
-               <string>收藏/在看/抛弃</string>
-              </property>
-             </widget>
-            </item>
-            <item alignment="Qt::AlignmentFlag::AlignLeft">
-             <widget class="QPushButton" name="pushButton_26">
-              <property name="minimumSize">
-               <size>
-                <width>80</width>
-                <height>35</height>
-               </size>
-              </property>
-              <property name="font">
-               <font>
-                <family>微软雅黑</family>
-                <pointsize>15</pointsize>
-               </font>
-              </property>
-             </widget>
-            </item>
-            <item alignment="Qt::AlignmentFlag::AlignLeft">
-             <widget class="QPushButton" name="pushButton_27">
-              <property name="minimumSize">
-               <size>
-                <width>80</width>
-                <height>35</height>
-               </size>
-              </property>
-              <property name="font">
-               <font>
-                <family>微软雅黑</family>
-                <pointsize>14</pointsize>
-               </font>
-              </property>
              </widget>
             </item>
            </layout>
@@ -460,7 +500,7 @@ QTabWidget {
 }</string>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -593,6 +633,9 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
 
 </string>
             </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
+            </property>
             <property name="widgetResizable">
              <bool>true</bool>
             </property>
@@ -601,8 +644,8 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>1451</width>
-               <height>534</height>
+               <width>89</width>
+               <height>30</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -617,6 +660,75 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
          <attribute name="title">
           <string>相关条目</string>
          </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <property name="leftMargin">
+           <number>50</number>
+          </property>
+          <property name="topMargin">
+           <number>20</number>
+          </property>
+          <property name="rightMargin">
+           <number>20</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QScrollArea" name="scrollArea_3">
+            <property name="styleSheet">
+             <string notr="true">QScrollArea {
+	border: none;
+}
+
+QScrollBar:vertical {
+    border: none;
+    background: #f0f0f0;
+    width: 11px;
+}
+
+QScrollBar::handle:vertical {
+    background: #c0c0c0;
+    border-radius: 5px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #a0a0a0;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+    height: 0px;
+}
+
+</string>
+            </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
+            </property>
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="scrollAreaWidgetContents_3">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>1440</width>
+               <height>534</height>
+              </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: transparent;</string>
+             </property>
+            </widget>
+           </widget>
+          </item>
+         </layout>
         </widget>
         <widget class="QWidget" name="tab_4">
          <attribute name="title">
@@ -677,8 +789,8 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>1451</width>
-               <height>534</height>
+               <width>100</width>
+               <height>30</height>
               </rect>
              </property>
              <property name="styleSheet">

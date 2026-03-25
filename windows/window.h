@@ -21,10 +21,6 @@ class MainWindow : public QMainWindow, public Ui::MainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
-    [[nodiscard]] DatabaseManager *getDatabaseManager() const {return dbManager;}
-    [[nodiscard]] CacheImageUtil *getCacheImageUtil() const {return cacheImageUtil;}
-    [[nodiscard]] BangumiAPI *getBangumiAPI() const {return bangumiAPI;}
-    [[nodiscard]] PikPakApi *getPikPakApi() const {return pikpakApi;}
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
@@ -41,7 +37,7 @@ private slots:
     void onSettingsButtonClicked();
     void onDownloadButtonClicked();
     void onBackButtonClicked();
-    void onShowDetailPageRequested(const CollectionData &collectionData, const QString &progressText);
+    void onShowDetailPageRequested(int subjectId, const QString &progressText);
     void onShowEpisodePageRequested(const CollectionData &collectionData);
     void precreatePlayerPage();
     void onEpisodeClicked(const CollectionData &collectionData, const EpisodeData &episodeData);

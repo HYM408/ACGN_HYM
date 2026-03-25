@@ -82,8 +82,7 @@ bool MainPageManager::eventFilter(QObject *obj, QEvent *event)
 {   // 鼠标事件
     if (obj->property("isCard").toBool() && event->type() == QEvent::MouseButtonPress) {
         const auto *frame = qobject_cast<QFrame*>(obj);
-        const auto *progressLabel = frame->property("progressLabel").value<QLabel*>();
-        emit showDetailPageRequested(frame->property("collectionData").value<CollectionData>(), progressLabel ? progressLabel->text() : QString());
+        emit showDetailPageRequested(frame->property("collectionData").value<CollectionData>().subject_id, frame->property("progressLabel").value<QLabel*>()->text());
         return true;
     }
     for (auto &[statusType, info] : statusFrames.toStdMap()) {
@@ -198,7 +197,7 @@ void MainPageManager::displayCurrentPage()
     updatePageInfo();
 }
 
-void MainPageManager::createCardComponents(CardComponents &card, const CollectionData &collection)
+void MainPageManager::createCardComponents(CardComponents &card, CollectionData &collection)
 {   // 创建卡片
     // 主框架
     card.card = new QFrame(mainWindow->centralwidget);
@@ -254,7 +253,7 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
     const QString imageUrl = QString("https://api.bgm.tv/v0/subjects/%1/image?type=common").arg(collection.subject_id);
     ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, card.coverLabel, 40, false, true, QString("s%1.jpg").arg(collection.subject_id));
     card.titleLabel->setText(collection.subject_name_cn.isEmpty() ? collection.subject_name : collection.subject_name_cn);
-    card.progressLabel->setText(computeProgressText(collection, airdatesJson));
+    card.progressLabel->setText(computeProgressText(collection, airdatesJson, dbManager));
     card.card->setProperty("progressLabel", QVariant::fromValue(card.progressLabel));
     if (collection.subject_type == 2) card.episodeButton->setText("选集");
     else if (collection.subject_type == 4) card.episodeButton->setText("启动");
@@ -264,7 +263,8 @@ void MainPageManager::createCardComponents(CardComponents &card, const Collectio
     // 连接信号
     connect(card.moreButton, &QPushButton::clicked, this, [this, card]() mutable {
         const auto data = card.card->property("collectionData").value<CollectionData>();
-        StatusSelector::showStatusSelector(card.moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, dbManager, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);});});
+        StatusSelector::showStatusSelector(card.moreButton, currentSubjectType, data.type, data.subject_id, bangumiAPI, dbManager, [this](int) {loadCollections(currentSubjectType, currentStatusType, false);});
+    });
     if (collection.subject_type == 4) connect(card.episodeButton, &QPushButton::clicked, this, [this, subjectId = collection.subject_id] {gameMonitor->startGame(subjectId);});
     else connect(card.episodeButton, &QPushButton::clicked, this, [this, data = collection] {emit showEpisodePageRequested(data);});
 }

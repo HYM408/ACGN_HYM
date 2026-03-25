@@ -46,7 +46,7 @@ void DatabaseManager::initTables()
         // episode公共数据表
         "CREATE TABLE IF NOT EXISTS episode_public_date (subject_id INTEGER, episode_id INTEGER, airdate INTEGER, sort INTEGER, type INTEGER, PRIMARY KEY (subject_id, episode_id))",
         // subject公共数据表
-        "CREATE TABLE IF NOT EXISTS subject_public_date (subject_id INTEGER PRIMARY KEY, name TEXT, name_cn TEXT, summary BLOB, tags TEXT, meta_tags TEXT, score INTEGER, rank INTEGER, date INTEGER, score_details TEXT, doing INTEGER, done INTEGER, dropped INTEGER, on_hold INTEGER, wish INTEGER)",
+        "CREATE TABLE IF NOT EXISTS subject_public_date (subject_id INTEGER PRIMARY KEY, type INTEGER, name TEXT, name_cn TEXT, summary BLOB, tags TEXT, meta_tags TEXT, score INTEGER, rank INTEGER, date INTEGER, score_details TEXT, doing INTEGER, done INTEGER, dropped INTEGER, on_hold INTEGER, wish INTEGER)",
         // character公共数据表
         "CREATE TABLE IF NOT EXISTS character_public_date (character_id INTEGER PRIMARY KEY, name TEXT, name_cn TEXT)",
         // subject character对应表
@@ -56,7 +56,9 @@ void DatabaseManager::initTables()
         // person character对应表
         "CREATE TABLE IF NOT EXISTS person_character (person_id INTEGER, subject_id INTEGER, character_id INTEGER, PRIMARY KEY (person_id, subject_id))",
         // subject person对应表
-        "CREATE TABLE IF NOT EXISTS subject_persons (subject_id INTEGER, person_id INTEGER, position INTEGER, PRIMARY KEY (subject_id, person_id, position))"
+        "CREATE TABLE IF NOT EXISTS subject_persons (subject_id INTEGER, person_id INTEGER, position INTEGER, PRIMARY KEY (subject_id, person_id, position))",
+        // subject relation对应表
+        "CREATE TABLE IF NOT EXISTS subject_relations (subject_id INTEGER, related_subject_id INTEGER, relation_type INTEGER, PRIMARY KEY (subject_id, related_subject_id))"
     };
     QSqlQuery publicQuery(QSqlDatabase::database("public_date_connection"));
     for (const auto &sql : publicTables) publicQuery.exec(sql);
@@ -418,12 +420,14 @@ QVector<EpisodeData> DatabaseManager::getEpisodeData(const int subjectId) const
 bool DatabaseManager::insertOrUpdateSubject(const QJsonObject &apiData) const
 {   // 插入subjects信息(API)
     QSqlQuery query(episodePublicDate);
-    query.prepare("INSERT OR REPLACE INTO subject_public_date VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    query.prepare("INSERT OR REPLACE INTO subject_public_date VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
     query.addBindValue(apiData["id"].toInt());
+    const QJsonArray tags = apiData["tags"].toArray();
+    query.addBindValue(determineSubjectType(apiData["type"].toInt(), tags));
     query.addBindValue(apiData["name"].toString());
     query.addBindValue(apiData["name_cn"].toString());
     query.addBindValue(compressString(apiData["summary"].toString()));
-    query.addBindValue(simplifyTags(apiData["tags"].toArray()));
+    query.addBindValue(simplifyTags(tags));
     query.addBindValue(QJsonDocument(apiData["meta_tags"].toArray()).toJson(QJsonDocument::Compact));
     QJsonObject rating = apiData["rating"].toObject();
     query.addBindValue(rating["score"].toDouble() * 10.0);
@@ -439,32 +443,37 @@ bool DatabaseManager::insertOrUpdateSubject(const QJsonObject &apiData) const
     return executeQuery(query, "插入subject失败");
 }
 
+SubjectsData DatabaseManager::buildSubjectsDataFromQuery(const QSqlQuery &query)
+{   // 构建SubjectsData
+    SubjectsData data;
+    data.subject_id = query.value("subject_id").toInt();
+    data.subject_type = query.value("type").toInt();
+    data.name = query.value("name").toString();
+    data.name_cn = query.value("name_cn").toString();
+    data.summary = decompressString(query.value("summary").toByteArray());
+    data.tags = QJsonDocument::fromJson(query.value("tags").toString().toUtf8()).object();
+    data.meta_tags = query.value("meta_tags").toString();
+    data.rating_score = query.value("score").toInt() / 10.0;
+    data.rating_rank = query.value("rank").toInt();
+    data.date = timestampToDateString(query.value("date").toLongLong());
+    const QStringList parts = query.value("score_details").toString().split(',');
+    for (const QString &part : parts) data.score_details.append(part.toInt());
+    data.doing = query.value("doing").toInt();
+    data.collect = query.value("done").toInt();
+    data.dropped = query.value("dropped").toInt();
+    data.on_hold = query.value("on_hold").toInt();
+    data.wish = query.value("wish").toInt();
+    return data;
+}
+
 SubjectsData DatabaseManager::getSubjectById(const int subjectId) const
-{   // // 根据ID获取subject信息
+{   // 根据ID获取subject信息
     QSqlQuery query(episodePublicDate);
     query.prepare("SELECT * FROM subject_public_date WHERE subject_id = ?");
     query.addBindValue(subjectId);
     if (!executeQuery(query, "获取subject失败")) return {};
     if (!query.next()) return {};
-    SubjectsData data;
-    data.subject_id = query.value("subject_id").toInt();
-    data.name = query.value("name").toString();
-    data.name_cn = query.value("name_cn").toString();
-    const QByteArray compressedSummary = query.value("summary").toByteArray();
-    if (!compressedSummary.isEmpty()) data.summary = decompressString(compressedSummary);
-    const QString tagsJson = query.value("tags").toString();
-    if (!tagsJson.isEmpty()) data.tags = QJsonDocument::fromJson(tagsJson.toUtf8()).object();
-    data.meta_tags = query.value("meta_tags").toString();
-    data.rating_score = query.value("score").toInt() / 10.0;
-    data.rating_rank = query.value("rank").toInt();
-    data.date = timestampToDateString(query.value("date").toLongLong());
-    for (const QString &part : query.value("score_details").toString().split(',')) data.score_details.append(part.toInt());
-    data.doing = query.value("doing").toInt();
-    data.collect = query.value("done").toInt();;
-    data.dropped = query.value("dropped").toInt();
-    data.on_hold = query.value("on_hold").toInt();
-    data.wish = query.value("wish").toInt();
-    return data;
+    return buildSubjectsDataFromQuery(query);
 }
 
 // =============== character相关 ===============
@@ -508,11 +517,7 @@ QVector<PersonData> DatabaseManager::getPersons(const int subjectId) const
 {   // 获取制作人员信息
     QVector<PersonData> results;
     QSqlQuery query(episodePublicDate);
-    query.prepare(
-        "SELECT sp.person_id, sp.position, pp.name, pp.name_cn "
-        "FROM subject_persons sp "
-        "JOIN person_public_date pp ON sp.person_id = pp.person_id "
-        "WHERE sp.subject_id = ?");
+    query.prepare("SELECT sp.*, pp.* FROM subject_persons sp JOIN person_public_date pp ON sp.person_id = pp.person_id WHERE sp.subject_id = ?");
     query.addBindValue(subjectId);
     if (!executeQuery(query, "获取制作人员信息失败")) return results;
     while (query.next()) {
@@ -524,4 +529,29 @@ QVector<PersonData> DatabaseManager::getPersons(const int subjectId) const
         results.append(info);
     }
     return results;
+}
+
+QVector<SubjectRelationData> DatabaseManager::getSubjectRelations(const int subjectId) const
+{   // 获取关联条目
+    QVector<SubjectRelationData> results;
+    QSqlQuery query(episodePublicDate);
+    query.prepare("SELECT sr.related_subject_id, sr.relation_type, sp.* FROM subject_relations sr JOIN subject_public_date sp ON sr.related_subject_id = sp.subject_id WHERE sr.subject_id = ?");
+    query.addBindValue(subjectId);
+    if (!executeQuery(query, "获取关联条目失败")) return results;
+    while (query.next()) {
+        SubjectRelationData relation;
+        relation.subject = buildSubjectsDataFromQuery(query);
+        relation.relation_type = query.value("relation_type").toInt();
+        results.append(relation);
+    }
+    return results;
+}
+
+int DatabaseManager::countSubjectRelations(const int subjectdId) const
+{   // 统计单行本数量
+    QSqlQuery query(episodePublicDate);
+    query.prepare("SELECT COUNT(*) FROM subject_relations WHERE subject_id = ? AND relation_type = 1003");
+    query.addBindValue(subjectdId);
+    if (!executeQuery(query, "统计关联条目失败") || !query.next()) return 0;
+    return query.value(0).toInt();
 }

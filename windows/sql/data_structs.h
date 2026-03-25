@@ -19,6 +19,7 @@ struct CollectionData {
 
 struct SubjectsData {
     int subject_id = 0;
+    int subject_type = 0;
     QString name;
     QString name_cn;
     QString summary;
@@ -67,6 +68,11 @@ struct PersonData {
     int position = 0;
     QString name;
     QString name_cn;
+};
+
+struct SubjectRelationData {
+    SubjectsData subject;
+    int relation_type = 0;
 };
 
 struct GameData {

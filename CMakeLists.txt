@@ -37,6 +37,8 @@ add_executable(appACGN_HYM
         windows/api/pikpak_api.cpp
         windows/crawler/crawler.h
         windows/crawler/crawler.cpp
+        windows/detail_page/clickable_label.h
+        windows/detail_page/clickable_label.cpp
         windows/detail_page/detail_page.h
         windows/detail_page/detail_page.cpp
         windows/detail_page/score_chart_widget.h
