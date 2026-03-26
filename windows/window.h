@@ -53,8 +53,6 @@ private:
     void setupConnections();
     void checkCacheCleanup() const;
     void ensureSearchPage();
-    QPoint dragPosition;
-    bool isDragging = false;
     DatabaseManager *dbManager = nullptr;
     CacheImageUtil *cacheImageUtil = nullptr;
     BangumiAPI *bangumiAPI = nullptr;
@@ -72,6 +70,8 @@ private:
     QSystemTrayIcon *trayIcon = nullptr;
     QMenu *trayMenu = nullptr;
     QTimer *gameFocusTimer = nullptr;
+    QPoint m_dragPosition;
+    bool m_isDragging = false;
     bool m_wasMaximized = false;
     QRect m_savedNormalGeometry = QRect();
 };

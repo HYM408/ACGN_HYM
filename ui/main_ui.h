@@ -27,67 +27,68 @@ public:
     QVBoxLayout *verticalLayout;
     QFrame *titlebar_frame;
     QHBoxLayout *horizontalLayout;
-    QSpacerItem *horizontalSpacer_5;
-    QPushButton *pushButton;
-    QPushButton *pushButton_8;
-    QPushButton *pushButton_2;
-    QStackedWidget *main_stackedWidget;
+    QSpacerItem *spacerTitleLeft;
+    QPushButton *btnMinimize;
+    QPushButton *btnMaximize;
+    QPushButton *btnClose;
+    QStackedWidget *stackedMainWindow;
     QWidget *showmain_page;
-    QHBoxLayout *horizontalLayout_6;
+    QHBoxLayout *mainContentLayout;
     QFrame *toolbar_frame;
-    QVBoxLayout *verticalLayout_3;
-    QPushButton *search_Button;
+    QVBoxLayout *toolbarLayout;
+    QPushButton *btnSearch;
     QFrame *acgnselect_frame;
-    QVBoxLayout *verticalLayout_4;
-    QPushButton *animation_Button;
-    QPushButton *novel_Button;
-    QPushButton *game_Button;
-    QPushButton *comic_Button;
-    QPushButton *pushButton_9;
-    QSpacerItem *verticalSpacer;
-    QPushButton *settings_Button;
-    QStackedWidget *showmain_stackedWidget;
-    QWidget *showmain_stackedWidgetPage1;
-    QVBoxLayout *verticalLayout_2;
+    QVBoxLayout *categoryLayout;
+    QPushButton *btnAnime;
+    QPushButton *btnNovel;
+    QPushButton *btnGame;
+    QPushButton *btnComic;
+    QPushButton *btnDownload;
+    QSpacerItem *spacerToolbar;
+    QPushButton *btnSettings;
+    QStackedWidget *stackedMainContent;
+    QWidget *pageMainContent;
+    QVBoxLayout *mainPageLayout;
     QFrame *header_frame;
-    QVBoxLayout *verticalLayout_5;
-    QFrame *frame;
-    QHBoxLayout *horizontalLayout_4;
-    QLabel *project_Button;
-    QFrame *frame_2;
-    QHBoxLayout *horizontalLayout_5;
-    QFrame *frame_3;
-    QHBoxLayout *horizontalLayout_7;
-    QLabel *pushButton_3;
-    QLabel *pushButton_10;
-    QFrame *frame_5;
-    QHBoxLayout *horizontalLayout_8;
-    QLabel *pushButton_4;
-    QLabel *pushButton_11;
-    QFrame *frame_7;
-    QHBoxLayout *horizontalLayout_9;
-    QLabel *pushButton_5;
-    QLabel *pushButton_12;
-    QFrame *frame_9;
-    QHBoxLayout *horizontalLayout_10;
-    QLabel *pushButton_6;
-    QLabel *pushButton_13;
-    QFrame *frame_11;
-    QHBoxLayout *horizontalLayout_2;
-    QLabel *pushButton_7;
-    QLabel *pushButton_14;
-    QPushButton *refresh_Button;
-    QSpacerItem *horizontalSpacer;
-    QLineEdit *searchlist_lineEdit;
-    QFrame *animationdata_frame;
+    QVBoxLayout *headerLayout;
+    QFrame *titleFrame;
+    QHBoxLayout *titleLayout;
+    QLabel *labelCategoryTitle;
+    QFrame *statusBarFrame;
+    QHBoxLayout *statusBarLayout;
+    QPushButton *statusBtnWish;
+    QHBoxLayout *statusLayoutWish;
+    QLabel *statusLabelWish;
+    QLabel *statusCountWish;
+    QPushButton *statusBtnWatched;
+    QHBoxLayout *statusLayoutWatched;
+    QLabel *statusLabelWatched;
+    QLabel *statusCountWatched;
+    QPushButton *statusBtnWatching;
+    QHBoxLayout *statusLayoutWatching;
+    QLabel *statusLabelWatching;
+    QLabel *statusCountWatching;
+    QPushButton *statusBtnOnHold;
+    QHBoxLayout *statusLayoutOnHold;
+    QLabel *statusLabelOnHold;
+    QLabel *statusCountOnHold;
+    QPushButton *statusBtnDropped;
+    QHBoxLayout *statusLayoutDropped;
+    QLabel *statusLabelDropped;
+    QLabel *statusCountDropped;
+    QPushButton *btnRefresh;
+    QSpacerItem *spacerStatusRight;
+    QLineEdit *lineEditSearch;
+    QFrame *cardGridFrame;
     QGridLayout *gridLayout_2;
-    QFrame *page_frame;
-    QHBoxLayout *horizontalLayout_3;
-    QSpacerItem *horizontalSpacer_3;
-    QPushButton *previous_Button;
-    QLabel *pages_Button;
-    QPushButton *next_Button;
-    QSpacerItem *horizontalSpacer_2;
+    QFrame *pageControlFrame;
+    QHBoxLayout *pageControlLayout;
+    QSpacerItem *spacerPageLeft;
+    QPushButton *btnPrev;
+    QLabel *labelPage;
+    QPushButton *btnNext;
+    QSpacerItem *spacerPageRight;
+    QButtonGroup *buttonGroup_2;
     QButtonGroup *buttonGroup;
 
     void setupUi(QMainWindow *MainWindow)
@@ -112,15 +113,15 @@ public:
         horizontalLayout->setSpacing(0);
         horizontalLayout->setObjectName("horizontalLayout");
         horizontalLayout->setContentsMargins(0, 0, 0, 0);
-        horizontalSpacer_5 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+        spacerTitleLeft = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
-        horizontalLayout->addItem(horizontalSpacer_5);
+        horizontalLayout->addItem(spacerTitleLeft);
 
-        pushButton = new QPushButton(titlebar_frame);
-        pushButton->setObjectName("pushButton");
-        pushButton->setMinimumSize(QSize(45, 25));
-        pushButton->setMaximumSize(QSize(45, 25));
-        pushButton->setStyleSheet(QString::fromUtf8("QPushButton {\n"
+        btnMinimize = new QPushButton(titlebar_frame);
+        btnMinimize->setObjectName("btnMinimize");
+        btnMinimize->setMinimumSize(QSize(45, 25));
+        btnMinimize->setMaximumSize(QSize(45, 25));
+        btnMinimize->setStyleSheet(QString::fromUtf8("QPushButton {\n"
 "           border: none\n"
 "           }\n"
 "           QPushButton:hover {\n"
@@ -128,15 +129,15 @@ public:
 "           }"));
         QIcon icon;
         icon.addFile(QString::fromUtf8("icons/title3.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        pushButton->setIcon(icon);
+        btnMinimize->setIcon(icon);
 
-        horizontalLayout->addWidget(pushButton);
+        horizontalLayout->addWidget(btnMinimize);
 
-        pushButton_8 = new QPushButton(titlebar_frame);
-        pushButton_8->setObjectName("pushButton_8");
-        pushButton_8->setMinimumSize(QSize(45, 25));
-        pushButton_8->setMaximumSize(QSize(45, 25));
-        pushButton_8->setStyleSheet(QString::fromUtf8("QPushButton {\n"
+        btnMaximize = new QPushButton(titlebar_frame);
+        btnMaximize->setObjectName("btnMaximize");
+        btnMaximize->setMinimumSize(QSize(45, 25));
+        btnMaximize->setMaximumSize(QSize(45, 25));
+        btnMaximize->setStyleSheet(QString::fromUtf8("QPushButton {\n"
 "           border: none\n"
 "           }\n"
 "           QPushButton:hover {\n"
@@ -144,16 +145,16 @@ public:
 "           }"));
         QIcon icon1;
         icon1.addFile(QString::fromUtf8("icons/title2.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        pushButton_8->setIcon(icon1);
-        pushButton_8->setIconSize(QSize(13, 13));
+        btnMaximize->setIcon(icon1);
+        btnMaximize->setIconSize(QSize(13, 13));
 
-        horizontalLayout->addWidget(pushButton_8, 0, Qt::AlignmentFlag::AlignRight);
+        horizontalLayout->addWidget(btnMaximize, 0, Qt::AlignmentFlag::AlignRight);
 
-        pushButton_2 = new QPushButton(titlebar_frame);
-        pushButton_2->setObjectName("pushButton_2");
-        pushButton_2->setMinimumSize(QSize(45, 25));
-        pushButton_2->setMaximumSize(QSize(45, 25));
-        pushButton_2->setStyleSheet(QString::fromUtf8("QPushButton {\n"
+        btnClose = new QPushButton(titlebar_frame);
+        btnClose->setObjectName("btnClose");
+        btnClose->setMinimumSize(QSize(45, 25));
+        btnClose->setMaximumSize(QSize(45, 25));
+        btnClose->setStyleSheet(QString::fromUtf8("QPushButton {\n"
 "           border: none\n"
 "           }\n"
 "           QPushButton:hover {\n"
@@ -161,23 +162,23 @@ public:
 "           }"));
         QIcon icon2;
         icon2.addFile(QString::fromUtf8("icons/title1.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        pushButton_2->setIcon(icon2);
-        pushButton_2->setIconSize(QSize(14, 14));
+        btnClose->setIcon(icon2);
+        btnClose->setIconSize(QSize(14, 14));
 
-        horizontalLayout->addWidget(pushButton_2, 0, Qt::AlignmentFlag::AlignRight);
+        horizontalLayout->addWidget(btnClose, 0, Qt::AlignmentFlag::AlignRight);
 
 
         verticalLayout->addWidget(titlebar_frame);
 
-        main_stackedWidget = new QStackedWidget(centralwidget);
-        main_stackedWidget->setObjectName("main_stackedWidget");
-        main_stackedWidget->setStyleSheet(QString::fromUtf8(""));
+        stackedMainWindow = new QStackedWidget(centralwidget);
+        stackedMainWindow->setObjectName("stackedMainWindow");
+        stackedMainWindow->setStyleSheet(QString::fromUtf8(""));
         showmain_page = new QWidget();
         showmain_page->setObjectName("showmain_page");
-        horizontalLayout_6 = new QHBoxLayout(showmain_page);
-        horizontalLayout_6->setSpacing(0);
-        horizontalLayout_6->setObjectName("horizontalLayout_6");
-        horizontalLayout_6->setContentsMargins(0, 0, 0, 0);
+        mainContentLayout = new QHBoxLayout(showmain_page);
+        mainContentLayout->setSpacing(0);
+        mainContentLayout->setObjectName("mainContentLayout");
+        mainContentLayout->setContentsMargins(0, 0, 0, 0);
         toolbar_frame = new QFrame(showmain_page);
         toolbar_frame->setObjectName("toolbar_frame");
         QSizePolicy sizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Preferred);
@@ -188,320 +189,323 @@ public:
         toolbar_frame->setMinimumSize(QSize(80, 0));
         toolbar_frame->setMaximumSize(QSize(80, 16777215));
         toolbar_frame->setFrameShape(QFrame::Shape::NoFrame);
-        verticalLayout_3 = new QVBoxLayout(toolbar_frame);
-        verticalLayout_3->setSpacing(0);
-        verticalLayout_3->setObjectName("verticalLayout_3");
-        verticalLayout_3->setContentsMargins(0, 40, 0, -1);
-        search_Button = new QPushButton(toolbar_frame);
-        search_Button->setObjectName("search_Button");
+        toolbarLayout = new QVBoxLayout(toolbar_frame);
+        toolbarLayout->setSpacing(0);
+        toolbarLayout->setObjectName("toolbarLayout");
+        toolbarLayout->setContentsMargins(0, 40, 0, -1);
+        btnSearch = new QPushButton(toolbar_frame);
+        btnSearch->setObjectName("btnSearch");
         QSizePolicy sizePolicy1(QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Minimum);
         sizePolicy1.setHorizontalStretch(0);
         sizePolicy1.setVerticalStretch(0);
-        sizePolicy1.setHeightForWidth(search_Button->sizePolicy().hasHeightForWidth());
-        search_Button->setSizePolicy(sizePolicy1);
-        search_Button->setMinimumSize(QSize(50, 50));
-        search_Button->setMaximumSize(QSize(50, 50));
+        sizePolicy1.setHeightForWidth(btnSearch->sizePolicy().hasHeightForWidth());
+        btnSearch->setSizePolicy(sizePolicy1);
+        btnSearch->setMinimumSize(QSize(50, 50));
+        btnSearch->setMaximumSize(QSize(50, 50));
         QIcon icon3;
         icon3.addFile(QString::fromUtf8("icons/search.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        search_Button->setIcon(icon3);
-        search_Button->setIconSize(QSize(20, 20));
-        search_Button->setCheckable(true);
+        btnSearch->setIcon(icon3);
+        btnSearch->setIconSize(QSize(20, 20));
+        btnSearch->setCheckable(true);
 
-        verticalLayout_3->addWidget(search_Button, 0, Qt::AlignmentFlag::AlignHCenter);
+        toolbarLayout->addWidget(btnSearch, 0, Qt::AlignmentFlag::AlignHCenter);
 
         acgnselect_frame = new QFrame(toolbar_frame);
         acgnselect_frame->setObjectName("acgnselect_frame");
         acgnselect_frame->setMinimumSize(QSize(80, 0));
         acgnselect_frame->setFrameShape(QFrame::Shape::NoFrame);
-        verticalLayout_4 = new QVBoxLayout(acgnselect_frame);
-        verticalLayout_4->setSpacing(40);
-        verticalLayout_4->setObjectName("verticalLayout_4");
-        verticalLayout_4->setContentsMargins(-1, 15, -1, -1);
-        animation_Button = new QPushButton(acgnselect_frame);
+        categoryLayout = new QVBoxLayout(acgnselect_frame);
+        categoryLayout->setSpacing(40);
+        categoryLayout->setObjectName("categoryLayout");
+        categoryLayout->setContentsMargins(-1, 15, -1, -1);
+        btnAnime = new QPushButton(acgnselect_frame);
         buttonGroup = new QButtonGroup(MainWindow);
         buttonGroup->setObjectName("buttonGroup");
-        buttonGroup->addButton(animation_Button);
-        animation_Button->setObjectName("animation_Button");
-        animation_Button->setMinimumSize(QSize(0, 50));
-        animation_Button->setMaximumSize(QSize(80, 50));
+        buttonGroup->addButton(btnAnime);
+        btnAnime->setObjectName("btnAnime");
+        btnAnime->setMinimumSize(QSize(0, 50));
+        btnAnime->setMaximumSize(QSize(80, 50));
         QFont font;
         font.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font.setPointSize(15);
         font.setBold(true);
-        animation_Button->setFont(font);
-        animation_Button->setCheckable(true);
+        btnAnime->setFont(font);
+        btnAnime->setCheckable(true);
+        btnAnime->setChecked(true);
 
-        verticalLayout_4->addWidget(animation_Button);
+        categoryLayout->addWidget(btnAnime);
 
-        novel_Button = new QPushButton(acgnselect_frame);
-        buttonGroup->addButton(novel_Button);
-        novel_Button->setObjectName("novel_Button");
-        novel_Button->setMinimumSize(QSize(0, 50));
-        novel_Button->setMaximumSize(QSize(80, 50));
-        novel_Button->setFont(font);
-        novel_Button->setCheckable(true);
+        btnNovel = new QPushButton(acgnselect_frame);
+        buttonGroup->addButton(btnNovel);
+        btnNovel->setObjectName("btnNovel");
+        btnNovel->setMinimumSize(QSize(0, 50));
+        btnNovel->setMaximumSize(QSize(80, 50));
+        btnNovel->setFont(font);
+        btnNovel->setCheckable(true);
 
-        verticalLayout_4->addWidget(novel_Button);
+        categoryLayout->addWidget(btnNovel);
 
-        game_Button = new QPushButton(acgnselect_frame);
-        buttonGroup->addButton(game_Button);
-        game_Button->setObjectName("game_Button");
-        game_Button->setMinimumSize(QSize(0, 50));
-        game_Button->setMaximumSize(QSize(80, 50));
-        game_Button->setFont(font);
-        game_Button->setCheckable(true);
+        btnGame = new QPushButton(acgnselect_frame);
+        buttonGroup->addButton(btnGame);
+        btnGame->setObjectName("btnGame");
+        btnGame->setMinimumSize(QSize(0, 50));
+        btnGame->setMaximumSize(QSize(80, 50));
+        btnGame->setFont(font);
+        btnGame->setCheckable(true);
 
-        verticalLayout_4->addWidget(game_Button);
+        categoryLayout->addWidget(btnGame);
 
-        comic_Button = new QPushButton(acgnselect_frame);
-        buttonGroup->addButton(comic_Button);
-        comic_Button->setObjectName("comic_Button");
-        comic_Button->setMinimumSize(QSize(0, 50));
-        comic_Button->setMaximumSize(QSize(80, 50));
-        comic_Button->setFont(font);
-        comic_Button->setCheckable(true);
+        btnComic = new QPushButton(acgnselect_frame);
+        buttonGroup->addButton(btnComic);
+        btnComic->setObjectName("btnComic");
+        btnComic->setMinimumSize(QSize(0, 50));
+        btnComic->setMaximumSize(QSize(80, 50));
+        btnComic->setFont(font);
+        btnComic->setCheckable(true);
 
-        verticalLayout_4->addWidget(comic_Button);
+        categoryLayout->addWidget(btnComic);
 
-        pushButton_9 = new QPushButton(acgnselect_frame);
-        buttonGroup->addButton(pushButton_9);
-        pushButton_9->setObjectName("pushButton_9");
-        pushButton_9->setMinimumSize(QSize(0, 50));
-        pushButton_9->setMaximumSize(QSize(80, 50));
-        pushButton_9->setFont(font);
-        pushButton_9->setCheckable(true);
+        btnDownload = new QPushButton(acgnselect_frame);
+        buttonGroup->addButton(btnDownload);
+        btnDownload->setObjectName("btnDownload");
+        btnDownload->setMinimumSize(QSize(0, 50));
+        btnDownload->setMaximumSize(QSize(80, 50));
+        btnDownload->setFont(font);
+        btnDownload->setCheckable(true);
 
-        verticalLayout_4->addWidget(pushButton_9);
+        categoryLayout->addWidget(btnDownload);
 
 
-        verticalLayout_3->addWidget(acgnselect_frame);
+        toolbarLayout->addWidget(acgnselect_frame);
 
-        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
+        spacerToolbar = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
 
-        verticalLayout_3->addItem(verticalSpacer);
+        toolbarLayout->addItem(spacerToolbar);
 
-        settings_Button = new QPushButton(toolbar_frame);
-        settings_Button->setObjectName("settings_Button");
-        settings_Button->setMinimumSize(QSize(50, 50));
-        settings_Button->setMaximumSize(QSize(50, 50));
+        btnSettings = new QPushButton(toolbar_frame);
+        btnSettings->setObjectName("btnSettings");
+        btnSettings->setMinimumSize(QSize(50, 50));
+        btnSettings->setMaximumSize(QSize(50, 50));
         QIcon icon4;
         icon4.addFile(QString::fromUtf8("icons/settings.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        settings_Button->setIcon(icon4);
-        settings_Button->setCheckable(false);
+        btnSettings->setIcon(icon4);
+        btnSettings->setCheckable(false);
 
-        verticalLayout_3->addWidget(settings_Button, 0, Qt::AlignmentFlag::AlignHCenter);
+        toolbarLayout->addWidget(btnSettings, 0, Qt::AlignmentFlag::AlignHCenter);
 
 
-        horizontalLayout_6->addWidget(toolbar_frame);
+        mainContentLayout->addWidget(toolbar_frame);
 
-        showmain_stackedWidget = new QStackedWidget(showmain_page);
-        showmain_stackedWidget->setObjectName("showmain_stackedWidget");
-        showmain_stackedWidgetPage1 = new QWidget();
-        showmain_stackedWidgetPage1->setObjectName("showmain_stackedWidgetPage1");
-        verticalLayout_2 = new QVBoxLayout(showmain_stackedWidgetPage1);
-        verticalLayout_2->setSpacing(0);
-        verticalLayout_2->setObjectName("verticalLayout_2");
-        verticalLayout_2->setContentsMargins(0, 0, 0, 0);
-        header_frame = new QFrame(showmain_stackedWidgetPage1);
+        stackedMainContent = new QStackedWidget(showmain_page);
+        stackedMainContent->setObjectName("stackedMainContent");
+        pageMainContent = new QWidget();
+        pageMainContent->setObjectName("pageMainContent");
+        mainPageLayout = new QVBoxLayout(pageMainContent);
+        mainPageLayout->setSpacing(0);
+        mainPageLayout->setObjectName("mainPageLayout");
+        mainPageLayout->setContentsMargins(0, 0, 0, 0);
+        header_frame = new QFrame(pageMainContent);
         header_frame->setObjectName("header_frame");
         header_frame->setMinimumSize(QSize(0, 100));
         header_frame->setMaximumSize(QSize(16777215, 100));
         header_frame->setStyleSheet(QString::fromUtf8("background-color: white;"));
         header_frame->setFrameShape(QFrame::Shape::NoFrame);
-        verticalLayout_5 = new QVBoxLayout(header_frame);
-        verticalLayout_5->setSpacing(0);
-        verticalLayout_5->setObjectName("verticalLayout_5");
-        verticalLayout_5->setContentsMargins(-1, 0, -1, 0);
-        frame = new QFrame(header_frame);
-        frame->setObjectName("frame");
-        frame->setFrameShape(QFrame::Shape::StyledPanel);
-        frame->setFrameShadow(QFrame::Shadow::Raised);
-        horizontalLayout_4 = new QHBoxLayout(frame);
-        horizontalLayout_4->setSpacing(0);
-        horizontalLayout_4->setObjectName("horizontalLayout_4");
-        horizontalLayout_4->setContentsMargins(-1, 0, -1, 0);
-        project_Button = new QLabel(frame);
-        project_Button->setObjectName("project_Button");
-        project_Button->setMinimumSize(QSize(105, 35));
-        project_Button->setMaximumSize(QSize(16777215, 25));
+        headerLayout = new QVBoxLayout(header_frame);
+        headerLayout->setSpacing(0);
+        headerLayout->setObjectName("headerLayout");
+        headerLayout->setContentsMargins(-1, 0, -1, 0);
+        titleFrame = new QFrame(header_frame);
+        titleFrame->setObjectName("titleFrame");
+        titleFrame->setFrameShape(QFrame::Shape::StyledPanel);
+        titleFrame->setFrameShadow(QFrame::Shadow::Raised);
+        titleLayout = new QHBoxLayout(titleFrame);
+        titleLayout->setSpacing(0);
+        titleLayout->setObjectName("titleLayout");
+        titleLayout->setContentsMargins(-1, 0, -1, 0);
+        labelCategoryTitle = new QLabel(titleFrame);
+        labelCategoryTitle->setObjectName("labelCategoryTitle");
+        labelCategoryTitle->setMinimumSize(QSize(105, 35));
+        labelCategoryTitle->setMaximumSize(QSize(16777215, 25));
         QFont font1;
         font1.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font1.setPointSize(25);
         font1.setBold(true);
-        project_Button->setFont(font1);
-        project_Button->setStyleSheet(QString::fromUtf8("border: none;"));
+        labelCategoryTitle->setFont(font1);
+        labelCategoryTitle->setStyleSheet(QString::fromUtf8("border: none;"));
 
-        horizontalLayout_4->addWidget(project_Button, 0, Qt::AlignmentFlag::AlignLeft);
+        titleLayout->addWidget(labelCategoryTitle, 0, Qt::AlignmentFlag::AlignLeft);
 
 
-        verticalLayout_5->addWidget(frame);
+        headerLayout->addWidget(titleFrame);
 
-        frame_2 = new QFrame(header_frame);
-        frame_2->setObjectName("frame_2");
-        frame_2->setFrameShape(QFrame::Shape::StyledPanel);
-        frame_2->setFrameShadow(QFrame::Shadow::Raised);
-        horizontalLayout_5 = new QHBoxLayout(frame_2);
-        horizontalLayout_5->setSpacing(20);
-        horizontalLayout_5->setObjectName("horizontalLayout_5");
-        horizontalLayout_5->setContentsMargins(-1, 0, -1, 0);
-        frame_3 = new QFrame(frame_2);
-        frame_3->setObjectName("frame_3");
-        frame_3->setMinimumSize(QSize(90, 0));
-        frame_3->setMaximumSize(QSize(90, 16777215));
-        frame_3->setFrameShape(QFrame::Shape::StyledPanel);
-        frame_3->setFrameShadow(QFrame::Shadow::Raised);
-        horizontalLayout_7 = new QHBoxLayout(frame_3);
-        horizontalLayout_7->setSpacing(0);
-        horizontalLayout_7->setObjectName("horizontalLayout_7");
-        horizontalLayout_7->setContentsMargins(0, 0, 0, 0);
-        pushButton_3 = new QLabel(frame_3);
-        pushButton_3->setObjectName("pushButton_3");
-        pushButton_3->setFont(font);
-        pushButton_3->setStyleSheet(QString::fromUtf8("border:none;\n"
-"                         background-color: transparent"));
+        statusBarFrame = new QFrame(header_frame);
+        statusBarFrame->setObjectName("statusBarFrame");
+        statusBarFrame->setFrameShape(QFrame::Shape::StyledPanel);
+        statusBarFrame->setFrameShadow(QFrame::Shadow::Raised);
+        statusBarLayout = new QHBoxLayout(statusBarFrame);
+        statusBarLayout->setSpacing(20);
+        statusBarLayout->setObjectName("statusBarLayout");
+        statusBarLayout->setContentsMargins(-1, 0, -1, 0);
+        statusBtnWish = new QPushButton(statusBarFrame);
+        buttonGroup_2 = new QButtonGroup(MainWindow);
+        buttonGroup_2->setObjectName("buttonGroup_2");
+        buttonGroup_2->addButton(statusBtnWish);
+        statusBtnWish->setObjectName("statusBtnWish");
+        statusBtnWish->setMinimumSize(QSize(90, 50));
+        statusBtnWish->setMaximumSize(QSize(90, 50));
+        statusBtnWish->setCheckable(true);
+        statusLayoutWish = new QHBoxLayout(statusBtnWish);
+        statusLayoutWish->setSpacing(0);
+        statusLayoutWish->setObjectName("statusLayoutWish");
+        statusLayoutWish->setContentsMargins(5, 0, 5, 0);
+        statusLabelWish = new QLabel(statusBtnWish);
+        statusLabelWish->setObjectName("statusLabelWish");
+        statusLabelWish->setFont(font);
+        statusLabelWish->setStyleSheet(QString::fromUtf8("border:none; background-color: transparent"));
 
-        horizontalLayout_7->addWidget(pushButton_3);
+        statusLayoutWish->addWidget(statusLabelWish);
 
-        pushButton_10 = new QLabel(frame_3);
-        pushButton_10->setObjectName("pushButton_10");
-        pushButton_10->setMinimumSize(QSize(30, 30));
-        pushButton_10->setMaximumSize(QSize(30, 30));
+        statusCountWish = new QLabel(statusBtnWish);
+        statusCountWish->setObjectName("statusCountWish");
+        statusCountWish->setMinimumSize(QSize(30, 30));
+        statusCountWish->setMaximumSize(QSize(30, 30));
         QFont font2;
         font2.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
-        pushButton_10->setFont(font2);
-        pushButton_10->setAlignment(Qt::AlignmentFlag::AlignCenter);
+        statusCountWish->setFont(font2);
+        statusCountWish->setStyleSheet(QString::fromUtf8("border:none; background-color: transparent"));
+        statusCountWish->setAlignment(Qt::AlignmentFlag::AlignCenter);
 
-        horizontalLayout_7->addWidget(pushButton_10);
-
-
-        horizontalLayout_5->addWidget(frame_3);
-
-        frame_5 = new QFrame(frame_2);
-        frame_5->setObjectName("frame_5");
-        frame_5->setMinimumSize(QSize(90, 0));
-        frame_5->setMaximumSize(QSize(90, 16777215));
-        frame_5->setFrameShape(QFrame::Shape::StyledPanel);
-        frame_5->setFrameShadow(QFrame::Shadow::Raised);
-        horizontalLayout_8 = new QHBoxLayout(frame_5);
-        horizontalLayout_8->setSpacing(0);
-        horizontalLayout_8->setObjectName("horizontalLayout_8");
-        horizontalLayout_8->setContentsMargins(0, 0, 0, 0);
-        pushButton_4 = new QLabel(frame_5);
-        pushButton_4->setObjectName("pushButton_4");
-        pushButton_4->setFont(font);
-        pushButton_4->setStyleSheet(QString::fromUtf8("border:none;\n"
-"                         background-color: transparent"));
-
-        horizontalLayout_8->addWidget(pushButton_4);
-
-        pushButton_11 = new QLabel(frame_5);
-        pushButton_11->setObjectName("pushButton_11");
-        pushButton_11->setMinimumSize(QSize(30, 30));
-        pushButton_11->setMaximumSize(QSize(30, 30));
-        pushButton_11->setFont(font2);
-        pushButton_11->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        horizontalLayout_8->addWidget(pushButton_11);
+        statusLayoutWish->addWidget(statusCountWish);
 
 
-        horizontalLayout_5->addWidget(frame_5);
+        statusBarLayout->addWidget(statusBtnWish);
 
-        frame_7 = new QFrame(frame_2);
-        frame_7->setObjectName("frame_7");
-        frame_7->setMinimumSize(QSize(90, 0));
-        frame_7->setMaximumSize(QSize(90, 16777215));
-        frame_7->setFrameShape(QFrame::Shape::StyledPanel);
-        frame_7->setFrameShadow(QFrame::Shadow::Raised);
-        horizontalLayout_9 = new QHBoxLayout(frame_7);
-        horizontalLayout_9->setSpacing(0);
-        horizontalLayout_9->setObjectName("horizontalLayout_9");
-        horizontalLayout_9->setContentsMargins(0, 0, 0, 0);
-        pushButton_5 = new QLabel(frame_7);
-        pushButton_5->setObjectName("pushButton_5");
-        pushButton_5->setFont(font);
-        pushButton_5->setStyleSheet(QString::fromUtf8("border:none;\n"
-"                         background-color: transparent"));
+        statusBtnWatched = new QPushButton(statusBarFrame);
+        buttonGroup_2->addButton(statusBtnWatched);
+        statusBtnWatched->setObjectName("statusBtnWatched");
+        statusBtnWatched->setMinimumSize(QSize(90, 50));
+        statusBtnWatched->setMaximumSize(QSize(90, 50));
+        statusBtnWatched->setCheckable(true);
+        statusBtnWatched->setChecked(true);
+        statusLayoutWatched = new QHBoxLayout(statusBtnWatched);
+        statusLayoutWatched->setSpacing(0);
+        statusLayoutWatched->setObjectName("statusLayoutWatched");
+        statusLayoutWatched->setContentsMargins(5, 0, 5, 0);
+        statusLabelWatched = new QLabel(statusBtnWatched);
+        statusLabelWatched->setObjectName("statusLabelWatched");
+        statusLabelWatched->setFont(font);
+        statusLabelWatched->setStyleSheet(QString::fromUtf8("border:none; background-color: transparent"));
 
-        horizontalLayout_9->addWidget(pushButton_5);
+        statusLayoutWatched->addWidget(statusLabelWatched);
 
-        pushButton_12 = new QLabel(frame_7);
-        pushButton_12->setObjectName("pushButton_12");
-        pushButton_12->setMinimumSize(QSize(30, 30));
-        pushButton_12->setMaximumSize(QSize(30, 30));
-        pushButton_12->setFont(font2);
-        pushButton_12->setAlignment(Qt::AlignmentFlag::AlignCenter);
+        statusCountWatched = new QLabel(statusBtnWatched);
+        statusCountWatched->setObjectName("statusCountWatched");
+        statusCountWatched->setMinimumSize(QSize(30, 30));
+        statusCountWatched->setMaximumSize(QSize(30, 30));
+        statusCountWatched->setFont(font2);
+        statusCountWatched->setStyleSheet(QString::fromUtf8("border:none; background-color: transparent"));
+        statusCountWatched->setAlignment(Qt::AlignmentFlag::AlignCenter);
 
-        horizontalLayout_9->addWidget(pushButton_12);
-
-
-        horizontalLayout_5->addWidget(frame_7);
-
-        frame_9 = new QFrame(frame_2);
-        frame_9->setObjectName("frame_9");
-        frame_9->setMinimumSize(QSize(90, 0));
-        frame_9->setMaximumSize(QSize(90, 16777215));
-        frame_9->setFrameShape(QFrame::Shape::StyledPanel);
-        frame_9->setFrameShadow(QFrame::Shadow::Raised);
-        horizontalLayout_10 = new QHBoxLayout(frame_9);
-        horizontalLayout_10->setSpacing(0);
-        horizontalLayout_10->setObjectName("horizontalLayout_10");
-        horizontalLayout_10->setContentsMargins(0, 0, 0, 0);
-        pushButton_6 = new QLabel(frame_9);
-        pushButton_6->setObjectName("pushButton_6");
-        pushButton_6->setFont(font);
-        pushButton_6->setStyleSheet(QString::fromUtf8("border:none;\n"
-"                         background-color: transparent"));
-
-        horizontalLayout_10->addWidget(pushButton_6);
-
-        pushButton_13 = new QLabel(frame_9);
-        pushButton_13->setObjectName("pushButton_13");
-        pushButton_13->setMinimumSize(QSize(30, 30));
-        pushButton_13->setMaximumSize(QSize(30, 30));
-        pushButton_13->setFont(font2);
-        pushButton_13->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        horizontalLayout_10->addWidget(pushButton_13);
+        statusLayoutWatched->addWidget(statusCountWatched);
 
 
-        horizontalLayout_5->addWidget(frame_9);
+        statusBarLayout->addWidget(statusBtnWatched);
 
-        frame_11 = new QFrame(frame_2);
-        frame_11->setObjectName("frame_11");
-        frame_11->setMinimumSize(QSize(90, 0));
-        frame_11->setMaximumSize(QSize(90, 16777215));
-        frame_11->setStyleSheet(QString::fromUtf8(""));
-        frame_11->setFrameShape(QFrame::Shape::StyledPanel);
-        frame_11->setFrameShadow(QFrame::Shadow::Raised);
-        horizontalLayout_2 = new QHBoxLayout(frame_11);
-        horizontalLayout_2->setSpacing(0);
-        horizontalLayout_2->setObjectName("horizontalLayout_2");
-        horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
-        pushButton_7 = new QLabel(frame_11);
-        pushButton_7->setObjectName("pushButton_7");
-        pushButton_7->setFont(font);
-        pushButton_7->setStyleSheet(QString::fromUtf8("border:none;\n"
-"                         background-color: transparent"));
+        statusBtnWatching = new QPushButton(statusBarFrame);
+        buttonGroup_2->addButton(statusBtnWatching);
+        statusBtnWatching->setObjectName("statusBtnWatching");
+        statusBtnWatching->setMinimumSize(QSize(90, 50));
+        statusBtnWatching->setMaximumSize(QSize(90, 50));
+        statusBtnWatching->setCheckable(true);
+        statusLayoutWatching = new QHBoxLayout(statusBtnWatching);
+        statusLayoutWatching->setSpacing(0);
+        statusLayoutWatching->setObjectName("statusLayoutWatching");
+        statusLayoutWatching->setContentsMargins(5, 0, 5, 0);
+        statusLabelWatching = new QLabel(statusBtnWatching);
+        statusLabelWatching->setObjectName("statusLabelWatching");
+        statusLabelWatching->setFont(font);
+        statusLabelWatching->setStyleSheet(QString::fromUtf8("border:none; background-color: transparent"));
 
-        horizontalLayout_2->addWidget(pushButton_7);
+        statusLayoutWatching->addWidget(statusLabelWatching);
 
-        pushButton_14 = new QLabel(frame_11);
-        pushButton_14->setObjectName("pushButton_14");
-        pushButton_14->setMinimumSize(QSize(30, 30));
-        pushButton_14->setMaximumSize(QSize(30, 30));
-        pushButton_14->setFont(font2);
-        pushButton_14->setAlignment(Qt::AlignmentFlag::AlignCenter);
+        statusCountWatching = new QLabel(statusBtnWatching);
+        statusCountWatching->setObjectName("statusCountWatching");
+        statusCountWatching->setMinimumSize(QSize(30, 30));
+        statusCountWatching->setMaximumSize(QSize(30, 30));
+        statusCountWatching->setFont(font2);
+        statusCountWatching->setStyleSheet(QString::fromUtf8("border:none; background-color: transparent"));
+        statusCountWatching->setAlignment(Qt::AlignmentFlag::AlignCenter);
 
-        horizontalLayout_2->addWidget(pushButton_14, 0, Qt::AlignmentFlag::AlignRight);
+        statusLayoutWatching->addWidget(statusCountWatching);
 
 
-        horizontalLayout_5->addWidget(frame_11);
+        statusBarLayout->addWidget(statusBtnWatching);
 
-        refresh_Button = new QPushButton(frame_2);
-        refresh_Button->setObjectName("refresh_Button");
-        refresh_Button->setMinimumSize(QSize(50, 50));
-        refresh_Button->setMaximumSize(QSize(50, 50));
-        refresh_Button->setStyleSheet(QString::fromUtf8("QPushButton {\n"
+        statusBtnOnHold = new QPushButton(statusBarFrame);
+        buttonGroup_2->addButton(statusBtnOnHold);
+        statusBtnOnHold->setObjectName("statusBtnOnHold");
+        statusBtnOnHold->setMinimumSize(QSize(90, 50));
+        statusBtnOnHold->setMaximumSize(QSize(90, 50));
+        statusBtnOnHold->setCheckable(true);
+        statusLayoutOnHold = new QHBoxLayout(statusBtnOnHold);
+        statusLayoutOnHold->setSpacing(0);
+        statusLayoutOnHold->setObjectName("statusLayoutOnHold");
+        statusLayoutOnHold->setContentsMargins(5, 0, 5, 0);
+        statusLabelOnHold = new QLabel(statusBtnOnHold);
+        statusLabelOnHold->setObjectName("statusLabelOnHold");
+        statusLabelOnHold->setFont(font);
+        statusLabelOnHold->setStyleSheet(QString::fromUtf8("border:none; background-color: transparent"));
+
+        statusLayoutOnHold->addWidget(statusLabelOnHold);
+
+        statusCountOnHold = new QLabel(statusBtnOnHold);
+        statusCountOnHold->setObjectName("statusCountOnHold");
+        statusCountOnHold->setMinimumSize(QSize(30, 30));
+        statusCountOnHold->setMaximumSize(QSize(30, 30));
+        statusCountOnHold->setFont(font2);
+        statusCountOnHold->setStyleSheet(QString::fromUtf8("border:none; background-color: transparent"));
+        statusCountOnHold->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+        statusLayoutOnHold->addWidget(statusCountOnHold);
+
+
+        statusBarLayout->addWidget(statusBtnOnHold);
+
+        statusBtnDropped = new QPushButton(statusBarFrame);
+        buttonGroup_2->addButton(statusBtnDropped);
+        statusBtnDropped->setObjectName("statusBtnDropped");
+        statusBtnDropped->setMinimumSize(QSize(90, 50));
+        statusBtnDropped->setMaximumSize(QSize(90, 50));
+        statusBtnDropped->setCheckable(true);
+        statusLayoutDropped = new QHBoxLayout(statusBtnDropped);
+        statusLayoutDropped->setSpacing(0);
+        statusLayoutDropped->setObjectName("statusLayoutDropped");
+        statusLayoutDropped->setContentsMargins(5, 0, 5, 0);
+        statusLabelDropped = new QLabel(statusBtnDropped);
+        statusLabelDropped->setObjectName("statusLabelDropped");
+        statusLabelDropped->setFont(font);
+        statusLabelDropped->setStyleSheet(QString::fromUtf8("border:none; background-color: transparent"));
+
+        statusLayoutDropped->addWidget(statusLabelDropped);
+
+        statusCountDropped = new QLabel(statusBtnDropped);
+        statusCountDropped->setObjectName("statusCountDropped");
+        statusCountDropped->setMinimumSize(QSize(30, 30));
+        statusCountDropped->setMaximumSize(QSize(30, 30));
+        statusCountDropped->setFont(font2);
+        statusCountDropped->setStyleSheet(QString::fromUtf8("border:none; background-color: transparent"));
+        statusCountDropped->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+        statusLayoutDropped->addWidget(statusCountDropped);
+
+
+        statusBarLayout->addWidget(statusBtnDropped);
+
+        btnRefresh = new QPushButton(statusBarFrame);
+        btnRefresh->setObjectName("btnRefresh");
+        btnRefresh->setMinimumSize(QSize(50, 50));
+        btnRefresh->setMaximumSize(QSize(50, 50));
+        btnRefresh->setStyleSheet(QString::fromUtf8("QPushButton {\n"
 "                      border-bottom-color: rgb(24, 59, 255);\n"
 "                      background-color: white;\n"
 "                      border:none;\n"
@@ -517,47 +521,47 @@ public:
 "                      }"));
         QIcon icon5;
         icon5.addFile(QString::fromUtf8("icons/refresh.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        refresh_Button->setIcon(icon5);
-        refresh_Button->setIconSize(QSize(20, 20));
+        btnRefresh->setIcon(icon5);
+        btnRefresh->setIconSize(QSize(20, 20));
 
-        horizontalLayout_5->addWidget(refresh_Button);
+        statusBarLayout->addWidget(btnRefresh);
 
-        horizontalSpacer = new QSpacerItem(774, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+        spacerStatusRight = new QSpacerItem(774, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
-        horizontalLayout_5->addItem(horizontalSpacer);
+        statusBarLayout->addItem(spacerStatusRight);
 
-        searchlist_lineEdit = new QLineEdit(frame_2);
-        searchlist_lineEdit->setObjectName("searchlist_lineEdit");
-        searchlist_lineEdit->setMinimumSize(QSize(200, 25));
-        searchlist_lineEdit->setMaximumSize(QSize(200, 25));
-        searchlist_lineEdit->setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
-        searchlist_lineEdit->setStyleSheet(QString::fromUtf8(""));
+        lineEditSearch = new QLineEdit(statusBarFrame);
+        lineEditSearch->setObjectName("lineEditSearch");
+        lineEditSearch->setMinimumSize(QSize(200, 25));
+        lineEditSearch->setMaximumSize(QSize(200, 25));
+        lineEditSearch->setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
+        lineEditSearch->setStyleSheet(QString::fromUtf8(""));
 
-        horizontalLayout_5->addWidget(searchlist_lineEdit);
-
-
-        verticalLayout_5->addWidget(frame_2);
+        statusBarLayout->addWidget(lineEditSearch);
 
 
-        verticalLayout_2->addWidget(header_frame);
+        headerLayout->addWidget(statusBarFrame);
 
-        animationdata_frame = new QFrame(showmain_stackedWidgetPage1);
-        animationdata_frame->setObjectName("animationdata_frame");
-        animationdata_frame->setStyleSheet(QString::fromUtf8("background-color: white;"));
-        animationdata_frame->setFrameShape(QFrame::Shape::NoFrame);
-        gridLayout_2 = new QGridLayout(animationdata_frame);
+
+        mainPageLayout->addWidget(header_frame);
+
+        cardGridFrame = new QFrame(pageMainContent);
+        cardGridFrame->setObjectName("cardGridFrame");
+        cardGridFrame->setStyleSheet(QString::fromUtf8("background-color: white;"));
+        cardGridFrame->setFrameShape(QFrame::Shape::NoFrame);
+        gridLayout_2 = new QGridLayout(cardGridFrame);
         gridLayout_2->setObjectName("gridLayout_2");
         gridLayout_2->setHorizontalSpacing(35);
         gridLayout_2->setVerticalSpacing(18);
         gridLayout_2->setContentsMargins(0, 10, 0, 10);
 
-        verticalLayout_2->addWidget(animationdata_frame);
+        mainPageLayout->addWidget(cardGridFrame);
 
-        page_frame = new QFrame(showmain_stackedWidgetPage1);
-        page_frame->setObjectName("page_frame");
-        page_frame->setMinimumSize(QSize(0, 45));
-        page_frame->setMaximumSize(QSize(16777215, 45));
-        page_frame->setStyleSheet(QString::fromUtf8("QFrame {\n"
+        pageControlFrame = new QFrame(pageMainContent);
+        pageControlFrame->setObjectName("pageControlFrame");
+        pageControlFrame->setMinimumSize(QSize(0, 45));
+        pageControlFrame->setMaximumSize(QSize(16777215, 45));
+        pageControlFrame->setStyleSheet(QString::fromUtf8("QFrame {\n"
 "                background-color: white\n"
 "                }\n"
 "\n"
@@ -567,66 +571,66 @@ public:
 "                border-color: rgba(0,0,0,100);\n"
 "                border-radius: 4px;\n"
 "                }"));
-        page_frame->setFrameShape(QFrame::Shape::NoFrame);
-        horizontalLayout_3 = new QHBoxLayout(page_frame);
-        horizontalLayout_3->setObjectName("horizontalLayout_3");
-        horizontalSpacer_3 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+        pageControlFrame->setFrameShape(QFrame::Shape::NoFrame);
+        pageControlLayout = new QHBoxLayout(pageControlFrame);
+        pageControlLayout->setObjectName("pageControlLayout");
+        spacerPageLeft = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
-        horizontalLayout_3->addItem(horizontalSpacer_3);
+        pageControlLayout->addItem(spacerPageLeft);
 
-        previous_Button = new QPushButton(page_frame);
-        previous_Button->setObjectName("previous_Button");
-        previous_Button->setMinimumSize(QSize(75, 20));
-        previous_Button->setMaximumSize(QSize(75, 20));
-        previous_Button->setStyleSheet(QString::fromUtf8("QPushButton:pressed {\n"
+        btnPrev = new QPushButton(pageControlFrame);
+        btnPrev->setObjectName("btnPrev");
+        btnPrev->setMinimumSize(QSize(75, 20));
+        btnPrev->setMaximumSize(QSize(75, 20));
+        btnPrev->setStyleSheet(QString::fromUtf8("QPushButton:pressed {\n"
 "                   background-color: rgba(0,0,0,20)\n"
 "                   }"));
-        previous_Button->setCheckable(true);
+        btnPrev->setCheckable(true);
 
-        horizontalLayout_3->addWidget(previous_Button);
+        pageControlLayout->addWidget(btnPrev);
 
-        pages_Button = new QLabel(page_frame);
-        pages_Button->setObjectName("pages_Button");
-        pages_Button->setMinimumSize(QSize(75, 20));
-        pages_Button->setMaximumSize(QSize(75, 20));
-        pages_Button->setStyleSheet(QString::fromUtf8("border-width: 1px;\n"
+        labelPage = new QLabel(pageControlFrame);
+        labelPage->setObjectName("labelPage");
+        labelPage->setMinimumSize(QSize(75, 20));
+        labelPage->setMaximumSize(QSize(75, 20));
+        labelPage->setStyleSheet(QString::fromUtf8("border-width: 1px;\n"
 "                   border-style: solid;\n"
 "                   border-color: rgba(0,0,0,100);\n"
 "                   border-radius: 4px;"));
-        pages_Button->setAlignment(Qt::AlignmentFlag::AlignCenter);
+        labelPage->setAlignment(Qt::AlignmentFlag::AlignCenter);
 
-        horizontalLayout_3->addWidget(pages_Button);
+        pageControlLayout->addWidget(labelPage);
 
-        next_Button = new QPushButton(page_frame);
-        next_Button->setObjectName("next_Button");
-        next_Button->setMinimumSize(QSize(75, 20));
-        next_Button->setMaximumSize(QSize(75, 20));
-        next_Button->setStyleSheet(QString::fromUtf8("QPushButton:pressed {\n"
+        btnNext = new QPushButton(pageControlFrame);
+        btnNext->setObjectName("btnNext");
+        btnNext->setMinimumSize(QSize(75, 20));
+        btnNext->setMaximumSize(QSize(75, 20));
+        btnNext->setStyleSheet(QString::fromUtf8("QPushButton:pressed {\n"
 "                   background-color: rgba(0,0,0,20)\n"
 "                   }"));
 
-        horizontalLayout_3->addWidget(next_Button);
+        pageControlLayout->addWidget(btnNext);
 
-        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+        spacerPageRight = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
-        horizontalLayout_3->addItem(horizontalSpacer_2);
+        pageControlLayout->addItem(spacerPageRight);
 
 
-        verticalLayout_2->addWidget(page_frame);
+        mainPageLayout->addWidget(pageControlFrame);
 
-        showmain_stackedWidget->addWidget(showmain_stackedWidgetPage1);
+        stackedMainContent->addWidget(pageMainContent);
 
-        horizontalLayout_6->addWidget(showmain_stackedWidget);
+        mainContentLayout->addWidget(stackedMainContent);
 
-        main_stackedWidget->addWidget(showmain_page);
+        stackedMainWindow->addWidget(showmain_page);
 
-        verticalLayout->addWidget(main_stackedWidget);
+        verticalLayout->addWidget(stackedMainWindow);
 
         MainWindow->setCentralWidget(centralwidget);
 
         retranslateUi(MainWindow);
 
-        main_stackedWidget->setCurrentIndex(0);
+        stackedMainWindow->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -634,31 +638,26 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow) const
     {
-        pushButton->setText(QString());
-        pushButton_8->setText(QString());
-        pushButton_2->setText(QString());
-        animation_Button->setText(QCoreApplication::translate("MainWindow", "\345\212\250\347\224\273", nullptr));
-        novel_Button->setText(QCoreApplication::translate("MainWindow", "\345\260\217\350\257\264", nullptr));
-        game_Button->setText(QCoreApplication::translate("MainWindow", "\346\270\270\346\210\217", nullptr));
-        comic_Button->setText(QCoreApplication::translate("MainWindow", "\346\274\253\347\224\273", nullptr));
-        pushButton_9->setText(QCoreApplication::translate("MainWindow", "\344\270\213\350\275\275", nullptr));
-        settings_Button->setText(QString());
-        project_Button->setText(QCoreApplication::translate("MainWindow", "\345\212\250\347\224\273", nullptr));
-        pushButton_3->setText(QString());
-        pushButton_10->setText(QString());
-        pushButton_4->setText(QString());
-        pushButton_11->setText(QString());
-        pushButton_5->setText(QString());
-        pushButton_12->setText(QString());
-        pushButton_6->setText(QCoreApplication::translate("MainWindow", "\346\220\201\347\275\256", nullptr));
-        pushButton_13->setText(QString());
-        pushButton_7->setText(QCoreApplication::translate("MainWindow", "\346\212\233\345\274\203", nullptr));
-        pushButton_14->setText(QString());
-        refresh_Button->setText(QString());
-        searchlist_lineEdit->setPlaceholderText(QCoreApplication::translate("MainWindow", "\346\220\234\347\264\242\345\275\223\345\211\215\345\210\227\350\241\250", nullptr));
-        previous_Button->setText(QCoreApplication::translate("MainWindow", "\344\270\212\344\270\200\351\241\265", nullptr));
-        pages_Button->setText(QString());
-        next_Button->setText(QCoreApplication::translate("MainWindow", "\344\270\213\344\270\200\351\241\265", nullptr));
+        btnMinimize->setText(QString());
+        btnMaximize->setText(QString());
+        btnClose->setText(QString());
+        btnAnime->setText(QCoreApplication::translate("MainWindow", "\345\212\250\347\224\273", nullptr));
+        btnNovel->setText(QCoreApplication::translate("MainWindow", "\345\260\217\350\257\264", nullptr));
+        btnGame->setText(QCoreApplication::translate("MainWindow", "\346\270\270\346\210\217", nullptr));
+        btnComic->setText(QCoreApplication::translate("MainWindow", "\346\274\253\347\224\273", nullptr));
+        btnDownload->setText(QCoreApplication::translate("MainWindow", "\344\270\213\350\275\275", nullptr));
+        btnSettings->setText(QString());
+        labelCategoryTitle->setText(QCoreApplication::translate("MainWindow", "\345\212\250\347\224\273", nullptr));
+        statusCountWish->setText(QString());
+        statusCountWatched->setText(QString());
+        statusCountWatching->setText(QString());
+        statusCountOnHold->setText(QString());
+        statusCountDropped->setText(QString());
+        btnRefresh->setText(QString());
+        lineEditSearch->setPlaceholderText(QCoreApplication::translate("MainWindow", "\346\220\234\347\264\242\345\275\223\345\211\215\347\212\266\346\200\201", nullptr));
+        btnPrev->setText(QCoreApplication::translate("MainWindow", "\344\270\212\344\270\200\351\241\265", nullptr));
+        labelPage->setText(QString());
+        btnNext->setText(QCoreApplication::translate("MainWindow", "\344\270\213\344\270\200\351\241\265", nullptr));
         (void)MainWindow;
     } // retranslateUi
 

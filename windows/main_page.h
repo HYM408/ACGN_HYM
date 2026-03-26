@@ -10,15 +10,6 @@ class CacheImageUtil;
 class DatabaseManager;
 class GameMonitorUtil;
 
-struct CardComponents {
-    QFrame *card = nullptr;
-    QLabel *coverLabel = nullptr;
-    QLabel *titleLabel = nullptr;
-    QLabel *progressLabel = nullptr;
-    QPushButton *moreButton = nullptr;
-    QPushButton *episodeButton = nullptr;
-};
-
 class MainPageManager : public QObject
 {
     Q_OBJECT
@@ -26,10 +17,8 @@ class MainPageManager : public QObject
 public:
     explicit MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cacheImageUtil, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, GameMonitorUtil *gameMonitor);
     void applyTheme();
-    void setupConnections();
-    [[nodiscard]] CacheImageUtil *getCacheImageUtil() const {return cacheImageUtil;}
-    [[nodiscard]] int getCurrentSubjectType() const {return currentSubjectType;}
-    [[nodiscard]] int getCurrentStatusType() const {return currentStatusType;}
+    [[nodiscard]] int getCurrentSubjectType() const {return m_currentSubjectType;}
+    [[nodiscard]] int getCurrentStatusType() const {return m_currentStatusType;}
 
 signals:
     void showDetailPageRequested(int subjectId, const QString &progressText);
@@ -37,43 +26,36 @@ signals:
     void showMainPageRequested();
 
 public slots:
-    void onSearchTextChanged(const QString &text);
+    void onSearchTextChanged(const QString &text, bool resetToFirstPage, bool displayPage);
     void previousPage();
     void nextPage();
     void loadCollections(int subjectType, int statusType, bool resetToFirstPage);
 
 private:
-    struct StatusFrameInfo {
-        QFrame *frame = nullptr;
-        QLabel *statusButton = nullptr;
-        QLabel *countButton = nullptr;
-    };
-    void initStatusFrames();
+    void setupConnections();
+    void initStatus();
     void switchCategory(int subjectType, const QString &title);
     void updatePageInfo() const;
     void displayCurrentPage();
-    void clearDisplayArea();
-    void createCardComponents(CardComponents &card, CollectionData &collection);
+    QFrame* createCardComponents(CollectionData &collection);
     bool eventFilter(QObject *obj, QEvent *event) override;
     Ui::MainWindow *mainWindow = nullptr;
     DatabaseManager *dbManager = nullptr;
     CacheImageUtil *cacheImageUtil = nullptr;
     BangumiAPI *bangumiAPI = nullptr;
     GameMonitorUtil *gameMonitor = nullptr;
-    int currentSubjectType = 2;
-    int currentStatusType = 3;
-    int currentPage = 1;
-    int itemsPerPage = 12;
-    QVector<CollectionData> allCollections;
-    QVector<CollectionData> filteredCollections;
-    QVector<QWidget*> placeholderWidgets;
-    QMap<int, QMap<int, QString>> statusNamesMap;
-    QMap<int, StatusFrameInfo> statusFrames;
-    QJsonObject airdatesJson;
+    QVector<QPushButton*> m_statusButtons;
+    QVector<QLabel*> m_statusLabels;
+    QVector<QLabel*> m_statusCountLabels;
+    int m_currentSubjectType = 2;
+    int m_currentStatusType = 3;
+    int m_currentPage = 1;
+    QVector<CollectionData> m_allCollections;
+    QVector<CollectionData> m_filteredCollections;
+    QVector<QWidget*> m_placeholderWidgets;
+    QJsonObject m_airdatesJson;
     QColor m_color2;
     QColor m_color3;
-    QColor m_color6;
-    QString m_color6A;
 };
 
 #endif // MAIN_PAGE_H
