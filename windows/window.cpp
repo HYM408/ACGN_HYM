@@ -266,7 +266,7 @@ void MainWindow::ensureSearchPage()
 {   // 确保搜索页面
     searchPage = new SearchPage();
     searchPage->setManagers(cacheImageUtil, bangumiAPI, dbManager, gameMonitorUtil);
-    stackedMainContent->addWidget(searchPage);
+    stackedMainWindow->addWidget(searchPage);
     connect(searchPage, &SearchPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
     connect(searchPage, &SearchPage::showEpisodePageRequested, this, &MainWindow::onShowEpisodePageRequested);
 }
@@ -275,14 +275,14 @@ void MainWindow::onSearchButtonClicked()
 {   // 切换到搜索页面
     if (!searchPage) ensureSearchPage();
     searchPage->updateComboBoxByType(mainPageManager->getCurrentSubjectType());
-    stackedMainContent->setCurrentWidget(searchPage);
+    stackedMainWindow->setCurrentWidget(searchPage);
 }
 
 void MainWindow::onTagClicked(const QString &tag, const int subjectType)
 {   // tag搜索
     if (!searchPage) ensureSearchPage();
-    pageHistory.append(stackedMainContent->currentWidget());
-    stackedMainContent->setCurrentWidget(searchPage);
+    pageHistory.append(stackedMainWindow->currentWidget());
+    stackedMainWindow->setCurrentWidget(searchPage);
     searchPage->searchByTag(tag, subjectType);
 }
 
@@ -291,10 +291,10 @@ void MainWindow::onSettingsButtonClicked()
     if (!settingsPage) {
         settingsPage = new SettingsPage(this);
         settingsPage->setManagers(bangumiAPI, pikpakApi, dbManager);
-        stackedMainContent->addWidget(settingsPage);
+        stackedMainWindow->addWidget(settingsPage);
         connect(settingsPage, &SettingsPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
     }
-    stackedMainContent->setCurrentWidget(settingsPage);
+    stackedMainWindow->setCurrentWidget(settingsPage);
 }
 
 void MainWindow::onShowDetailPageRequested(const int subjectId, const QString &progressText)
@@ -302,7 +302,7 @@ void MainWindow::onShowDetailPageRequested(const int subjectId, const QString &p
     if (!detailPage) {
         detailPage = new DetailPage();
         detailPage->setManagers(cacheImageUtil, bangumiAPI, dbManager, gameMonitorUtil);
-        stackedMainContent->addWidget(detailPage);
+        stackedMainWindow->addWidget(detailPage);
         connect(detailPage, &DetailPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
         connect(detailPage, &DetailPage::showEpisodePageRequested, this, &MainWindow::onShowEpisodePageRequested);
         connect(detailPage, &DetailPage::tagClicked, this, &MainWindow::onTagClicked);
@@ -310,7 +310,7 @@ void MainWindow::onShowDetailPageRequested(const int subjectId, const QString &p
     }
     detailPage->clearHistory();
     detailPage->setCollectionData(subjectId, progressText);
-    stackedMainContent->setCurrentWidget(detailPage);
+    stackedMainWindow->setCurrentWidget(detailPage);
 }
 
 void MainWindow::onDownloadButtonClicked()
@@ -346,24 +346,24 @@ void MainWindow::precreatePlayerPage()
 {   // 播放器页面预创建
     playerPage = new PlayerPage(this);
     playerPage->setManagers(cacheImageUtil, pikpakApi);
-    stackedMainContent->addWidget(playerPage);
+    stackedMainWindow->addWidget(playerPage);
     connect(playerPage, &PlayerPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
 }
 
 void MainWindow::onEpisodeClicked(const CollectionData &collectionData, const EpisodeData &episodeData)
 {   // 切换播放器页面
-    pageHistory.append(stackedMainContent->currentWidget());
+    pageHistory.append(stackedMainWindow->currentWidget());
     playerPage->fetchRoutes(collectionData, episodeData);
-    stackedMainContent->setCurrentWidget(playerPage);
+    stackedMainWindow->setCurrentWidget(playerPage);
 }
 
 void MainWindow::onBackButtonClicked()
 {   // 返回历史页面
     if (!pageHistory.isEmpty()) {
         QWidget *prevPage = pageHistory.takeLast();
-        stackedMainContent->setCurrentWidget(prevPage);
+        stackedMainWindow->setCurrentWidget(prevPage);
     } else {
-        stackedMainContent->setCurrentIndex(0);
+        stackedMainWindow->setCurrentIndex(0);
         QTimer::singleShot(100, this, [this]{mainPageManager->loadCollections(mainPageManager->getCurrentSubjectType(), mainPageManager->getCurrentStatusType(), false);});
     }
 }
