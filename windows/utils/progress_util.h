@@ -5,6 +5,6 @@
 
 class DatabaseManager;
 
-QString computeProgressText(CollectionData &collection, const QJsonObject &airdatesJson, const DatabaseManager *db);
+QString computeProgressText(const CollectionData &collection, const QJsonObject &airdatesJson);
 
 #endif // PROGRESS_UTIL_H

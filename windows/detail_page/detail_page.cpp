@@ -126,7 +126,10 @@ void DetailPage::updateDetailPage(const QString &progressText)
     cData.subject_id = subjectData.subject_id;
     cData.subject_type = subjectData.subject_type;
     cData.subject_date = subjectData.date;
-    targetButton->setText(progressText.isEmpty() ? computeProgressText(cData, dbManager->getEpisodeAirdates({subjectData.subject_id}), dbManager) : progressText);
+    cData.ep_status = currentData.ep_status;
+    cData.subject_volumes = currentData.subject_volumes;
+    cData.subject_eps = currentData.subject_eps;
+    targetButton->setText(progressText.isEmpty() ? computeProgressText(cData, dbManager->getEpisodeAirdates({subjectData.subject_id})) : progressText);
     ui.pushButton_26->setText(statusNamesMap.value(subjectData.subject_type).value(currentData.type));
     ui.pushButton_27->setText(subjectData.subject_type == 2 ? "选集" : subjectData.subject_type == 4 ? "启动" : "进度");
     const int total = std::reduce(subjectData.score_details.begin(), subjectData.score_details.end(), 0);
@@ -453,6 +456,11 @@ void DetailPage::clearLayout() const
     }
 }
 
+void DetailPage::clearHistory()
+{   // 清理历史
+    m_historyStack.clear();
+}
+
 void DetailPage::clearTab(const QWidget *content)
 {   // 清理Tab
     qDeleteAll(content->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly));
@@ -489,9 +497,4 @@ void DetailPage::onBackButtonClicked()
     relationTabInitialized = false;
     if (!m_historyStack.isEmpty()) setCollectionData(m_historyStack.pop(), "");
     else emit backButtonClicked();
-}
-
-void DetailPage::clearHistory()
-{   // 清理历史
-    m_historyStack.clear();
 }

@@ -552,6 +552,6 @@ int DatabaseManager::countSubjectRelations(const int subjectdId) const
     QSqlQuery query(episodePublicDate);
     query.prepare("SELECT COUNT(*) FROM subject_relations WHERE subject_id = ? AND relation_type = 1003");
     query.addBindValue(subjectdId);
-    if (!executeQuery(query, "统计关联条目失败") || !query.next()) return 0;
+    if (!executeQuery(query, "统计单行本数量失败") || !query.next()) return 0;
     return query.value(0).toInt();
 }

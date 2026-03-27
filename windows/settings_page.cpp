@@ -118,11 +118,7 @@ bool SettingsPage::ensureBangumiCredentials()
     dialog.setWindowTitle("Bangumi授权");
     dialog.setFixedSize(400, 300);
     const auto layout = new QVBoxLayout(&dialog);
-    const auto linkLabel = new QLabel(
-        "前往创建(需登录bangumi):<br>"
-        "<a href=\"https://bangumi.tv/dev/app\">https://bangumi.tv/dev/app</a><br>"
-        "<a href=\"https://bgm.tv/dev/app\">https://bgm.tv/dev/app</a><br>"
-        "<a href=\"https://chii.in/dev/app\">https://chii.in/dev/app</a>");
+    const auto linkLabel = new QLabel("前往创建应用(需登录bangumi):<a href=\"https://bgm.tv/dev/app\">https://bgm.tv/dev/app</a>");
     linkLabel->setOpenExternalLinks(true);
     layout->addWidget(linkLabel);
     layout->addWidget(new QLabel("Client ID:"));

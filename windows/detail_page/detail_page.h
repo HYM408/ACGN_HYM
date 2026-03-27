@@ -22,8 +22,8 @@ public:
     explicit DetailPage(QWidget *parent = nullptr);
     void setCollectionData(int subjectId, const QString &progressText);
     void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db, GameMonitorUtil *gameMonitor);
-    void resetUI();
     void clearHistory();
+    void resetUI();
 
 signals:
     void backButtonClicked();

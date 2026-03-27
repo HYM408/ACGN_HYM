@@ -199,7 +199,7 @@ QFrame* MainPageManager::createCardComponents(CollectionData &collection)
     auto *statusButton = new QPushButton();
     statusButton->setFixedSize(40, 40);
     statusButton->setStyleSheet(QString("QPushButton {border-radius: 20px}"
-                                      "QPushButton:hover {background-color: %1}").arg(m_color3.name()));
+                                        "QPushButton:hover {background-color: %1}").arg(m_color3.name()));
     statusButton->setIcon(QIcon("icons/more.png"));
     buttonLayout->addWidget(statusButton);
     // 选集/进度/启动
@@ -213,7 +213,8 @@ QFrame* MainPageManager::createCardComponents(CollectionData &collection)
     const QString imageUrl = QString("https://api.bgm.tv/v0/subjects/%1/image?type=common").arg(collection.subject_id);
     ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, coverLabel, 40, false, true, QString("s%1.jpg").arg(collection.subject_id));
     titleLabel->setText(collection.subject_name_cn.isEmpty() ? collection.subject_name : collection.subject_name_cn);
-    progressLabel->setText(computeProgressText(collection, m_airdatesJson, dbManager));
+    if (collection.subject_type == 7 || collection.subject_type == 8) collection.subject_volumes = dbManager->countSubjectRelations(collection.subject_id);
+    progressLabel->setText(computeProgressText(collection, m_airdatesJson));
     card->setProperty("progressLabel", QVariant::fromValue(progressLabel));
     if (collection.subject_type == 2) episodeButton->setText("选集");
     else if (collection.subject_type == 4) episodeButton->setText("启动");
