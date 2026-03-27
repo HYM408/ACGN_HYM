@@ -5,7 +5,7 @@
 #include <QCheckBox>
 #include <QJsonArray>
 #include <QPushButton>
-#include <QThreadPool>
+#include <QNetworkReply>
 #include "player.h"
 #include "../config.h"
 #include "player_core.h"

@@ -36,11 +36,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     QTimer::singleShot(5000, rss, &Rss::startRSS);
 }
 
-MainWindow::~MainWindow()
-{
-    cacheImageUtil->clearPendingDownloads();
-}
-
 void MainWindow::initializeManagers()
 {   // 初始化管理器
     bangumiAPI = new BangumiAPI(this);

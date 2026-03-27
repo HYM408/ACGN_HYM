@@ -1,7 +1,10 @@
 #ifndef CACHEIMAGEUTIL_H
 #define CACHEIMAGEUTIL_H
 
-#include <QNetworkReply>
+#include <QHash>
+#include <QObject>
+
+class QPixmap;
 
 using ImageCallback = std::function<void(const QPixmap&)>;
 
@@ -11,18 +14,9 @@ class CacheImageUtil : public QObject
 
 public:
     explicit CacheImageUtil(QObject *parent = nullptr);
-    void getImageAsync(const QString &url, const ImageCallback& callback, bool cacheToLocal, const QString &fileName);
-    void clearPendingDownloads();
-
-signals:
-    void downloadComplete(const QString &url, const QPixmap &pixmap);
-
-private slots:
-    void onDownloadFinished(QNetworkReply *reply);
-    void onDownloadComplete(const QString &url, const QPixmap &pixmap);
+    void getImageAsync(const QString &url, const ImageCallback &callback, bool cacheToLocal, const QString &fileName);
 
 private:
-    QNetworkAccessManager networkManager;
     QHash<QString, QList<ImageCallback>> pendingCallbacks;
 };
 

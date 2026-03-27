@@ -242,7 +242,6 @@ void MainPageManager::updatePageInfo() const
 void MainPageManager::previousPage()
 {   // 上一页
     if (m_currentPage < 1) return;
-    cacheImageUtil->clearPendingDownloads();
     --m_currentPage;
     displayCurrentPage();
 }
@@ -250,7 +249,6 @@ void MainPageManager::previousPage()
 void MainPageManager::nextPage()
 {   // 下一页
     if (m_currentPage > static_cast<int>(qMax(1, (m_filteredCollections.size() + itemsPerPage - 1) / itemsPerPage))) return;
-    cacheImageUtil->clearPendingDownloads();
     ++m_currentPage;
     displayCurrentPage();
 }

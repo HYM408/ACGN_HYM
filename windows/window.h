@@ -20,7 +20,6 @@ class MainWindow : public QMainWindow, public Ui::MainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow() override;
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
