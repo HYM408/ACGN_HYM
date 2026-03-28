@@ -71,7 +71,7 @@ bool BangumiOAuth::exchangeCodeForToken(const QString &code, const QString &refr
     const QString tokenUrl = "https://bgm.tv/oauth/access_token";
     QNetworkRequest request(tokenUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    request.setRawHeader("User-Agent", "ACGN_HYM/1.0");
+    request.setRawHeader("User-Agent", "HYM408/ACGN_HYM (https://github.com/HYM408/ACGN_HYM)");
     QUrlQuery postData;
     if (!refreshToken.isEmpty()) {
         postData.addQueryItem("grant_type", "refresh_token");

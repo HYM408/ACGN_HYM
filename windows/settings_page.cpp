@@ -12,8 +12,6 @@
 #include "utils/context_menu_util.h"
 #include "downloader/chunk_download.h"
 
-const QString SettingsPage::BANGUMI_ARCHIVE_URL = "https://raw.githubusercontent.com/HYM408/BangumiDateProcessing/refs/heads/main/latest.json";
-
 SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent)
 {
     ui.setupUi(this);
@@ -40,52 +38,57 @@ void SettingsPage::setManagers(BangumiAPI *api, PikPakApi *pikpakapi, DatabaseMa
 
 void SettingsPage::applyTheme() const
 {   // 主题
-    const QColor color1 = getColor("color1", QColor("#fdf7ff"));
-    const QColor color4 = getColor("color4", QColor("#e9ddff"));
-    ui.stackedWidget_2->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
+    const QColor color1 = getColor("color1", 0xfdf7ff);
+    const QColor color4 = getColor("color4", 0xe9ddff);
+    ui.stackedWidget->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
     const QString buttonStyle = QString("QPushButton:hover {background-color: rgba(0, 0, 0, 20)}"
                                         "QPushButton:checked {background-color: %1}"
                                         "QPushButton {border:none; border-radius: 10px}").arg(color4.name());
-    for (const auto button : {ui.pushButton_3, ui.pushButton_4, ui.pushButton_13}) button->setStyleSheet(buttonStyle);
+    for (const auto button : {ui.btnBangumi, ui.btnPikPak, ui.btnDownloadMenu}) button->setStyleSheet(buttonStyle);
 }
 
 void SettingsPage::setupConnections()
 {   // 设置连接
-    ui.pushButton_3->setChecked(true);
-    ui.stackedWidget_2->setCurrentIndex(0);
+    ui.btnBangumi->setChecked(true);
+    ui.stackedWidget->setCurrentIndex(0);
+    ui.checkBoxNsfw->setChecked(getConfig("Bangumi/nsfw").toBool());
     // 返回
-    connect(ui.back_Button_2, &QPushButton::clicked, this, &SettingsPage::onBackButtonClicked);
+    connect(ui.btnBack, &QPushButton::clicked, this, &SettingsPage::onBackButtonClicked);
     // Bangumi
-    connect(ui.pushButton_3, &QPushButton::clicked, [this] {ui.stackedWidget_2->setCurrentWidget(ui.login_page);});
-    connect(ui.login_Button, &QPushButton::clicked, this, &SettingsPage::onLoginButtonClicked);
-    connect(ui.collection_Button, &QPushButton::clicked, this, &SettingsPage::onCollectionButtonClicked);
-    connect(ui.comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SettingsPage::onBangumiUrlChanged);
-    connect(ui.pushButton_17, &QPushButton::clicked, this, [this] {downloadPublicDate(false);});
-    connect(ui.pushButton_19, &QPushButton::clicked, this, [this] {downloadPublicDate(true);});
+    connect(ui.btnBangumi, &QPushButton::clicked, [this] {ui.stackedWidget->setCurrentWidget(ui.bangumiPage);});
+    connect(ui.btnBangumiAuth, &QPushButton::clicked, this, &SettingsPage::onLoginButtonClicked);
+    connect(ui.btnGetCollection, &QPushButton::clicked, this, &SettingsPage::onCollectionButtonClicked);
+    connect(ui.comboBangumiDomain, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SettingsPage::onBangumiUrlChanged);
+    connect(ui.btnDownloadPublic, &QPushButton::clicked, this, [this] {downloadPublicDate(false);});
+    connect(ui.btnDownloadMirror, &QPushButton::clicked, this, [this] {downloadPublicDate(true);});
+    connect(ui.checkBoxNsfw, &QCheckBox::toggled, this, [this](const bool checked) {
+        setConfig("Bangumi/nsfw", checked);
+        emit nsfwSettingChanged(checked);
+    });
     // PikPak
-    connect(ui.pushButton_4, &QPushButton::clicked, [this] {ui.stackedWidget_2->setCurrentWidget(ui.pikpak_page);});
-    connect(ui.login_Button_2, &QPushButton::clicked, this, &SettingsPage::onPikPakLoginButtonClicked);
+    connect(ui.btnPikPak, &QPushButton::clicked, [this] {ui.stackedWidget->setCurrentWidget(ui.pikpakPage);});
+    connect(ui.btnPikPakLogin, &QPushButton::clicked, this, &SettingsPage::onPikPakLoginButtonClicked);
     // 下载
-    setupLineEditCustomContextMenu(ui.lineEdit, CMO_Copy | CMO_SelectAll);
-    connect(ui.pushButton_13, &QPushButton::clicked, [this] {ui.stackedWidget_2->setCurrentWidget(ui.download_page);});
-    connect(ui.login_Button_3, &QPushButton::clicked, this, &SettingsPage::onSelectDownloadPath);
+    setupLineEditCustomContextMenu(ui.lineEditDownloadPath, CMO_Copy | CMO_SelectAll);
+    connect(ui.btnDownloadMenu, &QPushButton::clicked, [this] {ui.stackedWidget->setCurrentWidget(ui.downloadPage);});
+    connect(ui.btnSelectDownloadPath, &QPushButton::clicked, this, &SettingsPage::onSelectDownloadPath);
 }
 
 void SettingsPage::updateTokenDisplay() const
 {   // 显示token
-    ui.pushButton_2->setText("ID: " + getConfig("Bangumi/user_id").toString());
-    ui.pushButton_9->setText("Access Token: " + getConfig("Bangumi/access_token").toString());
-    ui.pushButton_8->setText("Refresh Token: " + getConfig("Bangumi/refresh_token").toString());
-    ui.pushButton_6->setText("username: " + getConfig("PikPak/username").toString());
-    ui.pushButton_10->setText("password: " + getConfig("PikPak/password").toString());
-    ui.pushButton_11->setText("access token: " + getConfig("PikPak/access_token").toString().left(100));
-    ui.pushButton_15->setText("refresh token: " + getConfig("PikPak/refresh_token").toString());
+    ui.labelUserId->setText("ID: " + getConfig("Bangumi/user_id").toString());
+    ui.labelAccessToken->setText("Access Token: " + getConfig("Bangumi/access_token").toString());
+    ui.labelRefreshToken->setText("Refresh Token: " + getConfig("Bangumi/refresh_token").toString());
+    ui.labelPikPakUsername->setText("username: " + getConfig("PikPak/username").toString());
+    ui.labelPikPakPassword->setText("password: " + getConfig("PikPak/password").toString());
+    ui.labelPikPakAccessToken->setText("access token: " + getConfig("PikPak/access_token").toString().left(100));
+    ui.labelPikPakRefreshToken->setText("refresh token: " + getConfig("PikPak/refresh_token").toString());
 }
 
 void SettingsPage::setBangumiBaseUrl() const
 {   // 设置Bangumi域名
     const QMap<QString, int> urlToIndex = {{"https://bangumi.tv/", 0}, {"https://bgm.tv/", 1}, {"https://chii.in/", 2}};
-    ui.comboBox->setCurrentIndex(urlToIndex.value(getConfig("Bangumi/bangumi_base_url").toString()));
+    ui.comboBangumiDomain->setCurrentIndex(urlToIndex.value(getConfig("Bangumi/bangumi_base_url").toString()));
 }
 
 void SettingsPage::onBangumiUrlChanged(const int index)
@@ -97,19 +100,19 @@ void SettingsPage::onBangumiUrlChanged(const int index)
 void SettingsPage::onLoginButtonClicked()
 {   // 点击Bangumi授权
     if (!ensureBangumiCredentials()) return;
-    ui.login_Button->setText("授权中...");
-    ui.login_Button->setEnabled(false);
+    ui.btnBangumiAuth->setText("授权中...");
+    ui.btnBangumiAuth->setEnabled(false);
     QDesktopServices::openUrl(bangumiOAuth->generateAuthUrl());
     const QString code = bangumiOAuth->listenForCode(30);
     if (code.isEmpty()) {
-        ui.login_Button->setText("Code获取失败");
+        ui.btnBangumiAuth->setText("Code获取失败");
         return;
     }
     if (bangumiOAuth->exchangeCodeForToken(code, "")) {
         updateTokenDisplay();
-        ui.login_Button->setText("Bangumi授权成功！");
-    } else ui.login_Button->setText("Token交换失败");
-    ui.login_Button->setEnabled(true);
+        ui.btnBangumiAuth->setText("Bangumi授权成功！");
+    } else ui.btnBangumiAuth->setText("Token交换失败");
+    ui.btnBangumiAuth->setEnabled(true);
 }
 
 bool SettingsPage::ensureBangumiCredentials()
@@ -156,34 +159,35 @@ bool SettingsPage::ensureBangumiCredentials()
 
 void SettingsPage::onCollectionButtonClicked() const
 {   // 获取Bangumi收藏
-    ui.collection_Button->setEnabled(false);
-    ui.collection_Button->setText("进度：0");
+    ui.btnGetCollection->setEnabled(false);
+    ui.btnGetCollection->setText("进度：0");
     bangumiAPI->getUserCollections(true, 3, [this](const int current, const int total) {
-        ui.collection_Button->setText(QString("进度：%1/%2").arg(current).arg(total));
+        ui.btnGetCollection->setText(QString("进度：%1/%2").arg(current).arg(total));
     }, [this](const QJsonArray &collections, const QString &error) {
-        if (!error.isEmpty()) ui.collection_Button->setText("获取收藏失败: " + error);
+        if (!error.isEmpty()) ui.btnGetCollection->setText("获取收藏失败: " + error);
         else if (!collections.isEmpty()) {
             dbManager->clearCollectionTable();
-            if (DatabaseManager::insertManyCollectionData(collections)) ui.collection_Button->setText(QString("获取完成，共%1条").arg(collections.size()));
-            else ui.collection_Button->setText("保存收藏到数据库失败");
-        } else ui.collection_Button->setText("获取收藏失败");
-        ui.collection_Button->setEnabled(true);
+            if (DatabaseManager::insertManyCollectionData(collections)) ui.btnGetCollection->setText(QString("获取完成，共%1条").arg(collections.size()));
+            else ui.btnGetCollection->setText("保存收藏到数据库失败");
+        } else ui.btnGetCollection->setText("获取收藏失败");
+        ui.btnGetCollection->setEnabled(true);
     });
 }
 
 void SettingsPage::downloadPublicDate(const bool useMirror)
 {   // 下载Bangumi公共数据
     QList<int> selectedTypes;
-    if (ui.checkBox->isChecked()) selectedTypes.append(2);
-    if (ui.checkBox_2->isChecked()) selectedTypes.append(1);
-    if (ui.checkBox_3->isChecked()) selectedTypes.append(4);
-    if (selectedTypes.isEmpty()) return ui.pushButton_20->setText("请至少选择一种要导入的类型");
+    if (ui.checkBoxAnime->isChecked()) selectedTypes.append(2);
+    if (ui.checkBoxBook->isChecked()) selectedTypes.append(1);
+    if (ui.checkBoxGame->isChecked()) selectedTypes.append(4);
+    if (selectedTypes.isEmpty()) return ui.labelDownloadStatus->setText("请至少选择一种类型");
     if (m_currentDownload) clearDownloadTasks(true);
-    ui.pushButton_20->setText("获取下载链接");
-    const QString url = useMirror ? "https://hk.gh-proxy.org/" + BANGUMI_ARCHIVE_URL : BANGUMI_ARCHIVE_URL;
+    ui.labelDownloadStatus->setText("获取下载链接");
+    static const QString bangumiArchiveUrl = "https://raw.githubusercontent.com/HYM408/BangumiDateProcessing/refs/heads/main/latest.json";
+    const QString url = useMirror ? "https://hk.gh-proxy.org/" + bangumiArchiveUrl : bangumiArchiveUrl;
     const QNetworkRequest request(url);
     sendRequestJson(m_networkManager, request, "GET", QByteArray(), 2, [this, useMirror, selectedTypes](const QJsonObject &json, int, const QString &error) {
-        if (!error.isEmpty() || json.isEmpty()) return ui.pushButton_20->setText("错误：无法获取下载链接");
+        if (!error.isEmpty() || json.isEmpty()) return ui.labelDownloadStatus->setText("错误：无法获取下载链接");
         QStringList typeStrs;
         for (const int type : selectedTypes) typeStrs << QString::number(type);
         typeStrs.sort();
@@ -193,10 +197,10 @@ void SettingsPage::downloadPublicDate(const bool useMirror)
         const QString targetPath = targetDir + "/public_date.db";
         const QString tempPath   = targetDir + "/public_date.db.tmp";
         const QDir dir(targetDir);
-        if (!dir.exists()) dir.mkpath(".");
+        if (!dir.exists()) (void)dir.mkpath(".");
         const QString finalDownloadUrl = useMirror ? "https://hk.gh-proxy.org/" + downloadUrl : downloadUrl;
         m_currentDownload = new ChunkDownload(finalDownloadUrl, tempPath, 4, this);
-        connect(m_currentDownload, &ChunkDownload::progressChanged, this, [this](const int percent, qint64, qint64) {ui.pushButton_20->setText(QString("下载中 %1%").arg(percent));});
+        connect(m_currentDownload, &ChunkDownload::progressChanged, this, [this](const int percent, qint64, qint64) {ui.labelDownloadStatus->setText(QString("下载中 %1%").arg(percent));});
         connect(m_currentDownload, &ChunkDownload::statusChanged, this, [this, targetPath, tempPath](const QString &status) {
             if (status == "完成") {
                 dbManager->closePublicDatabase();
@@ -204,9 +208,9 @@ void SettingsPage::downloadPublicDate(const bool useMirror)
                 QFile tempFile(tempPath);
                 tempFile.rename(targetPath);
                 dbManager->openDatabase();
-                ui.pushButton_20->setText("完成");
+                ui.labelDownloadStatus->setText("完成");
             } else if (status == "错误") {
-                ui.pushButton_20->setText("失败");
+                ui.labelDownloadStatus->setText("失败");
                 QFile::remove(tempPath);
                 clearDownloadTasks(false);
             }
@@ -218,14 +222,14 @@ void SettingsPage::downloadPublicDate(const bool useMirror)
 void SettingsPage::onPikPakLoginButtonClicked()
 {   // 点击PikPak登录
     if (!ensurePikPakCredentials()) return;
-    ui.login_Button_2->setText("登录中...");
-    ui.login_Button_2->setEnabled(false);
+    ui.btnPikPakLogin->setText("登录中...");
+    ui.btnPikPakLogin->setEnabled(false);
     pikpakApi->loginPikPak([this](const bool success, const QString &error) {
         if (success) {
             updateTokenDisplay();
-            ui.login_Button_2->setText("PikPak 登录成功！");
-        } else ui.login_Button_2->setText("PikPak 登录失败:" + error);
-        ui.login_Button_2->setEnabled(true);
+            ui.btnPikPakLogin->setText("PikPak 登录成功！");
+        } else ui.btnPikPakLogin->setText("PikPak 登录失败:" + error);
+        ui.btnPikPakLogin->setEnabled(true);
     });
 }
 
@@ -267,15 +271,15 @@ bool SettingsPage::ensurePikPakCredentials()
 void SettingsPage::setupDownloadPathUi() const
 {   // 设置下载路径UI
     const QString downloadPath = getConfig("Download/download_path", "data/download").toString();
-    ui.lineEdit->setText(downloadPath);
+    ui.lineEditDownloadPath->setText(downloadPath);
 }
 
 void SettingsPage::onSelectDownloadPath()
 {   // 选择下载路径
-    const QString currentPath = ui.lineEdit->text();
+    const QString currentPath = ui.lineEditDownloadPath->text();
     const QString dirPath = QFileDialog::getExistingDirectory(this, "选择下载路径", currentPath);
     if (!dirPath.isEmpty()) {
-        ui.lineEdit->setText(dirPath);
+        ui.lineEditDownloadPath->setText(dirPath);
         setConfig("Download/download_path", dirPath);
     }
 }
@@ -289,10 +293,10 @@ void SettingsPage::clearDownloadTasks(const bool stop)
 
 void SettingsPage::onBackButtonClicked()
 {   // 返回
-    ui.pushButton_3->setChecked(true);
-    ui.stackedWidget_2->setCurrentIndex(0);
-    ui.login_Button->setText("开始授权");
-    ui.collection_Button->setText("获取收藏");
-    ui.login_Button_2->setText("开始登录");
+    ui.btnBangumi->setChecked(true);
+    ui.stackedWidget->setCurrentIndex(0);
+    ui.btnBangumiAuth->setText("开始授权");
+    ui.btnGetCollection->setText("获取收藏");
+    ui.btnPikPakLogin->setText("开始登录");
     emit backButtonClicked();
 }

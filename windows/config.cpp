@@ -33,6 +33,7 @@ void initConfig()
     setDefaultIfMissing(settings, "expires_at", 0);
     setDefaultIfMissing(settings, "bangumi_base_url", "https://bangumi.tv/");
     setDefaultIfMissing(settings, "rss_guid", "0");
+    setDefaultIfMissing(settings, "nsfw", false);
     settings.endGroup();
     // PikPak
     settings.beginGroup("PikPak");

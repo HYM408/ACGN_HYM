@@ -17,7 +17,7 @@ public:
     void getUserCollections(bool getAll, int maxRetries, const ProgressCallback &progressCallback, const CollectionsCallback &completionCallback);
     void getUserCollection(int subjectId, int maxRetries, const CollectionCallback &callback);
     void getSubjectInfo(int subjectId, int maxRetries, const SubjectCallback &callback);
-    void searchSubjects(const QString &keyword, const QString &tag, int subjectType, int maxRetries, const CollectionsCallback &callback);
+    void searchSubjectsWithPost(const QString &keyword, const QString &tag, int subjectType, bool containsNsfw, int maxRetries, const CollectionsCallback &callback);
     void getSubjectEpisodes(int subjectId, int maxRetries, const EpisodesCallback& callback);
     void createOrUpdateCollection(int subjectId, const QJsonObject &collectionData, int maxRetries, const BoolCallback &callback);
     void updateCollection(int subjectId, const QJsonObject &collectionData, int maxRetries, const BoolCallback &callback);
@@ -31,7 +31,6 @@ private:
     QString userId;
     QString accessToken;
     QString refreshToken;
-    QString baseUrl = "https://api.bgm.tv";
 };
 
 #endif // BANGUMI_API_H

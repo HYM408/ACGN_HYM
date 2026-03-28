@@ -27,7 +27,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QFrame" name="settings_frame">
+    <widget class="QFrame" name="settingsFrame">
      <property name="minimumSize">
       <size>
        <width>300</width>
@@ -51,10 +51,10 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QFrame" name="Frame">
+       <widget class="QFrame" name="headerFrame">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QPushButton" name="back_Button_2">
+          <widget class="QPushButton" name="btnBack">
            <property name="minimumSize">
             <size>
              <width>45</width>
@@ -103,7 +103,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="setting_Button">
+          <widget class="QPushButton" name="btnSettingsTitle">
            <property name="minimumSize">
             <size>
              <width>175</width>
@@ -148,13 +148,13 @@
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="Frame_2">
+       <widget class="QFrame" name="menuFrame">
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <property name="topMargin">
           <number>20</number>
          </property>
          <item>
-          <widget class="QPushButton" name="pushButton_3">
+          <widget class="QPushButton" name="btnBangumi">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -186,7 +186,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_4">
+          <widget class="QPushButton" name="btnPikPak">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -218,7 +218,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_13">
+          <widget class="QPushButton" name="btnDownloadMenu">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -269,19 +269,19 @@
     </widget>
    </item>
    <item>
-    <widget class="QStackedWidget" name="stackedWidget_2">
+    <widget class="QStackedWidget" name="stackedWidget">
      <property name="styleSheet">
       <string notr="true">QStackedWidget &gt; QWidget {
-	background-color: transparent;
-}</string>
+       background-color: transparent;
+       }</string>
      </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="login_page">
+     <widget class="QWidget" name="bangumiPage">
       <layout class="QVBoxLayout" name="verticalLayout_7">
        <item alignment="Qt::AlignmentFlag::AlignLeft">
-        <widget class="QLabel" name="pushButton">
+        <widget class="QLabel" name="labelBangumiTitle">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -307,10 +307,10 @@
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="Frame_3">
+        <widget class="QFrame" name="authFrame">
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QLabel" name="pushButton_7">
+           <widget class="QLabel" name="labelAuthSection">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -336,7 +336,7 @@
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QLabel" name="pushButton_2">
+           <widget class="QLabel" name="labelUserId">
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -350,7 +350,7 @@
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QLabel" name="pushButton_9">
+           <widget class="QLabel" name="labelAccessToken">
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -364,7 +364,7 @@
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QLabel" name="pushButton_8">
+           <widget class="QLabel" name="labelRefreshToken">
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -378,7 +378,7 @@
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QPushButton" name="login_Button">
+           <widget class="QPushButton" name="btnBangumiAuth">
             <property name="minimumSize">
              <size>
               <width>76</width>
@@ -397,7 +397,7 @@
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QPushButton" name="collection_Button">
+           <widget class="QPushButton" name="btnGetCollection">
             <property name="minimumSize">
              <size>
               <width>76</width>
@@ -419,13 +419,13 @@
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="Frame_4">
+        <widget class="QFrame" name="domainFrame">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <property name="spacing">
            <number>0</number>
           </property>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QLabel" name="pushButton_12">
+           <widget class="QLabel" name="labelDomainSection">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -451,7 +451,7 @@
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QComboBox" name="comboBox">
+           <widget class="QComboBox" name="comboBangumiDomain">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -498,7 +498,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="frame">
+        <widget class="QFrame" name="publicDataFrame">
          <property name="frameShape">
           <enum>QFrame::Shape::StyledPanel</enum>
          </property>
@@ -507,7 +507,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_6">
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QLabel" name="pushButton_16">
+           <widget class="QLabel" name="labelPublicDataSection">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -533,7 +533,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QFrame" name="frame_5">
+           <widget class="QFrame" name="publicDataOptionsFrame">
             <property name="frameShape">
              <enum>QFrame::Shape::StyledPanel</enum>
             </property>
@@ -545,7 +545,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QCheckBox" name="checkBox">
+              <widget class="QCheckBox" name="checkBoxAnime">
                <property name="font">
                 <font>
                  <family>微软雅黑</family>
@@ -561,7 +561,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QCheckBox" name="checkBox_2">
+              <widget class="QCheckBox" name="checkBoxBook">
                <property name="font">
                 <font>
                  <family>微软雅黑</family>
@@ -574,7 +574,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QCheckBox" name="checkBox_3">
+              <widget class="QCheckBox" name="checkBoxGame">
                <property name="font">
                 <font>
                  <family>微软雅黑</family>
@@ -587,7 +587,7 @@
               </widget>
              </item>
              <item alignment="Qt::AlignmentFlag::AlignLeft">
-              <widget class="QFrame" name="frame_4">
+              <widget class="QFrame" name="publicDataButtonsFrame">
                <property name="frameShape">
                 <enum>QFrame::Shape::StyledPanel</enum>
                </property>
@@ -605,7 +605,7 @@
                  <number>5</number>
                 </property>
                 <item>
-                 <widget class="QPushButton" name="pushButton_17">
+                 <widget class="QPushButton" name="btnDownloadPublic">
                   <property name="minimumSize">
                    <size>
                     <width>76</width>
@@ -630,7 +630,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_19">
+                 <widget class="QPushButton" name="btnDownloadMirror">
                   <property name="minimumSize">
                    <size>
                     <width>76</width>
@@ -655,7 +655,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_20">
+                 <widget class="QPushButton" name="labelDownloadStatus">
                   <property name="font">
                    <font>
                     <family>微软雅黑</family>
@@ -680,6 +680,57 @@
         </widget>
        </item>
        <item>
+        <widget class="QFrame" name="searchOptionsFrame">
+         <property name="frameShape">
+          <enum>QFrame::Shape::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Shadow::Raised</enum>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_10">
+          <item alignment="Qt::AlignmentFlag::AlignLeft">
+           <widget class="QLabel" name="labelSearchSection">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>微软雅黑</family>
+              <pointsize>13</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Bangumi 搜索</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBoxNsfw">
+            <property name="font">
+             <font>
+              <family>微软雅黑</family>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>NSFW 内容</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Orientation::Vertical</enum>
@@ -694,10 +745,10 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="pikpak_page">
+     <widget class="QWidget" name="pikpakPage">
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item alignment="Qt::AlignmentFlag::AlignLeft">
-        <widget class="QLabel" name="pushButton_5">
+        <widget class="QLabel" name="labelPikPakTitle">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -723,7 +774,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="frame_2">
+        <widget class="QFrame" name="pikPakInfoFrame">
          <property name="frameShape">
           <enum>QFrame::Shape::StyledPanel</enum>
          </property>
@@ -732,7 +783,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QLabel" name="pushButton_6">
+           <widget class="QLabel" name="labelPikPakUsername">
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -746,7 +797,7 @@
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QLabel" name="pushButton_10">
+           <widget class="QLabel" name="labelPikPakPassword">
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -760,7 +811,7 @@
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QLabel" name="pushButton_11">
+           <widget class="QLabel" name="labelPikPakAccessToken">
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -773,7 +824,7 @@
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QLabel" name="pushButton_15">
+           <widget class="QLabel" name="labelPikPakRefreshToken">
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -786,7 +837,7 @@
            </widget>
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
-           <widget class="QPushButton" name="login_Button_2">
+           <widget class="QPushButton" name="btnPikPakLogin">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -826,10 +877,10 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="download_page">
+     <widget class="QWidget" name="downloadPage">
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item alignment="Qt::AlignmentFlag::AlignLeft">
-        <widget class="QLabel" name="pushButton_14">
+        <widget class="QLabel" name="labelDownloadTitle">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -855,7 +906,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="frame_3">
+        <widget class="QFrame" name="downloadPathFrame">
          <property name="frameShape">
           <enum>QFrame::Shape::StyledPanel</enum>
          </property>
@@ -864,14 +915,14 @@
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
-           <widget class="QLineEdit" name="lineEdit">
+           <widget class="QLineEdit" name="lineEditDownloadPath">
             <property name="readOnly">
              <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="login_Button_3">
+           <widget class="QPushButton" name="btnSelectDownloadPath">
             <property name="minimumSize">
              <size>
               <width>0</width>

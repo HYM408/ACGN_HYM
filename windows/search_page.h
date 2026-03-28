@@ -17,11 +17,13 @@ class SearchPage : public QWidget
 
 public:
     explicit SearchPage(QWidget *parent = nullptr);
-    ~SearchPage() override;
     void setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db, GameMonitorUtil *gameMonitor);
-    void applyTheme() const;
+    void applyTheme();
     void updateComboBoxByType(int currentType) const;
     void searchByTag(const QString &tag, int subjectType);
+
+public slots:
+    void updateNsfwCheckBox(bool checked) const;
 
 signals:
     void backButtonClicked();
@@ -33,11 +35,10 @@ private slots:
 
 private:
     void setupConnections();
-    void doSearch(const QString &keyword, const QString &tag);
-    void clearSearchResults();
+    void searchSubject(const QString &keyword, const QString &tag);
+    QPushButton *createResult(const QVariantMap &result);
     void showSearchStatus(const QString &text);
-    QFrame *createResultFrame(const QVariantMap &result);
-    bool eventFilter(QObject *watched, QEvent *event) override;
+    void clearSearchResults();
     Ui::SearchPage ui{};
     BangumiAPI *bangumiApi = nullptr;
     CacheImageUtil *cacheImageUtil = nullptr;
@@ -45,7 +46,8 @@ private:
     GameMonitorUtil *gameMonitorUtil = nullptr;
     QLabel *statusLabel = nullptr;
     DetailPage *detailPage = nullptr;
-    QMap<int, QVariantMap> resultDataMap;
+    QColor m_color2;
+    QColor m_color3;
 };
 
 #endif // SEARCH_PAGE_H

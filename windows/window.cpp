@@ -264,6 +264,7 @@ void MainWindow::ensureSearchPage()
     stackedMainWindow->addWidget(searchPage);
     connect(searchPage, &SearchPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
     connect(searchPage, &SearchPage::showEpisodePageRequested, this, &MainWindow::onShowEpisodePageRequested);
+    if (settingsPage) connect(settingsPage, &SettingsPage::nsfwSettingChanged, searchPage, &SearchPage::updateNsfwCheckBox);
 }
 
 void MainWindow::onSearchButtonClicked()
@@ -288,6 +289,7 @@ void MainWindow::onSettingsButtonClicked()
         settingsPage->setManagers(bangumiAPI, pikpakApi, dbManager);
         stackedMainWindow->addWidget(settingsPage);
         connect(settingsPage, &SettingsPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
+        if (searchPage) connect(settingsPage, &SettingsPage::nsfwSettingChanged, searchPage, &SearchPage::updateNsfwCheckBox);
     }
     stackedMainWindow->setCurrentWidget(settingsPage);
 }

@@ -1,6 +1,5 @@
 #include "search_page.h"
 #include <QJsonArray>
-#include <QMouseEvent>
 #include "config.h"
 #include "sql/sql.h"
 #include "detail_page/detail_page.h"
@@ -16,18 +15,12 @@ SearchPage::SearchPage(QWidget *parent) : QWidget(parent)
     setupConnections();
 }
 
-SearchPage::~SearchPage()
-{
-    delete statusLabel;
-}
-
 void SearchPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db, GameMonitorUtil *gameMonitor)
-{   // 初始化实例
+{
     cacheImageUtil = cacheImage;
     bangumiApi = api;
     dbManager = db;
     gameMonitorUtil = gameMonitor;
-    // 详情页
     if (!detailPage) {
         detailPage = new DetailPage(this);
         detailPage->setManagers(cacheImageUtil, bangumiApi, dbManager, gameMonitorUtil);
@@ -38,134 +31,93 @@ void SearchPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, Databa
     }
 }
 
-void SearchPage::applyTheme() const
+void SearchPage::applyTheme()
 {   // 主题
-    const QColor color1 = getColor("color1", QColor("#fdf7ff"));
-    ui.search_frame->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
+    m_color2 = getColor("color2", 0xf2ecf4);
+    m_color3 = getColor("color3", 0xe1dbe4);
 }
 
 void SearchPage::setupConnections()
 {   // 连接
-    connect(ui.search_pushButton, &QPushButton::clicked, this, &SearchPage::onSearchLineEditReturnPressed);
-    connect(ui.search_lineEdit, &QLineEdit::returnPressed, this, &SearchPage::onSearchLineEditReturnPressed);
-    connect(ui.back_Button, &QPushButton::clicked, this, &SearchPage::onBackButtonClicked);
-    setupLineEditCustomContextMenu(ui.search_lineEdit, CMO_Default);
+    updateNsfwCheckBox(getConfig("Bangumi/nsfw").toBool());
+    connect(ui.btnSearch, &QPushButton::clicked, this, &SearchPage::onSearchLineEditReturnPressed);
+    connect(ui.lineEditSearch, &QLineEdit::returnPressed, this, &SearchPage::onSearchLineEditReturnPressed);
+    connect(ui.btnBack, &QPushButton::clicked, this, &SearchPage::onBackButtonClicked);
+    setupLineEditCustomContextMenu(ui.lineEditSearch, CMO_Default);
+}
+
+void SearchPage::updateNsfwCheckBox(const bool checked) const
+{   // 更新NSFW
+    ui.checkBoxNsfw->setChecked(checked);
 }
 
 void SearchPage::updateComboBoxByType(const int currentType) const
 {   // 类型映射
-    if (currentType == 7 || currentType == 8) ui.comboBox->setCurrentIndex(1);
-    else if (currentType == 4) ui.comboBox->setCurrentIndex(2);
-    else ui.comboBox->setCurrentIndex(0);
+    ui.lineEditSearch->setFocus();
+    if (currentType == 7 || currentType == 8) ui.comboSearchType->setCurrentIndex(1);
+    else if (currentType == 4) ui.comboSearchType->setCurrentIndex(2);
+    else ui.comboSearchType->setCurrentIndex(0);
 }
 
 void SearchPage::searchByTag(const QString &tag, const int subjectType)
 {   // tag搜索
-    if (tag.isEmpty()) return;
     updateComboBoxByType(subjectType);
-    ui.checkBox->setChecked(true);
-    ui.search_lineEdit->setText(tag);
-    doSearch("", tag);
+    ui.checkBoxTag->setChecked(true);
+    ui.lineEditSearch->setText(tag);
+    searchSubject("", tag);
 }
 
 void SearchPage::onSearchLineEditReturnPressed()
 {   // 搜索事件
-    const QString input = ui.search_lineEdit->text().trimmed();
+    const QString input = ui.lineEditSearch->text().trimmed();
     if (input.isEmpty()) return;
-    if (ui.checkBox->isChecked()) doSearch("", input);
-    else doSearch(input, "");
+    if (ui.checkBoxTag->isChecked()) searchSubject("", input);
+    else searchSubject(input, "");
 }
 
-void SearchPage::doSearch(const QString &keyword, const QString &tag)
+void SearchPage::searchSubject(const QString &keyword, const QString &tag)
 {   // 搜索
     ui.stackedWidget->setCurrentIndex(0);
-    const QMap<int, int> typeMapping{{1, 1}, {2, 4}};
-    const int searchType = typeMapping.value(ui.comboBox->currentIndex(), 2);
+    static const QMap<int, int> typeMapping{{0, 2}, {1, 1}, {2, 4}};
     showSearchStatus("搜索中...");
-    bangumiApi->searchSubjects(keyword, tag, searchType, 3, [this](const QJsonArray &results, const QString &error) {
-        if (!error.isEmpty()) return showSearchStatus("搜索失败: " + error);
+    bangumiApi->searchSubjectsWithPost(keyword, tag,typeMapping.value(ui.comboSearchType->currentIndex()), ui.checkBoxNsfw->isChecked(), 3, [this](const QJsonArray &results, const QString &error) {
+        if (!error.isEmpty()) return showSearchStatus(error);
         clearSearchResults();
         if (!isVisible()) return;
         auto *layout = qobject_cast<QVBoxLayout*>(ui.scrollAreaWidgetContents->layout());
         const qsizetype resultCount = results.size();
-        for (int i = 0; i < resultCount; ++i) layout->addWidget(createResultFrame(results[i].toObject().toVariantMap()));
+        for (int i = 0; i < resultCount; ++i) layout->addWidget(createResult(results[i].toObject().toVariantMap()));
         if (resultCount == 0) showSearchStatus("未找到结果");
         else layout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
     });
 }
 
-QFrame *SearchPage::createResultFrame(const QVariantMap &result)
-{
-    // 主框架
-    auto *animationFrame = new QFrame();
-    animationFrame->setFixedSize(450, 130);
-    animationFrame->setStyleSheet("QFrame{background-color: rgb(242, 236, 244)}");
-    animationFrame->setCursor(Qt::PointingHandCursor);
-    // 获取数据
+QPushButton *SearchPage::createResult(const QVariantMap &result)
+{   // 创建搜索结果组件
     const int subjectId = result["id"].toInt();
-    resultDataMap[subjectId] = result;
-    animationFrame->setProperty("subjectId", subjectId);
-    // 水平布局
-    auto *horizontalLayout = new QHBoxLayout(animationFrame);
-    horizontalLayout->setSpacing(0);
+    auto *button = new QPushButton();
+    button->setFixedHeight(130);
+    button->setStyleSheet(QString("QPushButton {background-color: %1; border: none; border-radius: 15px}"
+                                  "QPushButton:hover {background-color: %2}").arg(m_color2.name(), m_color3.name()));
+    auto *horizontalLayout = new QHBoxLayout(button);
     horizontalLayout->setContentsMargins(0, 0, 0, 0);
-    // 封面
-    auto *coverLabel = new QLabel(animationFrame);
+    auto *coverLabel = new QLabel(button);
     coverLabel->setFixedSize(100, 130);
-    coverLabel->setStyleSheet("background-color: rgb(242, 236, 244);border-radius: 15px 0 0 15px");
-    coverLabel->setAlignment(Qt::AlignCenter);
-    coverLabel->setText("加载中...");
-    coverLabel->setCursor(Qt::PointingHandCursor);
-    const QVariantMap images = result["images"].toMap();
-    const QString imageUrl = images.value("common").toString();
-    if (!imageUrl.isEmpty()) ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, coverLabel, 15, false, true, QString("s%1.jpg").arg(subjectId));
-    else coverLabel->setText("暂无封面");
+    ImageUtil::loadImageWithCache(cacheImageUtil, QString("https://api.bgm.tv/v0/subjects/%1/image?type=common").arg(subjectId), coverLabel, 15, false, true, QString("s%1.jpg").arg(subjectId));
     horizontalLayout->addWidget(coverLabel);
-    // 垂直布局
     auto *infoLayout = new QVBoxLayout();
-    infoLayout->setContentsMargins(5, 0, 0, 0);
-    // 标题
-    auto *titleLabel = new QLabel(animationFrame);
-    titleLabel->setFixedHeight(30);
-    const QString title = result.contains("name_cn") && !result["name_cn"].toString().isEmpty() ? result["name_cn"].toString() : result["name"].toString();
-    titleLabel->setText(title);
+    auto *titleLabel = new QLabel(button);
+    titleLabel->setText(result["name_cn"].toString().isEmpty() ? result["name"].toString() : result["name_cn"].toString());
     const QFont font("微软雅黑", 13);
     titleLabel->setFont(font);
     infoLayout->addWidget(titleLabel);
     infoLayout->addStretch();
     horizontalLayout->addLayout(infoLayout);
-    animationFrame->installEventFilter(this);
-    return animationFrame;
-}
-
-bool SearchPage::eventFilter(QObject *watched, QEvent *event)
-{   // 点击事件
-    if (event->type() == QEvent::MouseButtonPress) {
-        if (const auto *mouseEvent = dynamic_cast<QMouseEvent*>(event); mouseEvent->button() == Qt::LeftButton) {
-            if (const auto *frame = qobject_cast<QFrame*>(watched)) {
-                const int subjectId = frame->property("subjectId").toInt();
-                if (subjectId > 0 && resultDataMap.contains(subjectId)) {
-                    detailPage->setCollectionData(subjectId, "");
-                    ui.stackedWidget->setCurrentWidget(detailPage);
-                    return true;
-                }
-            }
-        }
-    }
-    return QWidget::eventFilter(watched, event);
-}
-
-void SearchPage::clearSearchResults()
-{   // 清理框架
-    resultDataMap.clear();
-    auto *layout = qobject_cast<QVBoxLayout*>(ui.scrollAreaWidgetContents->layout());
-    delete statusLabel;
-    statusLabel = nullptr;
-    while (layout->count() > 0) {
-        const QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
-    }
+    connect(button, &QPushButton::clicked, this, [this, subjectId] {
+        detailPage->setCollectionData(subjectId, "");
+        ui.stackedWidget->setCurrentWidget(detailPage);
+    });
+    return button;
 }
 
 void SearchPage::showSearchStatus(const QString &text)
@@ -176,9 +128,21 @@ void SearchPage::showSearchStatus(const QString &text)
     statusLabel->setAlignment(Qt::AlignCenter);
     const QFont font("微软雅黑", 14);
     statusLabel->setFont(font);
-    statusLabel->setStyleSheet("color: #666; padding: 20px");
+    statusLabel->setStyleSheet("color: #666");
     layout->addWidget(statusLabel);
     layout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
+}
+
+void SearchPage::clearSearchResults()
+{   // 清理框架
+    auto *layout = qobject_cast<QVBoxLayout*>(ui.scrollAreaWidgetContents->layout());
+    delete statusLabel;
+    statusLabel = nullptr;
+    while (layout->count() > 0) {
+        const QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
 }
 
 void SearchPage::onBackButtonClicked()
@@ -186,6 +150,6 @@ void SearchPage::onBackButtonClicked()
     ui.stackedWidget->setCurrentIndex(0);
     clearSearchResults();
     if (detailPage) detailPage->resetUI();
-    ui.checkBox->setChecked(false);
+    ui.checkBoxTag->setChecked(false);
     emit backButtonClicked();
 }

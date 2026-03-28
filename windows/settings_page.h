@@ -22,6 +22,7 @@ public:
 
 signals:
     void backButtonClicked();
+    void nsfwSettingChanged(bool checked);
 
 private slots:
     void onLoginButtonClicked();
@@ -46,7 +47,6 @@ private:
     DatabaseManager *dbManager = nullptr;
     PikPakApi *pikpakApi = nullptr;
     ChunkDownload *m_currentDownload = nullptr;
-    static const QString BANGUMI_ARCHIVE_URL;
     QNetworkAccessManager m_networkManager;
 };
 

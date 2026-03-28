@@ -5,6 +5,8 @@
 #include "bangumi_oauth.h"
 #include "../utils/network_util.h"
 
+static const QString baseUrl = "https://api.bgm.tv";
+
 BangumiAPI::BangumiAPI(QObject *parent) : QObject(parent)
 {   // 获取信息
     userId = getConfig("Bangumi/user_id").toString();
@@ -24,7 +26,7 @@ void BangumiAPI::refreshAndReload()
 QNetworkRequest BangumiAPI::createRequest(const QString &url) const
 {   // 创建请求
     QNetworkRequest request(url);
-    request.setRawHeader("User-Agent", "ACGN_HYM/1.0");
+    request.setRawHeader("User-Agent", "HYM408/ACGN_HYM (https://github.com/HYM408/ACGN_HYM)");
     request.setRawHeader("Authorization", QString("Bearer %1").arg(accessToken).toUtf8());
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     return request;
@@ -70,25 +72,19 @@ void BangumiAPI::getSubjectInfo(const int subjectId, const int maxRetries, const
     sendRequestJson(manager, request, "GET", QByteArray(), maxRetries, [callback](const QJsonObject &obj, int, const QString &error) {callback(obj, error);}, [this] {refreshAndReload();});
 }
 
-void BangumiAPI::searchSubjects(const QString &keyword, const QString &tag, const int subjectType, const int maxRetries, const CollectionsCallback &callback)
+void BangumiAPI::searchSubjectsWithPost(const QString &keyword, const QString &tag, const int subjectType, const bool containsNsfw, const int maxRetries, const CollectionsCallback &callback)
 {   // 搜索
     const QString url = QString("%1/v0/search/subjects?limit=20").arg(baseUrl);
     const QNetworkRequest request = createRequest(url);
     QJsonObject params;
+    if (!keyword.isEmpty()) params["keyword"] = keyword;
     params["sort"] = "heat";
     QJsonObject filter;
-    const QJsonArray typeArray{subjectType};
-    filter["type"] = typeArray;
-    if (!tag.isEmpty()) {
-        const QJsonArray tagArray{tag};
-        filter["tag"] = tagArray;
-        params["filter"] = filter;
-    } else {
-        params["keyword"] = keyword;
-        params["filter"] = filter;
-    }
-    const QByteArray data = QJsonDocument(params).toJson();
-    sendRequestJson(manager, request, "POST", data, maxRetries, [callback](const QJsonObject &obj, int, const QString &error) {
+    if (!tag.isEmpty()) filter["tag"] = QJsonArray{tag};
+    filter["type"] = QJsonArray{subjectType};
+    filter["nsfw"] = containsNsfw;
+    params["filter"] = filter;
+    sendRequestJson(manager, request, "POST", QJsonDocument(params).toJson(), maxRetries, [callback](const QJsonObject &obj, int, const QString &error) {
         if (!error.isEmpty()) callback(QJsonArray(), error);
         else callback(obj["data"].toArray(), QString());
     }, [this] {refreshAndReload();});
@@ -96,8 +92,7 @@ void BangumiAPI::searchSubjects(const QString &keyword, const QString &tag, cons
 
 void BangumiAPI::getSubjectEpisodes(int subjectId, int maxRetries, const EpisodesCallback &callback)
 {   // 获取章节收藏
-    std::function<void(int, QJsonArray)> fetchPage;
-    fetchPage = [this, subjectId, maxRetries, callback, &fetchPage]
+    std::function<void(int, QJsonArray)> fetchPage = [this, subjectId, maxRetries, callback, &fetchPage]
     (int offset, QJsonArray allItems) {
         const QString url = QString("%1/v0/users/-/collections/%2/episodes?limit=1000&offset=%3").arg(baseUrl).arg(subjectId).arg(offset);
         const QNetworkRequest request = createRequest(url);

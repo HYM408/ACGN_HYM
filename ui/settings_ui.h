@@ -25,68 +25,72 @@ class Ui_SettingsPage
 {
 public:
     QHBoxLayout *horizontalLayout_8;
-    QFrame *settings_frame;
+    QFrame *settingsFrame;
     QVBoxLayout *verticalLayout;
-    QFrame *Frame;
+    QFrame *headerFrame;
     QHBoxLayout *horizontalLayout;
-    QPushButton *back_Button_2;
-    QPushButton *setting_Button;
+    QPushButton *btnBack;
+    QPushButton *btnSettingsTitle;
     QSpacerItem *horizontalSpacer;
-    QFrame *Frame_2;
+    QFrame *menuFrame;
     QVBoxLayout *verticalLayout_2;
-    QPushButton *pushButton_3;
-    QPushButton *pushButton_4;
-    QPushButton *pushButton_13;
+    QPushButton *btnBangumi;
+    QPushButton *btnPikPak;
+    QPushButton *btnDownloadMenu;
     QSpacerItem *verticalSpacer;
-    QStackedWidget *stackedWidget_2;
-    QWidget *login_page;
+    QStackedWidget *stackedWidget;
+    QWidget *bangumiPage;
     QVBoxLayout *verticalLayout_7;
-    QLabel *pushButton;
-    QFrame *Frame_3;
+    QLabel *labelBangumiTitle;
+    QFrame *authFrame;
     QVBoxLayout *verticalLayout_4;
-    QLabel *pushButton_7;
-    QLabel *pushButton_2;
-    QLabel *pushButton_9;
-    QLabel *pushButton_8;
-    QPushButton *login_Button;
-    QPushButton *collection_Button;
-    QFrame *Frame_4;
+    QLabel *labelAuthSection;
+    QLabel *labelUserId;
+    QLabel *labelAccessToken;
+    QLabel *labelRefreshToken;
+    QPushButton *btnBangumiAuth;
+    QPushButton *btnGetCollection;
+    QFrame *domainFrame;
     QHBoxLayout *horizontalLayout_2;
-    QLabel *pushButton_12;
-    QComboBox *comboBox;
+    QLabel *labelDomainSection;
+    QComboBox *comboBangumiDomain;
     QSpacerItem *horizontalSpacer_2;
-    QFrame *frame;
+    QFrame *publicDataFrame;
     QVBoxLayout *verticalLayout_6;
-    QLabel *pushButton_16;
-    QFrame *frame_5;
+    QLabel *labelPublicDataSection;
+    QFrame *publicDataOptionsFrame;
     QVBoxLayout *verticalLayout_8;
-    QCheckBox *checkBox;
-    QCheckBox *checkBox_2;
-    QCheckBox *checkBox_3;
-    QFrame *frame_4;
+    QCheckBox *checkBoxAnime;
+    QCheckBox *checkBoxBook;
+    QCheckBox *checkBoxGame;
+    QFrame *publicDataButtonsFrame;
     QHBoxLayout *horizontalLayout_4;
-    QPushButton *pushButton_17;
-    QPushButton *pushButton_19;
-    QPushButton *pushButton_20;
+    QPushButton *btnDownloadPublic;
+    QPushButton *btnDownloadMirror;
+    QPushButton *labelDownloadStatus;
+    QFrame *searchOptionsFrame;
+    QVBoxLayout *verticalLayout_10;
+    QLabel *labelSearchSection;
+    QCheckBox *checkBoxNsfw;
     QSpacerItem *verticalSpacer_3;
-    QWidget *pikpak_page;
+    QWidget *pikpakPage;
     QVBoxLayout *verticalLayout_3;
-    QLabel *pushButton_5;
-    QFrame *frame_2;
+    QLabel *labelPikPakTitle;
+    QFrame *pikPakInfoFrame;
     QVBoxLayout *verticalLayout_9;
-    QLabel *pushButton_6;
-    QLabel *pushButton_10;
-    QLabel *pushButton_11;
-    QLabel *pushButton_15;
-    QPushButton *login_Button_2;
+    QLabel *labelPikPakUsername;
+    QLabel *labelPikPakPassword;
+    QLabel *labelPikPakAccessToken;
+    QLabel *labelPikPakRefreshToken;
+    QPushButton *btnPikPakLogin;
     QSpacerItem *verticalSpacer_2;
-    QWidget *download_page;
+    QWidget *downloadPage;
     QVBoxLayout *verticalLayout_5;
-    QLabel *pushButton_14;
-    QFrame *frame_3;
+    QLabel *labelDownloadTitle;
+    QFrame *downloadPathFrame;
     QHBoxLayout *horizontalLayout_3;
-    QLineEdit *lineEdit;
-    QPushButton *login_Button_3;
+    QLineEdit *lineEditDownloadPath;
+    QPushButton *btnSelectDownloadPath;
     QSpacerItem *verticalSpacer_4;
     QButtonGroup *buttonGroup;
 
@@ -99,28 +103,28 @@ public:
         horizontalLayout_8->setSpacing(0);
         horizontalLayout_8->setObjectName("horizontalLayout_8");
         horizontalLayout_8->setContentsMargins(0, 0, 0, 0);
-        settings_frame = new QFrame(SettingsPage);
-        settings_frame->setObjectName("settings_frame");
-        settings_frame->setMinimumSize(QSize(300, 0));
-        settings_frame->setMaximumSize(QSize(300, 16777215));
-        settings_frame->setStyleSheet(QString::fromUtf8("background-color: white;"));
-        settings_frame->setFrameShape(QFrame::Shape::StyledPanel);
-        settings_frame->setFrameShadow(QFrame::Shadow::Raised);
-        verticalLayout = new QVBoxLayout(settings_frame);
+        settingsFrame = new QFrame(SettingsPage);
+        settingsFrame->setObjectName("settingsFrame");
+        settingsFrame->setMinimumSize(QSize(300, 0));
+        settingsFrame->setMaximumSize(QSize(300, 16777215));
+        settingsFrame->setStyleSheet(QString::fromUtf8("background-color: white;"));
+        settingsFrame->setFrameShape(QFrame::Shape::StyledPanel);
+        settingsFrame->setFrameShadow(QFrame::Shadow::Raised);
+        verticalLayout = new QVBoxLayout(settingsFrame);
         verticalLayout->setObjectName("verticalLayout");
-        Frame = new QFrame(settings_frame);
-        Frame->setObjectName("Frame");
-        horizontalLayout = new QHBoxLayout(Frame);
+        headerFrame = new QFrame(settingsFrame);
+        headerFrame->setObjectName("headerFrame");
+        horizontalLayout = new QHBoxLayout(headerFrame);
         horizontalLayout->setObjectName("horizontalLayout");
-        back_Button_2 = new QPushButton(Frame);
-        back_Button_2->setObjectName("back_Button_2");
-        back_Button_2->setMinimumSize(QSize(45, 45));
-        back_Button_2->setMaximumSize(QSize(45, 45));
+        btnBack = new QPushButton(headerFrame);
+        btnBack->setObjectName("btnBack");
+        btnBack->setMinimumSize(QSize(45, 45));
+        btnBack->setMaximumSize(QSize(45, 45));
         QFont font;
         font.setBold(false);
         font.setKerning(false);
-        back_Button_2->setFont(font);
-        back_Button_2->setStyleSheet(QString::fromUtf8("QPushButton {\n"
+        btnBack->setFont(font);
+        btnBack->setStyleSheet(QString::fromUtf8("QPushButton {\n"
 "             background-color: white;\n"
 "             border:none;\n"
 "             border-radius:22px\n"
@@ -131,388 +135,411 @@ public:
 "             }"));
         QIcon icon;
         icon.addFile(QString::fromUtf8("icons/back.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        back_Button_2->setIcon(icon);
-        back_Button_2->setIconSize(QSize(20, 20));
-        back_Button_2->setCheckable(true);
+        btnBack->setIcon(icon);
+        btnBack->setIconSize(QSize(20, 20));
+        btnBack->setCheckable(true);
 
-        horizontalLayout->addWidget(back_Button_2);
+        horizontalLayout->addWidget(btnBack);
 
-        setting_Button = new QPushButton(Frame);
-        setting_Button->setObjectName("setting_Button");
-        setting_Button->setMinimumSize(QSize(175, 0));
-        setting_Button->setMaximumSize(QSize(175, 16777215));
+        btnSettingsTitle = new QPushButton(headerFrame);
+        btnSettingsTitle->setObjectName("btnSettingsTitle");
+        btnSettingsTitle->setMinimumSize(QSize(175, 0));
+        btnSettingsTitle->setMaximumSize(QSize(175, 16777215));
         QFont font1;
         font1.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font1.setPointSize(25);
         font1.setBold(true);
-        setting_Button->setFont(font1);
-        setting_Button->setStyleSheet(QString::fromUtf8("border:none"));
+        btnSettingsTitle->setFont(font1);
+        btnSettingsTitle->setStyleSheet(QString::fromUtf8("border:none"));
 
-        horizontalLayout->addWidget(setting_Button);
+        horizontalLayout->addWidget(btnSettingsTitle);
 
         horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
         horizontalLayout->addItem(horizontalSpacer);
 
 
-        verticalLayout->addWidget(Frame);
+        verticalLayout->addWidget(headerFrame);
 
-        Frame_2 = new QFrame(settings_frame);
-        Frame_2->setObjectName("Frame_2");
-        verticalLayout_2 = new QVBoxLayout(Frame_2);
+        menuFrame = new QFrame(settingsFrame);
+        menuFrame->setObjectName("menuFrame");
+        verticalLayout_2 = new QVBoxLayout(menuFrame);
         verticalLayout_2->setObjectName("verticalLayout_2");
         verticalLayout_2->setContentsMargins(-1, 20, -1, -1);
-        pushButton_3 = new QPushButton(Frame_2);
+        btnBangumi = new QPushButton(menuFrame);
         buttonGroup = new QButtonGroup(SettingsPage);
         buttonGroup->setObjectName("buttonGroup");
-        buttonGroup->addButton(pushButton_3);
-        pushButton_3->setObjectName("pushButton_3");
-        pushButton_3->setMinimumSize(QSize(0, 50));
-        pushButton_3->setMaximumSize(QSize(16777215, 50));
+        buttonGroup->addButton(btnBangumi);
+        btnBangumi->setObjectName("btnBangumi");
+        btnBangumi->setMinimumSize(QSize(0, 50));
+        btnBangumi->setMaximumSize(QSize(16777215, 50));
         QFont font2;
         font2.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font2.setPointSize(15);
         font2.setBold(true);
-        pushButton_3->setFont(font2);
-        pushButton_3->setCheckable(true);
+        btnBangumi->setFont(font2);
+        btnBangumi->setCheckable(true);
 
-        verticalLayout_2->addWidget(pushButton_3);
+        verticalLayout_2->addWidget(btnBangumi);
 
-        pushButton_4 = new QPushButton(Frame_2);
-        buttonGroup->addButton(pushButton_4);
-        pushButton_4->setObjectName("pushButton_4");
-        pushButton_4->setMinimumSize(QSize(0, 50));
-        pushButton_4->setMaximumSize(QSize(16777215, 50));
-        pushButton_4->setFont(font2);
-        pushButton_4->setCheckable(true);
+        btnPikPak = new QPushButton(menuFrame);
+        buttonGroup->addButton(btnPikPak);
+        btnPikPak->setObjectName("btnPikPak");
+        btnPikPak->setMinimumSize(QSize(0, 50));
+        btnPikPak->setMaximumSize(QSize(16777215, 50));
+        btnPikPak->setFont(font2);
+        btnPikPak->setCheckable(true);
 
-        verticalLayout_2->addWidget(pushButton_4);
+        verticalLayout_2->addWidget(btnPikPak);
 
-        pushButton_13 = new QPushButton(Frame_2);
-        buttonGroup->addButton(pushButton_13);
-        pushButton_13->setObjectName("pushButton_13");
-        pushButton_13->setMinimumSize(QSize(0, 50));
-        pushButton_13->setMaximumSize(QSize(16777215, 50));
-        pushButton_13->setFont(font2);
-        pushButton_13->setCheckable(true);
+        btnDownloadMenu = new QPushButton(menuFrame);
+        buttonGroup->addButton(btnDownloadMenu);
+        btnDownloadMenu->setObjectName("btnDownloadMenu");
+        btnDownloadMenu->setMinimumSize(QSize(0, 50));
+        btnDownloadMenu->setMaximumSize(QSize(16777215, 50));
+        btnDownloadMenu->setFont(font2);
+        btnDownloadMenu->setCheckable(true);
 
-        verticalLayout_2->addWidget(pushButton_13);
+        verticalLayout_2->addWidget(btnDownloadMenu);
 
 
-        verticalLayout->addWidget(Frame_2);
+        verticalLayout->addWidget(menuFrame);
 
         verticalSpacer = new QSpacerItem(20, 866, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
 
         verticalLayout->addItem(verticalSpacer);
 
 
-        horizontalLayout_8->addWidget(settings_frame);
+        horizontalLayout_8->addWidget(settingsFrame);
 
-        stackedWidget_2 = new QStackedWidget(SettingsPage);
-        stackedWidget_2->setObjectName("stackedWidget_2");
-        stackedWidget_2->setStyleSheet(QString::fromUtf8("QStackedWidget > QWidget {\n"
-"	background-color: transparent;\n"
-"}"));
-        login_page = new QWidget();
-        login_page->setObjectName("login_page");
-        verticalLayout_7 = new QVBoxLayout(login_page);
+        stackedWidget = new QStackedWidget(SettingsPage);
+        stackedWidget->setObjectName("stackedWidget");
+        stackedWidget->setStyleSheet(QString::fromUtf8("QStackedWidget > QWidget {\n"
+"       background-color: transparent;\n"
+"       }"));
+        bangumiPage = new QWidget();
+        bangumiPage->setObjectName("bangumiPage");
+        verticalLayout_7 = new QVBoxLayout(bangumiPage);
         verticalLayout_7->setObjectName("verticalLayout_7");
-        pushButton = new QLabel(login_page);
-        pushButton->setObjectName("pushButton");
-        pushButton->setMinimumSize(QSize(0, 0));
-        pushButton->setMaximumSize(QSize(16777215, 16777215));
+        labelBangumiTitle = new QLabel(bangumiPage);
+        labelBangumiTitle->setObjectName("labelBangumiTitle");
+        labelBangumiTitle->setMinimumSize(QSize(0, 0));
+        labelBangumiTitle->setMaximumSize(QSize(16777215, 16777215));
         QFont font3;
         font3.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font3.setPointSize(17);
         font3.setBold(true);
-        pushButton->setFont(font3);
+        labelBangumiTitle->setFont(font3);
 
-        verticalLayout_7->addWidget(pushButton, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_7->addWidget(labelBangumiTitle, 0, Qt::AlignmentFlag::AlignLeft);
 
-        Frame_3 = new QFrame(login_page);
-        Frame_3->setObjectName("Frame_3");
-        verticalLayout_4 = new QVBoxLayout(Frame_3);
+        authFrame = new QFrame(bangumiPage);
+        authFrame->setObjectName("authFrame");
+        verticalLayout_4 = new QVBoxLayout(authFrame);
         verticalLayout_4->setObjectName("verticalLayout_4");
-        pushButton_7 = new QLabel(Frame_3);
-        pushButton_7->setObjectName("pushButton_7");
-        pushButton_7->setMinimumSize(QSize(0, 30));
-        pushButton_7->setMaximumSize(QSize(16777215, 30));
+        labelAuthSection = new QLabel(authFrame);
+        labelAuthSection->setObjectName("labelAuthSection");
+        labelAuthSection->setMinimumSize(QSize(0, 30));
+        labelAuthSection->setMaximumSize(QSize(16777215, 30));
         QFont font4;
         font4.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font4.setPointSize(13);
         font4.setBold(true);
-        pushButton_7->setFont(font4);
+        labelAuthSection->setFont(font4);
 
-        verticalLayout_4->addWidget(pushButton_7, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_4->addWidget(labelAuthSection, 0, Qt::AlignmentFlag::AlignLeft);
 
-        pushButton_2 = new QLabel(Frame_3);
-        pushButton_2->setObjectName("pushButton_2");
+        labelUserId = new QLabel(authFrame);
+        labelUserId->setObjectName("labelUserId");
         QFont font5;
         font5.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font5.setPointSize(13);
         font5.setBold(false);
-        pushButton_2->setFont(font5);
+        labelUserId->setFont(font5);
 
-        verticalLayout_4->addWidget(pushButton_2, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_4->addWidget(labelUserId, 0, Qt::AlignmentFlag::AlignLeft);
 
-        pushButton_9 = new QLabel(Frame_3);
-        pushButton_9->setObjectName("pushButton_9");
-        pushButton_9->setFont(font5);
+        labelAccessToken = new QLabel(authFrame);
+        labelAccessToken->setObjectName("labelAccessToken");
+        labelAccessToken->setFont(font5);
 
-        verticalLayout_4->addWidget(pushButton_9, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_4->addWidget(labelAccessToken, 0, Qt::AlignmentFlag::AlignLeft);
 
-        pushButton_8 = new QLabel(Frame_3);
-        pushButton_8->setObjectName("pushButton_8");
-        pushButton_8->setFont(font5);
+        labelRefreshToken = new QLabel(authFrame);
+        labelRefreshToken->setObjectName("labelRefreshToken");
+        labelRefreshToken->setFont(font5);
 
-        verticalLayout_4->addWidget(pushButton_8, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_4->addWidget(labelRefreshToken, 0, Qt::AlignmentFlag::AlignLeft);
 
-        login_Button = new QPushButton(Frame_3);
-        login_Button->setObjectName("login_Button");
-        login_Button->setMinimumSize(QSize(76, 0));
+        btnBangumiAuth = new QPushButton(authFrame);
+        btnBangumiAuth->setObjectName("btnBangumiAuth");
+        btnBangumiAuth->setMinimumSize(QSize(76, 0));
         QFont font6;
         font6.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font6.setPointSize(13);
-        login_Button->setFont(font6);
+        btnBangumiAuth->setFont(font6);
 
-        verticalLayout_4->addWidget(login_Button, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_4->addWidget(btnBangumiAuth, 0, Qt::AlignmentFlag::AlignLeft);
 
-        collection_Button = new QPushButton(Frame_3);
-        collection_Button->setObjectName("collection_Button");
-        collection_Button->setMinimumSize(QSize(76, 0));
-        collection_Button->setFont(font6);
+        btnGetCollection = new QPushButton(authFrame);
+        btnGetCollection->setObjectName("btnGetCollection");
+        btnGetCollection->setMinimumSize(QSize(76, 0));
+        btnGetCollection->setFont(font6);
 
-        verticalLayout_4->addWidget(collection_Button, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_4->addWidget(btnGetCollection, 0, Qt::AlignmentFlag::AlignLeft);
 
 
-        verticalLayout_7->addWidget(Frame_3);
+        verticalLayout_7->addWidget(authFrame);
 
-        Frame_4 = new QFrame(login_page);
-        Frame_4->setObjectName("Frame_4");
-        horizontalLayout_2 = new QHBoxLayout(Frame_4);
+        domainFrame = new QFrame(bangumiPage);
+        domainFrame->setObjectName("domainFrame");
+        horizontalLayout_2 = new QHBoxLayout(domainFrame);
         horizontalLayout_2->setSpacing(0);
         horizontalLayout_2->setObjectName("horizontalLayout_2");
-        pushButton_12 = new QLabel(Frame_4);
-        pushButton_12->setObjectName("pushButton_12");
-        pushButton_12->setMinimumSize(QSize(0, 30));
-        pushButton_12->setMaximumSize(QSize(16777215, 30));
-        pushButton_12->setFont(font4);
+        labelDomainSection = new QLabel(domainFrame);
+        labelDomainSection->setObjectName("labelDomainSection");
+        labelDomainSection->setMinimumSize(QSize(0, 30));
+        labelDomainSection->setMaximumSize(QSize(16777215, 30));
+        labelDomainSection->setFont(font4);
 
-        horizontalLayout_2->addWidget(pushButton_12, 0, Qt::AlignmentFlag::AlignLeft);
+        horizontalLayout_2->addWidget(labelDomainSection, 0, Qt::AlignmentFlag::AlignLeft);
 
-        comboBox = new QComboBox(Frame_4);
-        comboBox->addItem(QString());
-        comboBox->addItem(QString());
-        comboBox->addItem(QString());
-        comboBox->setObjectName("comboBox");
-        comboBox->setMinimumSize(QSize(0, 25));
+        comboBangumiDomain = new QComboBox(domainFrame);
+        comboBangumiDomain->addItem(QString());
+        comboBangumiDomain->addItem(QString());
+        comboBangumiDomain->addItem(QString());
+        comboBangumiDomain->setObjectName("comboBangumiDomain");
+        comboBangumiDomain->setMinimumSize(QSize(0, 25));
         QFont font7;
         font7.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font7.setPointSize(10);
-        comboBox->setFont(font7);
+        comboBangumiDomain->setFont(font7);
 
-        horizontalLayout_2->addWidget(comboBox, 0, Qt::AlignmentFlag::AlignLeft);
+        horizontalLayout_2->addWidget(comboBangumiDomain, 0, Qt::AlignmentFlag::AlignLeft);
 
         horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
         horizontalLayout_2->addItem(horizontalSpacer_2);
 
 
-        verticalLayout_7->addWidget(Frame_4);
+        verticalLayout_7->addWidget(domainFrame);
 
-        frame = new QFrame(login_page);
-        frame->setObjectName("frame");
-        frame->setFrameShape(QFrame::Shape::StyledPanel);
-        frame->setFrameShadow(QFrame::Shadow::Raised);
-        verticalLayout_6 = new QVBoxLayout(frame);
+        publicDataFrame = new QFrame(bangumiPage);
+        publicDataFrame->setObjectName("publicDataFrame");
+        publicDataFrame->setFrameShape(QFrame::Shape::StyledPanel);
+        publicDataFrame->setFrameShadow(QFrame::Shadow::Raised);
+        verticalLayout_6 = new QVBoxLayout(publicDataFrame);
         verticalLayout_6->setObjectName("verticalLayout_6");
-        pushButton_16 = new QLabel(frame);
-        pushButton_16->setObjectName("pushButton_16");
-        pushButton_16->setMinimumSize(QSize(0, 30));
-        pushButton_16->setMaximumSize(QSize(16777215, 30));
-        pushButton_16->setFont(font4);
+        labelPublicDataSection = new QLabel(publicDataFrame);
+        labelPublicDataSection->setObjectName("labelPublicDataSection");
+        labelPublicDataSection->setMinimumSize(QSize(0, 30));
+        labelPublicDataSection->setMaximumSize(QSize(16777215, 30));
+        labelPublicDataSection->setFont(font4);
 
-        verticalLayout_6->addWidget(pushButton_16, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_6->addWidget(labelPublicDataSection, 0, Qt::AlignmentFlag::AlignLeft);
 
-        frame_5 = new QFrame(frame);
-        frame_5->setObjectName("frame_5");
-        frame_5->setFrameShape(QFrame::Shape::StyledPanel);
-        frame_5->setFrameShadow(QFrame::Shadow::Raised);
-        verticalLayout_8 = new QVBoxLayout(frame_5);
+        publicDataOptionsFrame = new QFrame(publicDataFrame);
+        publicDataOptionsFrame->setObjectName("publicDataOptionsFrame");
+        publicDataOptionsFrame->setFrameShape(QFrame::Shape::StyledPanel);
+        publicDataOptionsFrame->setFrameShadow(QFrame::Shadow::Raised);
+        verticalLayout_8 = new QVBoxLayout(publicDataOptionsFrame);
         verticalLayout_8->setObjectName("verticalLayout_8");
         verticalLayout_8->setContentsMargins(0, -1, -1, -1);
-        checkBox = new QCheckBox(frame_5);
-        checkBox->setObjectName("checkBox");
-        checkBox->setFont(font7);
-        checkBox->setChecked(true);
+        checkBoxAnime = new QCheckBox(publicDataOptionsFrame);
+        checkBoxAnime->setObjectName("checkBoxAnime");
+        checkBoxAnime->setFont(font7);
+        checkBoxAnime->setChecked(true);
 
-        verticalLayout_8->addWidget(checkBox);
+        verticalLayout_8->addWidget(checkBoxAnime);
 
-        checkBox_2 = new QCheckBox(frame_5);
-        checkBox_2->setObjectName("checkBox_2");
-        checkBox_2->setFont(font7);
+        checkBoxBook = new QCheckBox(publicDataOptionsFrame);
+        checkBoxBook->setObjectName("checkBoxBook");
+        checkBoxBook->setFont(font7);
 
-        verticalLayout_8->addWidget(checkBox_2);
+        verticalLayout_8->addWidget(checkBoxBook);
 
-        checkBox_3 = new QCheckBox(frame_5);
-        checkBox_3->setObjectName("checkBox_3");
-        checkBox_3->setFont(font7);
+        checkBoxGame = new QCheckBox(publicDataOptionsFrame);
+        checkBoxGame->setObjectName("checkBoxGame");
+        checkBoxGame->setFont(font7);
 
-        verticalLayout_8->addWidget(checkBox_3);
+        verticalLayout_8->addWidget(checkBoxGame);
 
-        frame_4 = new QFrame(frame_5);
-        frame_4->setObjectName("frame_4");
-        frame_4->setFrameShape(QFrame::Shape::StyledPanel);
-        frame_4->setFrameShadow(QFrame::Shadow::Raised);
-        horizontalLayout_4 = new QHBoxLayout(frame_4);
+        publicDataButtonsFrame = new QFrame(publicDataOptionsFrame);
+        publicDataButtonsFrame->setObjectName("publicDataButtonsFrame");
+        publicDataButtonsFrame->setFrameShape(QFrame::Shape::StyledPanel);
+        publicDataButtonsFrame->setFrameShadow(QFrame::Shadow::Raised);
+        horizontalLayout_4 = new QHBoxLayout(publicDataButtonsFrame);
         horizontalLayout_4->setObjectName("horizontalLayout_4");
         horizontalLayout_4->setContentsMargins(0, 0, -1, 5);
-        pushButton_17 = new QPushButton(frame_4);
-        pushButton_17->setObjectName("pushButton_17");
-        pushButton_17->setMinimumSize(QSize(76, 0));
-        pushButton_17->setMaximumSize(QSize(76, 16777215));
-        pushButton_17->setFont(font6);
+        btnDownloadPublic = new QPushButton(publicDataButtonsFrame);
+        btnDownloadPublic->setObjectName("btnDownloadPublic");
+        btnDownloadPublic->setMinimumSize(QSize(76, 0));
+        btnDownloadPublic->setMaximumSize(QSize(76, 16777215));
+        btnDownloadPublic->setFont(font6);
 
-        horizontalLayout_4->addWidget(pushButton_17);
+        horizontalLayout_4->addWidget(btnDownloadPublic);
 
-        pushButton_19 = new QPushButton(frame_4);
-        pushButton_19->setObjectName("pushButton_19");
-        pushButton_19->setMinimumSize(QSize(76, 0));
-        pushButton_19->setMaximumSize(QSize(76, 16777215));
-        pushButton_19->setFont(font6);
+        btnDownloadMirror = new QPushButton(publicDataButtonsFrame);
+        btnDownloadMirror->setObjectName("btnDownloadMirror");
+        btnDownloadMirror->setMinimumSize(QSize(76, 0));
+        btnDownloadMirror->setMaximumSize(QSize(76, 16777215));
+        btnDownloadMirror->setFont(font6);
 
-        horizontalLayout_4->addWidget(pushButton_19);
+        horizontalLayout_4->addWidget(btnDownloadMirror);
 
-        pushButton_20 = new QPushButton(frame_4);
-        pushButton_20->setObjectName("pushButton_20");
-        pushButton_20->setFont(font6);
-        pushButton_20->setStyleSheet(QString::fromUtf8("border: none;"));
+        labelDownloadStatus = new QPushButton(publicDataButtonsFrame);
+        labelDownloadStatus->setObjectName("labelDownloadStatus");
+        labelDownloadStatus->setFont(font6);
+        labelDownloadStatus->setStyleSheet(QString::fromUtf8("border: none;"));
 
-        horizontalLayout_4->addWidget(pushButton_20);
-
-
-        verticalLayout_8->addWidget(frame_4, 0, Qt::AlignmentFlag::AlignLeft);
+        horizontalLayout_4->addWidget(labelDownloadStatus);
 
 
-        verticalLayout_6->addWidget(frame_5);
+        verticalLayout_8->addWidget(publicDataButtonsFrame, 0, Qt::AlignmentFlag::AlignLeft);
 
 
-        verticalLayout_7->addWidget(frame);
+        verticalLayout_6->addWidget(publicDataOptionsFrame);
+
+
+        verticalLayout_7->addWidget(publicDataFrame);
+
+        searchOptionsFrame = new QFrame(bangumiPage);
+        searchOptionsFrame->setObjectName("searchOptionsFrame");
+        searchOptionsFrame->setFrameShape(QFrame::Shape::StyledPanel);
+        searchOptionsFrame->setFrameShadow(QFrame::Shadow::Raised);
+        verticalLayout_10 = new QVBoxLayout(searchOptionsFrame);
+        verticalLayout_10->setObjectName("verticalLayout_10");
+        labelSearchSection = new QLabel(searchOptionsFrame);
+        labelSearchSection->setObjectName("labelSearchSection");
+        labelSearchSection->setMinimumSize(QSize(0, 30));
+        labelSearchSection->setMaximumSize(QSize(16777215, 30));
+        labelSearchSection->setFont(font4);
+
+        verticalLayout_10->addWidget(labelSearchSection, 0, Qt::AlignmentFlag::AlignLeft);
+
+        checkBoxNsfw = new QCheckBox(searchOptionsFrame);
+        checkBoxNsfw->setObjectName("checkBoxNsfw");
+        checkBoxNsfw->setFont(font7);
+
+        verticalLayout_10->addWidget(checkBoxNsfw);
+
+
+        verticalLayout_7->addWidget(searchOptionsFrame);
 
         verticalSpacer_3 = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
 
         verticalLayout_7->addItem(verticalSpacer_3);
 
-        stackedWidget_2->addWidget(login_page);
-        pikpak_page = new QWidget();
-        pikpak_page->setObjectName("pikpak_page");
-        verticalLayout_3 = new QVBoxLayout(pikpak_page);
+        stackedWidget->addWidget(bangumiPage);
+        pikpakPage = new QWidget();
+        pikpakPage->setObjectName("pikpakPage");
+        verticalLayout_3 = new QVBoxLayout(pikpakPage);
         verticalLayout_3->setObjectName("verticalLayout_3");
-        pushButton_5 = new QLabel(pikpak_page);
-        pushButton_5->setObjectName("pushButton_5");
-        pushButton_5->setMinimumSize(QSize(0, 0));
-        pushButton_5->setMaximumSize(QSize(16777215, 16777215));
+        labelPikPakTitle = new QLabel(pikpakPage);
+        labelPikPakTitle->setObjectName("labelPikPakTitle");
+        labelPikPakTitle->setMinimumSize(QSize(0, 0));
+        labelPikPakTitle->setMaximumSize(QSize(16777215, 16777215));
         QFont font8;
         font8.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font8.setPointSize(20);
         font8.setBold(true);
-        pushButton_5->setFont(font8);
+        labelPikPakTitle->setFont(font8);
 
-        verticalLayout_3->addWidget(pushButton_5, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_3->addWidget(labelPikPakTitle, 0, Qt::AlignmentFlag::AlignLeft);
 
-        frame_2 = new QFrame(pikpak_page);
-        frame_2->setObjectName("frame_2");
-        frame_2->setFrameShape(QFrame::Shape::StyledPanel);
-        frame_2->setFrameShadow(QFrame::Shadow::Raised);
-        verticalLayout_9 = new QVBoxLayout(frame_2);
+        pikPakInfoFrame = new QFrame(pikpakPage);
+        pikPakInfoFrame->setObjectName("pikPakInfoFrame");
+        pikPakInfoFrame->setFrameShape(QFrame::Shape::StyledPanel);
+        pikPakInfoFrame->setFrameShadow(QFrame::Shadow::Raised);
+        verticalLayout_9 = new QVBoxLayout(pikPakInfoFrame);
         verticalLayout_9->setObjectName("verticalLayout_9");
-        pushButton_6 = new QLabel(frame_2);
-        pushButton_6->setObjectName("pushButton_6");
-        pushButton_6->setFont(font5);
+        labelPikPakUsername = new QLabel(pikPakInfoFrame);
+        labelPikPakUsername->setObjectName("labelPikPakUsername");
+        labelPikPakUsername->setFont(font5);
 
-        verticalLayout_9->addWidget(pushButton_6, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_9->addWidget(labelPikPakUsername, 0, Qt::AlignmentFlag::AlignLeft);
 
-        pushButton_10 = new QLabel(frame_2);
-        pushButton_10->setObjectName("pushButton_10");
-        pushButton_10->setFont(font5);
+        labelPikPakPassword = new QLabel(pikPakInfoFrame);
+        labelPikPakPassword->setObjectName("labelPikPakPassword");
+        labelPikPakPassword->setFont(font5);
 
-        verticalLayout_9->addWidget(pushButton_10, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_9->addWidget(labelPikPakPassword, 0, Qt::AlignmentFlag::AlignLeft);
 
-        pushButton_11 = new QLabel(frame_2);
-        pushButton_11->setObjectName("pushButton_11");
-        pushButton_11->setFont(font6);
+        labelPikPakAccessToken = new QLabel(pikPakInfoFrame);
+        labelPikPakAccessToken->setObjectName("labelPikPakAccessToken");
+        labelPikPakAccessToken->setFont(font6);
 
-        verticalLayout_9->addWidget(pushButton_11, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_9->addWidget(labelPikPakAccessToken, 0, Qt::AlignmentFlag::AlignLeft);
 
-        pushButton_15 = new QLabel(frame_2);
-        pushButton_15->setObjectName("pushButton_15");
-        pushButton_15->setFont(font6);
+        labelPikPakRefreshToken = new QLabel(pikPakInfoFrame);
+        labelPikPakRefreshToken->setObjectName("labelPikPakRefreshToken");
+        labelPikPakRefreshToken->setFont(font6);
 
-        verticalLayout_9->addWidget(pushButton_15, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_9->addWidget(labelPikPakRefreshToken, 0, Qt::AlignmentFlag::AlignLeft);
 
-        login_Button_2 = new QPushButton(frame_2);
-        login_Button_2->setObjectName("login_Button_2");
-        login_Button_2->setMinimumSize(QSize(0, 30));
-        login_Button_2->setFont(font5);
-        login_Button_2->setStyleSheet(QString::fromUtf8(""));
+        btnPikPakLogin = new QPushButton(pikPakInfoFrame);
+        btnPikPakLogin->setObjectName("btnPikPakLogin");
+        btnPikPakLogin->setMinimumSize(QSize(0, 30));
+        btnPikPakLogin->setFont(font5);
+        btnPikPakLogin->setStyleSheet(QString::fromUtf8(""));
 
-        verticalLayout_9->addWidget(login_Button_2, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_9->addWidget(btnPikPakLogin, 0, Qt::AlignmentFlag::AlignLeft);
 
 
-        verticalLayout_3->addWidget(frame_2);
+        verticalLayout_3->addWidget(pikPakInfoFrame);
 
         verticalSpacer_2 = new QSpacerItem(20, 759, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
 
         verticalLayout_3->addItem(verticalSpacer_2);
 
-        stackedWidget_2->addWidget(pikpak_page);
-        download_page = new QWidget();
-        download_page->setObjectName("download_page");
-        verticalLayout_5 = new QVBoxLayout(download_page);
+        stackedWidget->addWidget(pikpakPage);
+        downloadPage = new QWidget();
+        downloadPage->setObjectName("downloadPage");
+        verticalLayout_5 = new QVBoxLayout(downloadPage);
         verticalLayout_5->setObjectName("verticalLayout_5");
-        pushButton_14 = new QLabel(download_page);
-        pushButton_14->setObjectName("pushButton_14");
-        pushButton_14->setMinimumSize(QSize(0, 0));
-        pushButton_14->setMaximumSize(QSize(16777215, 16777215));
-        pushButton_14->setFont(font3);
+        labelDownloadTitle = new QLabel(downloadPage);
+        labelDownloadTitle->setObjectName("labelDownloadTitle");
+        labelDownloadTitle->setMinimumSize(QSize(0, 0));
+        labelDownloadTitle->setMaximumSize(QSize(16777215, 16777215));
+        labelDownloadTitle->setFont(font3);
 
-        verticalLayout_5->addWidget(pushButton_14, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_5->addWidget(labelDownloadTitle, 0, Qt::AlignmentFlag::AlignLeft);
 
-        frame_3 = new QFrame(download_page);
-        frame_3->setObjectName("frame_3");
-        frame_3->setFrameShape(QFrame::Shape::StyledPanel);
-        frame_3->setFrameShadow(QFrame::Shadow::Raised);
-        horizontalLayout_3 = new QHBoxLayout(frame_3);
+        downloadPathFrame = new QFrame(downloadPage);
+        downloadPathFrame->setObjectName("downloadPathFrame");
+        downloadPathFrame->setFrameShape(QFrame::Shape::StyledPanel);
+        downloadPathFrame->setFrameShadow(QFrame::Shadow::Raised);
+        horizontalLayout_3 = new QHBoxLayout(downloadPathFrame);
         horizontalLayout_3->setObjectName("horizontalLayout_3");
-        lineEdit = new QLineEdit(frame_3);
-        lineEdit->setObjectName("lineEdit");
-        lineEdit->setReadOnly(true);
+        lineEditDownloadPath = new QLineEdit(downloadPathFrame);
+        lineEditDownloadPath->setObjectName("lineEditDownloadPath");
+        lineEditDownloadPath->setReadOnly(true);
 
-        horizontalLayout_3->addWidget(lineEdit);
+        horizontalLayout_3->addWidget(lineEditDownloadPath);
 
-        login_Button_3 = new QPushButton(frame_3);
-        login_Button_3->setObjectName("login_Button_3");
-        login_Button_3->setMinimumSize(QSize(0, 30));
-        login_Button_3->setFont(font5);
-        login_Button_3->setStyleSheet(QString::fromUtf8(""));
+        btnSelectDownloadPath = new QPushButton(downloadPathFrame);
+        btnSelectDownloadPath->setObjectName("btnSelectDownloadPath");
+        btnSelectDownloadPath->setMinimumSize(QSize(0, 30));
+        btnSelectDownloadPath->setFont(font5);
+        btnSelectDownloadPath->setStyleSheet(QString::fromUtf8(""));
 
-        horizontalLayout_3->addWidget(login_Button_3);
+        horizontalLayout_3->addWidget(btnSelectDownloadPath);
 
 
-        verticalLayout_5->addWidget(frame_3);
+        verticalLayout_5->addWidget(downloadPathFrame);
 
         verticalSpacer_4 = new QSpacerItem(20, 829, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
 
         verticalLayout_5->addItem(verticalSpacer_4);
 
-        stackedWidget_2->addWidget(download_page);
+        stackedWidget->addWidget(downloadPage);
 
-        horizontalLayout_8->addWidget(stackedWidget_2);
+        horizontalLayout_8->addWidget(stackedWidget);
 
 
         retranslateUi(SettingsPage);
 
-        stackedWidget_2->setCurrentIndex(0);
+        stackedWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(SettingsPage);
@@ -520,38 +547,40 @@ public:
 
     void retranslateUi(QWidget *SettingsPage) const
     {
-        back_Button_2->setText(QString());
-        setting_Button->setText(QCoreApplication::translate("SettingsPage", "\350\256\276\347\275\256", nullptr));
-        pushButton_3->setText(QCoreApplication::translate("SettingsPage", "Bangumi", nullptr));
-        pushButton_4->setText(QCoreApplication::translate("SettingsPage", "PikPak", nullptr));
-        pushButton_13->setText(QCoreApplication::translate("SettingsPage", "\344\270\213\350\275\275", nullptr));
-        pushButton->setText(QCoreApplication::translate("SettingsPage", "Bangumi", nullptr));
-        pushButton_7->setText(QCoreApplication::translate("SettingsPage", "Bangumi \346\216\210\346\235\203", nullptr));
-        pushButton_2->setText(QString());
-        pushButton_9->setText(QString());
-        pushButton_8->setText(QString());
-        login_Button->setText(QCoreApplication::translate("SettingsPage", "\345\274\200\345\247\213\346\216\210\346\235\203", nullptr));
-        collection_Button->setText(QCoreApplication::translate("SettingsPage", "\350\216\267\345\217\226\346\224\266\350\227\217", nullptr));
-        pushButton_12->setText(QCoreApplication::translate("SettingsPage", "Bangumi \345\237\237\345\220\215 \357\274\232", nullptr));
-        comboBox->setItemText(0, QCoreApplication::translate("SettingsPage", "bangumi.tv", nullptr));
-        comboBox->setItemText(1, QCoreApplication::translate("SettingsPage", "bgm.tv", nullptr));
-        comboBox->setItemText(2, QCoreApplication::translate("SettingsPage", "chii.in", nullptr));
+        btnBack->setText(QString());
+        btnSettingsTitle->setText(QCoreApplication::translate("SettingsPage", "\350\256\276\347\275\256", nullptr));
+        btnBangumi->setText(QCoreApplication::translate("SettingsPage", "Bangumi", nullptr));
+        btnPikPak->setText(QCoreApplication::translate("SettingsPage", "PikPak", nullptr));
+        btnDownloadMenu->setText(QCoreApplication::translate("SettingsPage", "\344\270\213\350\275\275", nullptr));
+        labelBangumiTitle->setText(QCoreApplication::translate("SettingsPage", "Bangumi", nullptr));
+        labelAuthSection->setText(QCoreApplication::translate("SettingsPage", "Bangumi \346\216\210\346\235\203", nullptr));
+        labelUserId->setText(QString());
+        labelAccessToken->setText(QString());
+        labelRefreshToken->setText(QString());
+        btnBangumiAuth->setText(QCoreApplication::translate("SettingsPage", "\345\274\200\345\247\213\346\216\210\346\235\203", nullptr));
+        btnGetCollection->setText(QCoreApplication::translate("SettingsPage", "\350\216\267\345\217\226\346\224\266\350\227\217", nullptr));
+        labelDomainSection->setText(QCoreApplication::translate("SettingsPage", "Bangumi \345\237\237\345\220\215 \357\274\232", nullptr));
+        comboBangumiDomain->setItemText(0, QCoreApplication::translate("SettingsPage", "bangumi.tv", nullptr));
+        comboBangumiDomain->setItemText(1, QCoreApplication::translate("SettingsPage", "bgm.tv", nullptr));
+        comboBangumiDomain->setItemText(2, QCoreApplication::translate("SettingsPage", "chii.in", nullptr));
 
-        pushButton_16->setText(QCoreApplication::translate("SettingsPage", "Bangumi \345\205\254\345\205\261\346\225\260\346\215\256", nullptr));
-        checkBox->setText(QCoreApplication::translate("SettingsPage", "\345\212\250\347\224\273", nullptr));
-        checkBox_2->setText(QCoreApplication::translate("SettingsPage", "\344\271\246\347\261\215", nullptr));
-        checkBox_3->setText(QCoreApplication::translate("SettingsPage", "\346\270\270\346\210\217", nullptr));
-        pushButton_17->setText(QCoreApplication::translate("SettingsPage", "\344\270\213\350\275\275", nullptr));
-        pushButton_19->setText(QCoreApplication::translate("SettingsPage", "\351\225\234\345\203\217", nullptr));
-        pushButton_20->setText(QString());
-        pushButton_5->setText(QCoreApplication::translate("SettingsPage", "PikPak \347\231\273\345\275\225", nullptr));
-        pushButton_6->setText(QString());
-        pushButton_10->setText(QString());
-        pushButton_11->setText(QString());
-        pushButton_15->setText(QString());
-        login_Button_2->setText(QCoreApplication::translate("SettingsPage", "\345\274\200\345\247\213\347\231\273\345\275\225", nullptr));
-        pushButton_14->setText(QCoreApplication::translate("SettingsPage", "\344\270\213\350\275\275\350\267\257\345\276\204", nullptr));
-        login_Button_3->setText(QCoreApplication::translate("SettingsPage", "\351\200\211\346\213\251\350\267\257\345\276\204", nullptr));
+        labelPublicDataSection->setText(QCoreApplication::translate("SettingsPage", "Bangumi \345\205\254\345\205\261\346\225\260\346\215\256", nullptr));
+        checkBoxAnime->setText(QCoreApplication::translate("SettingsPage", "\345\212\250\347\224\273", nullptr));
+        checkBoxBook->setText(QCoreApplication::translate("SettingsPage", "\344\271\246\347\261\215", nullptr));
+        checkBoxGame->setText(QCoreApplication::translate("SettingsPage", "\346\270\270\346\210\217", nullptr));
+        btnDownloadPublic->setText(QCoreApplication::translate("SettingsPage", "\344\270\213\350\275\275", nullptr));
+        btnDownloadMirror->setText(QCoreApplication::translate("SettingsPage", "\351\225\234\345\203\217", nullptr));
+        labelDownloadStatus->setText(QString());
+        labelSearchSection->setText(QCoreApplication::translate("SettingsPage", "Bangumi \346\220\234\347\264\242", nullptr));
+        checkBoxNsfw->setText(QCoreApplication::translate("SettingsPage", "NSFW \345\206\205\345\256\271", nullptr));
+        labelPikPakTitle->setText(QCoreApplication::translate("SettingsPage", "PikPak \347\231\273\345\275\225", nullptr));
+        labelPikPakUsername->setText(QString());
+        labelPikPakPassword->setText(QString());
+        labelPikPakAccessToken->setText(QString());
+        labelPikPakRefreshToken->setText(QString());
+        btnPikPakLogin->setText(QCoreApplication::translate("SettingsPage", "\345\274\200\345\247\213\347\231\273\345\275\225", nullptr));
+        labelDownloadTitle->setText(QCoreApplication::translate("SettingsPage", "\344\270\213\350\275\275\350\267\257\345\276\204", nullptr));
+        btnSelectDownloadPath->setText(QCoreApplication::translate("SettingsPage", "\351\200\211\346\213\251\350\267\257\345\276\204", nullptr));
         (void)SettingsPage;
     } // retranslateUi
 
