@@ -37,9 +37,9 @@ private slots:
     void onDownloadButtonClicked();
     void onBackButtonClicked();
     void onShowDetailPageRequested(int subjectId, const QString &progressText);
-    void onShowEpisodePageRequested(const CollectionData &collectionData);
+    void onShowEpisodePageRequested(const SubjectsData &subjectsData);
     void precreatePlayerPage();
-    void onEpisodeClicked(const CollectionData &collectionData, const EpisodeData &episodeData);
+    void onEpisodeClicked(const SubjectsData &subjectsData, const EpisodeData &episodeData);
     void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
     void closeOptionSelection(int result);
     void onGameStarted();

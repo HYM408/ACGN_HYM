@@ -19,7 +19,7 @@ GameMonitorUtil::~GameMonitorUtil()
 void GameMonitorUtil::startGame(int subjectId)
 {   // 启动游戏
     QVector<GameData> gameDataList = DatabaseManager::getGameData({subjectId});
-    QString launchPath = gameDataList.isEmpty() ? QString() : gameDataList.first().launch_path;
+    QString launchPath = gameDataList.isEmpty() ? QString() : gameDataList.first().launchPath;
     if (launchPath.isEmpty() || !QFile::exists(launchPath)) {
         launchPath = QFileDialog::getOpenFileName(parentWidget, "选择启动文件", QString(), "可执行文件 (*.exe);;所有文件 (*)");
         if (launchPath.isEmpty()) return;
@@ -50,7 +50,7 @@ void GameMonitorUtil::checkGamesStatus()
             } else {
                 const qint64 elapsedSec = (now - gameStartTimes.take(subjectId)) / 1000;
                 QVector<GameData> current = DatabaseManager::getGameData({subjectId});
-                qint64 total = current.isEmpty() ? 0 : static_cast<qint64>(current.first().play_duration);
+                qint64 total = current.isEmpty() ? 0 : static_cast<qint64>(current.first().playDuration);
                 total += elapsedSec;
                 DatabaseManager::updateGameData(subjectId, {{"play_duration", total}});
                 qDebug() << subjectId << "已退出，运行:" << elapsedSec << "秒，总计:" << total << "秒";

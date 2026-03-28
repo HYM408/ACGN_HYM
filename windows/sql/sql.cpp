@@ -20,7 +20,7 @@ DatabaseManager::~DatabaseManager()
 void DatabaseManager::openDatabase()
 {   // 打开数据库
     const QDir dir("data");
-    if (!dir.exists()) dir.mkpath(".");
+    if (!dir.exists()) (void)dir.mkpath(".");
     database.open();
     episodePublicDate.open();
 }
@@ -173,27 +173,26 @@ bool DatabaseManager::insertManyCollectionData(const QJsonArray &jsonArray)
     return true;
 }
 
-CollectionData DatabaseManager::collectionFromQuery(const QSqlQuery &query)
+SubjectsData DatabaseManager::collectionFromQuery(const QSqlQuery &query)
 {   // collection表解析
-    CollectionData data;
-    data.subject_id = query.value("subject_id").toInt();
-    data.vol_status = query.value("vol_status").toInt();
-    data.ep_status = query.value("ep_status").toInt();
-    data.subject_type = query.value("subject_type").toInt();
+    SubjectsData data;
+    data.subjectId = query.value("subject_id").toInt();
+    data.subjectType = query.value("subject_type").toInt();
+    data.name = query.value("subject_name").toString();
+    data.nameCn = query.value("subject_name_cn").toString();
+    data.subjectEps = query.value("subject_eps").toInt();
+    data.subjectVolumes = query.value("subject_volumes").toInt();
+    data.date = timestampToDateString(query.value("subject_date").toInt());
+    data.epStatus = query.value("ep_status").toInt();
+    data.volStatus = query.value("vol_status").toInt();
     data.type = query.value("type").toInt();
     data.rate = query.value("rate").toInt();
-    const int dateTimestamp = query.value("subject_date").toInt();
-    data.subject_date = timestampToDateString(dateTimestamp);
-    data.subject_name = query.value("subject_name").toString();
-    data.subject_name_cn = query.value("subject_name_cn").toString();
-    data.subject_eps = query.value("subject_eps").toInt();
-    data.subject_volumes = query.value("subject_volumes").toInt();
     return data;
 }
 
-QVector<CollectionData> DatabaseManager::getCollectionBySubjectTypeAndType(const int subjectType, const int typeValue)
+QVector<SubjectsData> DatabaseManager::getCollectionBySubjectTypeAndType(const int subjectType, const int typeValue)
 {   // 获取所有收藏
-    QVector<CollectionData> results;
+    QVector<SubjectsData> results;
     QSqlQuery query;
     query.prepare("SELECT * FROM collection WHERE subject_type = ? AND type = ? ORDER BY updated_at DESC");
     query.addBindValue(subjectType);
@@ -214,7 +213,7 @@ QJsonObject DatabaseManager::getStatusCountsBySubjectType(const int subjectType)
     return statusCounts;
 }
 
-CollectionData DatabaseManager::getCollectionBySubjectId(const int subjectId)
+SubjectsData DatabaseManager::getCollectionBySubjectId(const int subjectId)
 {   // 根据subject_id获取单条记录
     QSqlQuery query;
     query.prepare("SELECT * FROM collection WHERE subject_id = ?");
@@ -233,7 +232,7 @@ bool DatabaseManager::updateCollectionFields(const int subjectId, const QJsonObj
     }
     if (updateTimestamp) {
         setParts << "updated_at = ?";
-        values << QDateTime::currentDateTime().toSecsSinceEpoch();
+        values << QDateTime::currentSecsSinceEpoch();
     }
     QSqlQuery query;
     query.prepare(QString("UPDATE collection SET %1 WHERE subject_id = ?").arg(setParts.join(", ")));
@@ -290,14 +289,14 @@ QVector<EpisodeData> DatabaseManager::getEpisodesBySubjectId(const int subjectId
     if (!executeQuery(query, "获取剧集失败")) return results;
     while (query.next()) {
         EpisodeData ep;
-        ep.subject_id = query.value("subject_id").toInt();
-        ep.episode_id = query.value("episode_id").toInt();
+        ep.subjectId = query.value("subject_id").toInt();
+        ep.subjectId = query.value("episode_id").toInt();
         ep.ep = query.value("ep").toInt() / 10.0;
         ep.sort = query.value("sort").toInt() / 10.0;
         ep.name = query.value("name").toString();
-        ep.name_cn = query.value("name_cn").toString();
-        ep.episode_type = query.value("episode_type").toInt();
-        ep.collection_type = query.value("collection_type").toInt();
+        ep.nameCn = query.value("name_cn").toString();
+        ep.episodeType = query.value("episode_type").toInt();
+        ep.collectionType = query.value("collection_type").toInt();
         results.append(ep);
     }
     return results;
@@ -351,7 +350,7 @@ bool DatabaseManager::updateGameData(const int subjectId, const QJsonObject &fie
         QStringList placeholders;
         placeholders.fill("?", insertFields.size());
         QSqlQuery insertQuery;
-        insertQuery.prepare(QString("INSERT INTO game_data (%1) VALUES (%2)").arg(insertFields.join(", ")).arg(placeholders.join(", ")));
+        insertQuery.prepare(QString("INSERT INTO game_data (%1) VALUES (%2)").arg(insertFields.join(", "), placeholders.join(", ")));
         for (const QVariant &v : insertValues) insertQuery.addBindValue(v);
         return executeQuery(insertQuery, "插入game data失败");
     }
@@ -369,9 +368,9 @@ QVector<GameData> DatabaseManager::getGameData(const QList<int> &subjectIds)
     if (!executeQuery(query, "获取game data失败")) return results;
     while (query.next()) {
         GameData data;
-        data.subject_id = query.value("subject_id").toInt();
-        data.launch_path = query.value("launch_path").toString();
-        data.play_duration = static_cast<double>(query.value("play_duration").toLongLong()) / 3600.0;
+        data.subjectId = query.value("subject_id").toInt();
+        data.launchPath = query.value("launch_path").toString();
+        data.playDuration = static_cast<double>(query.value("play_duration").toLongLong()) / 3600.0;
         results.append(data);
     }
     return results;
@@ -407,10 +406,10 @@ QVector<EpisodeData> DatabaseManager::getEpisodeData(const int subjectId) const
     if (!executeQuery(query, "获取剧集失败")) return results;
     while (query.next()) {
         EpisodeData ep;
-        ep.subject_id = query.value("subject_id").toInt();
-        ep.episode_id = query.value("episode_id").toInt();
+        ep.subjectId = query.value("subject_id").toInt();
+        ep.episodeId = query.value("episode_id").toInt();
         ep.sort = query.value("sort").toInt() / 10.0;
-        ep.episode_type = query.value("type").toInt();
+        ep.episodeType = query.value("type").toInt();
         results.append(ep);
     }
     return results;
@@ -446,22 +445,22 @@ bool DatabaseManager::insertOrUpdateSubject(const QJsonObject &apiData) const
 SubjectsData DatabaseManager::buildSubjectsDataFromQuery(const QSqlQuery &query)
 {   // 构建SubjectsData
     SubjectsData data;
-    data.subject_id = query.value("subject_id").toInt();
-    data.subject_type = query.value("type").toInt();
+    data.subjectId = query.value("subject_id").toInt();
+    data.subjectType = query.value("type").toInt();
     data.name = query.value("name").toString();
-    data.name_cn = query.value("name_cn").toString();
+    data.nameCn = query.value("name_cn").toString();
     data.summary = decompressString(query.value("summary").toByteArray());
     data.tags = QJsonDocument::fromJson(query.value("tags").toString().toUtf8()).object();
-    data.meta_tags = query.value("meta_tags").toString();
-    data.rating_score = query.value("score").toInt() / 10.0;
-    data.rating_rank = query.value("rank").toInt();
+    data.metaTags = query.value("meta_tags").toString();
+    data.ratingScore = query.value("score").toInt() / 10.0;
+    data.ratingRank = query.value("rank").toInt();
     data.date = timestampToDateString(query.value("date").toLongLong());
     const QStringList parts = query.value("score_details").toString().split(',');
-    for (const QString &part : parts) data.score_details.append(part.toInt());
+    for (const QString &part : parts) data.scoreDetails.append(part.toInt());
     data.doing = query.value("doing").toInt();
     data.collect = query.value("done").toInt();
     data.dropped = query.value("dropped").toInt();
-    data.on_hold = query.value("on_hold").toInt();
+    data.onHold = query.value("on_hold").toInt();
     data.wish = query.value("wish").toInt();
     return data;
 }
@@ -494,18 +493,18 @@ QVector<CharacterData> DatabaseManager::getCharacters(const int subjectId) const
     QVector<CharacterData> results;
     while (query.next()) {
         CharacterData data;
-        data.character_id = query.value("character_id").toInt();
-        data.character_name = query.value("char_name").toString();
-        data.character_name_cn = query.value("char_name_cn").toString();
+        data.characterId = query.value("character_id").toInt();
+        data.characterName = query.value("char_name").toString();
+        data.characterNameCn = query.value("char_name_cn").toString();
         data.type = query.value("type").toInt();
         QString personsJsonStr = query.value("persons_json").toString();
         QJsonArray personsArray = QJsonDocument::fromJson(personsJsonStr.toUtf8()).array();
         for (const auto &val : personsArray) {
             QJsonObject obj = val.toObject();
             PersonInfo info;
-            info.person_id = obj["person_id"].toInt();
-            info.person_name = obj["person_name"].toString();
-            info.person_name_cn = obj["person_name_cn"].toString();
+            info.personId = obj["person_id"].toInt();
+            info.personName = obj["person_name"].toString();
+            info.personNameCn = obj["person_name_cn"].toString();
             data.persons.append(info);
         }
         results.append(data);
@@ -522,10 +521,10 @@ QVector<PersonData> DatabaseManager::getPersons(const int subjectId) const
     if (!executeQuery(query, "获取制作人员信息失败")) return results;
     while (query.next()) {
         PersonData info;
-        info.person_id = query.value("person_id").toInt();
+        info.personId = query.value("person_id").toInt();
         info.position = query.value("position").toInt();
         info.name = query.value("name").toString();
-        info.name_cn = query.value("name_cn").toString();
+        info.nameCn = query.value("name_cn").toString();
         results.append(info);
     }
     return results;
@@ -541,7 +540,7 @@ QVector<SubjectRelationData> DatabaseManager::getSubjectRelations(const int subj
     while (query.next()) {
         SubjectRelationData relation;
         relation.subject = buildSubjectsDataFromQuery(query);
-        relation.relation_type = query.value("relation_type").toInt();
+        relation.relationType = query.value("relation_type").toInt();
         results.append(relation);
     }
     return results;

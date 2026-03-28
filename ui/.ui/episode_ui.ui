@@ -39,7 +39,7 @@
     <number>0</number>
    </property>
    <item alignment="Qt::AlignmentFlag::AlignLeft">
-    <widget class="QFrame" name="frame_2">
+    <widget class="QFrame" name="mainFrame">
      <property name="minimumSize">
       <size>
        <width>600</width>
@@ -66,10 +66,10 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QFrame" name="frame">
+       <widget class="QFrame" name="headerFrame">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QPushButton" name="pushButton_14">
+          <widget class="QPushButton" name="btnBack">
            <property name="minimumSize">
             <size>
              <width>44</width>
@@ -84,13 +84,13 @@
            </property>
            <property name="styleSheet">
             <string notr="true">QPushButton {
-	border:none;
-	border-radius:22px
-}
+             border:none;
+             border-radius:22px
+             }
 
-QPushButton:hover {
-	background-color: rgb(237, 237, 238);
-}</string>
+             QPushButton:hover {
+             background-color: rgb(237, 237, 238);
+             }</string>
            </property>
            <property name="text">
             <string/>
@@ -111,7 +111,7 @@ QPushButton:hover {
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="pushButton_12">
+          <widget class="QLabel" name="labelTitle">
            <property name="minimumSize">
             <size>
              <width>468</width>
@@ -140,7 +140,7 @@ QPushButton:hover {
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_15">
+          <widget class="QPushButton" name="btnUpdate">
            <property name="font">
             <font>
              <family>微软雅黑</family>
@@ -157,7 +157,7 @@ QPushButton:hover {
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="pushButton_13">
+       <widget class="QLabel" name="labelSubjectName">
         <property name="minimumSize">
          <size>
           <width>585</width>
@@ -186,43 +186,43 @@ QPushButton:hover {
        </widget>
       </item>
       <item>
-       <widget class="QScrollArea" name="scrollArea">
+       <widget class="QScrollArea" name="scrollAreaEpisodes">
         <property name="styleSheet">
          <string notr="true">QScrollArea {
-	border: none;
-	background-color: transparent;
-}
+          border: none;
+          background-color: transparent;
+          }
 
-QScrollArea &gt; QWidget &gt; QWidget {
-	background-color: transparent;
-}
+          QScrollArea &gt; QWidget &gt; QWidget {
+          background-color: transparent;
+          }
 
-QScrollBar:vertical {
-	border: none;
-	background-color: rgba(200, 200, 200, 100);
-	width: 8px;
-	border-radius: 4px;
-}
+          QScrollBar:vertical {
+          border: none;
+          background-color: rgba(200, 200, 200, 100);
+          width: 8px;
+          border-radius: 4px;
+          }
 
-QScrollBar::handle:vertical {
-	background-color: rgba(150, 150, 150, 150);
-	border-radius: 4px;
-	min-height: 20px;
-}
+          QScrollBar::handle:vertical {
+          background-color: rgba(150, 150, 150, 150);
+          border-radius: 4px;
+          min-height: 20px;
+          }
 
-QScrollBar::handle:vertical:hover {
-	background-color: rgba(120, 120, 120, 200);
-}
+          QScrollBar::handle:vertical:hover {
+          background-color: rgba(120, 120, 120, 200);
+          }
 
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-	height: 0px;
-}
+          QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+          height: 0px;
+          }
          </string>
         </property>
         <property name="widgetResizable">
          <bool>true</bool>
         </property>
-        <widget class="QWidget" name="scrollAreaWidgetContents_2">
+        <widget class="QWidget" name="episodesContainer">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -231,7 +231,7 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
            <height>480</height>
           </rect>
          </property>
-         <layout class="QGridLayout" name="gridLayout_3"/>
+         <layout class="QGridLayout" name="gridLayoutEpisodes"/>
         </widget>
        </widget>
       </item>

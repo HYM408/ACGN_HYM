@@ -27,7 +27,7 @@ public slots:
 
 signals:
     void backButtonClicked();
-    void showEpisodePageRequested(const CollectionData &collectionData);
+    void showEpisodePageRequested(const SubjectsData &subjectsData);
 
 private slots:
     void onSearchLineEditReturnPressed();

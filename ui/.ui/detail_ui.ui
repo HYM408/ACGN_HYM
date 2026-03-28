@@ -27,7 +27,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QFrame" name="frame_6">
+    <widget class="QFrame" name="mainFrame">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -57,10 +57,10 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QFrame" name="frame_3">
+       <widget class="QFrame" name="headerFrame">
         <property name="styleSheet">
          <string notr="true">background-color: transparent;
-border: none;</string>
+          border: none;</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::Shape::StyledPanel</enum>
@@ -85,7 +85,7 @@ border: none;</string>
           <number>0</number>
          </property>
          <item alignment="Qt::AlignmentFlag::AlignLeft">
-          <widget class="QPushButton" name="pushButton_19">
+          <widget class="QPushButton" name="btnBack">
            <property name="minimumSize">
             <size>
              <width>45</width>
@@ -100,14 +100,14 @@ border: none;</string>
            </property>
            <property name="styleSheet">
             <string notr="true">QPushButton {
-	background-color: transparent;
-	border:none;
-	border-radius:22px
-}
+             background-color: transparent;
+             border:none;
+             border-radius:22px
+             }
 
-QPushButton:hover {
-	background-color: rgb(237, 237, 238);
-}</string>
+             QPushButton:hover {
+             background-color: rgb(237, 237, 238);
+             }</string>
            </property>
            <property name="text">
             <string/>
@@ -125,7 +125,7 @@ QPushButton:hover {
           </widget>
          </item>
          <item alignment="Qt::AlignmentFlag::AlignRight">
-          <widget class="QPushButton" name="pushButton_20">
+          <widget class="QPushButton" name="btnOpenUrl">
            <property name="minimumSize">
             <size>
              <width>45</width>
@@ -140,14 +140,14 @@ QPushButton:hover {
            </property>
            <property name="styleSheet">
             <string notr="true">QPushButton {
-	background-color: transparent;
-	border:none;
-	border-radius:22px
-}
+             background-color: transparent;
+             border:none;
+             border-radius:22px
+             }
 
-QPushButton:hover {
-	background-color: rgb(237, 237, 238);
-}</string>
+             QPushButton:hover {
+             background-color: rgb(237, 237, 238);
+             }</string>
            </property>
            <property name="text">
             <string/>
@@ -168,7 +168,7 @@ QPushButton:hover {
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="frame_4">
+       <widget class="QFrame" name="infoFrame">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -183,9 +183,9 @@ QPushButton:hover {
         </property>
         <property name="styleSheet">
          <string notr="true">QFrame {
-	background-color: transparent;
-	border: none;
-}</string>
+          background-color: transparent;
+          border: none;
+          }</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::Shape::StyledPanel</enum>
@@ -210,7 +210,7 @@ QPushButton:hover {
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="cover_label_3">
+          <widget class="QLabel" name="labelCover">
            <property name="minimumSize">
             <size>
              <width>220</width>
@@ -235,7 +235,7 @@ QPushButton:hover {
           </widget>
          </item>
          <item>
-          <widget class="QFrame" name="frame">
+          <widget class="QFrame" name="infoTextFrame">
            <layout class="QVBoxLayout" name="verticalLayout_5">
             <property name="spacing">
              <number>0</number>
@@ -253,7 +253,7 @@ QPushButton:hover {
              <number>0</number>
             </property>
             <item>
-             <widget class="QLineEdit" name="lineEdit">
+             <widget class="QLineEdit" name="lineEditTitle">
               <property name="font">
                <font>
                 <family>微软雅黑</family>
@@ -263,7 +263,7 @@ QPushButton:hover {
               </property>
               <property name="styleSheet">
                <string notr="true">border:none;
-background-color: transparent;</string>
+                background-color: transparent;</string>
               </property>
               <property name="readOnly">
                <bool>true</bool>
@@ -271,7 +271,7 @@ background-color: transparent;</string>
              </widget>
             </item>
             <item>
-             <widget class="QFrame" name="frame_8">
+             <widget class="QFrame" name="statsFrame">
               <property name="frameShape">
                <enum>QFrame::Shape::StyledPanel</enum>
               </property>
@@ -295,7 +295,7 @@ background-color: transparent;</string>
                 <number>0</number>
                </property>
                <item>
-                <widget class="QFrame" name="frame_7">
+                <widget class="QFrame" name="infoLabelsFrame">
                  <property name="frameShape">
                   <enum>QFrame::Shape::StyledPanel</enum>
                  </property>
@@ -313,7 +313,7 @@ background-color: transparent;</string>
                    <number>0</number>
                   </property>
                   <item alignment="Qt::AlignmentFlag::AlignLeft">
-                   <widget class="QLabel" name="pushButton_23">
+                   <widget class="QLabel" name="labelStatus">
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
@@ -329,8 +329,8 @@ background-color: transparent;</string>
                     </property>
                     <property name="styleSheet">
                      <string notr="true">border: 1px solid gray;
-border-radius:8px;
-padding: 2px 10px;</string>
+                      border-radius:8px;
+                      padding: 2px 10px;</string>
                     </property>
                     <property name="text">
                      <string>TBA</string>
@@ -341,7 +341,7 @@ padding: 2px 10px;</string>
                    </widget>
                   </item>
                   <item alignment="Qt::AlignmentFlag::AlignLeft">
-                   <widget class="QLabel" name="pushButton_24">
+                   <widget class="QLabel" name="labelProgress">
                     <property name="font">
                      <font>
                       <family>微软雅黑</family>
@@ -357,7 +357,7 @@ padding: 2px 10px;</string>
                    </widget>
                   </item>
                   <item alignment="Qt::AlignmentFlag::AlignLeft">
-                   <widget class="QFrame" name="frame_2">
+                   <widget class="QFrame" name="ratingInfoFrame">
                     <property name="frameShape">
                      <enum>QFrame::Shape::StyledPanel</enum>
                     </property>
@@ -381,7 +381,7 @@ padding: 2px 10px;</string>
                       <number>0</number>
                      </property>
                      <item>
-                      <widget class="QLabel" name="pushButton_21">
+                      <widget class="QLabel" name="labelRatingInfo">
                        <property name="font">
                         <font>
                          <family>微软雅黑</family>
@@ -397,7 +397,7 @@ padding: 2px 10px;</string>
                       </widget>
                      </item>
                      <item>
-                      <widget class="QPushButton" name="pushButton">
+                      <widget class="QPushButton" name="btnRating">
                        <property name="minimumSize">
                         <size>
                          <width>80</width>
@@ -416,7 +416,7 @@ padding: 2px 10px;</string>
                    </widget>
                   </item>
                   <item alignment="Qt::AlignmentFlag::AlignLeft">
-                   <widget class="QLabel" name="pushButton_25">
+                   <widget class="QLabel" name="labelCollectionStats">
                     <property name="font">
                      <font>
                       <family>微软雅黑</family>
@@ -432,7 +432,7 @@ padding: 2px 10px;</string>
                    </widget>
                   </item>
                   <item alignment="Qt::AlignmentFlag::AlignLeft">
-                   <widget class="QPushButton" name="pushButton_26">
+                   <widget class="QPushButton" name="btnStatus">
                     <property name="minimumSize">
                      <size>
                       <width>80</width>
@@ -448,7 +448,7 @@ padding: 2px 10px;</string>
                    </widget>
                   </item>
                   <item alignment="Qt::AlignmentFlag::AlignLeft">
-                   <widget class="QPushButton" name="pushButton_27">
+                   <widget class="QPushButton" name="btnAction">
                     <property name="minimumSize">
                      <size>
                       <width>80</width>
@@ -492,17 +492,17 @@ padding: 2px 10px;</string>
         </property>
         <property name="styleSheet">
          <string notr="true">QTabWidget::tab-bar {
-	alignment: center;
-}
+          alignment: center;
+          }
 
-QTabWidget {
-	border:none;
-}</string>
+          QTabWidget {
+          border:none;
+          }</string>
         </property>
         <property name="currentIndex">
          <number>2</number>
         </property>
-        <widget class="QWidget" name="tab">
+        <widget class="QWidget" name="tabDetail">
          <attribute name="title">
           <string>详情</string>
          </attribute>
@@ -523,7 +523,7 @@ QTabWidget {
            <number>0</number>
           </property>
           <item alignment="Qt::AlignmentFlag::AlignTop">
-           <widget class="QFrame" name="frame_5">
+           <widget class="QFrame" name="frameTags">
             <property name="styleSheet">
              <string notr="true">border: none;</string>
             </property>
@@ -536,7 +536,7 @@ QTabWidget {
            </widget>
           </item>
           <item>
-           <widget class="QTextEdit" name="textEdit_2">
+           <widget class="QTextEdit" name="textEditSummary">
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -549,28 +549,28 @@ QTabWidget {
             </property>
             <property name="styleSheet">
              <string notr="true">QScrollBar:vertical {
-    border: none;
-    background: #f0f0f0;
-    width: 11px;
-}
+              border: none;
+              background: #f0f0f0;
+              width: 11px;
+              }
 
-QScrollBar::handle:vertical {
-    background: #c0c0c0;
-    border-radius: 5px;
-    min-height: 20px;
-}
+              QScrollBar::handle:vertical {
+              background: #c0c0c0;
+              border-radius: 5px;
+              min-height: 20px;
+              }
 
-QScrollBar::handle:vertical:hover {
-    background: #a0a0a0;
-}
+              QScrollBar::handle:vertical:hover {
+              background: #a0a0a0;
+              }
 
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-    border: none;
-    background: none;
-    height: 0px;
-}
+              QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+              border: none;
+              background: none;
+              height: 0px;
+              }
 
-</string>
+             </string>
             </property>
             <property name="frameShape">
              <enum>QFrame::Shape::NoFrame</enum>
@@ -582,7 +582,7 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="tab_2">
+        <widget class="QWidget" name="tabCharacters">
          <attribute name="title">
           <string>角色</string>
          </attribute>
@@ -603,35 +603,35 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
            <number>0</number>
           </property>
           <item>
-           <widget class="QScrollArea" name="scrollArea">
+           <widget class="QScrollArea" name="scrollAreaCharacters">
             <property name="styleSheet">
              <string notr="true">QScrollArea {
-	border: none;
-}
+              border: none;
+              }
 
-QScrollBar:vertical {
-    border: none;
-    background: #f0f0f0;
-    width: 11px;
-}
+              QScrollBar:vertical {
+              border: none;
+              background: #f0f0f0;
+              width: 11px;
+              }
 
-QScrollBar::handle:vertical {
-    background: #c0c0c0;
-    border-radius: 5px;
-    min-height: 20px;
-}
+              QScrollBar::handle:vertical {
+              background: #c0c0c0;
+              border-radius: 5px;
+              min-height: 20px;
+              }
 
-QScrollBar::handle:vertical:hover {
-    background: #a0a0a0;
-}
+              QScrollBar::handle:vertical:hover {
+              background: #a0a0a0;
+              }
 
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-    border: none;
-    background: none;
-    height: 0px;
-}
+              QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+              border: none;
+              background: none;
+              height: 0px;
+              }
 
-</string>
+             </string>
             </property>
             <property name="verticalScrollBarPolicy">
              <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
@@ -639,7 +639,7 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
             <property name="widgetResizable">
              <bool>true</bool>
             </property>
-            <widget class="QWidget" name="scrollAreaWidgetContents">
+            <widget class="QWidget" name="charactersContent">
              <property name="geometry">
               <rect>
                <x>0</x>
@@ -656,7 +656,7 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="tab_3">
+        <widget class="QWidget" name="tabRelations">
          <attribute name="title">
           <string>相关条目</string>
          </attribute>
@@ -677,35 +677,35 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
            <number>0</number>
           </property>
           <item>
-           <widget class="QScrollArea" name="scrollArea_3">
+           <widget class="QScrollArea" name="scrollAreaRelations">
             <property name="styleSheet">
              <string notr="true">QScrollArea {
-	border: none;
-}
+              border: none;
+              }
 
-QScrollBar:vertical {
-    border: none;
-    background: #f0f0f0;
-    width: 11px;
-}
+              QScrollBar:vertical {
+              border: none;
+              background: #f0f0f0;
+              width: 11px;
+              }
 
-QScrollBar::handle:vertical {
-    background: #c0c0c0;
-    border-radius: 5px;
-    min-height: 20px;
-}
+              QScrollBar::handle:vertical {
+              background: #c0c0c0;
+              border-radius: 5px;
+              min-height: 20px;
+              }
 
-QScrollBar::handle:vertical:hover {
-    background: #a0a0a0;
-}
+              QScrollBar::handle:vertical:hover {
+              background: #a0a0a0;
+              }
 
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-    border: none;
-    background: none;
-    height: 0px;
-}
+              QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+              border: none;
+              background: none;
+              height: 0px;
+              }
 
-</string>
+             </string>
             </property>
             <property name="verticalScrollBarPolicy">
              <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
@@ -713,7 +713,7 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
             <property name="widgetResizable">
              <bool>true</bool>
             </property>
-            <widget class="QWidget" name="scrollAreaWidgetContents_3">
+            <widget class="QWidget" name="relationsContent">
              <property name="geometry">
               <rect>
                <x>0</x>
@@ -730,7 +730,7 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="tab_4">
+        <widget class="QWidget" name="tabStaff">
          <attribute name="title">
           <string>制作人员</string>
          </attribute>
@@ -751,40 +751,40 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
            <number>0</number>
           </property>
           <item>
-           <widget class="QScrollArea" name="scrollArea_2">
+           <widget class="QScrollArea" name="scrollAreaStaff">
             <property name="styleSheet">
              <string notr="true">QScrollArea {
-	border: none;
-}
+              border: none;
+              }
 
-QScrollBar:vertical {
-    border: none;
-    background: #f0f0f0;
-    width: 11px;
-}
+              QScrollBar:vertical {
+              border: none;
+              background: #f0f0f0;
+              width: 11px;
+              }
 
-QScrollBar::handle:vertical {
-    background: #c0c0c0;
-    border-radius: 5px;
-    min-height: 20px;
-}
+              QScrollBar::handle:vertical {
+              background: #c0c0c0;
+              border-radius: 5px;
+              min-height: 20px;
+              }
 
-QScrollBar::handle:vertical:hover {
-    background: #a0a0a0;
-}
+              QScrollBar::handle:vertical:hover {
+              background: #a0a0a0;
+              }
 
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-    border: none;
-    background: none;
-    height: 0px;
-}
+              QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+              border: none;
+              background: none;
+              height: 0px;
+              }
 
-</string>
+             </string>
             </property>
             <property name="widgetResizable">
              <bool>true</bool>
             </property>
-            <widget class="QWidget" name="scrollAreaWidgetContents_2">
+            <widget class="QWidget" name="staffContent">
              <property name="geometry">
               <rect>
                <x>0</x>

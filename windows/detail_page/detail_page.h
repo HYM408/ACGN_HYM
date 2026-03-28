@@ -28,7 +28,7 @@ public:
 signals:
     void backButtonClicked();
     void tagClicked(const QString &tag, int subjectType);
-    void showEpisodePageRequested(const CollectionData &collectionData);
+    void showEpisodePageRequested(const SubjectsData &subjectsData);
     void refresh();
 
 private slots:
@@ -45,6 +45,7 @@ protected:
 
 private:
     void setupConnections();
+    void mergeSubjectData(const SubjectsData& subjectData);
     void updateDetailPage(const QString &progressText);
     void setupScoreChart(const QVector<int> &scoreDetails, int total);
     void tagsDisplay(const QList<QPair<QString, int>> &tagPairs);
@@ -57,7 +58,6 @@ private:
     void onStaffTab();
     void clearLayout() const;
     static void clearTab(const QWidget *content) ;
-    void loadData(int subjectId, const QString &progressText);
     Ui::DetailPage ui{};
     CacheImageUtil *cacheImageUtil = nullptr;
     BangumiAPI *bangumiAPI = nullptr;
@@ -67,8 +67,7 @@ private:
     StarRatingWidget *m_starRating = nullptr;
     ScoreChartWidget *m_scoreChartWidget = nullptr;
     QStack<int> m_historyStack;
-    CollectionData currentData;
-    SubjectsData subjectData;
+    SubjectsData m_subjectData;
     QMap<int, QMap<int, QString>> statusNamesMap;
     QVector<CharacterData> m_characters;
     QVector<SubjectRelationData> m_relations;

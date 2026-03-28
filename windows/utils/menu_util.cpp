@@ -24,7 +24,7 @@ StatusSelector::StatusSelector(const QPushButton *parentButton, const int subjec
     setAttribute(Qt::WA_TranslucentBackground);
     setFixedWidth(160);
     auto *container = new QFrame(this);
-    const QColor color2 = getColor("color2", QColor("#f2ecf4"));
+    const QColor color2 = getColor("color2", 0xf2ecf4);
     container->setStyleSheet(QString("QFrame {background-color: %1; border: 1px solid #ccc; border-radius: 4px}").arg(color2.name()));
     auto *shadowEffect = new QGraphicsDropShadowEffect(container);
     shadowEffect->setBlurRadius(15);
@@ -38,7 +38,7 @@ StatusSelector::StatusSelector(const QPushButton *parentButton, const int subjec
     for (auto statusValue : {1, 3, 2, 4, 5, 0}) {
         if (statusValue == 0 && collectionType == 0) continue;
         auto *btn = new QPushButton(statusMap.value(statusValue));
-        const QColor color3 = getColor("color3", QColor("#e1dbe4"));
+        const QColor color3 = getColor("color3", 0xe1dbe4);
         btn->setStyleSheet(QString("QPushButton {border: none; padding: 10px 12px; font-size: 13px}"
                                    "QPushButton:hover {background-color: %1}").arg(color3.name()));
         connect(btn, &QPushButton::clicked, this, [this, statusValue] {updateStatus(statusValue);});
@@ -157,7 +157,7 @@ void StatusSelector::updateEpisodesBatch(const QVector<EpisodeData> &episodes, i
 {   // 全部已看
     QPointer guard(this);
     QJsonArray episodeIds;
-    for (const auto &ep : episodes) episodeIds.append(ep.episode_id);
+    for (const auto &ep : episodes) episodeIds.append(ep.episodeId);
     if (episodeIds.isEmpty()) {
         const_cast<StatusSelector*>(this)->deleteLater();
         return;

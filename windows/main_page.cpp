@@ -24,11 +24,11 @@ MainPageManager::MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cac
 
 void MainPageManager::applyTheme()
 {   // 主题
-    m_color2 = getColor("color2", QColor("#f2ecf4"));
-    m_color3 = getColor("color3", QColor("#e1dbe4"));
-    const QColor color4 = getColor("color4", QColor("#e9ddff"));
-    const QColor color5 = getColor("color5", QColor("#ddd0f6"));
-    const QColor color6 = getColor("color6", QColor("#f2ecf4"));
+    m_color2 = getColor("color2", 0xf2ecf4);
+    m_color3 = getColor("color3", 0xe1dbe4);
+    const QColor color4 = getColor("color4", 0xe9ddff);
+    const QColor color5 = getColor("color5", 0xddd0f6);
+    const QColor color6 = getColor("color6", 0xf2ecf4);
     const QString color6A = QString("rgba(%1, %2, %3, 30)").arg(color6.red()).arg(color6.green()).arg(color6.blue());
     mainWindow->toolbar_frame->setStyleSheet(QString("QFrame {background-color: %1}").arg(m_color2.name()));
     mainWindow->btnSearch->setStyleSheet(QString("QPushButton {background-color: %1; border: none; border-radius:15px}"
@@ -74,7 +74,7 @@ bool MainPageManager::eventFilter(QObject *obj, QEvent *event)
 {   // 鼠标事件
     if (obj->property("isCard").toBool() && event->type() == QEvent::MouseButtonPress) {
         const auto *frame = qobject_cast<QFrame*>(obj);
-        emit showDetailPageRequested(frame->property("collectionData").value<CollectionData>().subject_id, frame->property("progressLabel").value<QLabel*>()->text());
+        emit showDetailPageRequested(frame->property("collectionData").value<SubjectsData>().subjectId, frame->property("progressLabel").value<QLabel*>()->text());
         return true;
     }
     return QObject::eventFilter(obj, event);
@@ -92,9 +92,9 @@ void MainPageManager::onSearchTextChanged(const QString &text, const bool resetT
     if (resetToFirstPage) m_currentPage = 1;
     if (text.trimmed().isEmpty()) m_filteredCollections = m_allCollections;
     else {
-        QString searchLower = text.toLower();
+        const QString searchLower = text.trimmed();
         m_filteredCollections.clear();
-        std::copy_if(m_allCollections.begin(), m_allCollections.end(), std::back_inserter(m_filteredCollections), [&searchLower](const CollectionData &collection) {return collection.subject_name_cn.toLower().contains(searchLower) || collection.subject_name.toLower().contains(searchLower);});
+        std::copy_if(m_allCollections.begin(), m_allCollections.end(), std::back_inserter(m_filteredCollections), [&searchLower](const SubjectsData &collection) {return collection.nameCn.contains(searchLower, Qt::CaseInsensitive) || collection.name.contains(searchLower, Qt::CaseInsensitive);});
     }
     if (displayPage) displayCurrentPage();
 }
@@ -118,7 +118,7 @@ void MainPageManager::loadCollections(const int subjectType, const int statusTyp
     m_allCollections = DatabaseManager::getCollectionBySubjectTypeAndType(subjectType, statusType);
     if (!m_allCollections.isEmpty()) {
         QList<int> subjectIds;
-        for (const auto &col : m_allCollections) subjectIds.append(col.subject_id);
+        for (const auto &col : m_allCollections) subjectIds.append(col.subjectId);
         m_airdatesJson = dbManager->getEpisodeAirdates(subjectIds);
     } else m_airdatesJson = QJsonObject();
     if (!typeChanged) onSearchTextChanged(mainWindow->lineEditSearch->text(), false, false);
@@ -160,7 +160,7 @@ void MainPageManager::displayCurrentPage()
     updatePageInfo();
 }
 
-QFrame* MainPageManager::createCardComponents(CollectionData &collection)
+QFrame* MainPageManager::createCardComponents(SubjectsData &subjectsData)
 {   // 创建卡片
     // 主框架
     auto *card = new QFrame(mainWindow->centralwidget);
@@ -169,7 +169,7 @@ QFrame* MainPageManager::createCardComponents(CollectionData &collection)
     card->setCursor(Qt::PointingHandCursor);
     card->installEventFilter(this);
     card->setProperty("isCard", true);
-    card->setProperty("collectionData", QVariant::fromValue(collection));
+    card->setProperty("collectionData", QVariant::fromValue(subjectsData));
     auto *layout = new QHBoxLayout(card);
     layout->setContentsMargins(0, 0, 0, 0);
     // 图片
@@ -210,24 +210,24 @@ QFrame* MainPageManager::createCardComponents(CollectionData &collection)
     infoLayout->addLayout(buttonLayout);
     layout->addWidget(infoFrame);
     // 填充内容
-    const QString imageUrl = QString("https://api.bgm.tv/v0/subjects/%1/image?type=common").arg(collection.subject_id);
-    ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, coverLabel, 40, false, true, QString("s%1.jpg").arg(collection.subject_id));
-    titleLabel->setText(collection.subject_name_cn.isEmpty() ? collection.subject_name : collection.subject_name_cn);
-    if (collection.subject_type == 7 || collection.subject_type == 8) collection.subject_volumes = dbManager->countSubjectRelations(collection.subject_id);
-    progressLabel->setText(computeProgressText(collection, m_airdatesJson));
+    const QString imageUrl = QString("https://api.bgm.tv/v0/subjects/%1/image?type=common").arg(subjectsData.subjectId);
+    ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, coverLabel, 40, false, true, QString("s%1.jpg").arg(subjectsData.subjectId));
+    titleLabel->setText(subjectsData.nameCn.isEmpty() ? subjectsData.name : subjectsData.nameCn);
+    if (subjectsData.subjectType == 7 || subjectsData.subjectType == 8) subjectsData.subjectVolumes = dbManager->countSubjectRelations(subjectsData.subjectId);
+    progressLabel->setText(computeProgressText(subjectsData, m_airdatesJson));
     card->setProperty("progressLabel", QVariant::fromValue(progressLabel));
-    if (collection.subject_type == 2) episodeButton->setText("选集");
-    else if (collection.subject_type == 4) episodeButton->setText("启动");
+    if (subjectsData.subjectType == 2) episodeButton->setText("选集");
+    else if (subjectsData.subjectType == 4) episodeButton->setText("启动");
     else episodeButton->setText("进度");
     episodeButton->setStyleSheet(QString("QPushButton {border-radius: 20px}"
                                          "QPushButton:hover {background-color: %1}").arg(m_color3.name()));
     // 连接信号
     connect(statusButton, &QPushButton::clicked, this, [this, card, statusButton] {
-        const auto data = card->property("collectionData").value<CollectionData>();
-        StatusSelector::showStatusSelector(statusButton, m_currentSubjectType, data.type, data.subject_id, bangumiAPI, dbManager, [this](int) {loadCollections(m_currentSubjectType, m_currentStatusType, false);});
+        const auto data = card->property("collectionData").value<SubjectsData>();
+        StatusSelector::showStatusSelector(statusButton, m_currentSubjectType, data.type, data.subjectId, bangumiAPI, dbManager, [this](int) {loadCollections(m_currentSubjectType, m_currentStatusType, false);});
     });
-    if (collection.subject_type == 4) connect(episodeButton, &QPushButton::clicked, this, [this, subjectId = collection.subject_id] {gameMonitor->startGame(subjectId);});
-    else connect(episodeButton, &QPushButton::clicked, this, [this, data = collection] {emit showEpisodePageRequested(data);});
+    if (subjectsData.subjectType == 4) connect(episodeButton, &QPushButton::clicked, this, [this, subjectId = subjectsData.subjectId] {gameMonitor->startGame(subjectId);});
+    else connect(episodeButton, &QPushButton::clicked, this, [this, data = subjectsData] {emit showEpisodePageRequested(data);});
     return card;
 }
 

@@ -20,7 +20,7 @@ public:
     void setManagers(CacheImageUtil *cacheImage, PikPakApi *pikpakapi);
     void setupControlOverlay();
     void applyTheme() const;
-    void fetchRoutes(const CollectionData& collectionData, const EpisodeData& episodeData);
+    void fetchRoutes(const SubjectsData &subjectsData, const EpisodeData& episodeData);
 
 signals:
     void backButtonClicked();

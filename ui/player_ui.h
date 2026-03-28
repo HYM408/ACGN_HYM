@@ -22,14 +22,14 @@ public:
     QHBoxLayout *horizontalLayout;
     QWidget *video_container;
     QVBoxLayout *verticalLayout_2;
-    QFrame *frame;
+    QFrame *sidePanelFrame;
     QVBoxLayout *verticalLayout_4;
     QTabWidget *tabWidget;
-    QWidget *tab;
+    QWidget *tabBasic;
     QVBoxLayout *verticalLayout;
-    QScrollArea *scrollArea;
-    QWidget *scrollAreaWidgetContents;
-    QWidget *tab_2;
+    QScrollArea *scrollAreaBasic;
+    QWidget *basicContent;
+    QWidget *tabDetail;
     QVBoxLayout *verticalLayout_3;
 
     void setupUi(QWidget *choicePage)
@@ -56,23 +56,23 @@ public:
 
         horizontalLayout->addWidget(video_container);
 
-        frame = new QFrame(choicePage);
-        frame->setObjectName("frame");
+        sidePanelFrame = new QFrame(choicePage);
+        sidePanelFrame->setObjectName("sidePanelFrame");
         QSizePolicy sizePolicy1(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
         sizePolicy1.setHorizontalStretch(1);
         sizePolicy1.setVerticalStretch(0);
-        sizePolicy1.setHeightForWidth(frame->sizePolicy().hasHeightForWidth());
-        frame->setSizePolicy(sizePolicy1);
-        frame->setStyleSheet(QString::fromUtf8("QFrame {\n"
+        sizePolicy1.setHeightForWidth(sidePanelFrame->sizePolicy().hasHeightForWidth());
+        sidePanelFrame->setSizePolicy(sizePolicy1);
+        sidePanelFrame->setStyleSheet(QString::fromUtf8("QFrame {\n"
 "	border:none;\n"
 "}"));
-        frame->setFrameShape(QFrame::Shape::StyledPanel);
-        frame->setFrameShadow(QFrame::Shadow::Raised);
-        verticalLayout_4 = new QVBoxLayout(frame);
+        sidePanelFrame->setFrameShape(QFrame::Shape::StyledPanel);
+        sidePanelFrame->setFrameShadow(QFrame::Shadow::Raised);
+        verticalLayout_4 = new QVBoxLayout(sidePanelFrame);
         verticalLayout_4->setSpacing(0);
         verticalLayout_4->setObjectName("verticalLayout_4");
         verticalLayout_4->setContentsMargins(0, 0, 0, 0);
-        tabWidget = new QTabWidget(frame);
+        tabWidget = new QTabWidget(sidePanelFrame);
         tabWidget->setObjectName("tabWidget");
         QSizePolicy sizePolicy2(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Expanding);
         sizePolicy2.setHorizontalStretch(1);
@@ -82,15 +82,15 @@ public:
         tabWidget->setStyleSheet(QString::fromUtf8("QTabWidget::pane {\n"
 "    border-right: none;\n"
 "}"));
-        tab = new QWidget();
-        tab->setObjectName("tab");
-        verticalLayout = new QVBoxLayout(tab);
+        tabBasic = new QWidget();
+        tabBasic->setObjectName("tabBasic");
+        verticalLayout = new QVBoxLayout(tabBasic);
         verticalLayout->setSpacing(0);
         verticalLayout->setObjectName("verticalLayout");
         verticalLayout->setContentsMargins(0, 0, 0, 0);
-        scrollArea = new QScrollArea(tab);
-        scrollArea->setObjectName("scrollArea");
-        scrollArea->setStyleSheet(QString::fromUtf8("QScrollBar:vertical {\n"
+        scrollAreaBasic = new QScrollArea(tabBasic);
+        scrollAreaBasic->setObjectName("scrollAreaBasic");
+        scrollAreaBasic->setStyleSheet(QString::fromUtf8("QScrollBar:vertical {\n"
 "    border: none;\n"
 "    background: #f0f0f0;\n"
 "    width: 11px;\n"
@@ -129,28 +129,28 @@ public:
 "}\n"
 "\n"
 ""));
-        scrollArea->setWidgetResizable(true);
-        scrollAreaWidgetContents = new QWidget();
-        scrollAreaWidgetContents->setObjectName("scrollAreaWidgetContents");
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 381, 919));
-        scrollAreaWidgetContents->setStyleSheet(QString::fromUtf8("background-color: transparent;"));
-        scrollArea->setWidget(scrollAreaWidgetContents);
+        scrollAreaBasic->setWidgetResizable(true);
+        basicContent = new QWidget();
+        basicContent->setObjectName("basicContent");
+        basicContent->setGeometry(QRect(0, 0, 381, 919));
+        basicContent->setStyleSheet(QString::fromUtf8("background-color: transparent;"));
+        scrollAreaBasic->setWidget(basicContent);
 
-        verticalLayout->addWidget(scrollArea);
+        verticalLayout->addWidget(scrollAreaBasic);
 
-        tabWidget->addTab(tab, QString());
-        tab_2 = new QWidget();
-        tab_2->setObjectName("tab_2");
-        verticalLayout_3 = new QVBoxLayout(tab_2);
+        tabWidget->addTab(tabBasic, QString());
+        tabDetail = new QWidget();
+        tabDetail->setObjectName("tabDetail");
+        verticalLayout_3 = new QVBoxLayout(tabDetail);
         verticalLayout_3->setSpacing(0);
         verticalLayout_3->setObjectName("verticalLayout_3");
         verticalLayout_3->setContentsMargins(0, 0, 0, 0);
-        tabWidget->addTab(tab_2, QString());
+        tabWidget->addTab(tabDetail, QString());
 
         verticalLayout_4->addWidget(tabWidget);
 
 
-        horizontalLayout->addWidget(frame);
+        horizontalLayout->addWidget(sidePanelFrame);
 
 
         retranslateUi(choicePage);
@@ -164,8 +164,8 @@ public:
     void retranslateUi(QWidget *choicePage) const
     {
         choicePage->setWindowTitle(QCoreApplication::translate("choicePage", "Form", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("choicePage", "\345\237\272\347\241\200", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("choicePage", "\350\257\246\347\273\206", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tabBasic), QCoreApplication::translate("choicePage", "\345\237\272\347\241\200", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tabDetail), QCoreApplication::translate("choicePage", "\350\257\246\347\273\206", nullptr));
     } // retranslateUi
 
 };

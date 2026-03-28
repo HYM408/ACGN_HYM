@@ -1,6 +1,7 @@
 #include "detail_page.h"
 #include <QTimer>
 #include <QJsonArray>
+#include <QMouseEvent>
 #include <QDesktopServices>
 #include "../config.h"
 #include "../sql/sql.h"
@@ -38,56 +39,54 @@ void DetailPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, Databa
 
 void DetailPage::applyTheme()
 {   // 主题
-    const QColor color1 = getColor("color1", QColor("#fdf7ff"));
-    m_color2 = getColor("color2", QColor("#f2ecf4"));
-    m_color3 = getColor("color3", QColor("#e1dbe4"));
-    const QColor color4 = getColor("color4", QColor("#f2ecf4"));
-    const QColor color5 = getColor("color5", QColor("#e1dbe4"));
-    ui.frame_6->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
-    ui.pushButton_26->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px}"
-                                            "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
-    ui.pushButton_27->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px}"
-                                            "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
-    ui.pushButton->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px; padding: 2px 10px}"
-                                         "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
+    const QColor color1 = getColor("color1", 0xfdf7ff);
+    m_color2 = getColor("color2", 0xf2ecf4);
+    m_color3 = getColor("color3", 0xe1dbe4);
+    const QColor color4 = getColor("color4", 0xf2ecf4);
+    const QColor color5 = getColor("color5", 0xe1dbe4);
+    ui.mainFrame->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
+    ui.btnStatus->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px}"
+                                        "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
+    ui.btnAction->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px}"
+                                        "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
+    ui.btnRating->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px; padding: 2px 10px}"
+                                        "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));
 }
 
 void DetailPage::setupConnections()
 {   // 连接
-    connect(ui.pushButton_19, &QPushButton::clicked, this, &DetailPage::onBackButtonClicked);
-    connect(ui.pushButton_27, &QPushButton::clicked, this, &DetailPage::onEpisodeClicked);
-    connect(ui.pushButton_20, &QPushButton::clicked, this, &DetailPage::onOpenBangumiPage);
-    connect(ui.pushButton_26, &QPushButton::clicked, this, &DetailPage::onStatusButtonClicked);
-    connect(ui.pushButton, &QPushButton::clicked, this, &DetailPage::onRatingButtonClicked);
+    connect(ui.btnBack, &QPushButton::clicked, this, &DetailPage::onBackButtonClicked);
+    connect(ui.btnAction, &QPushButton::clicked, this, &DetailPage::onEpisodeClicked);
+    connect(ui.btnOpenUrl, &QPushButton::clicked, this, &DetailPage::onOpenBangumiPage);
+    connect(ui.btnStatus, &QPushButton::clicked, this, &DetailPage::onStatusButtonClicked);
+    connect(ui.btnRating, &QPushButton::clicked, this, &DetailPage::onRatingButtonClicked);
     connect(ui.tabWidget, &QTabWidget::currentChanged, this, &DetailPage::clickOnTab);
-    setupLineEditCustomContextMenu(ui.lineEdit, CMO_Copy | CMO_SelectAll);
-    setupTextEditCustomContextMenu(ui.textEdit_2, CMO_Default);
-    ui.lineEdit->setCursor(Qt::IBeamCursor);
+    setupLineEditCustomContextMenu(ui.lineEditTitle, CMO_Copy | CMO_SelectAll);
+    setupTextEditCustomContextMenu(ui.textEditSummary, CMO_Default);
+    ui.lineEditTitle->setCursor(Qt::IBeamCursor);
 }
 
-void DetailPage::setCollectionData(const int subjectId, const QString &progressText)
-{   // 显示传入数据
+void DetailPage::setCollectionData(int subjectId, const QString &progressText)
+{   // 加载数据
     ui.tabWidget->setCurrentIndex(0);
     resetUI();
-    currentData = DatabaseManager::getCollectionBySubjectId(subjectId);
-    const QString imageUrl = QString("https://api.bgm.tv/v0/subjects/%1/image?type=large").arg(subjectId);
-    ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, ui.cover_label_3, 15, true, true, QString("s%1.jpg").arg(subjectId));
-    ui.pushButton->setText(currentData.rate > 0 ? QString("我的评价: %1 分").arg(currentData.rate) : "未评价");
-    loadData(subjectId, progressText);
-}
-
-void DetailPage::loadData(int subjectId, const QString &progressText)
-{   // 加载数据
-    subjectData = dbManager->getSubjectById(subjectId);
-    if (subjectData.subject_id == 0) {
-        bangumiAPI->getSubjectInfo(subjectId, 3, [this, subjectId](const QJsonObject &subjectInfo, const QString &error) {
+    m_subjectData = DatabaseManager::getCollectionBySubjectId(subjectId);
+    const QString imageUrl = QString("https://api.bgm.tv/v0/subjects/%1/image?type=common").arg(subjectId);
+    ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, ui.labelCover, 15, true, true, QString("s%1.jpg").arg(subjectId));
+    ui.btnRating->setText(m_subjectData.rate > 0 ? QString("我的评价: %1 分").arg(m_subjectData.rate) : "未评价");
+    const SubjectsData subjectData = dbManager->getSubjectById(subjectId);
+    if (subjectData.subjectId == 0) {
+        bangumiAPI->getSubjectInfo(subjectId, 3, [this, subjectId, progressText](const QJsonObject &subjectInfo, const QString &error) {
             if (!error.isEmpty() || subjectInfo.isEmpty()) return;
             if (!dbManager->insertOrUpdateSubject(subjectInfo)) qDebug() << subjectId << "失败";
             if (!isVisible()) return;
-            subjectData = dbManager->getSubjectById(subjectId);
+            mergeSubjectData(dbManager->getSubjectById(subjectId));
+            updateDetailPage(progressText);
         });
+    } else {
+        mergeSubjectData(subjectData);
+        updateDetailPage(progressText);
     }
-    updateDetailPage(progressText);
     QTimer::singleShot(50, this, [this, subjectId] {
         m_characters = dbManager->getCharacters(subjectId);
         m_relations = dbManager->getSubjectRelations(subjectId);
@@ -95,71 +94,75 @@ void DetailPage::loadData(int subjectId, const QString &progressText)
     });
 }
 
+void DetailPage::mergeSubjectData(const SubjectsData &subjectData)
+{   // 合并subjectData
+    const int userType = m_subjectData.type;
+    const int userRate = m_subjectData.rate;
+    const int userEpStatus = m_subjectData.epStatus;
+    const int userVolStatus = m_subjectData.volStatus;
+    m_subjectData = subjectData;
+    m_subjectData.type = userType;
+    m_subjectData.rate = userRate;
+    m_subjectData.epStatus = userEpStatus;
+    m_subjectData.volStatus = userVolStatus;
+}
+
 void DetailPage::onEpisodeClicked()
 {   // 打开选集页
-    if (subjectData.subject_type == 4) gameMonitorUtil->startGame(subjectData.subject_id);
-    else emit showEpisodePageRequested(currentData);
+    if (m_subjectData.subjectType == 4) gameMonitorUtil->startGame(m_subjectData.subjectId);
+    else emit showEpisodePageRequested(m_subjectData);
 }
 
 void DetailPage::onOpenBangumiPage() const
 {   // 跳转Bangumi
     const QString baseUrl = getConfig("Bangumi/bangumi_base_url").toString();
-    QDesktopServices::openUrl(QString("%1subject/%2").arg(baseUrl).arg(subjectData.subject_id));
+    QDesktopServices::openUrl(QString("%1subject/%2").arg(baseUrl).arg(m_subjectData.subjectId));
 }
 
 void DetailPage::onStatusButtonClicked()
 {   // 改变状态
-    int subjectType = subjectData.subject_type;
-    const int currentStatus = currentData.type;
-    StatusSelector::showStatusSelector(ui.pushButton_26, subjectType, currentStatus, subjectData.subject_id, bangumiAPI, dbManager,[this, subjectType](const int selectedStatus) {
-        currentData.type = selectedStatus;
-        ui.pushButton_26->setText(statusNamesMap.value(subjectType).value(selectedStatus));
+    int subjectType = m_subjectData.subjectType;
+    StatusSelector::showStatusSelector(ui.btnStatus, subjectType, m_subjectData.type, m_subjectData.subjectId, bangumiAPI, dbManager,[this, subjectType](const int selectedStatus) {
+        m_subjectData.type = selectedStatus;
+        ui.btnStatus->setText(statusNamesMap.value(subjectType).value(selectedStatus));
         emit refresh();
     });
 }
 
 void DetailPage::updateDetailPage(const QString &progressText)
 {   // 显示数据
-    ui.lineEdit->setText(subjectData.name_cn.isEmpty() ? subjectData.name : subjectData.name_cn);
-    QLabel *targetButton = subjectData.subject_type == 4 ? ui.pushButton_23 : ui.pushButton_24;
-    CollectionData cData;
-    cData.subject_id = subjectData.subject_id;
-    cData.subject_type = subjectData.subject_type;
-    cData.subject_date = subjectData.date;
-    cData.ep_status = currentData.ep_status;
-    cData.subject_volumes = currentData.subject_volumes;
-    cData.subject_eps = currentData.subject_eps;
-    targetButton->setText(progressText.isEmpty() ? computeProgressText(cData, dbManager->getEpisodeAirdates({subjectData.subject_id})) : progressText);
-    ui.pushButton_26->setText(statusNamesMap.value(subjectData.subject_type).value(currentData.type));
-    ui.pushButton_27->setText(subjectData.subject_type == 2 ? "选集" : subjectData.subject_type == 4 ? "启动" : "进度");
-    const int total = std::reduce(subjectData.score_details.begin(), subjectData.score_details.end(), 0);
-    ui.pushButton_21->setText(QString("%1 | %2人评 | #%3").arg(subjectData.rating_score).arg(total).arg(subjectData.rating_rank));
-    const int dropped = subjectData.dropped;
-    const int doing = subjectData.doing;
-    ui.pushButton_25->setText(QString("%1收藏 / %2在看 / %3抛弃").arg(subjectData.collect + subjectData.on_hold + dropped + subjectData.wish + doing).arg(doing).arg(dropped));
-    ui.textEdit_2->setText(subjectData.summary);
+    ui.lineEditTitle->setText(m_subjectData.nameCn.isEmpty() ? m_subjectData.name : m_subjectData.nameCn);
+    QLabel *targetLabel = m_subjectData.subjectType == 4 ? ui.labelStatus : ui.labelProgress;
+    targetLabel->setText(progressText.isEmpty() ? computeProgressText(m_subjectData, dbManager->getEpisodeAirdates({m_subjectData.subjectId})) : progressText);
+    ui.btnStatus->setText(statusNamesMap.value(m_subjectData.subjectType).value(m_subjectData.type));
+    ui.btnAction->setText(m_subjectData.subjectType == 2 ? "选集" : m_subjectData.subjectType == 4 ? "启动" : "进度");
+    const int total = std::reduce(m_subjectData.scoreDetails.begin(), m_subjectData.scoreDetails.end(), 0);
+    ui.labelRatingInfo->setText(QString("%1 | %2人评 | #%3").arg(m_subjectData.ratingScore).arg(total).arg(m_subjectData.ratingRank));
+    const int dropped = m_subjectData.dropped;
+    const int doing = m_subjectData.doing;
+    ui.labelCollectionStats->setText(QString("%1收藏 / %2在看 / %3抛弃").arg(m_subjectData.collect + m_subjectData.onHold + dropped + m_subjectData.wish + doing).arg(doing).arg(dropped));
+    ui.textEditSummary->setText(m_subjectData.summary);
     QList<QPair<QString, int>> allTagPairs, tagPairs;
-    if (!subjectData.meta_tags.isEmpty()) for (const auto &value : QJsonDocument::fromJson(subjectData.meta_tags.toUtf8()).array()) allTagPairs.append(qMakePair(value.toString().trimmed(), 0));
-    QJsonObject tagsObject = subjectData.tags;
+    if (!m_subjectData.metaTags.isEmpty()) for (const auto &value : QJsonDocument::fromJson(m_subjectData.metaTags.toUtf8()).array()) allTagPairs.append(qMakePair(value.toString().trimmed(), 0));
+    QJsonObject tagsObject = m_subjectData.tags;
     for (auto it = tagsObject.begin(); it != tagsObject.end(); ++it) tagPairs.append(qMakePair(it.key(), it.value().toInt()));
     std::sort(tagPairs.begin(), tagPairs.end(), [](const QPair<QString, int> &a, const QPair<QString, int> &b) {return b.second < a.second;});
     allTagPairs.append(tagPairs);
     m_currentTagPairs = allTagPairs;
-    QTimer::singleShot(0, this, [this] {tagsDisplay(m_currentTagPairs);});
-    const QString timeTag = getTimeInfo(tagPairs, subjectData.date);
-    if (subjectData.subject_type == 4) {
-        QVector<GameData> gameDataList = DatabaseManager::getGameData({subjectData.subject_id});
-        if (!gameDataList.isEmpty()) ui.pushButton_24->setText(QString("已玩 %1 小时").arg(gameDataList.first().play_duration));
-        else ui.pushButton_24->setText("0 小时");
-    } else ui.pushButton_23->setText(timeTag);
-    setupScoreChart(subjectData.score_details, total);
+    QMetaObject::invokeMethod(this, [this] {tagsDisplay(m_currentTagPairs);}, Qt::QueuedConnection);
+    if (m_subjectData.subjectType == 4) {
+        QVector<GameData> gameDataList = DatabaseManager::getGameData({m_subjectData.subjectId});
+        if (!gameDataList.isEmpty()) ui.labelProgress->setText(QString("已玩 %1 小时").arg(gameDataList.first().playDuration));
+        else ui.labelProgress->setText("0 小时");
+    } else ui.labelStatus->setText(getTimeInfo(tagPairs, m_subjectData.date));
+    setupScoreChart(m_subjectData.scoreDetails, total);
 }
 
 void DetailPage::setupScoreChart(const QVector<int> &scoreDetails, const int total)
 {   // 设置评分分布表
     auto *chart = new ScoreChartWidget(this);
     chart->setData(scoreDetails, total);
-    auto *layout = qobject_cast<QHBoxLayout*>(ui.frame_8->layout());
+    auto *layout = qobject_cast<QHBoxLayout*>(ui.statsFrame->layout());
     layout->insertWidget(layout->count(), chart);
     m_scoreChartWidget = chart;
 }
@@ -167,11 +170,11 @@ void DetailPage::setupScoreChart(const QVector<int> &scoreDetails, const int tot
 void DetailPage::tagsDisplay(const QList<QPair<QString, int>> &tagPairs)
 {   // tag显示
     clearLayout();
-    auto *mainLayout = new QVBoxLayout(ui.frame_5);
-    QFont font = ui.frame_5->font();
+    auto *mainLayout = new QVBoxLayout(ui.frameTags);
+    QFont font = ui.frameTags->font();
     font.setPixelSize(14);
     const QFontMetrics fm(font);
-    const int maxWidth = ui.frame_5->width();
+    const int maxWidth = ui.frameTags->width();
     QHBoxLayout *currentLayout = nullptr;
     QWidget *currentWidget = nullptr;
     int currentWidth = 0;
@@ -205,7 +208,7 @@ void DetailPage::tagsDisplay(const QList<QPair<QString, int>> &tagPairs)
                                         "QLabel:hover {background-color: %2}").arg(m_color2.name(), m_color3.name()));
         QString tagName = tagPairs[i].first;
         tagLabel->setProperty("tagName", tagName);
-        connect(tagLabel, &ClickableLabel::clicked, this, [this, tagName] {emit tagClicked(tagName, subjectData.subject_type);});
+        connect(tagLabel, &ClickableLabel::clicked, this, [this, tagName] {emit tagClicked(tagName, m_subjectData.subjectType);});
         currentLayout->insertWidget(currentLayout->count() - 1, tagLabel);
         currentWidth += textWidth + 10;
     }
@@ -218,7 +221,7 @@ void DetailPage::resizeEvent(QResizeEvent *event)
 
 QString DetailPage::getTimeInfo(const QList<QPair<QString, int>> &tagPairs, const QString &dateStr)
 {   // 时间
-    const QRegularExpression timePattern(R"(\d{4}年\d{1,2}月)");
+    static const QRegularExpression timePattern(R"(\d{4}年\d{1,2}月)");
     for (const auto & [fst, snd] : tagPairs) if (QRegularExpressionMatch match = timePattern.match(fst); match.hasMatch()) return match.captured();
     if (dateStr.isEmpty()) return "TBA";
     if (dateStr.length() >= 7) return QString("%1年%2月").arg(dateStr.left(4)).arg(dateStr.sliced(5, 2).toInt());
@@ -232,24 +235,24 @@ void DetailPage::onRatingButtonClicked()
         return;
     }
     m_starRating = new StarRatingWidget(10, this);
-    m_starRating->setRate(currentData.rate);
+    m_starRating->setRate(m_subjectData.rate);
     connect(m_starRating, &StarRatingWidget::ratingSelected, this, [this](const int rate) {
-        currentData.rate = rate;
-        ui.pushButton->setText(QString("我的评价: %1 分").arg(rate));
+        m_subjectData.rate = rate;
+        ui.btnRating->setText(QString("我的评价: %1 分").arg(rate));
         m_starRating->close();
-        ui.pushButton->setText("更改中...");
-        bangumiAPI->updateCollection(subjectData.subject_id, {{"rate", rate}}, 3, [this, rate](const bool success, const QString &error) {
+        ui.btnRating->setText("更改中...");
+        bangumiAPI->updateCollection(m_subjectData.subjectId, {{"rate", rate}}, 3, [this, rate](const bool success, const QString &error) {
             if (success && error.isEmpty()) {
-                DatabaseManager::updateCollectionFields(subjectData.subject_id, {{"rate", rate}}, false);
+                DatabaseManager::updateCollectionFields(m_subjectData.subjectId, {{"rate", rate}}, false);
                 if (!isVisible()) return;
-                ui.pushButton->setText(QString("我的评价: %1 分").arg(rate));
+                ui.btnRating->setText(QString("我的评价: %1 分").arg(rate));
                 emit refresh();
-            } else ui.pushButton->setText("更改失败");
+            } else ui.btnRating->setText("更改失败");
         });
     });
     connect(m_starRating, &QObject::destroyed, this, [this] {m_starRating = nullptr;});
-    const QPoint btnTopRight = ui.pushButton->mapToGlobal(QPoint(ui.pushButton->width(), 0));
-    const QPoint btnCenter = ui.pushButton->mapToGlobal(ui.pushButton->rect().center());
+    const QPoint btnTopRight = ui.btnRating->mapToGlobal(QPoint(ui.btnRating->width(), 0));
+    const QPoint btnCenter = ui.btnRating->mapToGlobal(ui.btnRating->rect().center());
     m_starRating->move(btnTopRight.x(), btnCenter.y() - m_starRating->height() / 2 - 3);
     m_starRating->show();
 }
@@ -301,7 +304,7 @@ void DetailPage::setupTabTemplate(QWidget *content, const QVector<DataType> &dat
 void DetailPage::onCharacterTab()
 {   // 角色Tab
     static const QMap<int, QString> roleTypeMap = {{1, "主角"}, {2, "配角"}, {3, "客串"}, {4, "闲角"}};
-    setupTabTemplate(ui.scrollAreaWidgetContents, m_characters, [this](const CharacterData& characterData) -> QWidget *{
+    setupTabTemplate(ui.charactersContent, m_characters, [this](const CharacterData& characterData) -> QWidget *{
         auto *card = new QWidget();
         card->setFixedWidth(400);
         card->setStyleSheet(QString("QWidget {background-color: %1; border-radius: 8px}").arg(m_color2.name()));
@@ -309,10 +312,10 @@ void DetailPage::onCharacterTab()
         auto *imageLabel = new QLabel(card);
         imageLabel->setFixedSize(60, 60);
         layout->addWidget(imageLabel);
-        const QString imageUrl = QString("https://api.bgm.tv/v0/characters/%1/image?type=grid").arg(characterData.character_id);
-        ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, imageLabel, 10, true, true, QString("c%1.jpg").arg(characterData.character_id));
+        const QString imageUrl = QString("https://api.bgm.tv/v0/characters/%1/image?type=grid").arg(characterData.characterId);
+        ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, imageLabel, 10, true, true, QString("c%1.jpg").arg(characterData.characterId));
         auto *textLayout = new QVBoxLayout();
-        const QString name = characterData.character_name_cn.isEmpty() ? characterData.character_name : characterData.character_name_cn;
+        const QString name = characterData.characterNameCn.isEmpty() ? characterData.characterName : characterData.characterNameCn;
         auto *nameLabel = new QLabel(name, card);
         QFont nameFont = nameLabel->font();
         nameFont.setBold(true);
@@ -322,7 +325,7 @@ void DetailPage::onCharacterTab()
         QStringList allPersons;
         QString firstPerson;
         for (const auto &p : characterData.persons) {
-            QString disp = p.person_name_cn.isEmpty() ? p.person_name : p.person_name_cn;
+            QString disp = p.personNameCn.isEmpty() ? p.personName : p.personNameCn;
             if (firstPerson.isEmpty()) firstPerson = disp;
             allPersons << disp;
         }
@@ -340,7 +343,7 @@ void DetailPage::onCharacterTab()
 void DetailPage::onRelationTab()
 {   // 相关条目Tab
     static const QMap<int, QString> relationMap = {{2, "前传"}, {3, "续集"}, {4, "总集篇"}, {5, "全集"}, {6, "番外篇"}, {11, "衍生"}, {1003, "单行本"}};
-    setupTabTemplate(ui.scrollAreaWidgetContents_3, m_relations, [this](const SubjectRelationData& relation) -> QWidget* {
+    setupTabTemplate(ui.relationsContent, m_relations, [this](const SubjectRelationData& relation) -> QWidget* {
         auto *card = new QPushButton();
         card->setFixedSize(400, 100);
         card->setStyleSheet(QString("QPushButton {background-color: %1; border-radius: 8px}"
@@ -350,23 +353,23 @@ void DetailPage::onRelationTab()
         auto *imageLabel = new QLabel(card);
         imageLabel->setFixedSize(75, 100);
         cardLayout->addWidget(imageLabel);
-        const QString imageUrl = QString("https://api.bgm.tv/v0/subjects/%1/image?type=grid").arg(relation.subject.subject_id);
-        ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, imageLabel, 10, false, true, QString("c%1.jpg").arg(relation.subject.subject_id));
+        const QString imageUrl = QString("https://api.bgm.tv/v0/subjects/%1/image?type=common").arg(relation.subject.subjectId);
+        ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, imageLabel, 10, false, true, QString("c%1.jpg").arg(relation.subject.subjectId));
         auto *textLayout = new QVBoxLayout();
-        const QString title = relation.subject.name_cn.isEmpty() ? relation.subject.name : relation.subject.name_cn;
+        const QString title = relation.subject.nameCn.isEmpty() ? relation.subject.name : relation.subject.nameCn;
         auto *titleLabel = new QLabel(title, card);
         QFont titleFont = titleLabel->font();
         titleFont.setBold(true);
         titleLabel->setFont(titleFont);
         titleLabel->setWordWrap(true);
         textLayout->addWidget(titleLabel);
-        const QString relText = relationMap.value(relation.relation_type, QString::number(relation.relation_type));
+        const QString relText = relationMap.value(relation.relationType, QString::number(relation.relationType));
         auto *typeLabel = new QLabel(relText, card);
         textLayout->addWidget(typeLabel);
         cardLayout->addLayout(textLayout);
         cardLayout->addStretch();
-        connect(card, &QPushButton::clicked, this, [this, subjectId = relation.subject.subject_id] {
-            m_historyStack.push(subjectData.subject_id);
+        connect(card, &QPushButton::clicked, this, [this, subjectId = relation.subject.subjectId] {
+            m_historyStack.push(m_subjectData.subjectId);
             setCollectionData(subjectId, "");
         });
         return card;
@@ -400,11 +403,11 @@ void DetailPage::onStaffTab()
         {2001, "作者"}, {2002, "作画"}, {2003, "插图"}, {2004, "出版社"}, {2005, "连载杂志"}, {2006, "译者"}, {2007, "原作"}, {2008, "客串"}, {2009, "人物原案"}, {2010, "脚本"},
         {2011, "书系"}, {2012, "出品方"}, {2013, "图书品牌"}
     };
-    QWidget *content = ui.scrollAreaWidgetContents_2;
+    QWidget *content = ui.staffContent;
     QMap<int, QVector<QPair<int, QString>>> grouped;
     for (const auto &[person_id, position, name, name_cn] : m_persons) grouped[position].append({person_id, name_cn.isEmpty() ? name : name_cn});
     QList<int> displayOrder;
-    displayOrder << 67;
+    if (grouped.contains(67)) displayOrder << 67;
     QList<int> remainingKeys = grouped.keys();
     std::sort(remainingKeys.begin(), remainingKeys.end());
     for (int key : remainingKeys) if (!displayOrder.contains(key)) displayOrder.append(key);
@@ -436,17 +439,19 @@ void DetailPage::onStaffTab()
 bool DetailPage::eventFilter(QObject *watched, QEvent *event)
 {   // 事件过滤器
     if (event->type() == QEvent::MouseButtonPress) {
-        ui.lineEdit->deselect();
-        QTextCursor cursor = ui.textEdit_2->textCursor();
-        cursor.clearSelection();
-        ui.textEdit_2->setTextCursor(cursor);
+        if (dynamic_cast<QMouseEvent*>(event)->button() == Qt::LeftButton) {
+            ui.lineEditTitle->deselect();
+            QTextCursor cursor = ui.textEditSummary->textCursor();
+            cursor.clearSelection();
+            ui.textEditSummary->setTextCursor(cursor);
+        }
     }
     return QWidget::eventFilter(watched, event);
 }
 
 void DetailPage::clearLayout() const
 {   // 清空组件
-    if (QLayout *layout = ui.frame_5->layout()) {
+    if (QLayout *layout = ui.frameTags->layout()) {
         QLayoutItem *item;
         while ((item = layout->takeAt(0))) {
             if (item->widget()) item->widget()->deleteLater();
@@ -470,16 +475,16 @@ void DetailPage::clearTab(const QWidget *content)
 void DetailPage::resetUI()
 {   // 重置ui
     clearLayout();
-    clearTab(ui.scrollAreaWidgetContents);
-    clearTab(ui.scrollAreaWidgetContents_2);
-    clearTab(ui.scrollAreaWidgetContents_3);
-    ui.lineEdit->clear();
-    ui.textEdit_2->clear();
-    ui.cover_label_3->clear();
-    ui.pushButton_24->setText("全 - 话");
-    ui.pushButton_23->setText("TBA");
-    ui.pushButton_21->setText(" | 人评 | #");
-    ui.pushButton_25->setText("收藏 / 在看 / 抛弃");
+    clearTab(ui.charactersContent);
+    clearTab(ui.staffContent);
+    clearTab(ui.relationsContent);
+    ui.lineEditTitle->clear();
+    ui.textEditSummary->clear();
+    ui.labelCover->clear();
+    ui.labelProgress->setText("全 - 话");
+    ui.labelStatus->setText("TBA");
+    ui.labelRatingInfo->setText(" | 人评 | #");
+    ui.labelCollectionStats->setText("收藏 / 在看 / 抛弃");
     if (!m_scoreChartWidget) return;
     m_scoreChartWidget->parentWidget()->layout()->removeWidget(m_scoreChartWidget);
     m_scoreChartWidget->deleteLater();

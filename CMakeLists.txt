@@ -47,6 +47,10 @@ add_executable(appACGN_HYM
         windows/downloader/chunk_download.cpp
         windows/downloader/download_page.h
         windows/downloader/download_page.cpp
+        windows/episode_page/episode_delegate.h
+        windows/episode_page/episode_delegate.cpp
+        windows/episode_page/episode_overlay.h
+        windows/episode_page/episode_overlay.cpp
         windows/player/player.h
         windows/player/player.cpp
         windows/player/player_core.h
@@ -80,8 +84,6 @@ add_executable(appACGN_HYM
         windows/utils/xml_util.cpp
         windows/config.h
         windows/config.cpp
-        windows/episode_page.h
-        windows/episode_page.cpp
         windows/main_page.h
         windows/main_page.cpp
         windows/rss.h

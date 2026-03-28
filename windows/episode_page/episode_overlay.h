@@ -1,28 +1,15 @@
-#ifndef EPISODE_PAGE_H
-#define EPISODE_PAGE_H
+#ifndef EPISODE_OVERLAY_H
+#define EPISODE_OVERLAY_H
 
 #include "episode_ui.h"
-#include <QStyledItemDelegate>
-#include "sql/data_structs.h"
+#include "../sql/data_structs.h"
+#include <QWidget>
 
 class QListView;
 class BangumiAPI;
 class DatabaseManager;
+class EpisodeDelegate;
 class QStandardItemModel;
-
-class EpisodeDelegate : public QStyledItemDelegate
-{
-    Q_OBJECT
-
-public:
-    explicit EpisodeDelegate(QObject *parent = nullptr);
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-    [[nodiscard]] QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-    bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index) override;
-
-signals:
-    void episodeClicked(const EpisodeData &episodeData);
-};
 
 class EpisodeOverlay : public QWidget
 {
@@ -32,12 +19,12 @@ public:
     explicit EpisodeOverlay(QWidget *parent = nullptr);
     void setManagers(BangumiAPI *api, DatabaseManager *db);
     void applyTheme() const;
-    void showWithCollectionData(const CollectionData &collData);
+    void showWithSubjectsData(const SubjectsData &sData);
     void closeOverlay();
     enum EpisodeRole {EpisodeDataRole = Qt::UserRole + 1};
 
 signals:
-    void episodeClicked(const CollectionData &collectionData, const EpisodeData &episodeData);
+    void episodeClicked(const SubjectsData &subjectsData, const EpisodeData &episodeData);
     void overlayClosed();
     void collectionDataChanged();
 
@@ -62,7 +49,7 @@ private:
     BangumiAPI *bangumiAPI = nullptr;
     DatabaseManager *dbManager = nullptr;
     QWidget *episodeContainer = nullptr;
-    CollectionData collectionData;
+    SubjectsData subjectsData;
     QVector<EpisodeData> episodes;
     QLabel *noEpisodesLabel = nullptr;
     QListView *episodeListView = nullptr;
@@ -71,11 +58,6 @@ private:
     QLineEdit *volEdit = nullptr;
     QLineEdit *epEdit = nullptr;
     QWidget *volContainer = nullptr;
-    const int BUTTON_SIZE = 40;
-    const int SPACING = 7;
-    const int COLUMNS = 12;
-    const int MAX_CONTAINER_HEIGHT = 900;
-    const int MIN_CONTAINER_HEIGHT = 200;
 };
 
-#endif // EPISODE_PAGE_H
+#endif // EPISODE_OVERLAY_H

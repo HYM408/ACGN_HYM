@@ -23,22 +23,22 @@ void DownloadPage::setManagers(PikPakApi *pikpakapi)
 
 void DownloadPage::applyTheme() const
 {   // 主题
-    const QColor color1 = getColor("color1", QColor("#fdf7ff"));
-    ui.frame_2->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
+    const QColor color1 = getColor("color1", 0xfdf7ff);
+    ui.mainFrame->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
 }
 
 void DownloadPage::setupDownloadPathUI()
 {   // 下载路径
     downloadPath = getConfig("Download/download_path").toString();
-    ui.lineEdit->setText(downloadPath);
-    connect(ui.pushButton, &QPushButton::clicked, this, &DownloadPage::selectDownloadPath);
+    ui.lineEditDownloadPath->setText(downloadPath);
+    connect(ui.btnSelectPath, &QPushButton::clicked, this, &DownloadPage::selectDownloadPath);
 }
 
 void DownloadPage::selectDownloadPath()
 {   // 设置下载路径
-    const QString currentPath = ui.lineEdit->text();
+    const QString currentPath = ui.lineEditDownloadPath->text();
     if (const QString dirPath = QFileDialog::getExistingDirectory(this, "选择下载路径", currentPath); !dirPath.isEmpty()) {
-        ui.lineEdit->setText(dirPath);
+        ui.lineEditDownloadPath->setText(dirPath);
         setConfig("Download/download_path", dirPath);
         downloadPath = dirPath;
     }
@@ -46,13 +46,13 @@ void DownloadPage::selectDownloadPath()
 
 void DownloadPage::displayItems(const QJsonArray &items, const QString &emptyMessage)
 {   // 显示组件
-    clearLayout(ui.verticalLayout_2);
+    clearLayout(ui.fileListLayout);
     if (items.isEmpty()) {
         auto *label = new QLabel(emptyMessage);
         label->setAlignment(Qt::AlignCenter);
         label->setStyleSheet("font-size: 14px; color: #999; padding: 20px");
-        ui.verticalLayout_2->addWidget(label);
-        ui.verticalLayout_2->addStretch();
+        ui.fileListLayout->addWidget(label);
+        ui.fileListLayout->addStretch();
         return;
     }
     for (const auto &val : items) {
@@ -80,9 +80,9 @@ void DownloadPage::displayItems(const QJsonArray &items, const QString &emptyMes
         typeLabel->setStyleSheet("font-size: 12px; background: transparent; border: none");
         typeLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
         layout->addWidget(typeLabel);
-        ui.verticalLayout_2->addWidget(item);
+        ui.fileListLayout->addWidget(item);
     }
-    ui.verticalLayout_2->addStretch();
+    ui.fileListLayout->addStretch();
 }
 
 void DownloadPage::loadRecentFiles()
@@ -164,7 +164,7 @@ bool DownloadPage::eventFilter(QObject *obj, QEvent *event)
             if (taskWidgets.contains(fileName) || downloadTasks.contains(fileName)) return true;
             QFrame *widget = createDownloadItem(fileName);
             taskWidgets[fileName] = widget;
-            ui.verticalLayout_4->insertWidget(0, widget);
+            ui.taskListLayout->insertWidget(0, widget);
             fetchAndDownload(fileId, fileName);
             return true;
         }
@@ -176,9 +176,9 @@ bool DownloadPage::eventFilter(QObject *obj, QEvent *event)
 
 void DownloadPage::setupDownloadList() const
 {   // 设置下载列表
-    ui.verticalLayout_4->setSpacing(5);
-    ui.verticalLayout_4->setContentsMargins(5, 5, 5, 5);
-    ui.verticalLayout_4->addSpacerItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
+    ui.taskListLayout->setSpacing(5);
+    ui.taskListLayout->setContentsMargins(5, 5, 5, 5);
+    ui.taskListLayout->addSpacerItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 }
 
 QFrame* DownloadPage::createDownloadItem(const QString &fileName)

@@ -22,7 +22,7 @@ public:
 
 signals:
     void showDetailPageRequested(int subjectId, const QString &progressText);
-    void showEpisodePageRequested(const CollectionData &collectionData);
+    void showEpisodePageRequested(const SubjectsData &subjectsData);
     void showMainPageRequested();
 
 public slots:
@@ -37,7 +37,7 @@ private:
     void switchCategory(int subjectType, const QString &title);
     void updatePageInfo() const;
     void displayCurrentPage();
-    QFrame* createCardComponents(CollectionData &collection);
+    QFrame* createCardComponents(SubjectsData &subjectsData);
     bool eventFilter(QObject *obj, QEvent *event) override;
     Ui::MainWindow *mainWindow = nullptr;
     DatabaseManager *dbManager = nullptr;
@@ -50,8 +50,8 @@ private:
     int m_currentSubjectType = 2;
     int m_currentStatusType = 3;
     int m_currentPage = 1;
-    QVector<CollectionData> m_allCollections;
-    QVector<CollectionData> m_filteredCollections;
+    QVector<SubjectsData> m_allCollections;
+    QVector<SubjectsData> m_filteredCollections;
     QVector<QWidget*> m_placeholderWidgets;
     QJsonObject m_airdatesJson;
     QColor m_color2;

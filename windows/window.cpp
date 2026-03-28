@@ -8,16 +8,16 @@
 #include "rss.h"
 #include "config.h"
 #include "sql/sql.h"
-#include "detail_page/detail_page.h"
 #include "search_page.h"
-#include "episode_page.h"
 #include "settings_page.h"
 #include "api/pikpak_api.h"
 #include "api/bangumi_api.h"
 #include "player/player_page.h"
 #include "utils/cache_image_util.h"
 #include "utils/game_monitor_util.h"
+#include "detail_page/detail_page.h"
 #include "downloader/download_page.h"
+#include "episode_page/episode_overlay.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
@@ -98,7 +98,7 @@ void MainWindow::checkCacheCleanup() const
     if (now >= next) {
         QDir imageDir("data/images");
         imageDir.removeRecursively();
-        imageDir.mkpath(".");
+        (void)imageDir.mkpath(".");
         dbManager->clearEpisodeCollectionTable();
     }
     setConfig("Cache/next_cleanup_timestamp", nextCleanup);
@@ -321,7 +321,7 @@ void MainWindow::onDownloadButtonClicked()
     downloadPage->loadRecentFiles();
 }
 
-void MainWindow::onShowEpisodePageRequested(const CollectionData &collectionData)
+void MainWindow::onShowEpisodePageRequested(const SubjectsData &subjectsData)
 {   // 创建选集遮罩层
     repaint();
     episodeOverlay = new EpisodeOverlay(this);
@@ -333,9 +333,9 @@ void MainWindow::onShowEpisodePageRequested(const CollectionData &collectionData
     });
     connect(episodeOverlay, &EpisodeOverlay::collectionDataChanged, this, [this] {mainPageManager->loadCollections(mainPageManager->getCurrentSubjectType(), mainPageManager->getCurrentStatusType(), false);});
     episodeOverlay->setGeometry(0, titlebar_frame->height(), width(), height() - titlebar_frame->height());
-    episodeOverlay->showWithCollectionData(collectionData);
+    episodeOverlay->showWithSubjectsData(subjectsData);
     if (playerPage) return;
-    if (collectionData.subject_type != 2) return;
+    if (subjectsData.subjectType != 2) return;
     QTimer::singleShot(1, this, &MainWindow::precreatePlayerPage);
 }
 
@@ -347,10 +347,10 @@ void MainWindow::precreatePlayerPage()
     connect(playerPage, &PlayerPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
 }
 
-void MainWindow::onEpisodeClicked(const CollectionData &collectionData, const EpisodeData &episodeData)
+void MainWindow::onEpisodeClicked(const SubjectsData &subjectsData, const EpisodeData &episodeData)
 {   // 切换播放器页面
     pageHistory.append(stackedMainWindow->currentWidget());
-    playerPage->fetchRoutes(collectionData, episodeData);
+    playerPage->fetchRoutes(subjectsData, episodeData);
     stackedMainWindow->setCurrentWidget(playerPage);
 }
 

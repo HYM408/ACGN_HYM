@@ -49,8 +49,8 @@ void PlayerPage::setupControlOverlay()
 
 void PlayerPage::applyTheme() const
 {   // 主题
-    const QColor color1 = getColor("color1", QColor("#fdf7ff"));
-    ui.frame->setStyleSheet(QString("QFrame {background-color: %1; border: none}").arg(color1.name()));
+    const QColor color1 = getColor("color1", 0xfdf7ff);
+    ui.sidePanelFrame->setStyleSheet(QString("QFrame {background-color: %1; border: none}").arg(color1.name()));
 }
 
 void PlayerPage::setSiteLoadingState(const QString &siteId) const
@@ -97,12 +97,12 @@ void PlayerPage::startSiteSearch(const QString &siteId)
     }
 }
 
-void PlayerPage::fetchRoutes(const CollectionData &collectionData, const EpisodeData &episodeData)
+void PlayerPage::fetchRoutes(const SubjectsData &subjectsData, const EpisodeData &episodeData)
 {   // 创建组件
     show();
     m_episodeData = episodeData;
-    m_keyword = collectionData.subject_name_cn;
-    if (m_keyword.isEmpty()) m_keyword = collectionData.subject_name;
+    m_keyword = subjectsData.nameCn;
+    if (m_keyword.isEmpty()) m_keyword = subjectsData.name;
     const QStringList allApiIds = Crawler::getAllAPISiteIds();
     const QStringList allSiteIds = Crawler::getAllSiteIds();
     const QStringList allBtIds = Crawler::getAllBTSiteIds();
@@ -118,12 +118,11 @@ void PlayerPage::fetchRoutes(const CollectionData &collectionData, const Episode
         else sortedIds = QStringList(str);
     }
     if (!sortedIds.isEmpty()) {
-        auto allSet = QSet(allIds.begin(), allIds.end());
         QStringList filtered;
         for (const QString &id : sortedIds) filtered.append(id);
         allIds = filtered;
     }
-    QWidget *container = ui.scrollAreaWidgetContents;
+    QWidget *container = ui.basicContent;
     container->setLayout(new QVBoxLayout());
     const QWidget *detailTab = ui.tabWidget->widget(1);
     detailTabWidget = new QTabWidget();
@@ -503,7 +502,7 @@ void PlayerPage::clearLayout(QLayout *layout)
 void PlayerPage::cleanupPage()
 {   // 清理
     vlcPlayer->stop();
-    const QWidget *container = ui.scrollAreaWidgetContents;
+    const QWidget *container = ui.basicContent;
     if (QLayout *oldLayout = container->layout()) {
         clearLayout(oldLayout);
         delete oldLayout;

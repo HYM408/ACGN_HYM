@@ -33,7 +33,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QFrame" name="frame_2">
+    <widget class="QFrame" name="mainFrame">
      <property name="frameShape">
       <enum>QFrame::Shape::StyledPanel</enum>
      </property>
@@ -57,7 +57,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QScrollArea" name="scrollArea">
+       <widget class="QScrollArea" name="scrollAreaFileList">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>1</horstretch>
@@ -70,7 +70,7 @@
         <property name="widgetResizable">
          <bool>true</bool>
         </property>
-        <widget class="QWidget" name="scrollAreaWidgetContents">
+        <widget class="QWidget" name="fileListContent">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -82,12 +82,12 @@
          <property name="styleSheet">
           <string notr="true">border-right: 2px solid #c0c0c0;</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_2"/>
+         <layout class="QVBoxLayout" name="fileListLayout"/>
         </widget>
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="frame_3">
+       <widget class="QFrame" name="rightPanelFrame">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>1</horstretch>
@@ -117,7 +117,7 @@
           <number>0</number>
          </property>
          <item>
-          <widget class="QFrame" name="frame">
+          <widget class="QFrame" name="pathFrame">
            <property name="frameShape">
             <enum>QFrame::Shape::StyledPanel</enum>
            </property>
@@ -141,7 +141,7 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="QLineEdit" name="lineEdit">
+             <widget class="QLineEdit" name="lineEditDownloadPath">
               <property name="font">
                <font>
                 <family>微软雅黑</family>
@@ -160,7 +160,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton">
+             <widget class="QPushButton" name="btnSelectPath">
               <property name="text">
                <string>选择路径</string>
               </property>
@@ -170,7 +170,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QScrollArea" name="scrollArea_2">
+          <widget class="QScrollArea" name="scrollAreaTaskList">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>1</horstretch>
@@ -183,7 +183,7 @@
            <property name="widgetResizable">
             <bool>true</bool>
            </property>
-           <widget class="QWidget" name="scrollAreaWidgetContents_3">
+           <widget class="QWidget" name="taskListContent">
             <property name="geometry">
              <rect>
               <x>0</x>
@@ -192,7 +192,7 @@
               <height>903</height>
              </rect>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_4"/>
+            <layout class="QVBoxLayout" name="taskListLayout"/>
            </widget>
           </widget>
          </item>

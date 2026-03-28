@@ -1,5 +1,5 @@
-#include "episode_page.h"
-#include <QTimer>
+#include "episode_overlay.h"
+#include "episode_delegate.h"
 #include <QPainter>
 #include <QPointer>
 #include <QLineEdit>
@@ -7,10 +7,16 @@
 #include <QJsonArray>
 #include <QResizeEvent>
 #include <QStandardItemModel>
-#include "config.h"
-#include "sql/sql.h"
-#include "api/bangumi_api.h"
-#include "utils/context_menu_util.h"
+#include "../config.h"
+#include "../sql/sql.h"
+#include "../api/bangumi_api.h"
+#include "../utils/context_menu_util.h"
+
+static constexpr int BUTTON_SIZE = 40;
+static constexpr int SPACING = 7;
+static constexpr int COLUMNS = 12;
+static constexpr int MAX_CONTAINER_HEIGHT = 900;
+static constexpr int MIN_CONTAINER_HEIGHT = 200;
 
 EpisodeOverlay::EpisodeOverlay(QWidget *parent) : QWidget(parent)
 {
@@ -27,14 +33,12 @@ EpisodeOverlay::EpisodeOverlay(QWidget *parent) : QWidget(parent)
     episodeListView->setFlow(QListView::LeftToRight);
     episodeListView->setWrapping(true);
     episodeListView->setStyleSheet("QListView {border: none}");
-    ui.gridLayout_3->addWidget(episodeListView, 0, 0, 1, 1);
-    connect(ui.pushButton_14, &QPushButton::clicked, this, &EpisodeOverlay::closeOverlay);
-    connect(ui.pushButton_15, &QPushButton::clicked, this, &EpisodeOverlay::onUpdateButtonClicked);
+    ui.gridLayoutEpisodes->addWidget(episodeListView, 0, 0, 1, 1);
+    connect(ui.btnBack, &QPushButton::clicked, this, &EpisodeOverlay::closeOverlay);
+    connect(ui.btnUpdate, &QPushButton::clicked, this, &EpisodeOverlay::onUpdateButtonClicked);
     connect(episodeDelegate, &EpisodeDelegate::episodeClicked, this, &EpisodeOverlay::onEpisodeItemClicked);
     applyTheme();
 }
-
-EpisodeDelegate::EpisodeDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 
 void EpisodeOverlay::setManagers(BangumiAPI *api, DatabaseManager *db)
 {
@@ -44,60 +48,8 @@ void EpisodeOverlay::setManagers(BangumiAPI *api, DatabaseManager *db)
 
 void EpisodeOverlay::applyTheme() const
 {   // 主题
-    const QColor color1 = getColor("color1", QColor("#fdf7ff"));
-    ui.frame_2->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
-}
-
-void EpisodeDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
-{   // 绘制
-    painter->setRenderHint(QPainter::Antialiasing);
-    QRect rect = option.rect;
-    auto ep = qvariant_cast<EpisodeData>(index.data(EpisodeOverlay::EpisodeDataRole));
-    int epType = ep.episode_type;
-    bool isHovered = option.state & QStyle::State_MouseOver;
-    QColor bgColor, textColor;
-    if (ep.collection_type == 2) {
-        bgColor = isHovered ? QColor(66, 155, 70) : QColor(76, 175, 80);
-        textColor = Qt::white;
-    } else {
-        bgColor = isHovered ? QColor(240, 240, 240) : Qt::white;
-        textColor = Qt::black;
-    }
-    painter->setBrush(bgColor);
-    painter->setPen(QPen(QColor(221, 221, 221), 1));
-    painter->drawRoundedRect(rect, 5, 5);
-    painter->setPen(textColor);
-    QFont font = painter->font();
-    font.setBold(true);
-    font.setPointSize(9);
-    painter->setFont(font);
-    painter->drawText(rect, Qt::AlignCenter, QString::number(ep.sort));
-    if (epType != 0) {
-        QFont smallFont = painter->font();
-        smallFont.setPointSize(6);
-        painter->setFont(smallFont);
-        QColor typeColor;
-        QString typeText;
-        switch (epType) {
-            case 1: typeColor = QColor(255, 152, 0); typeText = "SP"; break;
-            case 2: typeColor = QColor(33, 150, 243); typeText = "OP"; break;
-            case 3: typeColor = QColor(156, 39, 176); typeText = "ED"; break;
-            default: typeColor = QColor(255, 87, 34); typeText = "?"; break;
-        }
-        painter->setPen(typeColor);
-        painter->drawText(rect.adjusted(-2, 2, -2, 2), Qt::AlignTop | Qt::AlignRight, typeText);
-    }
-}
-
-QSize EpisodeDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const {return {40, 40};}
-
-bool EpisodeDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
-{   // 鼠标事件
-    if (event->type() == QEvent::MouseButtonRelease) {
-        emit episodeClicked(qvariant_cast<EpisodeData>(index.data(EpisodeOverlay::EpisodeDataRole)));
-        return true;
-    }
-    return QStyledItemDelegate::editorEvent(event, model, option, index);
+    const QColor color1 = getColor("color1", 0xfdf7ff);
+    ui.mainFrame->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
 }
 
 void EpisodeOverlay::keyPressEvent(QKeyEvent *event)
@@ -108,8 +60,8 @@ void EpisodeOverlay::keyPressEvent(QKeyEvent *event)
 bool EpisodeOverlay::eventFilter(QObject *obj, QEvent *event)
 {   // 事件过滤器
     if (event->type() == QEvent::MouseButtonPress) {
-        if (const auto *edit = qobject_cast<QLineEdit*>(obj)) {
-            QTimer::singleShot(0, edit, &QLineEdit::selectAll);
+        if (auto *edit = qobject_cast<QLineEdit*>(obj)) {
+            QMetaObject::invokeMethod(edit, &QLineEdit::selectAll, Qt::QueuedConnection);
             return false;
         }
     }
@@ -118,22 +70,22 @@ bool EpisodeOverlay::eventFilter(QObject *obj, QEvent *event)
 
 void EpisodeOverlay::onUpdateButtonClicked()
 {   // 更新按钮点击
-    if (collectionData.subject_type == 2) onMarkAllWatchedClicked();
+    if (subjectsData.subjectType == 2) onMarkAllWatchedClicked();
     else onUpdateClicked();
 }
 
-void EpisodeOverlay::showWithCollectionData(const CollectionData &collData)
+void EpisodeOverlay::showWithSubjectsData(const SubjectsData &sData)
 {   // 显示叠加层
     show();
     setFocus();
-    ui.pushButton_13->setText(collData.subject_name_cn.isEmpty() ? collData.subject_name : collData.subject_name_cn);
-    this->collectionData = collData;
-    ui.pushButton_15->setEnabled(true);
-    if (collData.subject_type != 2) {
-        ui.pushButton_15->setText("更新");
+    ui.labelSubjectName->setText(sData.nameCn.isEmpty() ? sData.name : sData.nameCn);
+    this->subjectsData = sData;
+    ui.btnUpdate->setEnabled(true);
+    if (sData.subjectType != 2) {
+        ui.btnUpdate->setText("更新");
         loadVolEpData();
     } else {
-        ui.pushButton_15->setText("全部已看");
+        ui.btnUpdate->setText("全部已看");
         loadEpisodesData();
     }
 }
@@ -162,7 +114,7 @@ void EpisodeOverlay::resizeEvent(QResizeEvent *event)
 
 void EpisodeOverlay::loadEpisodesData()
 {   // 加载剧集数据
-    const int subjectId = collectionData.subject_id;
+    const int subjectId = subjectsData.subjectId;
     episodes = DatabaseManager::getEpisodesBySubjectId(subjectId);
     if (!episodes.isEmpty()) {
         updateEpisodeView();
@@ -178,7 +130,7 @@ void EpisodeOverlay::loadEpisodesData()
             noEpisodesLabel = new QLabel("暂无剧集信息", episodeContainer);
             noEpisodesLabel->setAlignment(Qt::AlignCenter);
             noEpisodesLabel->setStyleSheet("color: #666");
-            ui.gridLayout_3->addWidget(noEpisodesLabel, 0, 0);
+            ui.gridLayoutEpisodes->addWidget(noEpisodesLabel, 0, 0);
             episodeContainer->setFixedHeight(MIN_CONTAINER_HEIGHT);
             resizeEvent(nullptr);
             return;
@@ -213,8 +165,8 @@ void EpisodeOverlay::loadVolEpData()
         hLayout->addWidget(totalLabel);
         vLayout->addLayout(hLayout);
     };
-    createField("Vol.", collectionData.vol_status, collectionData.subject_volumes, volEdit);
-    createField("Chap.", collectionData.ep_status, collectionData.subject_eps, epEdit);
+    createField("Vol.", subjectsData.volStatus, subjectsData.subjectVolumes, volEdit);
+    createField("Chap.", subjectsData.epStatus, subjectsData.subjectEps, epEdit);
     setupLineEditCustomContextMenu(volEdit, CMO_Cut | CMO_Copy | CMO_Paste);
     setupLineEditCustomContextMenu(epEdit, CMO_Cut | CMO_Copy | CMO_Paste);
     volEdit->installEventFilter(this);
@@ -223,7 +175,7 @@ void EpisodeOverlay::loadVolEpData()
     hBox->addStretch();
     hBox->addWidget(container);
     hBox->addStretch();
-    ui.gridLayout_3->addLayout(hBox, 0, 0);
+    ui.gridLayoutEpisodes->addLayout(hBox, 0, 0);
     const int containerHeight = qMax(MIN_CONTAINER_HEIGHT, qMin(120 + vLayout->sizeHint().height() + 20, MAX_CONTAINER_HEIGHT));
     episodeContainer->setFixedHeight(containerHeight);
     resizeEvent(nullptr);
@@ -235,37 +187,35 @@ void EpisodeOverlay::updateEpisodeView()
     for (const auto &ep : episodes) {
         auto *item = new QStandardItem();
         item->setData(QVariant::fromValue(ep), EpisodeDataRole);
-        QString name = ep.name_cn.isEmpty() ? ep.name : ep.name_cn;
+        QString name = ep.nameCn.isEmpty() ? ep.name : ep.nameCn;
         item->setToolTip(name);
         episodeModel->appendRow(item);
     }
-    const int itemHeight = BUTTON_SIZE + SPACING;
-    const int totalItems = episodeModel->rowCount();
-    const int rows = (totalItems + COLUMNS - 1) / COLUMNS;
+    const int rows = (episodeModel->rowCount() + COLUMNS - 1) / COLUMNS;
     const int visibleRows = qMin(rows, 15);
-    int containerHeight = 120 + visibleRows * itemHeight + 20;
+    int containerHeight = 120 + visibleRows * (BUTTON_SIZE + SPACING) + 20;
     containerHeight = qMax(MIN_CONTAINER_HEIGHT, qMin(containerHeight, MAX_CONTAINER_HEIGHT));
     episodeContainer->setFixedHeight(containerHeight);
-    ui.scrollArea->setVerticalScrollBarPolicy(rows > visibleRows ? Qt::ScrollBarAsNeeded : Qt::ScrollBarAlwaysOff);
+    ui.scrollAreaEpisodes->setVerticalScrollBarPolicy(rows > visibleRows ? Qt::ScrollBarAsNeeded : Qt::ScrollBarAlwaysOff);
     resizeEvent(nullptr);
 }
 
 void EpisodeOverlay::onEpisodeItemClicked(const EpisodeData &episodeData)
 {   // 点击剧集
-    const int epType = episodeData.episode_type;
+    const int epType = episodeData.episodeType;
     if (epType != 0 && epType != 1) return;
     closeOverlay();
-    emit episodeClicked(collectionData, episodeData);
+    emit episodeClicked(subjectsData, episodeData);
 }
 
 void EpisodeOverlay::onMarkAllWatchedClicked()
 {   // 标记全部已看
     if (episodes.isEmpty()) return;
-    ui.pushButton_15->setText("标记中...");
-    ui.pushButton_15->setEnabled(false);
-    const int subjectId = collectionData.subject_id;
+    ui.btnUpdate->setText("标记中...");
+    ui.btnUpdate->setEnabled(false);
+    const int subjectId = subjectsData.subjectId;
     QJsonArray episodeIds;
-    for (const auto &ep : episodes) episodeIds.append(ep.episode_id);
+    for (const auto &ep : episodes) episodeIds.append(ep.episodeId);
     const QJsonObject apiRequestData{{"episode_id", episodeIds}, {"type", 2}};
     QPointer guard(this);
     bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData, 3, [this, subjectId, guard](const bool success, const QString &error) {
@@ -273,22 +223,22 @@ void EpisodeOverlay::onMarkAllWatchedClicked()
         DatabaseManager::updateCollectionFields(subjectId, {{"ep_status", episodes.size()}}, true);
         if (!guard) return;
         if (!success || !error.isEmpty()) {
-            ui.pushButton_15->setText("失败");
-            ui.pushButton_15->setEnabled(true);
+            ui.btnUpdate->setText("失败");
+            ui.btnUpdate->setEnabled(true);
             return;
         }
         emit collectionDataChanged();
         loadEpisodesData();
-        ui.pushButton_15->setText("全部已看");
-        ui.pushButton_15->setEnabled(true);
+        ui.btnUpdate->setText("全部已看");
+        ui.btnUpdate->setEnabled(true);
     });
 }
 
 void EpisodeOverlay::onUpdateClicked()
 {   // 更新进度
-    ui.pushButton_15->setText("更新中...");
-    ui.pushButton_15->setEnabled(false);
-    const int subjectId = collectionData.subject_id;
+    ui.btnUpdate->setText("更新中...");
+    ui.btnUpdate->setEnabled(false);
+    const int subjectId = subjectsData.subjectId;
     int newEpStatus  = epEdit->text().toInt();
     int newVolStatus = volEdit->text().toInt();
     const QJsonObject apiRequestData{{"vol_status", newVolStatus}, {"ep_status", newEpStatus}};
@@ -297,13 +247,13 @@ void EpisodeOverlay::onUpdateClicked()
         DatabaseManager::updateCollectionFields(subjectId, {{"vol_status", newVolStatus}, {"ep_status", newEpStatus}}, true);
         if (!guard) return;
         if (!success || !error.isEmpty()) {
-            ui.pushButton_15->setText("失败");
-            ui.pushButton_15->setEnabled(true);
+            ui.btnUpdate->setText("失败");
+            ui.btnUpdate->setEnabled(true);
             return;
         }
         emit collectionDataChanged();
-        ui.pushButton_15->setText("更新");
-        ui.pushButton_15->setEnabled(true);
+        ui.btnUpdate->setText("更新");
+        ui.btnUpdate->setEnabled(true);
     });
 }
 

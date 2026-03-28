@@ -16,10 +16,10 @@ public:
     static void initTables();
     // collection表
     static bool insertManyCollectionData(const QJsonArray &jsonArray);
-    static CollectionData collectionFromQuery(const QSqlQuery& query);
-    static QVector<CollectionData> getCollectionBySubjectTypeAndType(int subjectType, int typeValue);
+    static SubjectsData collectionFromQuery(const QSqlQuery& query);
+    static QVector<SubjectsData> getCollectionBySubjectTypeAndType(int subjectType, int typeValue);
     static QJsonObject getStatusCountsBySubjectType(int subjectType);
-    static CollectionData getCollectionBySubjectId(int subjectId);
+    static SubjectsData getCollectionBySubjectId(int subjectId);
     static bool updateCollectionFields(int subjectId, const QJsonObject &fields, bool updateTimestamp);
     bool deleteCollectionBySubjectId(int subjectId);
     void clearCollectionTable() const;
