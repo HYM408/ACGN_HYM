@@ -28,8 +28,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     DatabaseManager::initTables();
     mainPageManager = new MainPageManager(this, cacheImageUtil, bangumiAPI, dbManager, gameMonitorUtil);
     setWindowFlags(Qt::FramelessWindowHint);
-    titlebar_frame->installEventFilter(this);
-    btnClose->installEventFilter(this);
+    QCoreApplication::instance()->installEventFilter(this);
     setupTrayIcon();
     setupConnections();
     checkCacheCleanup();
@@ -65,7 +64,7 @@ void MainWindow::setupConnections()
     // 删除收藏
     connect(dbManager, &DatabaseManager::collectionDeleted, this, [this] {mainPageManager->loadCollections(mainPageManager->getCurrentSubjectType(), mainPageManager->getCurrentStatusType(), false);});
     // 标题栏
-    connect(btnMinimize, &QPushButton::clicked, this, &MainWindow::minimizeWindow);
+    connect(btnMinimize, &QPushButton::clicked, this, [this] {showMinimized();});
     connect(btnMaximize, &QPushButton::clicked, this, &MainWindow::toggleMaximizeWindow);
     connect(btnClose, &QPushButton::clicked, this, &MainWindow::onCloseButtonClicked);
     // 搜索
@@ -105,18 +104,20 @@ void MainWindow::checkCacheCleanup() const
     mainPageManager->loadCollections(mainPageManager->getCurrentSubjectType(), mainPageManager->getCurrentStatusType(), false);
 }
 
-void MainWindow::minimizeWindow()
-{   // 最小化
-    showMinimized();
-}
-
 void MainWindow::toggleMaximizeWindow()
 {   // 切换最大化/还原窗口
     isMaximized() ? showNormal() : showMaximized();
 }
 
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
-{   // 标题栏事件
+{   // 事件过滤器
+    if (event->type() == QEvent::MouseButtonPress) {
+        if (gameFocusTimer && gameFocusTimer->isActive()) {
+            gameFocusTimer->stop();
+            gameFocusTimer->deleteLater();
+            gameFocusTimer = nullptr;
+        }
+    }
     if (watched == titlebar_frame) {
         const auto *mouseEvent = dynamic_cast<QMouseEvent*>(event);
         if (event->type() == QEvent::MouseButtonDblClick) {
@@ -216,15 +217,6 @@ void MainWindow::onTrayIconActivated(const QSystemTrayIcon::ActivationReason rea
     raise();
     activateWindow();
     if (windowHandle()) windowHandle()->requestActivate();
-}
-
-void MainWindow::focusInEvent(QFocusEvent *event)
-{   // 获得焦点事件
-    QMainWindow::focusInEvent(event);
-    if (!gameFocusTimer) return;
-    gameFocusTimer->stop();
-    gameFocusTimer->deleteLater();
-    gameFocusTimer = nullptr;
 }
 
 void MainWindow::onGameStarted()

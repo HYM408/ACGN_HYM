@@ -25,10 +25,8 @@ protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
     void resizeEvent(QResizeEvent* event) override;
     void showCloseOptionDialog();
-    void focusInEvent(QFocusEvent *event) override;
 
 private slots:
-    void minimizeWindow();
     void toggleMaximizeWindow();
     void onCloseButtonClicked();
     void onSearchButtonClicked();
