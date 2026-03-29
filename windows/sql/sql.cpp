@@ -290,7 +290,7 @@ QVector<EpisodeData> DatabaseManager::getEpisodesBySubjectId(const int subjectId
     while (query.next()) {
         EpisodeData ep;
         ep.subjectId = query.value("subject_id").toInt();
-        ep.subjectId = query.value("episode_id").toInt();
+        ep.episodeId = query.value("episode_id").toInt();
         ep.ep = query.value("ep").toInt() / 10.0;
         ep.sort = query.value("sort").toInt() / 10.0;
         ep.name = query.value("name").toString();
