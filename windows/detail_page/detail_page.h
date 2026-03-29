@@ -72,6 +72,7 @@ private:
     QVector<CharacterData> m_characters;
     QVector<SubjectRelationData> m_relations;
     QVector<PersonData> m_persons;
+    QMap<int, GameData> m_gameData;
     bool characterTabInitialized = false;
     bool relationTabInitialized = false;
     bool staffTabInitialized = false;

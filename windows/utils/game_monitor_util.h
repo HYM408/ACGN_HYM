@@ -2,6 +2,7 @@
 #define GAME_MONITOR_UTIL_H
 
 #include <QWidget>
+#include "../sql/data_structs.h"
 
 class DatabaseManager;
 
@@ -12,11 +13,11 @@ class GameMonitorUtil : public QObject
 public:
     explicit GameMonitorUtil(DatabaseManager *dbManager, QWidget *parentWidget = nullptr, QObject *parent = nullptr);
     ~GameMonitorUtil() override;
-    void startGame(int subjectId);
+    void startGame(int subjectId, const GameData &gameData);
 
 signals:
-    void gameStarted();
-    void gameExited();
+    void gameStarted(int subjectId, QString &launchPath);
+    void gameExited(int subjectId, int totalSeconds);
 
 private slots:
     void checkGamesStatus();
@@ -27,6 +28,7 @@ private:
     DatabaseManager *dbManager;
     QWidget *parentWidget;
     QTimer *gameMonitorTimer;
+    GameData m_gameData;
     QHash<int, qint64> gameStartTimes;
     QHash<int, qint64> monitoredGames;
 };

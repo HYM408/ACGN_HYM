@@ -16,10 +16,10 @@ GameMonitorUtil::~GameMonitorUtil()
     if (gameMonitorTimer->isActive()) gameMonitorTimer->stop();
 }
 
-void GameMonitorUtil::startGame(int subjectId)
+void GameMonitorUtil::startGame(const int subjectId, const GameData &gameData)
 {   // 启动游戏
-    QVector<GameData> gameDataList = DatabaseManager::getGameData({subjectId});
-    QString launchPath = gameDataList.isEmpty() ? QString() : gameDataList.first().launchPath;
+    m_gameData = gameData;
+    QString launchPath = m_gameData.launchPath;
     if (launchPath.isEmpty() || !QFile::exists(launchPath)) {
         launchPath = QFileDialog::getOpenFileName(parentWidget, "选择启动文件", QString(), "可执行文件 (*.exe);;所有文件 (*)");
         if (launchPath.isEmpty()) return;
@@ -30,7 +30,7 @@ void GameMonitorUtil::startGame(int subjectId)
     if (!QProcess::startDetached(launchPath, {}, fileInfo.absolutePath(), &pid)) return;
     gameStartTimes[subjectId] = QDateTime::currentMSecsSinceEpoch();
     monitoredGames.insert(subjectId, pid);
-    emit gameStarted();
+    emit gameStarted(subjectId, launchPath);
     if (!gameMonitorTimer->isActive()) gameMonitorTimer->start(2000);
 }
 
@@ -48,13 +48,12 @@ void GameMonitorUtil::checkGamesStatus()
                 stillRunning.insert(subjectId, childPid);
                 qDebug() << subjectId << "PID:" << childPid;
             } else {
-                const qint64 elapsedSec = (now - gameStartTimes.take(subjectId)) / 1000;
-                QVector<GameData> current = DatabaseManager::getGameData({subjectId});
-                qint64 total = current.isEmpty() ? 0 : static_cast<qint64>(current.first().playDuration);
+                const int elapsedSec = static_cast<int>((now - gameStartTimes.take(subjectId)) / 1000);
+                int total = m_gameData.playDuration;
                 total += elapsedSec;
                 DatabaseManager::updateGameData(subjectId, {{"play_duration", total}});
                 qDebug() << subjectId << "已退出，运行:" << elapsedSec << "秒，总计:" << total << "秒";
-                emit gameExited();
+                emit gameExited(subjectId, total);
             }
         }
     }

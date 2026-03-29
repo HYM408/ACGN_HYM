@@ -109,7 +109,7 @@ void DetailPage::mergeSubjectData(const SubjectsData &subjectData)
 
 void DetailPage::onEpisodeClicked()
 {   // 打开选集页
-    if (m_subjectData.subjectType == 4) gameMonitorUtil->startGame(m_subjectData.subjectId);
+    if (m_subjectData.subjectType == 4) gameMonitorUtil->startGame(m_subjectData.subjectId, m_gameData[m_subjectData.subjectId]);
     else emit showEpisodePageRequested(m_subjectData);
 }
 
@@ -151,9 +151,8 @@ void DetailPage::updateDetailPage(const QString &progressText)
     m_currentTagPairs = allTagPairs;
     QMetaObject::invokeMethod(this, [this] {tagsDisplay(m_currentTagPairs);}, Qt::QueuedConnection);
     if (m_subjectData.subjectType == 4) {
-        QVector<GameData> gameDataList = DatabaseManager::getGameData({m_subjectData.subjectId});
-        if (!gameDataList.isEmpty()) ui.labelProgress->setText(QString("已玩 %1 小时").arg(gameDataList.first().playDuration));
-        else ui.labelProgress->setText("0 小时");
+        m_gameData = DatabaseManager::getGameData({m_subjectData.subjectId});
+        ui.labelProgress->setText(QString("已玩 %1 小时").arg(m_gameData[m_subjectData.subjectId].playDuration / 3600.0));
     } else ui.labelStatus->setText(getTimeInfo(tagPairs, m_subjectData.date));
     setupScoreChart(m_subjectData.scoreDetails, total);
 }

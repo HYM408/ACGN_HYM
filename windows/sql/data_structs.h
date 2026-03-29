@@ -68,7 +68,7 @@ struct SubjectRelationData {
 struct GameData {
     int subjectId = 0;
     QString launchPath;
-    double playDuration = 0.0;
+    int playDuration = 0;
 };
 
 Q_DECLARE_METATYPE(EpisodeData)

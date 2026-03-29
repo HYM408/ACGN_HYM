@@ -52,8 +52,11 @@ private:
     int m_currentPage = 1;
     QVector<SubjectsData> m_allCollections;
     QVector<SubjectsData> m_filteredCollections;
+    QMap<int, GameData> m_gameData;
     QVector<QWidget*> m_placeholderWidgets;
     QJsonObject m_airdatesJson;
+    QString m_progressText;
+    QHash<int, QFrame*> m_gameCards;
     QColor m_color2;
     QColor m_color3;
 };

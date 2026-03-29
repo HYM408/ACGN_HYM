@@ -357,21 +357,21 @@ bool DatabaseManager::updateGameData(const int subjectId, const QJsonObject &fie
     return true;
 }
 
-QVector<GameData> DatabaseManager::getGameData(const QList<int> &subjectIds)
+QMap<int, GameData> DatabaseManager::getGameData(const QList<int> &subjectIds)
 {   // 根据subject_id获取game数据
-    QVector<GameData> results;
+    QMap<int, GameData> results;
     QStringList placeholders;
     placeholders.fill("?", subjectIds.size());
     QSqlQuery query;
-    query.prepare(QString("SELECT subject_id, launch_path, play_duration FROM game_data WHERE subject_id IN (%1)").arg(placeholders.join(", ")));
+    query.prepare(QString("SELECT * FROM game_data WHERE subject_id IN (%1)").arg(placeholders.join(", ")));
     for (const int id : subjectIds) query.addBindValue(id);
     if (!executeQuery(query, "获取game data失败")) return results;
     while (query.next()) {
         GameData data;
         data.subjectId = query.value("subject_id").toInt();
         data.launchPath = query.value("launch_path").toString();
-        data.playDuration = static_cast<double>(query.value("play_duration").toLongLong()) / 3600.0;
-        results.append(data);
+        data.playDuration = query.value("play_duration").toInt();
+        results[data.subjectId] = data;
     }
     return results;
 }

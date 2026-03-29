@@ -74,7 +74,7 @@ bool MainPageManager::eventFilter(QObject *obj, QEvent *event)
 {   // 鼠标事件
     if (obj->property("isCard").toBool() && event->type() == QEvent::MouseButtonPress) {
         const auto *frame = qobject_cast<QFrame*>(obj);
-        emit showDetailPageRequested(frame->property("collectionData").value<SubjectsData>().subjectId, frame->property("progressLabel").value<QLabel*>()->text());
+        emit showDetailPageRequested(frame->property("collectionData").value<SubjectsData>().subjectId, m_progressText);
         return true;
     }
     return QObject::eventFilter(obj, event);
@@ -119,7 +119,8 @@ void MainPageManager::loadCollections(const int subjectType, const int statusTyp
     if (!m_allCollections.isEmpty()) {
         QList<int> subjectIds;
         for (const auto &col : m_allCollections) subjectIds.append(col.subjectId);
-        m_airdatesJson = dbManager->getEpisodeAirdates(subjectIds);
+        if (subjectType == 4) m_gameData = DatabaseManager::getGameData(subjectIds);
+        else m_airdatesJson = dbManager->getEpisodeAirdates(subjectIds);
     } else m_airdatesJson = QJsonObject();
     if (!typeChanged) onSearchTextChanged(mainWindow->lineEditSearch->text(), false, false);
     else {
@@ -133,6 +134,7 @@ void MainPageManager::loadCollections(const int subjectType, const int statusTyp
 
 void MainPageManager::displayCurrentPage()
 {   // 显示标签
+    m_gameCards.clear();
     const auto layout = mainWindow->gridLayout_2;
     while (const QLayoutItem *item = layout->takeAt(0)) {
         item->widget()->deleteLater();
@@ -214,20 +216,36 @@ QFrame* MainPageManager::createCardComponents(SubjectsData &subjectsData)
     ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, coverLabel, 40, false, true, QString("s%1.jpg").arg(subjectsData.subjectId));
     titleLabel->setText(subjectsData.nameCn.isEmpty() ? subjectsData.name : subjectsData.nameCn);
     if (subjectsData.subjectType == 7 || subjectsData.subjectType == 8) subjectsData.subjectVolumes = dbManager->countSubjectRelations(subjectsData.subjectId);
-    progressLabel->setText(computeProgressText(subjectsData, m_airdatesJson));
+    QString progressText = m_progressText = computeProgressText(subjectsData, m_airdatesJson);
+    if (subjectsData.subjectType == 4) progressText = QString("%1 · 已玩 %2 小时").arg(m_progressText).arg(m_gameData[subjectsData.subjectId].playDuration / 3600.0);
+    progressLabel->setText(progressText);
     card->setProperty("progressLabel", QVariant::fromValue(progressLabel));
     if (subjectsData.subjectType == 2) episodeButton->setText("选集");
     else if (subjectsData.subjectType == 4) episodeButton->setText("启动");
     else episodeButton->setText("进度");
     episodeButton->setStyleSheet(QString("QPushButton {border-radius: 20px}"
                                          "QPushButton:hover {background-color: %1}").arg(m_color3.name()));
+    card->setProperty("episodeButton", QVariant::fromValue(episodeButton));
     // 连接信号
     connect(statusButton, &QPushButton::clicked, this, [this, card, statusButton] {
         const auto data = card->property("collectionData").value<SubjectsData>();
         StatusSelector::showStatusSelector(statusButton, m_currentSubjectType, data.type, data.subjectId, bangumiAPI, dbManager, [this](int) {loadCollections(m_currentSubjectType, m_currentStatusType, false);});
     });
-    if (subjectsData.subjectType == 4) connect(episodeButton, &QPushButton::clicked, this, [this, subjectId = subjectsData.subjectId] {gameMonitor->startGame(subjectId);});
-    else connect(episodeButton, &QPushButton::clicked, this, [this, data = subjectsData] {emit showEpisodePageRequested(data);});
+    if (subjectsData.subjectType == 4) {
+        m_gameCards.insert(subjectsData.subjectId, card);
+        connect(episodeButton, &QPushButton::clicked, this, [this, subjectId = subjectsData.subjectId, subjectsData] {gameMonitor->startGame(subjectId, m_gameData[subjectsData.subjectId]);});
+        connect(gameMonitor, &GameMonitorUtil::gameStarted, this, [this](const int id, const QString &launchPath) {
+            m_gameData[id].launchPath = launchPath;
+            if (const auto frame = m_gameCards.value(id)) if (const auto btn = frame->property("episodeButton").value<QPushButton*>()) btn->setText("正在运行");
+        });
+        connect(gameMonitor, &GameMonitorUtil::gameExited, this, [this](const int id, const int totalSeconds) {
+            m_gameData[id].playDuration = totalSeconds;
+            if (const auto cardFrame = m_gameCards.value(id)) {
+                if (const auto btn = cardFrame->property("episodeButton").value<QPushButton*>()) btn->setText("启动");
+                if (const auto progress = cardFrame->property("progressLabel").value<QLabel*>()) progress->setText(QString("%1 · 已玩 %2 小时").arg(computeProgressText(cardFrame->property("collectionData").value<SubjectsData>(), m_airdatesJson)).arg(totalSeconds / 3600.0));
+            }
+        });
+    } else connect(episodeButton, &QPushButton::clicked, this, [this, data = subjectsData] {emit showEpisodePageRequested(data);});
     return card;
 }
 

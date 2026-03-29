@@ -16,7 +16,7 @@ public:
     static void initTables();
     // collection表
     static bool insertManyCollectionData(const QJsonArray &jsonArray);
-    static SubjectsData collectionFromQuery(const QSqlQuery& query);
+    static SubjectsData collectionFromQuery(const QSqlQuery &query);
     static QVector<SubjectsData> getCollectionBySubjectTypeAndType(int subjectType, int typeValue);
     static QJsonObject getStatusCountsBySubjectType(int subjectType);
     static SubjectsData getCollectionBySubjectId(int subjectId);
@@ -30,13 +30,13 @@ public:
     static bool updateAllEpisodesStatus(int subjectId, int collectionType);
     void clearEpisodeCollectionTable() const;
     // game_data表
-    static bool updateGameData(int subjectId, const QJsonObject& fields);
-    static QVector<GameData> getGameData(const QList<int>& subjectIds);
+    static bool updateGameData(int subjectId, const QJsonObject &fields);
+    static QMap<int, GameData> getGameData(const QList<int> &subjectIds);
     // 公共数据表
     [[nodiscard]] QJsonObject getEpisodeAirdates(const QList<int> &subjectIds) const;
     [[nodiscard]] QVector<EpisodeData> getEpisodeData(int subjectId) const;
     [[nodiscard]] bool insertOrUpdateSubject(const QJsonObject &apiData) const;
-    static SubjectsData buildSubjectsDataFromQuery(const QSqlQuery& query);
+    static SubjectsData buildSubjectsDataFromQuery(const QSqlQuery &query);
     [[nodiscard]] SubjectsData getSubjectById(int subjectId) const;
     [[nodiscard]] QVector<CharacterData> getCharacters(int subjectId) const;
     [[nodiscard]] QVector<PersonData> getPersons(int subjectId) const;
@@ -51,14 +51,14 @@ private:
     QSqlDatabase episodePublicDate;
     static QString simplifyTags(const QJsonArray &tags);
     static int determineSubjectType(int originalType, const QJsonArray &tags);
-    static QString compactScoreDetails(const QJsonObject& scoreDetails);
+    static QString compactScoreDetails(const QJsonObject &scoreDetails);
     static bool executeQuery(QSqlQuery &query, const QString &errorMsg);
-    static qint64 dateStringToTimestamp(const QString& dateStr);
-    static qint64 dateTimeStringToTimestamp(const QString& dateTimeStr);
+    static qint64 dateStringToTimestamp(const QString &dateStr);
+    static qint64 dateTimeStringToTimestamp(const QString &dateTimeStr);
     static QString timestampToDateString(qint64 timestamp);
-    static QByteArray compressString(const QString& str);
-    static QString decompressString(const QByteArray& data);
-    static QString sanitizeString(const QString& str);
+    static QByteArray compressString(const QString &str);
+    static QString decompressString(const QByteArray &data);
+    static QString sanitizeString(const QString &str);
 };
 
 #endif // SQL_H
