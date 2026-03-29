@@ -348,7 +348,6 @@ public:
         checkBoxAnime = new QCheckBox(publicDataOptionsFrame);
         checkBoxAnime->setObjectName("checkBoxAnime");
         checkBoxAnime->setFont(font7);
-        checkBoxAnime->setChecked(true);
 
         verticalLayout_8->addWidget(checkBoxAnime);
 

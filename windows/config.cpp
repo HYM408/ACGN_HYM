@@ -27,11 +27,12 @@ void initConfig()
     setDefaultIfMissing(settings, "user_id", "");
     setDefaultIfMissing(settings, "client_id", "");
     setDefaultIfMissing(settings, "client_secret", "");
-    setDefaultIfMissing(settings, "redirect_uri", "");
+    setDefaultIfMissing(settings, "redirect_url", "");
     setDefaultIfMissing(settings, "access_token", "");
     setDefaultIfMissing(settings, "refresh_token", "");
     setDefaultIfMissing(settings, "expires_at", 0);
     setDefaultIfMissing(settings, "bangumi_base_url", "https://bangumi.tv/");
+    setDefaultIfMissing(settings, "bangumi_public_date_type", 2);
     setDefaultIfMissing(settings, "rss_guid", "0");
     setDefaultIfMissing(settings, "nsfw", false);
     settings.endGroup();

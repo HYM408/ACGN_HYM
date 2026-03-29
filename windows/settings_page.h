@@ -36,7 +36,7 @@ private slots:
 private:
     void setupConnections();
     void updateTokenDisplay() const;
-    void setBangumiBaseUrl() const;
+    void setUiSelection();
     bool ensureBangumiCredentials();
     void downloadPublicDate(bool useMirror);
     bool ensurePikPakCredentials();

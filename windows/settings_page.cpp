@@ -20,7 +20,7 @@ SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent)
     setupConnections();
     setupDownloadPathUi();
     updateTokenDisplay();
-    setBangumiBaseUrl();
+    setUiSelection();
 }
 
 SettingsPage::~SettingsPage()
@@ -51,7 +51,6 @@ void SettingsPage::setupConnections()
 {   // 设置连接
     ui.btnBangumi->setChecked(true);
     ui.stackedWidget->setCurrentIndex(0);
-    ui.checkBoxNsfw->setChecked(getConfig("Bangumi/nsfw").toBool());
     // 返回
     connect(ui.btnBack, &QPushButton::clicked, this, &SettingsPage::onBackButtonClicked);
     // Bangumi
@@ -85,10 +84,15 @@ void SettingsPage::updateTokenDisplay() const
     ui.labelPikPakRefreshToken->setText("refresh token: " + getConfig("PikPak/refresh_token").toString());
 }
 
-void SettingsPage::setBangumiBaseUrl() const
-{   // 设置Bangumi域名
+void SettingsPage::setUiSelection()
+{   // 设置ui
     const QMap<QString, int> urlToIndex = {{"https://bangumi.tv/", 0}, {"https://bgm.tv/", 1}, {"https://chii.in/", 2}};
     ui.comboBangumiDomain->setCurrentIndex(urlToIndex.value(getConfig("Bangumi/bangumi_base_url").toString()));
+    int mask = getConfig("Bangumi/bangumi_public_date_type").toInt();
+    ui.checkBoxBook->setChecked(mask & 1);
+    ui.checkBoxAnime->setChecked(mask & 2);
+    ui.checkBoxGame->setChecked(mask & 4);
+    ui.checkBoxNsfw->setChecked(getConfig("Bangumi/nsfw").toBool());
 }
 
 void SettingsPage::onBangumiUrlChanged(const int index)
@@ -176,6 +180,11 @@ void SettingsPage::onCollectionButtonClicked() const
 
 void SettingsPage::downloadPublicDate(const bool useMirror)
 {   // 下载Bangumi公共数据
+    int mask = 0;
+    if (ui.checkBoxBook->isChecked()) mask |= 1;
+    if (ui.checkBoxAnime->isChecked()) mask |= 2;
+    if (ui.checkBoxGame->isChecked()) mask |= 4;
+    setConfig("Bangumi/bangumi_public_date_type", mask);
     QList<int> selectedTypes;
     if (ui.checkBoxAnime->isChecked()) selectedTypes.append(2);
     if (ui.checkBoxBook->isChecked()) selectedTypes.append(1);
