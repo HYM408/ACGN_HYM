@@ -42,7 +42,7 @@ void MainWindow::initializeManagers()
     cacheImageUtil = new CacheImageUtil(this);
     pikpakApi = new PikPakApi(this);
     rss = new Rss(bangumiAPI, this);
-    gameMonitorUtil = new GameMonitorUtil(dbManager, this, this);
+    gameMonitorUtil = new GameMonitorUtil(this, this);
     trayMenu = new QMenu(this);
     trayIcon = new QSystemTrayIcon(this);
 }
@@ -202,6 +202,7 @@ void MainWindow::closeOptionSelection(const int result)
     m_savedNormalGeometry = normalGeometry();
     hide();
     if (result == 1) return;
+    gameMonitorUtil->resumeAllSuspendedProcess(false);
     QApplication::quit();
 }
 
