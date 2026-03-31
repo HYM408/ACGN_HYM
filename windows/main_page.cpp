@@ -225,9 +225,13 @@ QFrame* MainPageManager::createCardComponents(SubjectsData &subjectsData)
     progressLabel->setText(displayText);
     card->setProperty("pureProgressText", pureProgressText);
     card->setProperty("progressLabel", QVariant::fromValue(progressLabel));
-    if (subjectsData.subjectType == 2) episodeButton->setText("选集");
-    else if (subjectsData.subjectType == 4) episodeButton->setText("启动");
-    else episodeButton->setText("进度");
+    if (subjectsData.subjectType == 4) {
+        if (gameMonitor->isGameRunning(subjectsData.subjectId)) episodeButton->setText("正在运行");
+        else episodeButton->setText("启动");
+    } else {
+        if (subjectsData.subjectType == 2) episodeButton->setText("选集");
+        else episodeButton->setText("进度");
+    }
     episodeButton->setStyleSheet(QString("QPushButton {border-radius: 20px}"
                                          "QPushButton:hover {background-color: %1}").arg(m_color3.name()));
     card->setProperty("episodeButton", QVariant::fromValue(episodeButton));
@@ -243,12 +247,9 @@ QFrame* MainPageManager::createCardComponents(SubjectsData &subjectsData)
             m_gameData[id].launchPath = launchPath;
             if (const auto frame = m_gameCards.value(id)) if (const auto btn = frame->property("episodeButton").value<QPushButton*>()) btn->setText("正在运行");
         });
-        connect(gameMonitor, &GameMonitorUtil::gameExited, this, [this](const int id, const int totalSeconds) {
-            m_gameData[id].playDuration = totalSeconds;
-            if (const auto cardFrame = m_gameCards.value(id)) {
-                if (const auto btn = cardFrame->property("episodeButton").value<QPushButton*>()) btn->setText("启动");
-                if (const auto progress = cardFrame->property("progressLabel").value<QLabel*>()) progress->setText(QString("%1 · 已玩 %2 小时").arg(computeProgressText(cardFrame->property("collectionData").value<SubjectsData>(), m_airdatesJson)).arg(totalSeconds / 3600.0));
-            }
+        connect(gameMonitor, &GameMonitorUtil::gameExited, this, [this](const int id) {
+            loadCollections(m_currentSubjectType, m_currentStatusType, false);
+            if (const auto btn = m_gameCards.value(id)->property("episodeButton").value<QPushButton*>()) btn->setText("启动");
         });
     } else connect(episodeButton, &QPushButton::clicked, this, [this, data = subjectsData] {emit showEpisodePageRequested(data);});
     return card;

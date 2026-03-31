@@ -57,7 +57,7 @@ void GameMonitorUtil::checkGamesStatus()
                 int total = m_gameData.playDuration + elapsedSec;
                 DatabaseManager::updateGameData(subjectId, {{"play_duration", total}});
                 qDebug() << subjectId << "已退出，运行:" << elapsedSec << "秒，总计:" << total << "秒";
-                emit gameExited(subjectId, total);
+                emit gameExited(subjectId);
                 gameSuspended.remove(subjectId);
                 suspendedGameHwnd.remove(subjectId);
                 originalGameTitles.remove(subjectId);
