@@ -1,7 +1,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <QSettings>
+#include <QVariant>
+
+class QSettings;
 
 void initConfig();
 void setDefaultIfMissing(QSettings &settings, const QString &key, const QVariant &defaultValue);

@@ -5,6 +5,7 @@
 #include <QDesktopServices>
 #include "config.h"
 #include "sql/sql.h"
+#include "utils/key_util.h"
 #include "api/pikpak_api.h"
 #include "api/bangumi_api.h"
 #include "api/bangumi_oauth.h"
@@ -18,9 +19,7 @@ SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent)
     bangumiOAuth = new BangumiOAuth(this);
     applyTheme();
     setupConnections();
-    setupDownloadPathUi();
-    updateTokenDisplay();
-    setUiSelection();
+    loadBangumiPage();
 }
 
 SettingsPage::~SettingsPage()
@@ -44,13 +43,11 @@ void SettingsPage::applyTheme() const
     const QString buttonStyle = QString("QPushButton:hover {background-color: rgba(0, 0, 0, 20)}"
                                         "QPushButton:checked {background-color: %1}"
                                         "QPushButton {border:none; border-radius: 10px}").arg(color4.name());
-    for (const auto button : {ui.btnBangumi, ui.btnPikPak, ui.btnDownloadMenu}) button->setStyleSheet(buttonStyle);
+    for (const auto button : {ui.btnBangumi, ui.btnPikPak, ui.btnDownload, ui.btnGame}) button->setStyleSheet(buttonStyle);
 }
 
 void SettingsPage::setupConnections()
 {   // 设置连接
-    ui.btnBangumi->setChecked(true);
-    ui.stackedWidget->setCurrentIndex(0);
     // 返回
     connect(ui.btnBack, &QPushButton::clicked, this, &SettingsPage::onBackButtonClicked);
     // Bangumi
@@ -65,34 +62,69 @@ void SettingsPage::setupConnections()
         emit nsfwSettingChanged(checked);
     });
     // PikPak
-    connect(ui.btnPikPak, &QPushButton::clicked, [this] {ui.stackedWidget->setCurrentWidget(ui.pikpakPage);});
+    connect(ui.btnPikPak, &QPushButton::clicked, [this] {loadPikpakPage();});
     connect(ui.btnPikPakLogin, &QPushButton::clicked, this, &SettingsPage::onPikPakLoginButtonClicked);
     // 下载
     setupLineEditCustomContextMenu(ui.lineEditDownloadPath, CMO_Copy | CMO_SelectAll);
-    connect(ui.btnDownloadMenu, &QPushButton::clicked, [this] {ui.stackedWidget->setCurrentWidget(ui.downloadPage);});
+    connect(ui.btnDownload, &QPushButton::clicked, [this] {loadDownloadPage();});
     connect(ui.btnSelectDownloadPath, &QPushButton::clicked, this, &SettingsPage::onSelectDownloadPath);
+    // 游戏
+    connect(ui.btnGame, &QPushButton::clicked, [this] {loadGamePage();});
+    connect(ui.suspendProcessKeySequenceEdit, &QKeySequenceEdit::keySequenceChanged, this, [](const QKeySequence &keySequence) {setConfig("Shortcut/suspendProcess", keySequenceToVirtualKey(keySequence));});
 }
 
-void SettingsPage::updateTokenDisplay() const
-{   // 显示token
-    ui.labelUserId->setText("ID: " + getConfig("Bangumi/user_id").toString());
-    ui.labelAccessToken->setText("Access Token: " + getConfig("Bangumi/access_token").toString());
-    ui.labelRefreshToken->setText("Refresh Token: " + getConfig("Bangumi/refresh_token").toString());
-    ui.labelPikPakUsername->setText("username: " + getConfig("PikPak/username").toString());
-    ui.labelPikPakPassword->setText("password: " + getConfig("PikPak/password").toString());
-    ui.labelPikPakAccessToken->setText("access token: " + getConfig("PikPak/access_token").toString().left(100));
-    ui.labelPikPakRefreshToken->setText("refresh token: " + getConfig("PikPak/refresh_token").toString());
-}
-
-void SettingsPage::setUiSelection()
-{   // 设置ui
+void SettingsPage::loadBangumiPage() const
+{   // 加载Bangumi页面
+    ui.btnBangumi->setChecked(true);
+    ui.stackedWidget->setCurrentIndex(0);
     const QMap<QString, int> urlToIndex = {{"https://bangumi.tv/", 0}, {"https://bgm.tv/", 1}, {"https://chii.in/", 2}};
     ui.comboBangumiDomain->setCurrentIndex(urlToIndex.value(getConfig("Bangumi/bangumi_base_url").toString()));
-    int mask = getConfig("Bangumi/bangumi_public_date_type").toInt();
+    const int mask = getConfig("Bangumi/bangumi_public_date_type").toInt();
     ui.checkBoxBook->setChecked(mask & 1);
     ui.checkBoxAnime->setChecked(mask & 2);
     ui.checkBoxGame->setChecked(mask & 4);
     ui.checkBoxNsfw->setChecked(getConfig("Bangumi/nsfw").toBool());
+    updateBangumiTokenDisplay();
+}
+
+void SettingsPage::loadPikpakPage()
+{   // 加载Pikpak页面
+    ui.stackedWidget->setCurrentWidget(ui.pikpakPage);
+    if (m_pikpakLoaded) return;
+    updatePikpakTokenDisplay();
+    m_pikpakLoaded = true;
+}
+
+void SettingsPage::loadDownloadPage()
+{   // 加载下载页面
+    ui.stackedWidget->setCurrentWidget(ui.downloadPage);
+    if (m_downloadLoaded) return;
+    ui.lineEditDownloadPath->setText(getConfig("Download/download_path", "data/download").toString());
+    m_downloadLoaded = true;
+}
+
+void SettingsPage::loadGamePage()
+{   // 加载游戏页面
+    ui.stackedWidget->setCurrentWidget(ui.gamePage);
+    if (m_gameLoaded) return;
+    ui.suspendProcessKeySequenceEdit->setKeySequence(virtualKeyToKeySequence(getConfig("Shortcut/suspendProcess", 27).toInt()));
+    ui.suspendProcessKeySequenceEdit->findChild<QLineEdit*>()->setContextMenuPolicy(Qt::NoContextMenu);
+    m_gameLoaded = true;
+}
+
+void SettingsPage::updateBangumiTokenDisplay() const
+{   // Bangumi token
+    ui.labelUserId->setText("ID: " + getConfig("Bangumi/user_id").toString());
+    ui.labelAccessToken->setText("Access Token: " + getConfig("Bangumi/access_token").toString());
+    ui.labelRefreshToken->setText("Refresh Token: " + getConfig("Bangumi/refresh_token").toString());
+}
+
+void SettingsPage::updatePikpakTokenDisplay() const
+{   // Pikpak token
+    ui.labelPikPakUsername->setText("username: " + getConfig("PikPak/username").toString());
+    ui.labelPikPakPassword->setText("password: " + getConfig("PikPak/password").toString());
+    ui.labelPikPakAccessToken->setText("access token: " + getConfig("PikPak/access_token").toString().left(100));
+    ui.labelPikPakRefreshToken->setText("refresh token: " + getConfig("PikPak/refresh_token").toString());
 }
 
 void SettingsPage::onBangumiUrlChanged(const int index)
@@ -110,10 +142,11 @@ void SettingsPage::onLoginButtonClicked()
     const QString code = bangumiOAuth->listenForCode(30);
     if (code.isEmpty()) {
         ui.btnBangumiAuth->setText("Code获取失败");
+        ui.btnBangumiAuth->setEnabled(true);
         return;
     }
     if (bangumiOAuth->exchangeCodeForToken(code, "")) {
-        updateTokenDisplay();
+        updateBangumiTokenDisplay();
         ui.btnBangumiAuth->setText("Bangumi授权成功！");
     } else ui.btnBangumiAuth->setText("Token交换失败");
     ui.btnBangumiAuth->setEnabled(true);
@@ -124,26 +157,26 @@ bool SettingsPage::ensureBangumiCredentials()
     QDialog dialog(this);
     dialog.setWindowTitle("Bangumi授权");
     dialog.setFixedSize(400, 300);
-    const auto layout = new QVBoxLayout(&dialog);
-    const auto linkLabel = new QLabel("前往创建应用(需登录bangumi):<a href=\"https://bgm.tv/dev/app\">https://bgm.tv/dev/app</a>");
+    auto *layout = new QVBoxLayout(&dialog);
+    auto *linkLabel = new QLabel("前往创建应用(需登录bangumi):<a href=\"https://bgm.tv/dev/app\">https://bgm.tv/dev/app</a>");
     linkLabel->setOpenExternalLinks(true);
     layout->addWidget(linkLabel);
     layout->addWidget(new QLabel("Client ID:"));
-    const auto clientIdInput = new QLineEdit();
+    auto *clientIdInput = new QLineEdit();
     clientIdInput->setPlaceholderText("输入 App ID");
     clientIdInput->setText(getConfig("Bangumi/client_id").toString());
     layout->addWidget(clientIdInput);
     layout->addWidget(new QLabel("Client Secret:"));
-    const auto clientSecretInput = new QLineEdit();
+    auto *clientSecretInput = new QLineEdit();
     clientSecretInput->setPlaceholderText("输入 App Secret");
     clientSecretInput->setText(getConfig("Bangumi/client_secret").toString());
     layout->addWidget(clientSecretInput);
     layout->addWidget(new QLabel("Redirect URI:"));
-    const auto redirectUriInput = new QLineEdit();
+    auto *redirectUriInput = new QLineEdit();
     redirectUriInput->setPlaceholderText("输入 回调地址");
     redirectUriInput->setText(getConfig("Bangumi/redirect_uri").toString());
     layout->addWidget(redirectUriInput);
-    const auto confirmButton = new QPushButton("授权");
+    auto *confirmButton = new QPushButton("授权");
     layout->addWidget(confirmButton);
     connect(confirmButton, &QPushButton::clicked, &dialog, &QDialog::accept);
     if (dialog.exec() == QDialog::Accepted) {
@@ -165,9 +198,7 @@ void SettingsPage::onCollectionButtonClicked() const
 {   // 获取Bangumi收藏
     ui.btnGetCollection->setEnabled(false);
     ui.btnGetCollection->setText("进度：0");
-    bangumiAPI->getUserCollections(true, 3, [this](const int current, const int total) {
-        ui.btnGetCollection->setText(QString("进度：%1/%2").arg(current).arg(total));
-    }, [this](const QJsonArray &collections, const QString &error) {
+    bangumiAPI->getUserCollections(true, 3, [this](const int current, const int total) {ui.btnGetCollection->setText(QString("进度：%1/%2").arg(current).arg(total));}, [this](const QJsonArray &collections, const QString &error) {
         if (!error.isEmpty()) ui.btnGetCollection->setText("获取收藏失败: " + error);
         else if (!collections.isEmpty()) {
             dbManager->clearCollectionTable();
@@ -235,7 +266,7 @@ void SettingsPage::onPikPakLoginButtonClicked()
     ui.btnPikPakLogin->setEnabled(false);
     pikpakApi->loginPikPak([this](const bool success, const QString &error) {
         if (success) {
-            updateTokenDisplay();
+            updatePikpakTokenDisplay();
             ui.btnPikPakLogin->setText("PikPak 登录成功！");
         } else ui.btnPikPakLogin->setText("PikPak 登录失败:" + error);
         ui.btnPikPakLogin->setEnabled(true);
@@ -247,21 +278,21 @@ bool SettingsPage::ensurePikPakCredentials()
     QDialog dialog(this);
     dialog.setWindowTitle("PikPak登录(ip不能在中国大陆)");
     dialog.setFixedSize(400, 200);
-    const auto layout = new QVBoxLayout(&dialog);
-    const auto infoLabel = new QLabel("请输入PikPak账号和密码（IP不能在中国大陆）");
+    auto *layout = new QVBoxLayout(&dialog);
+    auto *infoLabel = new QLabel("请输入PikPak账号和密码（IP不能在中国大陆）");
     infoLabel->setWordWrap(true);
     layout->addWidget(infoLabel);
     layout->addWidget(new QLabel("用户名:"));
-    const auto userInput = new QLineEdit();
+    auto *userInput = new QLineEdit();
     userInput->setPlaceholderText("输入 PikPak 账号");
     userInput->setText(getConfig("PikPak/username").toString());
     layout->addWidget(userInput);
     layout->addWidget(new QLabel("密码:"));
-    const auto passInput = new QLineEdit();
+    auto *passInput = new QLineEdit();
     passInput->setPlaceholderText("输入 PikPak 密码");
     passInput->setText(getConfig("PikPak/password").toString());
     layout->addWidget(passInput);
-    const auto confirmButton = new QPushButton("登录");
+    auto *confirmButton = new QPushButton("登录");
     layout->addWidget(confirmButton);
     connect(confirmButton, &QPushButton::clicked, &dialog, &QDialog::accept);
     if (dialog.exec() == QDialog::Accepted) {
@@ -275,12 +306,6 @@ bool SettingsPage::ensurePikPakCredentials()
         QMessageBox::warning(this, "警告", "所有字段都必须填写完整！");
     }
     return false;
-}
-
-void SettingsPage::setupDownloadPathUi() const
-{   // 设置下载路径UI
-    const QString downloadPath = getConfig("Download/download_path", "data/download").toString();
-    ui.lineEditDownloadPath->setText(downloadPath);
 }
 
 void SettingsPage::onSelectDownloadPath()

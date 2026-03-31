@@ -1,5 +1,7 @@
 #include "config.h"
 #include <QColor>
+#include <QSettings>
+#include <QKeySequence>
 
 void initConfig()
 {   // 初始化配置文件
@@ -50,6 +52,10 @@ void initConfig()
     // 数据源
     settings.beginGroup("EnabledSites");
     setDefaultIfMissing(settings, "sites", "*");
+    settings.endGroup();
+    // 快捷键
+    settings.beginGroup("Shortcut");
+    setDefaultIfMissing(settings, "suspendProcess", 27);
     settings.endGroup();
 }
 

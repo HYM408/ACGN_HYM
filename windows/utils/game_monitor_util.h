@@ -1,16 +1,17 @@
 #ifndef GAME_MONITOR_UTIL_H
 #define GAME_MONITOR_UTIL_H
 
-#include <QObject>
 #include <windows.h>
 #include "../sql/data_structs.h"
+
+class GlobalHotkeyManager;
 
 class GameMonitorUtil : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit GameMonitorUtil(QWidget *parentWidget = nullptr, QObject *parent = nullptr);
+    explicit GameMonitorUtil(GlobalHotkeyManager *hotkeyManager, QObject *parent = nullptr);
     ~GameMonitorUtil() override;
     void startGame(int subjectId, const GameData &gameData);
     void resumeAllSuspendedProcess(bool restoreWindow);
@@ -27,14 +28,10 @@ private:
     static qint64 findChildProcess(qint64 parentPid);
     static bool suspendOrResumeProcess(DWORD pid, bool suspend);
     static HWND findWindowByPid(DWORD pid);
-    void installKeyboardHook();
-    static void uninstallKeyboardHook();
-    static LRESULT CALLBACK lowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
-    QWidget *parentWidget = nullptr;
+    void onFreezeOrResume();
     QTimer *gameMonitorTimer = nullptr;
+    GlobalHotkeyManager *hotkeyManager = nullptr;
     GameData m_gameData;
-    static HHOOK keyboardHook;
-    static GameMonitorUtil *instance;
     QHash<int, qint64> gameStartTimes;
     QHash<int, qint64> monitoredGames;
     QHash<int, bool> gameSuspended;

@@ -70,8 +70,12 @@ add_executable(appACGN_HYM
         windows/utils/context_menu_util.cpp
         windows/utils/game_monitor_util.h
         windows/utils/game_monitor_util.cpp
+        windows/utils/global_hotkey_manager.h
+        windows/utils/global_hotkey_manager.cpp
         windows/utils/image_util.h
         windows/utils/image_util.cpp
+        windows/utils/key_util.h
+        windows/utils/key_util.cpp
         windows/utils/menu_util.h
         windows/utils/menu_util.cpp
         windows/utils/network_util.h

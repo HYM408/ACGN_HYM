@@ -35,12 +35,15 @@ private slots:
 
 private:
     void setupConnections();
-    void updateTokenDisplay() const;
-    void setUiSelection();
+    void loadBangumiPage() const;
+    void loadPikpakPage();
+    void loadDownloadPage();
+    void loadGamePage();
+    void updateBangumiTokenDisplay() const;
+    void updatePikpakTokenDisplay() const;
     bool ensureBangumiCredentials();
     void downloadPublicDate(bool useMirror);
     bool ensurePikPakCredentials();
-    void setupDownloadPathUi() const;
     Ui::SettingsPage ui{};
     BangumiAPI *bangumiAPI = nullptr;
     BangumiOAuth *bangumiOAuth = nullptr;
@@ -48,6 +51,9 @@ private:
     PikPakApi *pikpakApi = nullptr;
     ChunkDownload *m_currentDownload = nullptr;
     QNetworkAccessManager m_networkManager;
+    bool m_pikpakLoaded = false;
+    bool m_downloadLoaded = false;
+    bool m_gameLoaded = false;
 };
 
 #endif // SETTINGS_PAGE_H

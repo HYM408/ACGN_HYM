@@ -13,6 +13,7 @@ class SettingsPage;
 class DownloadPage;
 class EpisodeOverlay;
 class GameMonitorUtil;
+class GlobalHotkeyManager;
 
 class MainWindow : public QMainWindow, public Ui::MainWindow
 {
@@ -25,6 +26,7 @@ protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
     void resizeEvent(QResizeEvent* event) override;
     void showCloseOptionDialog();
+    bool nativeEvent(const QByteArray &eventType, void *message, qintptr *result) override;
 
 private slots:
     void toggleMaximizeWindow();
@@ -64,6 +66,7 @@ private:
     EpisodeOverlay *episodeOverlay = nullptr;
     QList<QWidget*> pageHistory;
     GameMonitorUtil *gameMonitorUtil = nullptr;
+    GlobalHotkeyManager *hotkeyManager = nullptr;
     QSystemTrayIcon *trayIcon = nullptr;
     QMenu *trayMenu = nullptr;
     QTimer *gameFocusTimer = nullptr;

@@ -13,6 +13,7 @@
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QComboBox>
+#include <QtWidgets/QKeySequenceEdit>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QPushButton>
@@ -36,7 +37,8 @@ public:
     QVBoxLayout *verticalLayout_2;
     QPushButton *btnBangumi;
     QPushButton *btnPikPak;
-    QPushButton *btnDownloadMenu;
+    QPushButton *btnDownload;
+    QPushButton *btnGame;
     QSpacerItem *verticalSpacer;
     QStackedWidget *stackedWidget;
     QWidget *bangumiPage;
@@ -92,6 +94,17 @@ public:
     QLineEdit *lineEditDownloadPath;
     QPushButton *btnSelectDownloadPath;
     QSpacerItem *verticalSpacer_4;
+    QWidget *gamePage;
+    QVBoxLayout *verticalLayout_12;
+    QLabel *labelGameTitle;
+    QFrame *shortcutFrame;
+    QVBoxLayout *verticalLayout_11;
+    QLabel *labelShortcutSection;
+    QFrame *suspendProcessFrame;
+    QHBoxLayout *horizontalLayout_5;
+    QLabel *suspendProcessLabel;
+    QKeySequenceEdit *suspendProcessKeySequenceEdit;
+    QSpacerItem *verticalSpacer_5;
     QButtonGroup *buttonGroup;
 
     void setupUi(QWidget *SettingsPage)
@@ -192,15 +205,25 @@ public:
 
         verticalLayout_2->addWidget(btnPikPak);
 
-        btnDownloadMenu = new QPushButton(menuFrame);
-        buttonGroup->addButton(btnDownloadMenu);
-        btnDownloadMenu->setObjectName("btnDownloadMenu");
-        btnDownloadMenu->setMinimumSize(QSize(0, 50));
-        btnDownloadMenu->setMaximumSize(QSize(16777215, 50));
-        btnDownloadMenu->setFont(font2);
-        btnDownloadMenu->setCheckable(true);
+        btnDownload = new QPushButton(menuFrame);
+        buttonGroup->addButton(btnDownload);
+        btnDownload->setObjectName("btnDownload");
+        btnDownload->setMinimumSize(QSize(0, 50));
+        btnDownload->setMaximumSize(QSize(16777215, 50));
+        btnDownload->setFont(font2);
+        btnDownload->setCheckable(true);
 
-        verticalLayout_2->addWidget(btnDownloadMenu);
+        verticalLayout_2->addWidget(btnDownload);
+
+        btnGame = new QPushButton(menuFrame);
+        buttonGroup->addButton(btnGame);
+        btnGame->setObjectName("btnGame");
+        btnGame->setMinimumSize(QSize(0, 50));
+        btnGame->setMaximumSize(QSize(16777215, 50));
+        btnGame->setFont(font2);
+        btnGame->setCheckable(true);
+
+        verticalLayout_2->addWidget(btnGame);
 
 
         verticalLayout->addWidget(menuFrame);
@@ -223,15 +246,13 @@ public:
         verticalLayout_7->setObjectName("verticalLayout_7");
         labelBangumiTitle = new QLabel(bangumiPage);
         labelBangumiTitle->setObjectName("labelBangumiTitle");
-        labelBangumiTitle->setMinimumSize(QSize(0, 0));
-        labelBangumiTitle->setMaximumSize(QSize(16777215, 16777215));
         QFont font3;
         font3.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font3.setPointSize(17);
         font3.setBold(true);
         labelBangumiTitle->setFont(font3);
 
-        verticalLayout_7->addWidget(labelBangumiTitle, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_7->addWidget(labelBangumiTitle);
 
         authFrame = new QFrame(bangumiPage);
         authFrame->setObjectName("authFrame");
@@ -344,7 +365,7 @@ public:
         publicDataOptionsFrame->setFrameShadow(QFrame::Shadow::Raised);
         verticalLayout_8 = new QVBoxLayout(publicDataOptionsFrame);
         verticalLayout_8->setObjectName("verticalLayout_8");
-        verticalLayout_8->setContentsMargins(0, -1, -1, -1);
+        verticalLayout_8->setContentsMargins(0, -1, -1, 0);
         checkBoxAnime = new QCheckBox(publicDataOptionsFrame);
         checkBoxAnime->setObjectName("checkBoxAnime");
         checkBoxAnime->setFont(font7);
@@ -369,7 +390,7 @@ public:
         publicDataButtonsFrame->setFrameShadow(QFrame::Shadow::Raised);
         horizontalLayout_4 = new QHBoxLayout(publicDataButtonsFrame);
         horizontalLayout_4->setObjectName("horizontalLayout_4");
-        horizontalLayout_4->setContentsMargins(0, 0, -1, 5);
+        horizontalLayout_4->setContentsMargins(0, 0, -1, 0);
         btnDownloadPublic = new QPushButton(publicDataButtonsFrame);
         btnDownloadPublic->setObjectName("btnDownloadPublic");
         btnDownloadPublic->setMinimumSize(QSize(76, 0));
@@ -438,11 +459,7 @@ public:
         labelPikPakTitle->setObjectName("labelPikPakTitle");
         labelPikPakTitle->setMinimumSize(QSize(0, 0));
         labelPikPakTitle->setMaximumSize(QSize(16777215, 16777215));
-        QFont font8;
-        font8.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
-        font8.setPointSize(20);
-        font8.setBold(true);
-        labelPikPakTitle->setFont(font8);
+        labelPikPakTitle->setFont(font3);
 
         verticalLayout_3->addWidget(labelPikPakTitle, 0, Qt::AlignmentFlag::AlignLeft);
 
@@ -532,13 +549,67 @@ public:
         verticalLayout_5->addItem(verticalSpacer_4);
 
         stackedWidget->addWidget(downloadPage);
+        gamePage = new QWidget();
+        gamePage->setObjectName("gamePage");
+        verticalLayout_12 = new QVBoxLayout(gamePage);
+        verticalLayout_12->setObjectName("verticalLayout_12");
+        labelGameTitle = new QLabel(gamePage);
+        labelGameTitle->setObjectName("labelGameTitle");
+        labelGameTitle->setFont(font3);
+
+        verticalLayout_12->addWidget(labelGameTitle);
+
+        shortcutFrame = new QFrame(gamePage);
+        shortcutFrame->setObjectName("shortcutFrame");
+        verticalLayout_11 = new QVBoxLayout(shortcutFrame);
+        verticalLayout_11->setObjectName("verticalLayout_11");
+        labelShortcutSection = new QLabel(shortcutFrame);
+        labelShortcutSection->setObjectName("labelShortcutSection");
+        labelShortcutSection->setMinimumSize(QSize(0, 30));
+        labelShortcutSection->setMaximumSize(QSize(16777215, 30));
+        labelShortcutSection->setFont(font4);
+
+        verticalLayout_11->addWidget(labelShortcutSection, 0, Qt::AlignmentFlag::AlignLeft);
+
+        suspendProcessFrame = new QFrame(shortcutFrame);
+        suspendProcessFrame->setObjectName("suspendProcessFrame");
+        suspendProcessFrame->setFrameShape(QFrame::Shape::StyledPanel);
+        suspendProcessFrame->setFrameShadow(QFrame::Shadow::Raised);
+        horizontalLayout_5 = new QHBoxLayout(suspendProcessFrame);
+        horizontalLayout_5->setSpacing(0);
+        horizontalLayout_5->setObjectName("horizontalLayout_5");
+        horizontalLayout_5->setContentsMargins(0, 0, 0, 0);
+        suspendProcessLabel = new QLabel(suspendProcessFrame);
+        suspendProcessLabel->setObjectName("suspendProcessLabel");
+        suspendProcessLabel->setFont(font6);
+
+        horizontalLayout_5->addWidget(suspendProcessLabel);
+
+        suspendProcessKeySequenceEdit = new QKeySequenceEdit(suspendProcessFrame);
+        suspendProcessKeySequenceEdit->setObjectName("suspendProcessKeySequenceEdit");
+        suspendProcessKeySequenceEdit->setFont(font6);
+        suspendProcessKeySequenceEdit->setMaximumSequenceLength(Q_INT64_C(1));
+
+        horizontalLayout_5->addWidget(suspendProcessKeySequenceEdit, 0, Qt::AlignmentFlag::AlignRight);
+
+
+        verticalLayout_11->addWidget(suspendProcessFrame);
+
+
+        verticalLayout_12->addWidget(shortcutFrame);
+
+        verticalSpacer_5 = new QSpacerItem(20, 837, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
+
+        verticalLayout_12->addItem(verticalSpacer_5);
+
+        stackedWidget->addWidget(gamePage);
 
         horizontalLayout_8->addWidget(stackedWidget);
 
 
         retranslateUi(SettingsPage);
 
-        stackedWidget->setCurrentIndex(0);
+        stackedWidget->setCurrentIndex(3);
 
 
         QMetaObject::connectSlotsByName(SettingsPage);
@@ -550,7 +621,8 @@ public:
         btnSettingsTitle->setText(QCoreApplication::translate("SettingsPage", "\350\256\276\347\275\256", nullptr));
         btnBangumi->setText(QCoreApplication::translate("SettingsPage", "Bangumi", nullptr));
         btnPikPak->setText(QCoreApplication::translate("SettingsPage", "PikPak", nullptr));
-        btnDownloadMenu->setText(QCoreApplication::translate("SettingsPage", "\344\270\213\350\275\275", nullptr));
+        btnDownload->setText(QCoreApplication::translate("SettingsPage", "\344\270\213\350\275\275", nullptr));
+        btnGame->setText(QCoreApplication::translate("SettingsPage", "\346\270\270\346\210\217", nullptr));
         labelBangumiTitle->setText(QCoreApplication::translate("SettingsPage", "Bangumi", nullptr));
         labelAuthSection->setText(QCoreApplication::translate("SettingsPage", "Bangumi \346\216\210\346\235\203", nullptr));
         labelUserId->setText(QString());
@@ -580,6 +652,9 @@ public:
         btnPikPakLogin->setText(QCoreApplication::translate("SettingsPage", "\345\274\200\345\247\213\347\231\273\345\275\225", nullptr));
         labelDownloadTitle->setText(QCoreApplication::translate("SettingsPage", "\344\270\213\350\275\275\350\267\257\345\276\204", nullptr));
         btnSelectDownloadPath->setText(QCoreApplication::translate("SettingsPage", "\351\200\211\346\213\251\350\267\257\345\276\204", nullptr));
+        labelGameTitle->setText(QCoreApplication::translate("SettingsPage", "\346\270\270\346\210\217", nullptr));
+        labelShortcutSection->setText(QCoreApplication::translate("SettingsPage", "\345\277\253\346\215\267\351\224\256", nullptr));
+        suspendProcessLabel->setText(QCoreApplication::translate("SettingsPage", "\351\232\220\350\227\217\346\270\270\346\210\217\347\250\213\345\272\217\357\274\210\345\206\215\346\254\241\347\202\271\345\207\273\346\201\242\345\244\215\357\274\211", nullptr));
         (void)SettingsPage;
     } // retranslateUi
 

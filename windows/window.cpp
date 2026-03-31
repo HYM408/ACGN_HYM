@@ -17,6 +17,7 @@
 #include "utils/game_monitor_util.h"
 #include "detail_page/detail_page.h"
 #include "downloader/download_page.h"
+#include "utils/global_hotkey_manager.h"
 #include "episode_page/episode_overlay.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -35,6 +36,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     QTimer::singleShot(5000, rss, &Rss::startRSS);
 }
 
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, qintptr *result)
+{   // 原生事件
+    if (eventType == "windows_generic_MSG") {
+        const auto msg = static_cast<MSG*>(message);
+        if (msg->message == WM_HOTKEY) {
+            if (hotkeyManager->handleHotKey(static_cast<UINT>(msg->wParam))) {
+                *result = 0;
+                return true;
+            }
+        }
+    }
+    return QMainWindow::nativeEvent(eventType, message, result);
+}
+
 void MainWindow::initializeManagers()
 {   // 初始化管理器
     bangumiAPI = new BangumiAPI(this);
@@ -42,7 +57,8 @@ void MainWindow::initializeManagers()
     cacheImageUtil = new CacheImageUtil(this);
     pikpakApi = new PikPakApi(this);
     rss = new Rss(bangumiAPI, this);
-    gameMonitorUtil = new GameMonitorUtil(this, this);
+    hotkeyManager = new GlobalHotkeyManager(this, this);
+    gameMonitorUtil = new GameMonitorUtil(hotkeyManager, this);
     trayMenu = new QMenu(this);
     trayIcon = new QSystemTrayIcon(this);
 }
