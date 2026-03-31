@@ -13,6 +13,7 @@ class DatabaseManager;
 class StatusSelector : public QWidget
 {
     Q_OBJECT
+
 public:
     explicit StatusSelector(const QPushButton *parentButton, int subjectType, int collectionType, int subjectId, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, std::function<void(int)> callback);
     static void showStatusSelector(const QPushButton *parentButton, int subjectType, int collectionType, int subjectId, BangumiAPI *bangumiAPI, DatabaseManager *dbManager, std::function<void(int)> callback);

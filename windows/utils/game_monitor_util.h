@@ -17,8 +17,8 @@ public:
     void resumeAllSuspendedProcess(bool restoreWindow);
     [[nodiscard]] bool isGameRunning(const int subjectId) const {return monitoredGames.contains(subjectId);}
 
-    signals:
-        void gameStarted(int subjectId, const QString &launchPath);
+signals:
+    void gameStarted(int subjectId, const QString &launchPath);
     void gameExited(int subjectId);
 
 private slots:

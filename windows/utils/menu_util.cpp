@@ -163,10 +163,12 @@ void StatusSelector::updateEpisodesBatch(const QVector<EpisodeData> &episodes, i
         return;
     }
     const QJsonObject apiRequestData{{"episode_id", episodeIds}, {"type", statusValue}};
-    bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData, 3, [this, guard](const bool success, const QString &error) {
+    bangumiAPI->updateSubjectEpisodes(subjectId, apiRequestData, 3, [this, guard, episodes](const bool success, const QString &error) {
         if (!guard) return;
-        if (success) DatabaseManager::updateAllEpisodesStatus(subjectId, 2);
-        else qDebug() << "更新章节状态失败:" << error;
+        if (success) {
+            DatabaseManager::updateAllEpisodesStatus(subjectId, 2);
+            DatabaseManager::updateCollectionFields(subjectId, {{"ep_status", episodes.size()}}, true);;
+        } else qDebug() << "更新章节状态失败:" << error;
         const_cast<StatusSelector*>(this)->deleteLater();
     });
 }
