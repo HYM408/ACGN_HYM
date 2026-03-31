@@ -74,7 +74,10 @@ bool MainPageManager::eventFilter(QObject *obj, QEvent *event)
 {   // 鼠标事件
     if (obj->property("isCard").toBool() && event->type() == QEvent::MouseButtonPress) {
         const auto *frame = qobject_cast<QFrame*>(obj);
-        emit showDetailPageRequested(frame->property("collectionData").value<SubjectsData>().subjectId, m_progressText);
+        QString progressText;
+        if (frame->property("pureProgressText").isValid()) progressText = frame->property("pureProgressText").toString();
+        else progressText = frame->property("progressLabel").value<QLabel*>()->text();
+        emit showDetailPageRequested(frame->property("collectionData").value<SubjectsData>().subjectId, progressText);
         return true;
     }
     return QObject::eventFilter(obj, event);
@@ -216,9 +219,11 @@ QFrame* MainPageManager::createCardComponents(SubjectsData &subjectsData)
     ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, coverLabel, 40, false, true, QString("s%1.jpg").arg(subjectsData.subjectId));
     titleLabel->setText(subjectsData.nameCn.isEmpty() ? subjectsData.name : subjectsData.nameCn);
     if (subjectsData.subjectType == 7 || subjectsData.subjectType == 8) subjectsData.subjectVolumes = dbManager->countSubjectRelations(subjectsData.subjectId);
-    QString progressText = m_progressText = computeProgressText(subjectsData, m_airdatesJson);
-    if (subjectsData.subjectType == 4) progressText = QString("%1 · 已玩 %2 小时").arg(m_progressText).arg(m_gameData[subjectsData.subjectId].playDuration / 3600.0);
-    progressLabel->setText(progressText);
+    const QString pureProgressText = computeProgressText(subjectsData, m_airdatesJson);
+    QString displayText = pureProgressText;
+    if (subjectsData.subjectType == 4) displayText = QString("%1 · 已玩 %2 小时").arg(computeProgressText(subjectsData, m_airdatesJson)).arg(m_gameData[subjectsData.subjectId].playDuration / 3600.0);
+    progressLabel->setText(displayText);
+    card->setProperty("pureProgressText", pureProgressText);
     card->setProperty("progressLabel", QVariant::fromValue(progressLabel));
     if (subjectsData.subjectType == 2) episodeButton->setText("选集");
     else if (subjectsData.subjectType == 4) episodeButton->setText("启动");

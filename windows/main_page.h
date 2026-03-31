@@ -55,7 +55,6 @@ private:
     QMap<int, GameData> m_gameData;
     QVector<QWidget*> m_placeholderWidgets;
     QJsonObject m_airdatesJson;
-    QString m_progressText;
     QHash<int, QFrame*> m_gameCards;
     QColor m_color2;
     QColor m_color3;
