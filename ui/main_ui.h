@@ -78,6 +78,7 @@ public:
     QLabel *statusCountDropped;
     QPushButton *btnRefresh;
     QSpacerItem *spacerStatusRight;
+    QPushButton *btnPlus;
     QLineEdit *lineEditSearch;
     QFrame *cardGridFrame;
     QGridLayout *gridLayout_2;
@@ -88,8 +89,8 @@ public:
     QLabel *labelPage;
     QPushButton *btnNext;
     QSpacerItem *spacerPageRight;
-    QButtonGroup *buttonGroup_2;
     QButtonGroup *buttonGroup;
+    QButtonGroup *buttonGroup_2;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -530,6 +531,31 @@ public:
 
         statusBarLayout->addItem(spacerStatusRight);
 
+        btnPlus = new QPushButton(statusBarFrame);
+        btnPlus->setObjectName("btnPlus");
+        btnPlus->setMinimumSize(QSize(50, 50));
+        btnPlus->setMaximumSize(QSize(50, 50));
+        btnPlus->setStyleSheet(QString::fromUtf8("QPushButton {\n"
+"                      border-bottom-color: rgb(24, 59, 255);\n"
+"                      background-color: white;\n"
+"                      border:none;\n"
+"                      border-radius:25px\n"
+"                      }\n"
+"\n"
+"                      QPushButton:hover {\n"
+"                      background-color: rgb(237, 237, 238);\n"
+"                      }\n"
+"\n"
+"                      QPushButton:checked:hover {\n"
+"                      background-color: rgb(237, 237, 238);\n"
+"                      }"));
+        QIcon icon6;
+        icon6.addFile(QString::fromUtf8("icons/plus.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        btnPlus->setIcon(icon6);
+        btnPlus->setIconSize(QSize(20, 20));
+
+        statusBarLayout->addWidget(btnPlus);
+
         lineEditSearch = new QLineEdit(statusBarFrame);
         lineEditSearch->setObjectName("lineEditSearch");
         lineEditSearch->setMinimumSize(QSize(200, 25));
@@ -654,6 +680,7 @@ public:
         statusCountOnHold->setText(QString());
         statusCountDropped->setText(QString());
         btnRefresh->setText(QString());
+        btnPlus->setText(QString());
         lineEditSearch->setPlaceholderText(QCoreApplication::translate("MainWindow", "\346\220\234\347\264\242\345\275\223\345\211\215\347\212\266\346\200\201", nullptr));
         btnPrev->setText(QCoreApplication::translate("MainWindow", "\344\270\212\344\270\200\351\241\265", nullptr));
         labelPage->setText(QString());

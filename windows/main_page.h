@@ -26,10 +26,15 @@ signals:
     void showMainPageRequested();
 
 public slots:
+    void loadCollections(int subjectType, int statusType, bool resetToFirstPage);
+    void onGameStarted(int id, const QString &launchPath);
+    void onGameExited(int id);
+
+private slots:
     void onSearchTextChanged(const QString &text, bool resetToFirstPage, bool displayPage);
     void previousPage();
     void nextPage();
-    void loadCollections(int subjectType, int statusType, bool resetToFirstPage);
+    void onBtnPlusClicked();
 
 private:
     void setupConnections();
@@ -37,7 +42,7 @@ private:
     void switchCategory(int subjectType, const QString &title);
     void updatePageInfo() const;
     void displayCurrentPage();
-    QFrame* createCardComponents(SubjectsData &subjectsData);
+    QFrame *createCardComponents(SubjectsData &subjectsData);
     bool eventFilter(QObject *obj, QEvent *event) override;
     Ui::MainWindow *mainWindow = nullptr;
     DatabaseManager *dbManager = nullptr;

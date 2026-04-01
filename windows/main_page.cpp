@@ -1,4 +1,8 @@
 #include "main_page.h"
+#include <QDialog>
+#include <QFileIconProvider>
+#include <QHeaderView>
+#include <QTableWidgetItem>
 #include "config.h"
 #include "sql/sql.h"
 #include "utils/menu_util.h"
@@ -67,6 +71,9 @@ void MainPageManager::setupConnections()
     connect(mainWindow->btnPrev, &QPushButton::clicked, this, &MainPageManager::previousPage);
     connect(mainWindow->btnNext, &QPushButton::clicked, this, &MainPageManager::nextPage);
     connect(mainWindow->lineEditSearch, &QLineEdit::textChanged, this, [this](const QString &text) {onSearchTextChanged(text, true, true);});
+    connect(gameMonitor, &GameMonitorUtil::gameStarted, this, &MainPageManager::onGameStarted);
+    connect(gameMonitor, &GameMonitorUtil::gameExited, this, &MainPageManager::onGameExited);
+    connect(mainWindow->btnPlus, &QPushButton::clicked, this, &MainPageManager::onBtnPlusClicked);
     setupLineEditCustomContextMenu(mainWindow->lineEditSearch, CMO_Default);
 }
 
@@ -243,16 +250,21 @@ QFrame* MainPageManager::createCardComponents(SubjectsData &subjectsData)
     if (subjectsData.subjectType == 4) {
         m_gameCards.insert(subjectsData.subjectId, card);
         connect(episodeButton, &QPushButton::clicked, this, [this, subjectId = subjectsData.subjectId, subjectsData] {gameMonitor->startGame(subjectId, m_gameData[subjectsData.subjectId]);});
-        connect(gameMonitor, &GameMonitorUtil::gameStarted, this, [this](const int id, const QString &launchPath) {
-            m_gameData[id].launchPath = launchPath;
-            if (const auto frame = m_gameCards.value(id)) if (const auto btn = frame->property("episodeButton").value<QPushButton*>()) btn->setText("正在运行");
-        });
-        connect(gameMonitor, &GameMonitorUtil::gameExited, this, [this](const int id) {
-            loadCollections(m_currentSubjectType, m_currentStatusType, false);
-            if (const auto btn = m_gameCards.value(id)->property("episodeButton").value<QPushButton*>()) btn->setText("启动");
-        });
     } else connect(episodeButton, &QPushButton::clicked, this, [this, data = subjectsData] {emit showEpisodePageRequested(data);});
     return card;
+}
+
+void MainPageManager::onGameStarted(const int id, const QString &launchPath)
+{   // 游戏开始处理
+    m_gameData[id].launchPath = launchPath;
+    if (const auto frame = m_gameCards.value(id)) if (const auto btn = frame->property("episodeButton").value<QPushButton*>()) btn->setText("正在运行");
+}
+
+void MainPageManager::onGameExited(const int id)
+{   // 游戏退出处理
+    loadCollections(m_currentSubjectType, m_currentStatusType, false);
+    const QFrame* card = m_gameCards.value(id);
+    if (card) card->property("episodeButton").value<QPushButton*>()->setText("启动");
 }
 
 void MainPageManager::updatePageInfo() const
@@ -275,4 +287,40 @@ void MainPageManager::nextPage()
     if (m_currentPage > static_cast<int>(qMax(1, (m_filteredCollections.size() + itemsPerPage - 1) / itemsPerPage))) return;
     ++m_currentPage;
     displayCurrentPage();
+}
+
+void MainPageManager::onBtnPlusClicked()
+{   // Plus按钮点击
+    auto *dialog = new QDialog(mainWindow->centralwidget);
+    dialog->setWindowTitle("进程列表(双击添加)");
+    dialog->resize(400, 500);
+    auto *table = new QTableWidget(dialog);
+    table->setColumnCount(1);
+    table->horizontalHeader()->setVisible(false);
+    table->verticalHeader()->setVisible(false);
+    table->horizontalHeader()->setStretchLastSection(true);
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table->setFocusPolicy(Qt::NoFocus);
+    const QMap<qint64, QString> processes = GameMonitorUtil::getAllProcesses();
+    table->setRowCount(static_cast<int>(processes.size()));
+    const QFileIconProvider iconProvider;
+    int row = 0;
+    for (auto it = processes.cbegin(); it != processes.cend(); ++it) {
+        const QString &path = it.value();
+        auto *item = new QTableWidgetItem(QFileInfo(path).fileName());
+        item->setIcon(iconProvider.icon(QFileInfo(path)));
+        item->setData(Qt::UserRole, QVariant::fromValue(it.key()));
+        table->setItem(row++, 0, item);
+    }
+    connect(table, &QTableWidget::cellDoubleClicked, this, [this, table](const int clickedRow) {
+        const auto *item = table->item(clickedRow, 0);
+        gameMonitor->addExternalProcess(item->data(Qt::UserRole).toLongLong(), item->text(), 0,-1);
+        qobject_cast<QDialog*>(table->parentWidget())->accept();
+    });
+    auto *layout = new QVBoxLayout(dialog);
+    layout->addWidget(table);
+    dialog->setLayout(layout);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->exec();
 }

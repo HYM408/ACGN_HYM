@@ -1,21 +1,63 @@
 #include "game_monitor_util.h"
 #include <QTimer>
 #include <QProcess>
+#include <QWinEventNotifier>
 #include <tlhelp32.h>
 #include <QFileDialog>
 #include "../config.h"
 #include "../sql/sql.h"
 #include "global_hotkey_manager.h"
 
-GameMonitorUtil::GameMonitorUtil(GlobalHotkeyManager *hotkeyManager, QObject *parent) : QObject(parent), gameMonitorTimer(new QTimer(this)), hotkeyManager(hotkeyManager)
-{
-    connect(gameMonitorTimer, &QTimer::timeout, this, &GameMonitorUtil::checkGamesStatus);
-}
+GameMonitorUtil::GameMonitorUtil(GlobalHotkeyManager *hotkeyManager, QObject *parent) : QObject(parent), hotkeyManager(hotkeyManager) {}
 
 GameMonitorUtil::~GameMonitorUtil()
 {
-    if (gameMonitorTimer->isActive()) gameMonitorTimer->stop();
     resumeAllSuspendedProcess(false);
+    for (auto it = processHandles.begin(); it != processHandles.end(); ++it) if (it.value() && it.value() != INVALID_HANDLE_VALUE) CloseHandle(it.value());
+    for (auto it = processNotifiers.begin(); it != processNotifiers.end(); ++it) {
+        if (it.value()) {
+            it.value()->setEnabled(false);
+            delete it.value();
+        }
+    }
+    processHandles.clear();
+    processNotifiers.clear();
+}
+
+QMap<qint64, QString> GameMonitorUtil::getAllProcesses()
+{   // 获取所有进程
+    QMap<qint64, QString> processes;
+    EnumWindows([](HWND hwnd, const LPARAM lParam) -> BOOL {
+        if (!IsWindowVisible(hwnd)) return TRUE;
+        DWORD pid = 0;
+        GetWindowThreadProcessId(hwnd, &pid);
+        if (pid == 0 || pid == GetCurrentProcessId()) return TRUE;
+        if (HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid)) {
+            wchar_t path[MAX_PATH];
+            DWORD size = MAX_PATH;
+            if (QueryFullProcessImageNameW(hProcess, 0, path, &size)) reinterpret_cast<QMap<qint64, QString>*>(lParam)->insert(pid, QString::fromWCharArray(path));
+            CloseHandle(hProcess);
+        }
+        return TRUE;
+    }, reinterpret_cast<LPARAM>(&processes));
+    return processes;
+}
+
+void GameMonitorUtil::updateHotkey(const int newKeyCode)
+{   // 更新快捷键
+    if (monitoredGames.isEmpty()) return;
+    hotkeyManager->unregisterHotKey(1);
+    hotkeyManager->registerHotKey(1, 0, newKeyCode, [this] {onFreezeOrResume();});
+}
+
+void GameMonitorUtil::addExternalProcess(const qint64 pid, const QString &processName, const qint64 startTime, const int idOverride)
+{   // 添加外部进程
+    for (auto it = monitoredGames.begin(); it != monitoredGames.end(); ++it) if (it.value() == pid) return;
+    HANDLE hProcess = OpenProcess(SYNCHRONIZE | PROCESS_QUERY_INFORMATION, FALSE, static_cast<DWORD>(pid));
+    int id = idOverride;
+    if (id <= 0) id = nextExternalId--;
+    externalProcessNames.insert(id, processName);
+    registerMonitoredProcess(id, pid, hProcess, startTime, processName);
 }
 
 void GameMonitorUtil::startGame(const int subjectId, const GameData &gameData)
@@ -30,55 +72,24 @@ void GameMonitorUtil::startGame(const int subjectId, const GameData &gameData)
     qint64 pid = 0;
     const QFileInfo fileInfo(launchPath);
     if (!QProcess::startDetached(launchPath, {}, fileInfo.absolutePath(), &pid)) return;
-    gameStartTimes[subjectId] = QDateTime::currentMSecsSinceEpoch();
-    const bool needRegister = monitoredGames.isEmpty();
-    monitoredGames.insert(subjectId, pid);
-    gameSuspended.insert(subjectId, false);
+    HANDLE hProcess = OpenProcess(SYNCHRONIZE | PROCESS_QUERY_INFORMATION, FALSE, static_cast<DWORD>(pid));
+    registerMonitoredProcess(subjectId, pid, hProcess, QDateTime::currentMSecsSinceEpoch(), QString());
     emit gameStarted(subjectId, launchPath);
-    if (needRegister) hotkeyManager->registerHotKey(1, 0, getConfig("Shortcut/suspendProcess", 27).toInt(), [this] {onFreezeOrResume();});
-    if (!gameMonitorTimer->isActive()) gameMonitorTimer->start(100);
 }
 
-void GameMonitorUtil::checkGamesStatus()
-{   // 检查游戏状态
-    QHash<int, qint64> stillRunning;
-    const qint64 now = QDateTime::currentMSecsSinceEpoch();
-    for (auto it = monitoredGames.begin(); it != monitoredGames.end(); ++it) {
-        int subjectId = it.key();
-        qint64 pid = it.value();
-        if (isProcessRunning(pid)) stillRunning.insert(subjectId, pid);
-        else {
-            qint64 childPid = findChildProcess(pid);
-            if (childPid != 0) {
-                stillRunning.insert(subjectId, childPid);
-                qDebug() << subjectId << "PID:" << childPid;
-            } else {
-                const int elapsedSec = static_cast<int>((now - gameStartTimes.take(subjectId)) / 1000);
-                int total = m_gameData.playDuration + elapsedSec;
-                DatabaseManager::updateGameData(subjectId, {{"play_duration", total}});
-                qDebug() << subjectId << "已退出，运行:" << elapsedSec << "秒，总计:" << total << "秒";
-                emit gameExited(subjectId);
-                gameSuspended.remove(subjectId);
-                suspendedGameHwnd.remove(subjectId);
-                originalGameTitles.remove(subjectId);
-            }
-        }
-    }
-    const bool wasEmpty = monitoredGames.isEmpty();
-    monitoredGames = stillRunning;
-    const bool nowEmpty = monitoredGames.isEmpty();
-    if (!wasEmpty && nowEmpty) hotkeyManager->unregisterHotKey(1);
-    if (nowEmpty) gameMonitorTimer->stop();
-}
-
-bool GameMonitorUtil::isProcessRunning(const qint64 pid)
-{   // 检查进程运行状态
-    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, static_cast<DWORD>(pid));
-    if (!hProcess) return false;
-    DWORD exitCode;
-    const bool running = GetExitCodeProcess(hProcess, &exitCode) && exitCode == STILL_ACTIVE;
-    CloseHandle(hProcess);
-    return running;
+void GameMonitorUtil::registerMonitoredProcess(int id, const qint64 pid, const HANDLE hProcess, const qint64 startTime, const QString &name)
+{   // 注册监控进程
+    monitoredGames.insert(id, pid);
+    gameStartTimes.insert(id, startTime);
+    processHandles.insert(id, hProcess);
+    gameSuspended.insert(id, false);
+    auto *notifier = new QWinEventNotifier(hProcess, this);
+    connect(notifier, &QWinEventNotifier::activated, this, [this, id] {onProcessExited(id);});
+    notifier->setEnabled(true);
+    processNotifiers.insert(id, notifier);
+    if (!name.isEmpty()) qDebug() << name << "ID" << id << "PID" << pid;
+    else qDebug() << "ID:" << id << "PID:" << pid;
+    if (monitoredGames.size() == 1) hotkeyManager->registerHotKey(1, 0, getConfig("Shortcut/suspendProcess", 27).toInt(), [this] { onFreezeOrResume(); });
 }
 
 qint64 GameMonitorUtil::findChildProcess(const qint64 parentPid)
@@ -136,6 +147,29 @@ HWND GameMonitorUtil::findWindowByPid(const DWORD pid)
     return data.hwnd;
 }
 
+void GameMonitorUtil::onProcessExited(const int id)
+{   // 进程退出处理
+    if (!monitoredGames.contains(id)) return;
+    const qint64 pid = monitoredGames.value(id);
+    const qint64 startTime = gameStartTimes.value(id, 0);
+    const qint64 childPid = findChildProcess(pid);
+    if (childPid != 0) {
+        qDebug() << "进程" << pid << "子进程" << childPid;
+        const int gameId = id;
+        cleanupProcessResources(id);
+        addExternalProcess(childPid, QString("子进程_%1").arg(childPid), startTime, gameId);
+        return;
+    }
+    if (id > 0) {
+        const int elapsedSec = static_cast<int>((QDateTime::currentMSecsSinceEpoch() - startTime) / 1000);
+        int total = m_gameData.playDuration + elapsedSec;
+        DatabaseManager::updateGameData(id, {{"play_duration", total}});
+        qDebug() << id << "已退出，运行:" << elapsedSec << "秒，总计:" << total << "秒";
+        emit gameExited(id);
+    } else qDebug() << "外部进程" << externalProcessNames.value(id) << "已退出，id" << id;
+    cleanupProcessResources(id);
+}
+
 void GameMonitorUtil::resumeAllSuspendedProcess(const bool restoreWindow)
 {   // 恢复所有暂停的进程
     for (auto it = gameSuspended.begin(); it != gameSuspended.end(); ++it) {
@@ -186,4 +220,25 @@ void GameMonitorUtil::onFreezeOrResume()
             gameSuspended[subjectId] = true;
         }
     }
+}
+
+void GameMonitorUtil::cleanupProcessResources(const int id)
+{   // 清理
+    monitoredGames.remove(id);
+    gameStartTimes.remove(id);
+    externalProcessNames.remove(id);
+    gameSuspended.remove(id);
+    suspendedGameHwnd.remove(id);
+    originalGameTitles.remove(id);
+    if (processHandles.contains(id)) {
+        const HANDLE h = processHandles.take(id);
+        if (h && h != INVALID_HANDLE_VALUE) CloseHandle(h);
+    }
+    if (processNotifiers.contains(id)) {
+        if (QWinEventNotifier *notifier = processNotifiers.take(id)) {
+            notifier->setEnabled(false);
+            delete notifier;
+        }
+    }
+    if (monitoredGames.isEmpty()) hotkeyManager->unregisterHotKey(1);
 }

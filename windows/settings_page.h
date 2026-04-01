@@ -23,6 +23,7 @@ public:
 signals:
     void backButtonClicked();
     void nsfwSettingChanged(bool checked);
+    void hotkeyChanged(int keyCode);
 
 private slots:
     void onLoginButtonClicked();

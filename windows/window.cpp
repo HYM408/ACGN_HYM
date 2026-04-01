@@ -218,7 +218,6 @@ void MainWindow::closeOptionSelection(const int result)
     m_savedNormalGeometry = normalGeometry();
     hide();
     if (result == 1) return;
-    gameMonitorUtil->resumeAllSuspendedProcess(false);
     QApplication::quit();
 }
 
@@ -298,6 +297,7 @@ void MainWindow::onSettingsButtonClicked()
         settingsPage->setManagers(bangumiAPI, pikpakApi, dbManager);
         stackedMainWindow->addWidget(settingsPage);
         connect(settingsPage, &SettingsPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
+        connect(settingsPage, &SettingsPage::hotkeyChanged, gameMonitorUtil, &GameMonitorUtil::updateHotkey);
         if (searchPage) connect(settingsPage, &SettingsPage::nsfwSettingChanged, searchPage, &SearchPage::updateNsfwCheckBox);
     }
     stackedMainWindow->setCurrentWidget(settingsPage);

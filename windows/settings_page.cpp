@@ -70,7 +70,11 @@ void SettingsPage::setupConnections()
     connect(ui.btnSelectDownloadPath, &QPushButton::clicked, this, &SettingsPage::onSelectDownloadPath);
     // 游戏
     connect(ui.btnGame, &QPushButton::clicked, [this] {loadGamePage();});
-    connect(ui.suspendProcessKeySequenceEdit, &QKeySequenceEdit::keySequenceChanged, this, [](const QKeySequence &keySequence) {setConfig("Shortcut/suspendProcess", keySequenceToVirtualKey(keySequence));});
+    connect(ui.suspendProcessKeySequenceEdit, &QKeySequenceEdit::keySequenceChanged, this, [this](const QKeySequence &keySequence) {
+        const int keyCode = keySequenceToVirtualKey(keySequence);
+        setConfig("Shortcut/suspendProcess", keyCode);
+        emit hotkeyChanged(keyCode);
+    });
 }
 
 void SettingsPage::loadBangumiPage() const
@@ -327,6 +331,9 @@ void SettingsPage::clearDownloadTasks(const bool stop)
 
 void SettingsPage::onBackButtonClicked()
 {   // 返回
+    m_pikpakLoaded = false;
+    m_downloadLoaded = false;
+    m_gameLoaded = false;
     ui.btnBangumi->setChecked(true);
     ui.stackedWidget->setCurrentIndex(0);
     ui.btnBangumiAuth->setText("开始授权");

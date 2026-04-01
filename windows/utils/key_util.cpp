@@ -22,12 +22,12 @@ static QMap<int, QString> map = {
 
 static int nameToVirtualKey(const QString &name)
 {   // 键名->虚拟键码
+    for (auto it = map.begin(); it != map.end(); ++it) if (it.value().compare(name) == 0) return it.key();
     const QChar ch = name[0];
     if (ch.isLetterOrNumber()) {
         const int vk = ch.unicode();
         if ((vk >= 'A' && vk <= 'Z') || (vk >= '0' && vk <= '9')) return vk;
     }
-    for (auto it = map.begin(); it != map.end(); ++it) if (it.value().compare(name) == 0) return it.key();
     return 27;
 }
 
