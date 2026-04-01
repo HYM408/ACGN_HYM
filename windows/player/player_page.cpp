@@ -49,7 +49,7 @@ void PlayerPage::setupControlOverlay()
 
 void PlayerPage::applyTheme() const
 {   // 主题
-    const QColor color1 = getColor("color1", 0xfdf7ff);
+    const QColor color1 = getConfig("Theme/color1", 0xfdf7ff).toString();
     ui.sidePanelFrame->setStyleSheet(QString("QFrame {background-color: %1; border: none}").arg(color1.name()));
 }
 

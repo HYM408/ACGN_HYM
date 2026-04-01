@@ -24,7 +24,7 @@ StatusSelector::StatusSelector(const QPushButton *parentButton, const int subjec
     setAttribute(Qt::WA_TranslucentBackground);
     setFixedWidth(160);
     auto *container = new QFrame(this);
-    const QColor color2 = getColor("color2", 0xf2ecf4);
+    const QColor color2 = getConfig("Theme/color2", 0xf2ecf4).toString();
     container->setStyleSheet(QString("QFrame {background-color: %1; border: 1px solid #ccc; border-radius: 4px}").arg(color2.name()));
     auto *shadowEffect = new QGraphicsDropShadowEffect(container);
     shadowEffect->setBlurRadius(15);
@@ -38,7 +38,7 @@ StatusSelector::StatusSelector(const QPushButton *parentButton, const int subjec
     for (auto statusValue : {1, 3, 2, 4, 5, 0}) {
         if (statusValue == 0 && collectionType == 0) continue;
         auto *btn = new QPushButton(statusMap.value(statusValue));
-        const QColor color3 = getColor("color3", 0xe1dbe4);
+        const QColor color3 = getConfig("Theme/color3", 0xe1dbe4).toString();
         btn->setStyleSheet(QString("QPushButton {border: none; padding: 10px 12px; font-size: 13px}"
                                    "QPushButton:hover {background-color: %1}").arg(color3.name()));
         connect(btn, &QPushButton::clicked, this, [this, statusValue] {updateStatus(statusValue);});
@@ -167,7 +167,7 @@ void StatusSelector::updateEpisodesBatch(const QVector<EpisodeData> &episodes, i
         if (!guard) return;
         if (success) {
             DatabaseManager::updateAllEpisodesStatus(subjectId, 2);
-            DatabaseManager::updateCollectionFields(subjectId, {{"ep_status", episodes.size()}}, true);;
+            DatabaseManager::updateCollectionFields(subjectId, {{"ep_status", episodes.size()}}, true);
         } else qDebug() << "更新章节状态失败:" << error;
         const_cast<StatusSelector*>(this)->deleteLater();
     });

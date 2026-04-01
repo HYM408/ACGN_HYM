@@ -33,8 +33,8 @@ void SearchPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, Databa
 
 void SearchPage::applyTheme()
 {   // 主题
-    m_color2 = getColor("color2", 0xf2ecf4);
-    m_color3 = getColor("color3", 0xe1dbe4);
+    m_color2 = getConfig("Theme/color2", 0xf2ecf4).toString();
+    m_color3 = getConfig("Theme/color3", 0xe1dbe4).toString();
 }
 
 void SearchPage::setupConnections()

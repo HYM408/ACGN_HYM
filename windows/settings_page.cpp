@@ -37,8 +37,8 @@ void SettingsPage::setManagers(BangumiAPI *api, PikPakApi *pikpakapi, DatabaseMa
 
 void SettingsPage::applyTheme() const
 {   // 主题
-    const QColor color1 = getColor("color1", 0xfdf7ff);
-    const QColor color4 = getColor("color4", 0xe9ddff);
+    const QColor color1 = getConfig("Theme/color1", 0xfdf7ff).toString();
+    const QColor color4 = getConfig("Theme/color4", 0xe9ddff).toString();
     ui.stackedWidget->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
     const QString buttonStyle = QString("QPushButton:hover {background-color: rgba(0, 0, 0, 20)}"
                                         "QPushButton:checked {background-color: %1}"

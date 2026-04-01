@@ -18,11 +18,11 @@ LineEditContextMenu::LineEditContextMenu(QLineEdit* lineEdit, const QPoint& glob
     const QString selectedText = lineEdit->selectedText();
     const QString fullText = lineEdit->text();
     const int selStart = lineEdit->selectionStart();
-    const int selLength = selectedText.length();
+    const int selLength = static_cast<int>(selectedText.length());
     const int cursorPos = lineEdit->cursorPosition();
     const bool readOnly = lineEdit->isReadOnly();
-    const QColor color2 = getColor("color2", QColor("#f2ecf4"));
-    const QColor color3 = getColor("color3", QColor("#e1dbe4"));
+    const QColor color2 = getConfig("Theme/color2", 0xf2ecf4).toString();
+    const QColor color3 = getConfig("Theme/color3", 0xe1dbe4).toString();
     auto* container = new QFrame(this);
     container->setStyleSheet(QString("QFrame {background-color: %1; border-radius: 4px}").arg(color2.name()));
     auto* shadow = new QGraphicsDropShadowEffect(container);
@@ -77,7 +77,7 @@ LineEditContextMenu::LineEditContextMenu(QLineEdit* lineEdit, const QPoint& glob
             }
             newText.insert(insertPos, clipText);
             lineEdit->setText(newText);
-            lineEdit->setCursorPosition(insertPos + clipText.length());
+            lineEdit->setCursorPosition(insertPos + static_cast<int>(clipText.length()));
         });
         layout->addWidget(pasteBtn);
     }
@@ -103,8 +103,8 @@ TextEditContextMenu::TextEditContextMenu(QTextEdit* textEdit, const QPoint& glob
     QTextCursor cursor = textEdit->textCursor();
     const QString selectedText = cursor.selectedText();
     const QString fullText = textEdit->toPlainText();
-    const QColor color2 = getColor("color2", QColor("#f2ecf4"));
-    const QColor color3 = getColor("color3", QColor("#e1dbe4"));
+    const QColor color2 = getConfig("Theme/color2", 0xf2ecf4).toString();
+    const QColor color3 = getConfig("Theme/color3", 0xe1dbe4).toString();
     auto* container = new QFrame(this);
     container->setStyleSheet(QString("QFrame {background-color: %1; border-radius: 4px}").arg(color2.name()));
     auto* shadow = new QGraphicsDropShadowEffect(container);

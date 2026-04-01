@@ -27,6 +27,9 @@ DetailPage::DetailPage(QWidget *parent) : QWidget(parent)
     applyTheme();
     setupConnections();
     installEventFilter(this);
+    // QFont font = ui.textEditSummary->font();
+    // font.setStyleStrategy(QFont::NoFontMerging);
+    // ui.textEditSummary->setFont(font);
 }
 
 void DetailPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db, GameMonitorUtil *gameMonitor)
@@ -39,11 +42,11 @@ void DetailPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, Databa
 
 void DetailPage::applyTheme()
 {   // 主题
-    const QColor color1 = getColor("color1", 0xfdf7ff);
-    m_color2 = getColor("color2", 0xf2ecf4);
-    m_color3 = getColor("color3", 0xe1dbe4);
-    const QColor color4 = getColor("color4", 0xf2ecf4);
-    const QColor color5 = getColor("color5", 0xe1dbe4);
+    const QColor color1 = getConfig("Theme/color1", 0xfdf7ff).toString();
+    m_color2 = getConfig("Theme/color2", 0xf2ecf4).toString();
+    m_color3 = getConfig("Theme/color3", 0xe1dbe4).toString();
+    const QColor color4 = getConfig("Theme/color4", 0xf2ecf4).toString();
+    const QColor color5 = getConfig("Theme/color5", 0xe1dbe4).toString();
     ui.mainFrame->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
     ui.btnStatus->setStyleSheet(QString("QPushButton {background-color: %1; border-radius:15px}"
                                         "QPushButton:hover {background-color: %2}").arg(color4.name(), color5.name()));

@@ -28,11 +28,11 @@ MainPageManager::MainPageManager(Ui::MainWindow *mainWindow, CacheImageUtil *cac
 
 void MainPageManager::applyTheme()
 {   // 主题
-    m_color2 = getColor("color2", 0xf2ecf4);
-    m_color3 = getColor("color3", 0xe1dbe4);
-    const QColor color4 = getColor("color4", 0xe9ddff);
-    const QColor color5 = getColor("color5", 0xddd0f6);
-    const QColor color6 = getColor("color6", 0xf2ecf4);
+    m_color2 = getConfig("Theme/color2", 0xf2ecf4).toString();
+    m_color3 = getConfig("Theme/color3", 0xe1dbe4).toString();
+    const QColor color4 = getConfig("Theme/color4", 0xf2ecf4).toString();
+    const QColor color5 = getConfig("Theme/color5", 0xe1dbe4).toString();
+    const QColor color6 = getConfig("Theme/color6", 0xf2ecf4).toString();
     const QString color6A = QString("rgba(%1, %2, %3, 30)").arg(color6.red()).arg(color6.green()).arg(color6.blue());
     mainWindow->toolbar_frame->setStyleSheet(QString("QFrame {background-color: %1}").arg(m_color2.name()));
     mainWindow->btnSearch->setStyleSheet(QString("QPushButton {background-color: %1; border: none; border-radius:15px}"

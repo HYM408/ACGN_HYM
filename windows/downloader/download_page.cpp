@@ -23,7 +23,7 @@ void DownloadPage::setManagers(PikPakApi *pikpakapi)
 
 void DownloadPage::applyTheme() const
 {   // 主题
-    const QColor color1 = getColor("color1", 0xfdf7ff);
+    const QColor color1 = getConfig("Theme/color1", 0xfdf7ff).toString();
     ui.mainFrame->setStyleSheet(QString("QFrame {background-color: %1}").arg(color1.name()));
 }
 
