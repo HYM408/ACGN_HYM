@@ -27,8 +27,8 @@ void Crawler::sendRequest(const QString &url, const std::function<void(const QSt
     auto *manager = new QNetworkAccessManager;
     QNetworkRequest request(url);
     request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
-    sendRequestHtml(*manager, request, "GET", {}, 1, [manager, callback](const QString &html, int, const QString &error) {
-        callback(html, error);
+    new RequestHandler(*manager, request, "GET", {}, 1, [manager, callback](const QByteArray &rawData, int, const QString &error) {
+        callback(QString::fromUtf8(rawData), error);
         manager->deleteLater();
     }, nullptr);
 }

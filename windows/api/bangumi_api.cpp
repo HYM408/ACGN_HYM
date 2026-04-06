@@ -7,75 +7,93 @@
 
 static const QString baseUrl = "https://api.bgm.tv";
 
-BangumiAPI::BangumiAPI(QObject *parent) : QObject(parent)
+BangumiAPI::BangumiAPI(BangumiOAuth *oauth, QObject *parent) : QObject(parent), bangumiOAuth(oauth)
 {   // 获取信息
-    userId = getConfig("Bangumi/user_id").toString();
-    accessToken = getConfig("Bangumi/access_token").toString();
-    refreshToken = getConfig("Bangumi/refresh_token").toString();
+    m_userId = getConfig("Bangumi/user_id").toString();
+    m_accessToken = getConfig("Bangumi/access_token").toString();
+    m_refreshToken = getConfig("Bangumi/refresh_token").toString();
 }
 
-void BangumiAPI::refreshAndReload()
+void BangumiAPI::requestWithAuth(const QString &url, const QString &method, const QByteArray &data, int maxRetries, const std::function<void(const QByteArray&, int, const QString&)> &callback)
+{   // 发送请求
+    if (m_accessToken.isEmpty() && m_refreshToken.isEmpty()) return;
+    QNetworkRequest req(url);
+    req.setRawHeader("User-Agent", "HYM408/ACGN_HYM (https://github.com/HYM408/ACGN_HYM)");
+    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    req.setRawHeader("Authorization", QString("Bearer %1").arg(m_accessToken).toUtf8());
+    new RequestHandler(m_manager, req, method, data, maxRetries, [callback](const QByteArray &rawData, const int statusCode, const QString &error) {
+        callback(rawData, statusCode, error);
+    }, [this, url, method, data, maxRetries, callback] {
+        refreshAndReload([this, url, method, data, maxRetries, callback](const bool success) {
+            if (success) requestWithAuth(url, method, data, maxRetries, callback);
+            else callback(QByteArray(), 401, "Token刷新失败");
+        });
+    });
+}
+
+void BangumiAPI::refreshAndReload(const std::function<void(bool)> &callback)
 {   // 刷新token
-    BangumiOAuth oauth;
-    oauth.exchangeCodeForToken("", refreshToken);
-    userId = getConfig("Bangumi/user_id").toString();
-    accessToken = getConfig("Bangumi/access_token").toString();
-    refreshToken = getConfig("Bangumi/refresh_token").toString();
+    if (m_refreshToken.isEmpty()) return;
+    if (m_isRefreshing) {
+        m_pendingCallbacks.push_back(callback);
+        return;
+    }
+    m_isRefreshing = true;
+    bangumiOAuth->exchangeCodeForToken("", m_refreshToken, [this, callback](const bool success) {
+        if (success) {
+            m_userId = getConfig("Bangumi/user_id").toString();
+            m_accessToken = getConfig("Bangumi/access_token").toString();
+            m_refreshToken = getConfig("Bangumi/refresh_token").toString();
+        }
+        if (callback) callback(success);
+        for (auto &cb : m_pendingCallbacks) if (cb) cb(success);
+        m_pendingCallbacks.clear();
+        m_isRefreshing = false;
+    });
 }
 
-QNetworkRequest BangumiAPI::createRequest(const QString &url) const
-{   // 创建请求
-    QNetworkRequest request(url);
-    request.setRawHeader("User-Agent", "HYM408/ACGN_HYM (https://github.com/HYM408/ACGN_HYM)");
-    request.setRawHeader("Authorization", QString("Bearer %1").arg(accessToken).toUtf8());
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    return request;
+void BangumiAPI::getUser(const int maxRetries, const BoolCallback &callback)
+{   // 获取用户信息
+    const QString url = QString("%1/v0/me").arg(baseUrl);
+    requestWithAuth(url, "GET", QByteArray(), maxRetries, [callback](const QByteArray &, const int statusCode, const QString &error) {
+        if (!error.isEmpty()) callback(false, error);
+        else callback(statusCode == 200, QString());
+    });
 }
 
-void BangumiAPI::getUserCollections(const bool getAll, const int maxRetries, const ProgressCallback &progressCallback, const CollectionsCallback &completionCallback)
-{   // 获取全部收藏
-    fetchCollectionsPage(0, QJsonArray(), getAll, maxRetries, progressCallback, completionCallback);
+void BangumiAPI::getUserCollections(int offset, QJsonArray allItems, bool getAll, int maxRetries, const std::function<void(int current, int total)> &progress, const CollectionsCallback &completion)
+{   // 获取收藏
+    const QString url = QString("%1/v0/users/%2/collections?limit=50&offset=%3").arg(baseUrl, m_userId).arg(offset);
+    requestWithAuth(url, "GET", QByteArray(), maxRetries, [this, offset, allItems, getAll, maxRetries, progress, completion](const QByteArray &rawData, const int statusCode, const QString &error) mutable {
+        if (!error.isEmpty() || statusCode != 200) {
+            completion(QJsonArray(), error.isEmpty() ? QString("HTTP %1").arg(statusCode) : error);
+            return;
+        }
+        QJsonObject response = QJsonDocument::fromJson(rawData).object();
+        QJsonArray items = response["data"].toArray();
+        const int total = response["total"].toInt();
+        for (const auto &item : items) allItems.append(item);
+        if (progress) progress(static_cast<int>(offset + items.size()), total);
+        if (getAll && offset + 50 < total) getUserCollections(offset + 50, allItems, getAll, maxRetries, progress, completion);
+        else completion(allItems, QString());
+    });
 }
 
-void BangumiAPI::fetchCollectionsPage(int offset, QJsonArray allItems, bool getAll, int maxRetries, const ProgressCallback &progress, const CollectionsCallback &completion)
-{   // 处理分页
-    const QString url = QString("%1/v0/users/%2/collections?limit=50&offset=%3").arg(baseUrl, userId).arg(offset);
-    const QNetworkRequest request = createRequest(url);
-    sendRequestUtil(manager, request, "GET", QByteArray(), maxRetries, [this, offset, allItems, getAll, maxRetries, progress, completion]
-        (const QByteArray &raw, const int statusCode, const QString &error) mutable {
-            if (!error.isEmpty() || statusCode != 200) {
-                completion(QJsonArray(), error.isEmpty() ? QString("HTTP %1").arg(statusCode) : error);
-                return;
-            }
-            QJsonObject response = QJsonDocument::fromJson(raw).object();
-            QJsonArray items = response["data"].toArray();
-            const int total = response["total"].toInt();
-            for (const auto &item : items) allItems.append(item);
-            if (progress) progress(static_cast<int>(offset + items.size()), total);
-            if (getAll && offset + 50 < total) fetchCollectionsPage(offset + 50, allItems, getAll, maxRetries, progress, completion);
-            else completion(allItems, QString());
-        }, [this] {refreshAndReload();}
-    );
-}
-
-void BangumiAPI::getUserCollection(const int subjectId, const int maxRetries, const CollectionCallback &callback)
+void BangumiAPI::getUserCollection(const int subjectId, const int maxRetries, const SubjectCallback &callback)
 {   // 获取单个收藏
-    const QString url = QString("%1/v0/users/%2/collections/%3").arg(baseUrl, userId).arg(subjectId);
-    const QNetworkRequest request = createRequest(url);
-    sendRequestJson(manager, request, "GET", QByteArray(), maxRetries, [callback](const QJsonObject &obj, int, const QString &error) {callback(obj, error);}, [this] {refreshAndReload();});
+    const QString url = QString("%1/v0/users/%2/collections/%3").arg(baseUrl, m_userId).arg(subjectId);
+    requestWithAuth(url, "GET", QByteArray(), maxRetries, [callback](const QByteArray &rawData, int, const QString &error) {callback(QJsonDocument::fromJson(rawData).object(), error);});
 }
 
 void BangumiAPI::getSubjectInfo(const int subjectId, const int maxRetries, const SubjectCallback &callback)
 {   // 获取条目信息
     const QString url = QString("%1/v0/subjects/%2").arg(baseUrl).arg(subjectId);
-    const QNetworkRequest request = createRequest(url);
-    sendRequestJson(manager, request, "GET", QByteArray(), maxRetries, [callback](const QJsonObject &obj, int, const QString &error) {callback(obj, error);}, [this] {refreshAndReload();});
+    requestWithAuth(url, "GET", QByteArray(), maxRetries, [callback](const QByteArray &rawData, int, const QString &error) {callback(QJsonDocument::fromJson(rawData).object(), error);});
 }
 
 void BangumiAPI::searchSubjectsWithPost(const QString &keyword, const QString &tag, const int subjectType, const bool containsNsfw, const int maxRetries, const CollectionsCallback &callback)
 {   // 搜索
     const QString url = QString("%1/v0/search/subjects?limit=20").arg(baseUrl);
-    const QNetworkRequest request = createRequest(url);
     QJsonObject params;
     if (!keyword.isEmpty()) params["keyword"] = keyword;
     params["sort"] = "heat";
@@ -84,29 +102,26 @@ void BangumiAPI::searchSubjectsWithPost(const QString &keyword, const QString &t
     filter["type"] = QJsonArray{subjectType};
     filter["nsfw"] = containsNsfw;
     params["filter"] = filter;
-    sendRequestJson(manager, request, "POST", QJsonDocument(params).toJson(), maxRetries, [callback](const QJsonObject &obj, int, const QString &error) {
+    requestWithAuth(url, "POST", QJsonDocument(params).toJson(), maxRetries, [callback](const QByteArray &rawData, int, const QString &error) {
         if (!error.isEmpty()) callback(QJsonArray(), error);
-        else callback(obj["data"].toArray(), QString());
-    }, [this] {refreshAndReload();});
+        else callback(QJsonDocument::fromJson(rawData)["data"].toArray(), QString());
+    });
 }
 
-void BangumiAPI::getSubjectEpisodes(int subjectId, int maxRetries, const EpisodesCallback &callback)
+void BangumiAPI::getSubjectEpisodes(int subjectId, int maxRetries, const CollectionsCallback &callback)
 {   // 获取章节收藏
-    std::function<void(int, QJsonArray)> fetchPage = [this, subjectId, maxRetries, callback, &fetchPage]
-    (int offset, QJsonArray allItems) {
+    std::function<void(int, QJsonArray)> fetchPage = [this, subjectId, maxRetries, callback, &fetchPage](int offset, QJsonArray allItems) {
         const QString url = QString("%1/v0/users/-/collections/%2/episodes?limit=1000&offset=%3").arg(baseUrl).arg(subjectId).arg(offset);
-        const QNetworkRequest request = createRequest(url);
-        sendRequestJson(manager, request, "GET", QByteArray(), maxRetries, [offset, allItems, callback, fetchPage]
-        (const QJsonObject &obj, int, const QString &error) mutable {
+        requestWithAuth(url, "GET", QByteArray(), maxRetries, [offset, allItems, callback, fetchPage](const QByteArray &rawData, int, const QString &error) mutable {
             if (!error.isEmpty()) {
                 callback(QJsonArray(), error);
                 return;
             }
-            QJsonArray items = obj["data"].toArray();
+            QJsonArray items = QJsonDocument::fromJson(rawData)["data"].toArray();
             for (const auto &item : items) allItems.append(item);
             if (items.size() < 1000) callback(allItems, QString());
             else fetchPage(offset + 1000, allItems);
-        }, [this] {refreshAndReload();});
+        });
     };
     fetchPage(0, QJsonArray());
 }
@@ -114,32 +129,26 @@ void BangumiAPI::getSubjectEpisodes(int subjectId, int maxRetries, const Episode
 void BangumiAPI::createOrUpdateCollection(const int subjectId, const QJsonObject &collectionData, const int maxRetries, const BoolCallback &callback)
 {   // 新增单个收藏条目
     const QString url = QString("%1/v0/users/-/collections/%2").arg(baseUrl).arg(subjectId);
-    const QNetworkRequest request = createRequest(url);
-    const QByteArray data = QJsonDocument(collectionData).toJson();
-    sendRequestUtil(manager, request, "POST", data, maxRetries, [callback](const QByteArray &, const int statusCode, const QString &error) {
+    requestWithAuth(url, "POST", QJsonDocument(collectionData).toJson(), maxRetries, [callback](const QByteArray &, const int statusCode, const QString &error) {
         if (!error.isEmpty()) callback(false, error);
         else callback(statusCode == 202, QString());
-    }, [this] {refreshAndReload();});
+    });
 }
 
 void BangumiAPI::updateCollection(const int subjectId, const QJsonObject &collectionData, const int maxRetries, const BoolCallback &callback)
 {   // 修改单个收藏
     const QString url = QString("%1/v0/users/-/collections/%2").arg(baseUrl).arg(subjectId);
-    const QNetworkRequest request = createRequest(url);
-    const QByteArray data = QJsonDocument(collectionData).toJson();
-    sendRequestUtil(manager, request, "PATCH", data, maxRetries, [callback](const QByteArray &, const int statusCode, const QString &error) {
+    requestWithAuth(url, "PATCH", QJsonDocument(collectionData).toJson(), maxRetries, [callback](const QByteArray &, const int statusCode, const QString &error) {
         if (!error.isEmpty()) callback(false, error);
         else callback(statusCode == 204, QString());
-    }, [this] {refreshAndReload();});
+    });
 }
 
 void BangumiAPI::updateSubjectEpisodes(const int subjectId, const QJsonObject &episodesData, const int maxRetries, const BoolCallback &callback)
 {   // 批量更新章节收藏信息
     const QString url = QString("%1/v0/users/-/collections/%2/episodes").arg(baseUrl).arg(subjectId);
-    const QNetworkRequest request = createRequest(url);
-    const QByteArray data = QJsonDocument(episodesData).toJson();
-    sendRequestUtil(manager, request, "PATCH", data, maxRetries, [callback](const QByteArray &, const int statusCode, const QString &error) {
+    requestWithAuth(url, "PATCH", QJsonDocument(episodesData).toJson(), maxRetries, [callback](const QByteArray &, const int statusCode, const QString &error) {
         if (!error.isEmpty()) callback(false, error);
         else callback(statusCode == 204, QString());
-    }, [this] {refreshAndReload();});
+    });
 }

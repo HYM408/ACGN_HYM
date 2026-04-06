@@ -16,7 +16,6 @@
 SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent)
 {
     ui.setupUi(this);
-    bangumiOAuth = new BangumiOAuth(this);
     applyTheme();
     setupConnections();
     loadBangumiPage();
@@ -25,14 +24,14 @@ SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent)
 SettingsPage::~SettingsPage()
 {
     if (m_currentDownload) clearDownloadTasks(true);
-    delete bangumiOAuth;
 }
 
-void SettingsPage::setManagers(BangumiAPI *api, PikPakApi *pikpakapi, DatabaseManager *db)
+void SettingsPage::setManagers(BangumiAPI *api, PikPakApi *pikpakapi, DatabaseManager *db, BangumiOAuth *oauth)
 {   // 初始化实例
     bangumiAPI = api;
     pikpakApi = pikpakapi;
     dbManager = db;
+    bangumiOAuth = oauth;
 }
 
 void SettingsPage::applyTheme() const
@@ -143,17 +142,20 @@ void SettingsPage::onLoginButtonClicked()
     ui.btnBangumiAuth->setText("授权中...");
     ui.btnBangumiAuth->setEnabled(false);
     QDesktopServices::openUrl(bangumiOAuth->generateAuthUrl());
-    const QString code = bangumiOAuth->listenForCode(30);
-    if (code.isEmpty()) {
-        ui.btnBangumiAuth->setText("Code获取失败");
-        ui.btnBangumiAuth->setEnabled(true);
-        return;
-    }
-    if (bangumiOAuth->exchangeCodeForToken(code, "")) {
-        updateBangumiTokenDisplay();
-        ui.btnBangumiAuth->setText("Bangumi授权成功！");
-    } else ui.btnBangumiAuth->setText("Token交换失败");
-    ui.btnBangumiAuth->setEnabled(true);
+    bangumiOAuth->listenForCode([this](const QString &code) {
+        if (code.isEmpty()) {
+            ui.btnBangumiAuth->setText("Code获取失败");
+            ui.btnBangumiAuth->setEnabled(true);
+            return;
+        }
+        bangumiOAuth->exchangeCodeForToken(code, "", [this](const bool cb) {
+            if (cb) {
+                updateBangumiTokenDisplay();
+                ui.btnBangumiAuth->setText("Bangumi授权成功！");
+            } else ui.btnBangumiAuth->setText("Token交换失败");
+            ui.btnBangumiAuth->setEnabled(true);
+        });
+    });
 }
 
 bool SettingsPage::ensureBangumiCredentials()
@@ -202,7 +204,7 @@ void SettingsPage::onCollectionButtonClicked() const
 {   // 获取Bangumi收藏
     ui.btnGetCollection->setEnabled(false);
     ui.btnGetCollection->setText("进度：0");
-    bangumiAPI->getUserCollections(true, 3, [this](const int current, const int total) {ui.btnGetCollection->setText(QString("进度：%1/%2").arg(current).arg(total));}, [this](const QJsonArray &collections, const QString &error) {
+    bangumiAPI->getUserCollections(0, QJsonArray(), true, 3, [this](const int current, const int total) {ui.btnGetCollection->setText(QString("进度：%1/%2").arg(current).arg(total));}, [this](const QJsonArray &collections, const QString &error) {
         if (!error.isEmpty()) ui.btnGetCollection->setText("获取收藏失败: " + error);
         else if (!collections.isEmpty()) {
             dbManager->clearCollectionTable();
@@ -230,7 +232,8 @@ void SettingsPage::downloadPublicDate(const bool useMirror)
     static const QString bangumiArchiveUrl = "https://raw.githubusercontent.com/HYM408/BangumiDateProcessing/refs/heads/main/latest.json";
     const QString url = useMirror ? "https://hk.gh-proxy.org/" + bangumiArchiveUrl : bangumiArchiveUrl;
     const QNetworkRequest request(url);
-    sendRequestJson(m_networkManager, request, "GET", QByteArray(), 2, [this, useMirror, selectedTypes](const QJsonObject &json, int, const QString &error) {
+    new RequestHandler(m_networkManager, request, "GET", QByteArray(), 2, [this, useMirror, selectedTypes](const QByteArray &rawData, int, const QString &error) {
+        QJsonObject json = QJsonDocument::fromJson(rawData).object();
         if (!error.isEmpty() || json.isEmpty()) return ui.labelDownloadStatus->setText("错误：无法获取下载链接");
         QStringList typeStrs;
         for (const int type : selectedTypes) typeStrs << QString::number(type);
@@ -268,7 +271,7 @@ void SettingsPage::onPikPakLoginButtonClicked()
     if (!ensurePikPakCredentials()) return;
     ui.btnPikPakLogin->setText("登录中...");
     ui.btnPikPakLogin->setEnabled(false);
-    pikpakApi->loginPikPak([this](const bool success, const QString &error) {
+    pikpakApi->loginPikPak(3, [this](const bool success, const QString &error) {
         if (success) {
             updatePikpakTokenDisplay();
             ui.btnPikPakLogin->setText("PikPak 登录成功！");

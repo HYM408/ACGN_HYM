@@ -60,7 +60,7 @@ private:
     QTabWidget *detailTabWidget = nullptr;
     QWidget *original_parent = nullptr;
     QLayout *original_layout = nullptr;
-    bool fullscreen_mode = false;
+    bool m_fullscreen_mode = false;
     EpisodeData m_episodeData;
     QString m_keyword;
 };

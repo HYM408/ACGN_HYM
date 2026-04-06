@@ -42,5 +42,5 @@ void ImageUtil::loadImageWithCache(CacheImageUtil *cacheImageUtil, const QString
         } else processed = pixmap.scaledToWidth(safeLabel->width(), Qt::SmoothTransformation);
         safeLabel->setPixmap(processed);
     };
-    cacheImageUtil->getImageAsync(url, onLoaded, cacheToLocal, fileName);
+    cacheImageUtil->getImage(url, onLoaded, cacheToLocal, fileName);
 }

@@ -83,7 +83,7 @@ void performCaptchaAsync(const QString &baseUrl, const QString &searchUrl, const
     manager->setCookieJar(new QNetworkCookieJar(manager));
     QNetworkRequest captchaRequest(QUrl(baseUrl + "/verify/index.html"));
     captchaRequest.setRawHeader("User-Agent", userAgent);
-    sendRequestUtil(*manager, captchaRequest, "GET", {}, 1, [=](const QByteArray &imageData, int, const QString &err1) {
+    new RequestHandler(*manager, captchaRequest, "GET", {}, 1, [=](const QByteArray &imageData, int, const QString &err1) {
         if (!err1.isEmpty() || imageData.isEmpty()) {
             callback({}, "获取验证码失败:" + err1);
             manager->deleteLater();
@@ -101,7 +101,7 @@ void performCaptchaAsync(const QString &baseUrl, const QString &searchUrl, const
         QNetworkRequest checkRequest(baseUrl + "/index.php/ajax/verify_check");
         checkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
         checkRequest.setRawHeader("User-Agent", userAgent);
-        sendRequestUtil(*manager, checkRequest, "POST", params.toString().toUtf8(), 1, [=](const QByteArray &, int, const QString &err2) {
+        new RequestHandler(*manager, checkRequest, "POST", params.toString().toUtf8(), 1, [=](const QByteArray &, int, const QString &err2) {
             if (!err2.isEmpty()) {
                 callback({}, "验证码提交失败: " + err2);
                 manager->deleteLater();
@@ -111,9 +111,9 @@ void performCaptchaAsync(const QString &baseUrl, const QString &searchUrl, const
             fullSearchUrl.replace("{keyword}", keyword);
             QNetworkRequest searchRequest(fullSearchUrl);
             searchRequest.setRawHeader("User-Agent", userAgent);
-            sendRequestHtml(*manager, searchRequest, "GET", {}, 1, [=](const QString &html, int, const QString &err3) {
+            new RequestHandler(*manager, searchRequest, "GET", {}, 1, [=](const QByteArray &rawData, int, const QString &err3) {
                 if (!err3.isEmpty()) callback({}, "搜索失败: " + err3);
-                else callback(html, {});
+                else callback(QString::fromUtf8(rawData), {});
                 manager->deleteLater();
             }, nullptr);
         }, nullptr);

@@ -88,7 +88,7 @@ void DownloadPage::displayItems(const QJsonArray &items, const QString &emptyMes
 void DownloadPage::loadRecentFiles()
 {   // 显示最近添加
     QPointer guard(this);
-    pikpakApi->getRecentFiles([guard](const QJsonObject &result, const int statusCode, const QString &error) {
+    pikpakApi->getRecentFiles(3, [guard](const QJsonObject &result, const int statusCode, const QString &error) {
         if (!guard) return;
         if (statusCode == 200 && error.isEmpty()) {
             QJsonArray events = result["events"].toArray();
@@ -113,7 +113,7 @@ void DownloadPage::fetchAndDownload(const QString &fileId, const QString &fileNa
     QFrame *widget = taskWidgets.value(fileName, nullptr);
     updateDownloadStatus(widget, "获取链接");
     const QPointer guard(this);
-    pikpakApi->getDownloadUrl(fileId, [=](const QJsonObject &fileInfo, const int statusCode, const QString &error) {
+    pikpakApi->getDownloadUrl(fileId, 3, [=](const QJsonObject &fileInfo, const int statusCode, const QString &error) {
         if (!guard) return;
         if (statusCode != 200 || !error.isEmpty()) {
             updateDownloadStatus(widget, "获取链接失败");
@@ -142,7 +142,7 @@ void DownloadPage::fetchAndDownload(const QString &fileId, const QString &fileNa
 void DownloadPage::loadFolderContent(const QString &folderId)
 {   // 显示文件夹内容
     QPointer guard(this);
-    pikpakApi->getFileList(folderId, 100, "", [guard, folderId](const QJsonObject &result, const int statusCode, const QString &error) {
+    pikpakApi->getFileList(folderId, 100, "", 3, [guard, folderId](const QJsonObject &result, const int statusCode, const QString &error) {
         if (!guard) return;
         if (statusCode == 200 && error.isEmpty()) {
             const QJsonArray files = result["files"].toArray();

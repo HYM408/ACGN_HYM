@@ -1,9 +1,7 @@
 #ifndef PIKPAK_API_H
 #define PIKPAK_API_H
 
-#include <QWidget>
-class QNetworkRequest;
-class QNetworkAccessManager;
+#include <QNetworkAccessManager>
 
 class PikPakApi : public QObject
 {
@@ -11,30 +9,30 @@ class PikPakApi : public QObject
 
 public:
     explicit PikPakApi(QObject *parent = nullptr);
-    void getInformation();
-    using LoginCallback = std::function<void(bool success, const QString &error)>;
-    void loginPikPak(const LoginCallback& callback);
-    using RefreshCallback = std::function<void(bool success)>;
-    void refreshAccessToken(const RefreshCallback& callback);
+    using BoolCallback = std::function<void(bool success, const QString &error)>;
     using JsonCallback = std::function<void(const QJsonObject&, int statusCode, const QString &error)>;
-    void captchaInit(const QString &action, const QJsonObject &meta, const JsonCallback& callback);
-    void getRecentFiles(const JsonCallback& callback);
-    void getDownloadUrl(const QString &fileId, const JsonCallback& callback);
-    void getShareInfo(const QString &shareId, const QString &parentId, const QString &passCode, const JsonCallback& callback);
-    void restoreShare(const QString &shareId, const QString &passCodeToken, const QStringList &fileIds, const JsonCallback& callback);
-    using TransferCallback = std::function<void(bool success)>;
-    void transferShareLink(const QString &shareLink, const QString &passCode, const TransferCallback& callback);
-    void getFileList(const QString &parentId, int limit, const QString &pageToken, const JsonCallback& callback);
+    void loginPikPak(int maxRetries, const BoolCallback &callback);
+    void refreshAccessToken(int maxRetries, const std::function<void(bool success)> &callback);
+    void captchaInit(const QString &action, const QJsonObject &meta, int maxRetries, const JsonCallback &callback);
+    void getRecentFiles(int maxRetries, const JsonCallback &callback);
+    void getQuotaInfo(int maxRetries, const BoolCallback &callback);
+    void getDownloadUrl(const QString &fileId, int maxRetries, const JsonCallback &callback);
+    void getShareInfo(const QString &shareId, const QString &parentId, const QString &passCode, int maxRetries, const JsonCallback& callback);
+    void restoreShare(const QString &shareId, const QString &passCodeToken, const QStringList &fileIds, int maxRetries, const JsonCallback &callback);
+    void transferShareLink(const QString &shareLink, const QString &passCode, int maxRetries, const BoolCallback &callback);
+    void getFileList(const QString &parentId, int limit, const QString &pageToken, int maxRetries, const JsonCallback &callback);
 
 private:
-    template<typename Func>
-    void requestWithAuth(const QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, Func callback);
-    QNetworkAccessManager *m_manager;
-    QString username;
-    QString password;
-    QString accessToken;
-    QString refreshToken;
-    QString deviceId;
+    void getInformation();
+    void requestWithAuth(const QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, const JsonCallback &callback);
+    bool m_isRefreshing = false;
+    std::vector<std::function<void(bool)>> m_pendingCallbacks;
+    QNetworkAccessManager m_manager;
+    QString m_username;
+    QString m_password;
+    QString m_accessToken;
+    QString m_refreshToken;
+    QString m_deviceId;
 };
 
 #endif // PIKPAK_API_H

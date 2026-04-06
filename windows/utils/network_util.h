@@ -6,7 +6,8 @@
 class QNetworkReply;
 class QNetworkAccessManager;
 
-class RequestHandler : public QObject {
+class RequestHandler : public QObject
+{
     Q_OBJECT
 
 public:
@@ -25,9 +26,5 @@ private:
     QNetworkReply *m_reply = nullptr;
     QTimer *m_timeoutTimer = nullptr;
 };
-
-void sendRequestUtil(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, const std::function<void(const QByteArray&, int statusCode, const QString &error)> &callback, std::function<void()> onAuthFailure = nullptr);
-void sendRequestJson(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, const std::function<void(const QJsonObject&, int statusCode, const QString &error)> &callback, std::function<void()> onAuthFailure = nullptr);
-void sendRequestHtml(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, const std::function<void(const QString&, int statusCode, const QString &error)> &callback, std::function<void()> onAuthFailure = nullptr);
 
 #endif // NETWORK_UTILS_H

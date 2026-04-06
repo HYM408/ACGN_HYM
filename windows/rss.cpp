@@ -32,18 +32,18 @@ void Rss::updateRSS()
     QNetworkRequest request(QUrl(baseUrl % "feed/user/" % userId % "/timeline?type=subject"));
     request.setHeader(QNetworkRequest::UserAgentHeader, "ACGN_HYM/1.0");
     request.setRawHeader("Authorization", "Bearer " + token.toUtf8());
-    sendRequestHtml(netManager, request, "GET", {}, 3, [this, oldGuid](const QString &content, int, const QString &error) {
+    new RequestHandler(netManager, request, "GET", {}, 3, [this, oldGuid](const QByteArray &rawData, int, const QString &error) {
         if (!error.isEmpty()) {
             qDebug() << "RSS: 请求失败" << error;
             return;
         }
-        const QString newGuid = guidPattern.match(content).captured(1);
+        const QString newGuid = guidPattern.match(QString::fromUtf8(rawData)).captured(1);
         if (newGuid == "") return;
         if (oldGuid == "0") {
             setConfig("Bangumi/rss_guid", newGuid);
             qDebug() << "RSS: 首次获取";
         } else if (oldGuid != newGuid) {
-            api->getUserCollections(false, 3, nullptr, [this, newGuid](const QJsonArray &collections, const QString &err) {
+            api->getUserCollections(0, QJsonArray(), false, 3, nullptr, [this, newGuid](const QJsonArray &collections, const QString &err) {
                 if (!err.isEmpty()) {
                     qDebug() << "RSS: 获取收藏失败" << err;
                     return;

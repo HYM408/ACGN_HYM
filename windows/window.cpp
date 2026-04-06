@@ -12,6 +12,7 @@
 #include "settings_page.h"
 #include "api/pikpak_api.h"
 #include "api/bangumi_api.h"
+#include "api/bangumi_oauth.h"
 #include "player/player_page.h"
 #include "utils/cache_image_util.h"
 #include "utils/game_monitor_util.h"
@@ -33,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setupTrayIcon();
     setupConnections();
     checkCacheCleanup();
+    refreshToken();
     QTimer::singleShot(5000, rss, &Rss::startRSS);
 }
 
@@ -52,9 +54,10 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, qintptr
 
 void MainWindow::initializeManagers()
 {   // 初始化管理器
-    bangumiAPI = new BangumiAPI(this);
+    bangumiOAuth = new BangumiOAuth(this);
+    bangumiAPI = new BangumiAPI(bangumiOAuth, this);
     dbManager = new DatabaseManager(this);
-    cacheImageUtil = new CacheImageUtil(this);
+    cacheImageUtil = new CacheImageUtil(bangumiAPI, this);
     pikpakApi = new PikPakApi(this);
     rss = new Rss(bangumiAPI, this);
     hotkeyManager = new GlobalHotkeyManager(this, this);
@@ -120,6 +123,18 @@ void MainWindow::checkCacheCleanup() const
     mainPageManager->loadCollections(mainPageManager->getCurrentSubjectType(), mainPageManager->getCurrentStatusType(), false);
 }
 
+void MainWindow::refreshToken() const
+{   // 刷新token
+    bangumiAPI->getUser(3, [](const bool success, const QString &error){
+        if (!success) qDebug() << "bangumi token 刷新失败:" << error;
+        else qDebug() << "bangumi token 刷新成功";
+    });
+    pikpakApi->getQuotaInfo(3, [](const bool success, const QString &error){
+        if (!success) qDebug() << "pikpak token 刷新失败:" << error;
+        else qDebug() << "pikpak token 刷新成功";
+    });
+}
+
 void MainWindow::toggleMaximizeWindow()
 {   // 切换最大化/还原窗口
     isMaximized() ? showNormal() : showMaximized();
@@ -128,10 +143,10 @@ void MainWindow::toggleMaximizeWindow()
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {   // 事件过滤器
     if (event->type() == QEvent::MouseButtonPress) {
-        if (gameFocusTimer && gameFocusTimer->isActive()) {
-            gameFocusTimer->stop();
-            gameFocusTimer->deleteLater();
-            gameFocusTimer = nullptr;
+        if (m_gameFocusTimer && m_gameFocusTimer->isActive()) {
+            m_gameFocusTimer->stop();
+            m_gameFocusTimer->deleteLater();
+            m_gameFocusTimer = nullptr;
         }
     }
     if (watched == titlebar_frame) {
@@ -237,32 +252,32 @@ void MainWindow::onTrayIconActivated(const QSystemTrayIcon::ActivationReason rea
 
 void MainWindow::onGameStarted()
 {   // 游戏启动时
-    if (gameFocusTimer) {
-        gameFocusTimer->stop();
-        gameFocusTimer->deleteLater();
-        gameFocusTimer = nullptr;
+    if (m_gameFocusTimer) {
+        m_gameFocusTimer->stop();
+        m_gameFocusTimer->deleteLater();
+        m_gameFocusTimer = nullptr;
     }
-    gameFocusTimer = new QTimer(this);
-    gameFocusTimer->setSingleShot(true);
-    connect(gameFocusTimer, &QTimer::timeout, this, &MainWindow::onGameFocusTimeout);
-    gameFocusTimer->start(5000);
+    m_gameFocusTimer = new QTimer(this);
+    m_gameFocusTimer->setSingleShot(true);
+    connect(m_gameFocusTimer, &QTimer::timeout, this, &MainWindow::onGameFocusTimeout);
+    m_gameFocusTimer->start(5000);
 }
 
 void MainWindow::onGameFocusTimeout()
 {   // 游戏启动后 焦点超时
     hide();
-    if (!gameFocusTimer) return;
-    gameFocusTimer->deleteLater();
-    gameFocusTimer = nullptr;
+    if (!m_gameFocusTimer) return;
+    m_gameFocusTimer->deleteLater();
+    m_gameFocusTimer = nullptr;
 }
 
 void MainWindow::gameExited()
 {   // 游戏退出
     onTrayIconActivated(QSystemTrayIcon::Trigger);
-    if (!gameFocusTimer) return;
-    gameFocusTimer->stop();
-    gameFocusTimer->deleteLater();
-    gameFocusTimer = nullptr;
+    if (!m_gameFocusTimer) return;
+    m_gameFocusTimer->stop();
+    m_gameFocusTimer->deleteLater();
+    m_gameFocusTimer = nullptr;
 }
 
 void MainWindow::ensureSearchPage()
@@ -285,7 +300,7 @@ void MainWindow::onSearchButtonClicked()
 void MainWindow::onTagClicked(const QString &tag, const int subjectType)
 {   // tag搜索
     if (!searchPage) ensureSearchPage();
-    pageHistory.append(stackedMainWindow->currentWidget());
+    m_pageHistory.append(stackedMainWindow->currentWidget());
     stackedMainWindow->setCurrentWidget(searchPage);
     searchPage->searchByTag(tag, subjectType);
 }
@@ -294,7 +309,7 @@ void MainWindow::onSettingsButtonClicked()
 {   // 切换到设置页面
     if (!settingsPage) {
         settingsPage = new SettingsPage(this);
-        settingsPage->setManagers(bangumiAPI, pikpakApi, dbManager);
+        settingsPage->setManagers(bangumiAPI, pikpakApi, dbManager, bangumiOAuth);
         stackedMainWindow->addWidget(settingsPage);
         connect(settingsPage, &SettingsPage::backButtonClicked, this, &MainWindow::onBackButtonClicked);
         connect(settingsPage, &SettingsPage::hotkeyChanged, gameMonitorUtil, &GameMonitorUtil::updateHotkey);
@@ -358,15 +373,15 @@ void MainWindow::precreatePlayerPage()
 
 void MainWindow::onEpisodeClicked(const SubjectsData &subjectsData, const EpisodeData &episodeData)
 {   // 切换播放器页面
-    pageHistory.append(stackedMainWindow->currentWidget());
+    m_pageHistory.append(stackedMainWindow->currentWidget());
     playerPage->fetchRoutes(subjectsData, episodeData);
     stackedMainWindow->setCurrentWidget(playerPage);
 }
 
 void MainWindow::onBackButtonClicked()
 {   // 返回历史页面
-    if (!pageHistory.isEmpty()) {
-        QWidget *prevPage = pageHistory.takeLast();
+    if (!m_pageHistory.isEmpty()) {
+        QWidget *prevPage = m_pageHistory.takeLast();
         stackedMainWindow->setCurrentWidget(prevPage);
     } else {
         stackedMainWindow->setCurrentIndex(0);

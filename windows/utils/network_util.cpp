@@ -33,7 +33,12 @@ void RequestHandler::onReplyFinished()
     const int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     const QNetworkReply::NetworkError err = reply->error();
     const QString errorMsg = err != QNetworkReply::NoError ? reply->errorString() : QString();
-    if (httpStatus == 401 && m_onAuthFailure) m_onAuthFailure();
+    if (httpStatus == 401 && m_onAuthFailure) {
+        reply->deleteLater();
+        m_onAuthFailure();
+        deleteLater();
+        return;
+    }
     reply->deleteLater();
     if (err == QNetworkReply::NoError) {
         if (m_callback) m_callback(reply->readAll(), httpStatus, QString());
@@ -45,33 +50,4 @@ void RequestHandler::onReplyFinished()
         if (m_callback) m_callback(QByteArray(), httpStatus, errorMsg);
         deleteLater();
     }
-}
-
-template<typename Callback, typename Transformer>
-static void sendRequestGeneric(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, int maxRetries, const Callback& callback, Transformer transformer, std::function<void()> onAuthFailure)
-{
-    new RequestHandler(manager, request, method, data, maxRetries, [callback, transformer](const QByteArray &raw, int status, const QString &error) {
-        callback(transformer(raw, status, error), status, error);
-    }, std::move(onAuthFailure));
-}
-
-void sendRequestUtil(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, const int maxRetries, const std::function<void(const QByteArray&, int, const QString&)> &callback, std::function<void()> onAuthFailure)
-{   // 原始数据封装
-    sendRequestGeneric(manager, request, method, data, maxRetries, callback, [](const QByteArray &raw, int, const QString&) {
-        return raw;
-    }, std::move(onAuthFailure));
-}
-
-void sendRequestJson(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, const int maxRetries, const std::function<void(const QJsonObject&, int, const QString&)> &callback, std::function<void()> onAuthFailure)
-{   // JSON封装
-    sendRequestGeneric(manager, request, method, data, maxRetries, callback, [](const QByteArray &raw, int, const QString&) {
-        return QJsonDocument::fromJson(raw).object();
-    }, std::move(onAuthFailure));
-}
-
-void sendRequestHtml(QNetworkAccessManager &manager, const QNetworkRequest &request, const QString &method, const QByteArray &data, const int maxRetries, const std::function<void(const QString&, int, const QString&)> &callback, std::function<void()> onAuthFailure)
-{   // HTML封装
-    sendRequestGeneric(manager, request, method, data, maxRetries, callback, [](const QByteArray &raw, int, const QString&) {
-        return QString::fromUtf8(raw);
-    }, std::move(onAuthFailure));
 }

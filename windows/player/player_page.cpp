@@ -43,7 +43,7 @@ void PlayerPage::setupControlOverlay()
     connect(vlcPlayer, &VLCPlayer::playStateChanged, controlOverlay, &ControlOverlay::setPlayState);
     connect(vlcPlayer, &VLCPlayer::timeChanged, [this](const int currentMs, const int totalMs) {controlOverlay->setTime(currentMs / 1000, totalMs / 1000);});
     connect(vlcPlayer, &VLCPlayer::positionChanged, controlOverlay, &ControlOverlay::setProgress);
-    connect(vlcPlayer, &VLCPlayer::exitFullscreenRequested, this, [this] {if (fullscreen_mode) toggleFullscreen();});
+    connect(vlcPlayer, &VLCPlayer::exitFullscreenRequested, this, [this] {if (m_fullscreen_mode) toggleFullscreen();});
     connect(vlcPlayer, &VLCPlayer::volumeChanged, controlOverlay, &ControlOverlay::setVolume);
 }
 
@@ -175,7 +175,7 @@ void PlayerPage::createSiteDetailTab(const QString &siteId)
     siteDetailFrames[siteId] = contentFrame;
     siteDetailTabIndex[siteId] = tabIndex;
     const QString iconUrl = getSiteIconUrl(siteId);
-    cacheImageUtil->getImageAsync(iconUrl, [this, tabIndex](const QPixmap &pixmap) {
+    cacheImageUtil->getImage(iconUrl, [this, tabIndex](const QPixmap &pixmap) {
         if (!detailTabWidget) return;
         if (tabIndex < 0 || tabIndex >= detailTabWidget->count()) return;
         QTransform transform;
@@ -202,7 +202,7 @@ QWidget* PlayerPage::createSiteCard(const QString &siteId)
     topLayout->addWidget(iconBtn);
     const QString iconUrl = getSiteIconUrl(siteId);
     QPointer btnPtr(iconBtn);
-    cacheImageUtil->getImageAsync(iconUrl, [btnPtr](const QPixmap &pixmap) {if (btnPtr) btnPtr->setIcon(QIcon(pixmap));}, false, "");
+    cacheImageUtil->getImage(iconUrl, [btnPtr](const QPixmap &pixmap) {if (btnPtr) btnPtr->setIcon(QIcon(pixmap));}, false, "");
     connect(iconBtn, &QPushButton::clicked, this, [this, siteId]{
         ui.tabWidget->setCurrentIndex(1);
         detailTabWidget->setCurrentIndex(siteDetailTabIndex[siteId]);
@@ -462,9 +462,9 @@ void PlayerPage::onBTResultClicked(const QString &magnet, const QString &playLin
         pikpakBtn->setText("转存中...");
         pikpakBtn->setEnabled(false);
         QPointer btnPtr(pikpakBtn);
-        pikpakApi->transferShareLink(finalUrl, "", [btnPtr](const bool success) {
+        pikpakApi->transferShareLink(finalUrl, "", 3, [btnPtr](const bool success, const QString &error) {
             if (!btnPtr) return;
-            btnPtr->setText(success ? "转存成功" : "转存失败");
+            btnPtr->setText(success ? "转存成功" : error);
             btnPtr->setEnabled(true);
         });
     });
@@ -473,16 +473,16 @@ void PlayerPage::onBTResultClicked(const QString &magnet, const QString &playLin
 
 void PlayerPage::toggleFullscreen()
 {   // 全屏切换
-    if (!fullscreen_mode) {
+    if (!m_fullscreen_mode) {
         window()->hide();
-        fullscreen_mode = true;
+        m_fullscreen_mode = true;
         original_parent = vlcPlayer->parentWidget();
         original_layout = original_parent->layout();
         vlcPlayer->setParent(nullptr);
         vlcPlayer->showFullScreen();
     } else {
         window()->show();
-        fullscreen_mode = false;
+        m_fullscreen_mode = false;
         vlcPlayer->showNormal();
         vlcPlayer->setParent(original_parent);
         original_layout->addWidget(vlcPlayer);
@@ -517,7 +517,7 @@ void PlayerPage::cleanupPage()
 
 void PlayerPage::onBackButtonClicked()
 {   // 返回
-    if (fullscreen_mode) toggleFullscreen();
+    if (m_fullscreen_mode) toggleFullscreen();
     cleanupPage();
     emit backButtonClicked();
 }

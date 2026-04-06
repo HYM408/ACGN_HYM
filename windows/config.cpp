@@ -21,7 +21,7 @@ static const QVariantMap m_defaults = {
     {"Bangumi/user_id", ""},
     {"Bangumi/client_id", ""},
     {"Bangumi/client_secret", ""},
-    {"Bangumi/redirect_url", ""},
+    {"Bangumi/redirect_uri", ""},
     {"Bangumi/access_token", ""},
     {"Bangumi/refresh_token", ""},
     {"Bangumi/expires_at", 0},
@@ -63,7 +63,7 @@ QVariant getConfig(const QString &key, const QVariant &defaultValue)
     QMutexLocker locker(&m_configMutex);
     if (m_config.contains(key)) return m_config[key];
     if (!defaultValue.isNull()) return defaultValue;
-    auto it = m_defaults.find(key);
+    const auto it = m_defaults.find(key);
     return it != m_defaults.end() ? it.value() : QVariant();
 }
 

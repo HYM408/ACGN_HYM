@@ -17,7 +17,7 @@ class SettingsPage : public QWidget
 public:
     explicit SettingsPage(QWidget *parent = nullptr);
     ~SettingsPage() override;
-    void setManagers(BangumiAPI *api, PikPakApi *pikpakapi, DatabaseManager *db);
+    void setManagers(BangumiAPI *api, PikPakApi *pikpakapi, DatabaseManager *db, BangumiOAuth *oauth);
     void applyTheme() const;
 
 signals:

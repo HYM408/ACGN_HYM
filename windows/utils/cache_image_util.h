@@ -5,16 +5,17 @@
 #include <QObject>
 
 class QPixmap;
-
-using ImageCallback = std::function<void(const QPixmap&)>;
+class BangumiAPI;
 
 class CacheImageUtil : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit CacheImageUtil(QObject *parent = nullptr);
-    void getImageAsync(const QString &url, const ImageCallback &callback, bool cacheToLocal, const QString &fileName);
+    explicit CacheImageUtil(BangumiAPI *bangumiAPI, QObject *parent = nullptr);
+    using ImageCallback = std::function<void(const QPixmap&)>;
+    void getImage(const QString &url, const ImageCallback &callback, bool cacheToLocal, const QString &fileName);
+    BangumiAPI *bangumiAPI = nullptr;
 
 private:
     QHash<QString, QList<ImageCallback>> pendingCallbacks;
