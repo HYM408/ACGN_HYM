@@ -2,8 +2,9 @@
 #define GAME_MONITOR_UTIL_H
 
 #include <windows.h>
-#include "../sql/data_structs.h"
+#include "../../sql/data_structs.h"
 
+class EtwFileMonitor;
 class QWinEventNotifier;
 class GlobalHotkeyManager;
 
@@ -12,7 +13,7 @@ class GameMonitorUtil : public QObject
     Q_OBJECT
 
 public:
-    explicit GameMonitorUtil(GlobalHotkeyManager *hotkeyManager, QObject *parent = nullptr);
+    explicit GameMonitorUtil(GlobalHotkeyManager *hotkeyManager, EtwFileMonitor *etwfileMonitor, QObject *parent = nullptr);
     ~GameMonitorUtil() override;
     static QMap<qint64, QString> getAllProcesses();
     void addExternalProcess(qint64 pid, const QString &processName, qint64 startTime, int idOverride);
@@ -24,11 +25,12 @@ public slots:
 
 signals:
     void gameStarted(int subjectId, const QString &launchPath);
-    void gameExited(int subjectId);
+    void gameExited(int subjectId, int total);
 
 private:
-    void registerMonitoredProcess(int id, qint64 pid, HANDLE hProcess, qint64 startTime, const QString &name);
+    void registerMonitoredProcess(int id, qint64 pid, HANDLE hProcess, qint64 startTime, const QString &name, bool enableFileMonitor);
     static qint64 findChildProcess(qint64 parentPid);
+    static QString getSavePath(const QString &pathA, const QString &pathB);
     static bool suspendOrResumeProcess(DWORD pid, bool suspend);
     static HWND findWindowByPid(DWORD pid);
     void onProcessExited(int id);
@@ -36,6 +38,7 @@ private:
     void onFreezeOrResume();
     void cleanupProcessResources(int id);
     GlobalHotkeyManager *hotkeyManager = nullptr;
+    EtwFileMonitor *etwfileMonitor = nullptr;
     GameData m_gameData;
     int nextExternalId = -1;
     QHash<int, qint64> monitoredGames;

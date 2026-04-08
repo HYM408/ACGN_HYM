@@ -64,12 +64,14 @@ add_executable(appACGN_HYM
         windows/utils/captcha_utils/captcha_util.cpp
         windows/utils/captcha_utils/charset_data.h
         windows/utils/captcha_utils/charset_data.cpp
+        windows/utils/game/etw_file_monitor.h
+        windows/utils/game/etw_file_monitor.cpp
+        windows/utils/game/game_monitor_util.h
+        windows/utils/game/game_monitor_util.cpp
         windows/utils/cache_image_util.h
         windows/utils/cache_image_util.cpp
         windows/utils/context_menu_util.h
         windows/utils/context_menu_util.cpp
-        windows/utils/game_monitor_util.h
-        windows/utils/game_monitor_util.cpp
         windows/utils/global_hotkey_manager.h
         windows/utils/global_hotkey_manager.cpp
         windows/utils/image_util.h
@@ -107,6 +109,7 @@ target_link_libraries(appACGN_HYM
         Qt6::Widgets
         Qt6::Sql
         Qt6::Network
+        tdh
         ${LIBXML2_LIBRARIES}
         ${VLC_LIBRARIES}
         ${ONNXRUNTIME_LIBRARY}
@@ -119,18 +122,14 @@ target_include_directories(appACGN_HYM PRIVATE
         ${ONNXRUNTIME_INCLUDE_DIR}
 )
 
+if(WIN32)
+    target_link_options(appACGN_HYM PRIVATE "/MANIFESTUAC:level='requireAdministrator'")
+endif()
+
 # WebEngine进程
-add_executable(videoStream
-        windows/crawler/video_stream.cpp
-)
-
-target_link_libraries(videoStream
-        PRIVATE
-        Qt6::WebEngineWidgets
-)
-
+add_executable(videoStream windows/crawler/video_stream.cpp)
+target_link_libraries(videoStream PRIVATE Qt6::WebEngineWidgets)
 add_dependencies(appACGN_HYM videoStream)
-
 
 if(WIN32)
     add_custom_command(TARGET appACGN_HYM POST_BUILD

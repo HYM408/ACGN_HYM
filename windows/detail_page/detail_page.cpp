@@ -12,8 +12,8 @@
 #include "../utils/image_util.h"
 #include "../utils/progress_util.h"
 #include "../utils/star_rating_util.h"
-#include "../utils/game_monitor_util.h"
 #include "../utils/context_menu_util.h"
+#include "../utils/game/game_monitor_util.h"
 
 DetailPage::DetailPage(QWidget *parent) : QWidget(parent)
 {
@@ -27,9 +27,6 @@ DetailPage::DetailPage(QWidget *parent) : QWidget(parent)
     applyTheme();
     setupConnections();
     installEventFilter(this);
-    // QFont font = ui.textEditSummary->font();
-    // font.setStyleStrategy(QFont::NoFontMerging);
-    // ui.textEditSummary->setFont(font);
 }
 
 void DetailPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, DatabaseManager *db, GameMonitorUtil *gameMonitor)
@@ -38,6 +35,8 @@ void DetailPage::setManagers(CacheImageUtil *cacheImage, BangumiAPI *api, Databa
     bangumiAPI = api;
     dbManager = db;
     gameMonitorUtil = gameMonitor;
+    connect(gameMonitorUtil, &GameMonitorUtil::gameStarted, this, &DetailPage::onGameStarted);
+    connect(gameMonitorUtil, &GameMonitorUtil::gameExited, this, &DetailPage::onGameExited);
 }
 
 void DetailPage::applyTheme()
@@ -59,7 +58,7 @@ void DetailPage::applyTheme()
 void DetailPage::setupConnections()
 {   // 连接
     connect(ui.btnBack, &QPushButton::clicked, this, &DetailPage::onBackButtonClicked);
-    connect(ui.btnAction, &QPushButton::clicked, this, &DetailPage::onEpisodeClicked);
+    connect(ui.btnAction, &QPushButton::clicked, this, &DetailPage::onBtnActionClicked);
     connect(ui.btnOpenUrl, &QPushButton::clicked, this, &DetailPage::onOpenBangumiPage);
     connect(ui.btnStatus, &QPushButton::clicked, this, &DetailPage::onStatusButtonClicked);
     connect(ui.btnRating, &QPushButton::clicked, this, &DetailPage::onRatingButtonClicked);
@@ -73,6 +72,7 @@ void DetailPage::setCollectionData(int subjectId, const QString &progressText)
 {   // 加载数据
     ui.tabWidget->setCurrentIndex(0);
     resetUI();
+    m_currentSubjectId = subjectId;
     m_subjectData = DatabaseManager::getCollectionBySubjectId(subjectId);
     const QString imageUrl = QString("https://api.bgm.tv/v0/subjects/%1/image?type=common").arg(subjectId);
     ImageUtil::loadImageWithCache(cacheImageUtil, imageUrl, ui.labelCover, 15, true, true, QString("s%1.jpg").arg(subjectId));
@@ -110,10 +110,23 @@ void DetailPage::mergeSubjectData(const SubjectsData &subjectData)
     m_subjectData.volStatus = userVolStatus;
 }
 
-void DetailPage::onEpisodeClicked()
-{   // 打开选集页
+void DetailPage::onBtnActionClicked()
+{   // 点击btnAction按钮
     if (m_subjectData.subjectType == 4) gameMonitorUtil->startGame(m_subjectData.subjectId, m_gameData[m_subjectData.subjectId]);
     else emit showEpisodePageRequested(m_subjectData);
+}
+
+void DetailPage::onGameStarted(const int subjectId, const QString &launchPath)
+{   // 游戏开始处理
+    m_gameData[subjectId].launchPath = launchPath;
+    if (subjectId == m_currentSubjectId) ui.btnAction->setText("正在运行");
+}
+
+void DetailPage::onGameExited(const int subjectId, const int total) const
+{   // 游戏退出处理
+    if (subjectId != m_currentSubjectId) return;
+    ui.btnAction->setText("启动");
+    if (m_gameData.contains(subjectId)) ui.labelProgress->setText(QString("已玩 %1 小时").arg(total / 3600.0));
 }
 
 void DetailPage::onOpenBangumiPage() const
@@ -139,6 +152,7 @@ void DetailPage::updateDetailPage(const QString &progressText)
     targetLabel->setText(progressText.isEmpty() ? computeProgressText(m_subjectData, dbManager->getEpisodeAirdates({m_subjectData.subjectId})) : progressText);
     ui.btnStatus->setText(statusNamesMap.value(m_subjectData.subjectType).value(m_subjectData.type));
     ui.btnAction->setText(m_subjectData.subjectType == 2 ? "选集" : m_subjectData.subjectType == 4 ? "启动" : "进度");
+    if (m_subjectData.subjectType == 4 && gameMonitorUtil->isGameRunning(m_subjectData.subjectId)) ui.btnAction->setText("正在运行");
     const int total = std::reduce(m_subjectData.scoreDetails.begin(), m_subjectData.scoreDetails.end(), 0);
     ui.labelRatingInfo->setText(QString("%1 | %2人评 | #%3").arg(m_subjectData.ratingScore).arg(total).arg(m_subjectData.ratingRank));
     const int dropped = m_subjectData.dropped;

@@ -13,6 +13,7 @@ class BangumiOAuth;
 class SettingsPage;
 class DownloadPage;
 class EpisodeOverlay;
+class EtwFileMonitor;
 class GameMonitorUtil;
 class GlobalHotkeyManager;
 
@@ -68,6 +69,7 @@ private:
     MainPageManager *mainPageManager = nullptr;
     EpisodeOverlay *episodeOverlay = nullptr;
     GameMonitorUtil *gameMonitorUtil = nullptr;
+    EtwFileMonitor *etwfileMonitor = nullptr;
     GlobalHotkeyManager *hotkeyManager = nullptr;
     QSystemTrayIcon *trayIcon = nullptr;
     QMenu *trayMenu = nullptr;

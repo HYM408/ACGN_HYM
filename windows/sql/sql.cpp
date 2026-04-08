@@ -39,7 +39,7 @@ void DatabaseManager::initTables()
         // episode表
         "CREATE TABLE IF NOT EXISTS episode_collection (subject_id INTEGER, episode_id INTEGER, ep INTEGER, sort INTEGER, name TEXT, name_cn TEXT, episode_type INTEGER, collection_type INTEGER, PRIMARY KEY(subject_id, episode_id))",
         // game_data表
-        "CREATE TABLE IF NOT EXISTS game_data (subject_id INTEGER PRIMARY KEY, launch_path TEXT, play_duration INTEGER)"
+        "CREATE TABLE IF NOT EXISTS game_data (subject_id INTEGER PRIMARY KEY, launch_path TEXT, save_path TEXT, play_duration INTEGER)"
     };
     for (const QString &sql : tables) query.exec(sql);
     const QStringList publicTables = {
@@ -370,6 +370,7 @@ QMap<int, GameData> DatabaseManager::getGameData(const QList<int> &subjectIds)
         GameData data;
         data.subjectId = query.value("subject_id").toInt();
         data.launchPath = query.value("launch_path").toString();
+        data.savePath = query.value("save_path").toString();
         data.playDuration = query.value("play_duration").toInt();
         results[data.subjectId] = data;
     }

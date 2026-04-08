@@ -1,16 +1,16 @@
 #include "main_page.h"
 #include <QDialog>
-#include <QFileIconProvider>
 #include <QHeaderView>
 #include <QTableWidgetItem>
+#include <QFileIconProvider>
 #include "config.h"
 #include "sql/sql.h"
 #include "utils/menu_util.h"
 #include "utils/image_util.h"
 #include "utils/progress_util.h"
 #include "utils/cache_image_util.h"
-#include "utils/game_monitor_util.h"
 #include "utils/context_menu_util.h"
+#include "utils/game/game_monitor_util.h"
 
 static constexpr int itemsPerPage = 12;
 static const QVector<int> posToType = {1, 3, 2, 4, 5};

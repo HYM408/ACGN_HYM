@@ -2,11 +2,11 @@
 #include <QJsonArray>
 #include "config.h"
 #include "sql/sql.h"
-#include "detail_page/detail_page.h"
 #include "api/bangumi_api.h"
 #include "utils/image_util.h"
-#include "utils/game_monitor_util.h"
 #include "utils/context_menu_util.h"
+#include "detail_page/detail_page.h"
+#include "utils/game/game_monitor_util.h"
 
 SearchPage::SearchPage(QWidget *parent) : QWidget(parent)
 {

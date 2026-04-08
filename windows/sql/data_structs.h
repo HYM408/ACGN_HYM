@@ -68,6 +68,7 @@ struct SubjectRelationData {
 struct GameData {
     int subjectId = 0;
     QString launchPath;
+    QString savePath;
     int playDuration = 0;
 };
 

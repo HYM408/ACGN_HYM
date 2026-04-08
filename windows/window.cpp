@@ -15,10 +15,11 @@
 #include "api/bangumi_oauth.h"
 #include "player/player_page.h"
 #include "utils/cache_image_util.h"
-#include "utils/game_monitor_util.h"
 #include "detail_page/detail_page.h"
 #include "downloader/download_page.h"
 #include "utils/global_hotkey_manager.h"
+#include "utils/game/etw_file_monitor.h"
+#include "utils/game/game_monitor_util.h"
 #include "episode_page/episode_overlay.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -61,7 +62,8 @@ void MainWindow::initializeManagers()
     pikpakApi = new PikPakApi(this);
     rss = new Rss(bangumiAPI, this);
     hotkeyManager = new GlobalHotkeyManager(this, this);
-    gameMonitorUtil = new GameMonitorUtil(hotkeyManager, this);
+    etwfileMonitor = new EtwFileMonitor(this);
+    gameMonitorUtil = new GameMonitorUtil(hotkeyManager, etwfileMonitor, this);
     trayMenu = new QMenu(this);
     trayIcon = new QSystemTrayIcon(this);
 }

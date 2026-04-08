@@ -4,11 +4,12 @@
 #include <QWinEventNotifier>
 #include <tlhelp32.h>
 #include <QFileDialog>
-#include "../config.h"
-#include "../sql/sql.h"
-#include "global_hotkey_manager.h"
+#include "../../config.h"
+#include "../../sql/sql.h"
+#include "etw_file_monitor.h"
+#include "../global_hotkey_manager.h"
 
-GameMonitorUtil::GameMonitorUtil(GlobalHotkeyManager *hotkeyManager, QObject *parent) : QObject(parent), hotkeyManager(hotkeyManager) {}
+GameMonitorUtil::GameMonitorUtil(GlobalHotkeyManager *hotkeyManager, EtwFileMonitor *fileMonitor, QObject *parent) : QObject(parent), hotkeyManager(hotkeyManager), etwfileMonitor(fileMonitor) {}
 
 GameMonitorUtil::~GameMonitorUtil()
 {
@@ -57,7 +58,7 @@ void GameMonitorUtil::addExternalProcess(const qint64 pid, const QString &proces
     int id = idOverride;
     if (id <= 0) id = nextExternalId--;
     externalProcessNames.insert(id, processName);
-    registerMonitoredProcess(id, pid, hProcess, startTime, processName);
+    registerMonitoredProcess(id, pid, hProcess, startTime, processName, idOverride > 0);
 }
 
 void GameMonitorUtil::startGame(const int subjectId, const GameData &gameData)
@@ -65,7 +66,7 @@ void GameMonitorUtil::startGame(const int subjectId, const GameData &gameData)
     m_gameData = gameData;
     QString launchPath = m_gameData.launchPath;
     if (launchPath.isEmpty() || !QFile::exists(launchPath)) {
-        launchPath = QFileDialog::getOpenFileName(nullptr, "选择启动文件", QString(), "可执行文件 (*.exe);;所有文件 (*)");
+        launchPath = m_gameData.launchPath = QFileDialog::getOpenFileName(nullptr, "选择启动文件", QString(), "可执行文件 (*.exe);;所有文件 (*)");
         if (launchPath.isEmpty()) return;
         DatabaseManager::updateGameData(subjectId, {{"launch_path", launchPath}});
     }
@@ -73,11 +74,11 @@ void GameMonitorUtil::startGame(const int subjectId, const GameData &gameData)
     const QFileInfo fileInfo(launchPath);
     if (!QProcess::startDetached(launchPath, {}, fileInfo.absolutePath(), &pid)) return;
     HANDLE hProcess = OpenProcess(SYNCHRONIZE | PROCESS_QUERY_INFORMATION, FALSE, static_cast<DWORD>(pid));
-    registerMonitoredProcess(subjectId, pid, hProcess, QDateTime::currentMSecsSinceEpoch(), QString());
+    registerMonitoredProcess(subjectId, pid, hProcess, QDateTime::currentMSecsSinceEpoch(), QString(), true);
     emit gameStarted(subjectId, launchPath);
 }
 
-void GameMonitorUtil::registerMonitoredProcess(int id, const qint64 pid, const HANDLE hProcess, const qint64 startTime, const QString &name)
+void GameMonitorUtil::registerMonitoredProcess(int id, const qint64 pid, HANDLE hProcess, const qint64 startTime, const QString &name, const bool enableFileMonitor)
 {   // 注册监控进程
     monitoredGames.insert(id, pid);
     gameStartTimes.insert(id, startTime);
@@ -87,6 +88,23 @@ void GameMonitorUtil::registerMonitoredProcess(int id, const qint64 pid, const H
     connect(notifier, &QWinEventNotifier::activated, this, [this, id] {onProcessExited(id);});
     notifier->setEnabled(true);
     processNotifiers.insert(id, notifier);
+    if (enableFileMonitor && m_gameData.savePath.isEmpty()) {
+        etwfileMonitor->startMonitoring(static_cast<ULONG>(pid));
+        QStringList keywords = {".sav", ".ksd"};
+        etwfileMonitor->setFileAccessCallback([this, keywords, id](const QString &fileName) {
+            for (const QString &kw : keywords) {
+                if (fileName.contains(kw, Qt::CaseInsensitive)) {
+                    QMetaObject::invokeMethod(this, [this] {etwfileMonitor->stopMonitoring(true);}, Qt::QueuedConnection);
+                    QString merged = m_gameData.savePath = getSavePath(m_gameData.launchPath, EtwFileMonitor::convertDevicePathToDosPath(fileName));
+                    if (!QFile::exists(merged)) while (!merged.isEmpty() && !QFile::exists(merged)) merged.chop(1);
+                    QMetaObject::invokeMethod(this, [id, merged] {DatabaseManager::updateGameData(id, {{"save_path", merged}});}, Qt::QueuedConnection);
+                    qDebug().noquote() << "存档:" << merged;
+                    break;
+                }
+            }
+        });
+        QTimer::singleShot(30000, this, [this] {etwfileMonitor->stopMonitoring(true);});
+    }
     if (!name.isEmpty()) qDebug() << name << "ID" << id << "PID" << pid;
     else qDebug() << "ID:" << id << "PID:" << pid;
     if (monitoredGames.size() == 1) hotkeyManager->registerHotKey(1, 0, getConfig("Shortcut/suspendProcess", 27).toInt(), [this] { onFreezeOrResume(); });
@@ -96,7 +114,7 @@ qint64 GameMonitorUtil::findChildProcess(const qint64 parentPid)
 {   // 查找子进程
     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hSnapshot == INVALID_HANDLE_VALUE) return 0;
-    PROCESSENTRY32 pe = { sizeof(PROCESSENTRY32) };
+    PROCESSENTRY32 pe = {sizeof(PROCESSENTRY32)};
     qint64 childPid = 0;
     if (Process32First(hSnapshot, &pe)) {
         do {
@@ -108,6 +126,26 @@ qint64 GameMonitorUtil::findChildProcess(const qint64 parentPid)
     }
     CloseHandle(hSnapshot);
     return childPid;
+}
+
+QString GameMonitorUtil::getSavePath(const QString &pathA, const QString &pathB)
+{   // 获取存档路径
+    if (pathB.contains("Documents", Qt::CaseInsensitive)) {
+        const QStringList parts = QDir::fromNativeSeparators(pathB).split('/');
+        for (qsizetype i = parts.size() - 1; i >= 0; --i) {
+            bool isNumber;
+            parts[i].toLongLong(&isNumber);
+            if (isNumber) return QDir::fromNativeSeparators(parts.mid(0, i + 1).join('/'));
+        }
+        return QDir::fromNativeSeparators(parts.mid(0, parts.size() - 1).join('/'));
+    }
+    const QStringList partsA = QDir::fromNativeSeparators(pathA).split('/');
+    const QStringList partsB = QDir::fromNativeSeparators(pathB).split('/');
+    int common = 0;
+    const qsizetype minLen = qMin(partsA.size(), partsB.size());
+    while (common < minLen && partsA[common].compare(partsB[common], Qt::CaseInsensitive) == 0) ++common;
+    if (common == 0 || common >= partsB.size()) return pathB;
+    return QDir::fromNativeSeparators(partsB.mid(0, common + 1).join('/'));
 }
 
 bool GameMonitorUtil::suspendOrResumeProcess(const DWORD pid, const bool suspend)
@@ -165,8 +203,9 @@ void GameMonitorUtil::onProcessExited(const int id)
         int total = m_gameData.playDuration + elapsedSec;
         DatabaseManager::updateGameData(id, {{"play_duration", total}});
         qDebug() << id << "已退出，运行:" << elapsedSec << "秒，总计:" << total << "秒";
-        emit gameExited(id);
+        emit gameExited(id, total);
     } else qDebug() << "外部进程" << externalProcessNames.value(id) << "已退出，id" << id;
+    etwfileMonitor->stopMonitoring(true);
     cleanupProcessResources(id);
 }
 
@@ -231,7 +270,7 @@ void GameMonitorUtil::cleanupProcessResources(const int id)
     suspendedGameHwnd.remove(id);
     originalGameTitles.remove(id);
     if (processHandles.contains(id)) {
-        const HANDLE h = processHandles.take(id);
+        HANDLE h = processHandles.take(id);
         if (h && h != INVALID_HANDLE_VALUE) CloseHandle(h);
     }
     if (processNotifiers.contains(id)) {

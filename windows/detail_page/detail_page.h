@@ -32,7 +32,9 @@ signals:
     void refresh();
 
 private slots:
-    void onEpisodeClicked();
+    void onBtnActionClicked();
+    void onGameStarted(int subjectId, const QString& launchPath);
+    void onGameExited(int subjectId, int total) const;
     void onOpenBangumiPage() const;
     void onStatusButtonClicked();
     void clickOnTab(int index);
@@ -66,6 +68,7 @@ private:
     QListWidget *tagListWidget = nullptr;
     StarRatingWidget *m_starRating = nullptr;
     ScoreChartWidget *m_scoreChartWidget = nullptr;
+    int m_currentSubjectId = 0;
     QStack<int> m_historyStack;
     SubjectsData m_subjectData;
     QMap<int, QMap<int, QString>> statusNamesMap;
