@@ -78,13 +78,18 @@ public:
     QWidget *pikpakPage;
     QVBoxLayout *verticalLayout_3;
     QLabel *labelPikPakTitle;
-    QFrame *pikPakInfoFrame;
+    QFrame *pikPakLoginFrame;
     QVBoxLayout *verticalLayout_9;
+    QLabel *labelLoginSection;
     QLabel *labelPikPakUsername;
     QLabel *labelPikPakPassword;
     QLabel *labelPikPakAccessToken;
     QLabel *labelPikPakRefreshToken;
     QPushButton *btnPikPakLogin;
+    QFrame *pikPakRegistrationFrame;
+    QVBoxLayout *verticalLayout_13;
+    QLabel *labelRegistrationSection;
+    QPushButton *btnPikPakRegistration;
     QSpacerItem *verticalSpacer_2;
     QWidget *downloadPage;
     QVBoxLayout *verticalLayout_5;
@@ -260,15 +265,13 @@ public:
         verticalLayout_4->setObjectName("verticalLayout_4");
         labelAuthSection = new QLabel(authFrame);
         labelAuthSection->setObjectName("labelAuthSection");
-        labelAuthSection->setMinimumSize(QSize(0, 30));
-        labelAuthSection->setMaximumSize(QSize(16777215, 30));
         QFont font4;
         font4.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font4.setPointSize(13);
         font4.setBold(true);
         labelAuthSection->setFont(font4);
 
-        verticalLayout_4->addWidget(labelAuthSection, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_4->addWidget(labelAuthSection);
 
         labelUserId = new QLabel(authFrame);
         labelUserId->setObjectName("labelUserId");
@@ -294,7 +297,6 @@ public:
 
         btnBangumiAuth = new QPushButton(authFrame);
         btnBangumiAuth->setObjectName("btnBangumiAuth");
-        btnBangumiAuth->setMinimumSize(QSize(76, 0));
         QFont font6;
         font6.setFamilies({QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221")});
         font6.setPointSize(13);
@@ -304,7 +306,6 @@ public:
 
         btnGetCollection = new QPushButton(authFrame);
         btnGetCollection->setObjectName("btnGetCollection");
-        btnGetCollection->setMinimumSize(QSize(76, 0));
         btnGetCollection->setFont(font6);
 
         verticalLayout_4->addWidget(btnGetCollection, 0, Qt::AlignmentFlag::AlignLeft);
@@ -394,7 +395,6 @@ public:
         btnDownloadPublic = new QPushButton(publicDataButtonsFrame);
         btnDownloadPublic->setObjectName("btnDownloadPublic");
         btnDownloadPublic->setMinimumSize(QSize(76, 0));
-        btnDownloadPublic->setMaximumSize(QSize(76, 16777215));
         btnDownloadPublic->setFont(font6);
 
         horizontalLayout_4->addWidget(btnDownloadPublic);
@@ -402,7 +402,6 @@ public:
         btnDownloadMirror = new QPushButton(publicDataButtonsFrame);
         btnDownloadMirror->setObjectName("btnDownloadMirror");
         btnDownloadMirror->setMinimumSize(QSize(76, 0));
-        btnDownloadMirror->setMaximumSize(QSize(76, 16777215));
         btnDownloadMirror->setFont(font6);
 
         horizontalLayout_4->addWidget(btnDownloadMirror);
@@ -457,52 +456,74 @@ public:
         verticalLayout_3->setObjectName("verticalLayout_3");
         labelPikPakTitle = new QLabel(pikpakPage);
         labelPikPakTitle->setObjectName("labelPikPakTitle");
-        labelPikPakTitle->setMinimumSize(QSize(0, 0));
-        labelPikPakTitle->setMaximumSize(QSize(16777215, 16777215));
         labelPikPakTitle->setFont(font3);
 
-        verticalLayout_3->addWidget(labelPikPakTitle, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_3->addWidget(labelPikPakTitle);
 
-        pikPakInfoFrame = new QFrame(pikpakPage);
-        pikPakInfoFrame->setObjectName("pikPakInfoFrame");
-        pikPakInfoFrame->setFrameShape(QFrame::Shape::StyledPanel);
-        pikPakInfoFrame->setFrameShadow(QFrame::Shadow::Raised);
-        verticalLayout_9 = new QVBoxLayout(pikPakInfoFrame);
+        pikPakLoginFrame = new QFrame(pikpakPage);
+        pikPakLoginFrame->setObjectName("pikPakLoginFrame");
+        pikPakLoginFrame->setFrameShape(QFrame::Shape::StyledPanel);
+        pikPakLoginFrame->setFrameShadow(QFrame::Shadow::Raised);
+        verticalLayout_9 = new QVBoxLayout(pikPakLoginFrame);
         verticalLayout_9->setObjectName("verticalLayout_9");
-        labelPikPakUsername = new QLabel(pikPakInfoFrame);
+        labelLoginSection = new QLabel(pikPakLoginFrame);
+        labelLoginSection->setObjectName("labelLoginSection");
+        labelLoginSection->setFont(font4);
+
+        verticalLayout_9->addWidget(labelLoginSection);
+
+        labelPikPakUsername = new QLabel(pikPakLoginFrame);
         labelPikPakUsername->setObjectName("labelPikPakUsername");
         labelPikPakUsername->setFont(font5);
 
         verticalLayout_9->addWidget(labelPikPakUsername, 0, Qt::AlignmentFlag::AlignLeft);
 
-        labelPikPakPassword = new QLabel(pikPakInfoFrame);
+        labelPikPakPassword = new QLabel(pikPakLoginFrame);
         labelPikPakPassword->setObjectName("labelPikPakPassword");
         labelPikPakPassword->setFont(font5);
 
         verticalLayout_9->addWidget(labelPikPakPassword, 0, Qt::AlignmentFlag::AlignLeft);
 
-        labelPikPakAccessToken = new QLabel(pikPakInfoFrame);
+        labelPikPakAccessToken = new QLabel(pikPakLoginFrame);
         labelPikPakAccessToken->setObjectName("labelPikPakAccessToken");
         labelPikPakAccessToken->setFont(font6);
 
         verticalLayout_9->addWidget(labelPikPakAccessToken, 0, Qt::AlignmentFlag::AlignLeft);
 
-        labelPikPakRefreshToken = new QLabel(pikPakInfoFrame);
+        labelPikPakRefreshToken = new QLabel(pikPakLoginFrame);
         labelPikPakRefreshToken->setObjectName("labelPikPakRefreshToken");
         labelPikPakRefreshToken->setFont(font6);
 
         verticalLayout_9->addWidget(labelPikPakRefreshToken, 0, Qt::AlignmentFlag::AlignLeft);
 
-        btnPikPakLogin = new QPushButton(pikPakInfoFrame);
+        btnPikPakLogin = new QPushButton(pikPakLoginFrame);
         btnPikPakLogin->setObjectName("btnPikPakLogin");
-        btnPikPakLogin->setMinimumSize(QSize(0, 30));
-        btnPikPakLogin->setFont(font5);
+        btnPikPakLogin->setFont(font6);
         btnPikPakLogin->setStyleSheet(QString::fromUtf8(""));
 
         verticalLayout_9->addWidget(btnPikPakLogin, 0, Qt::AlignmentFlag::AlignLeft);
 
 
-        verticalLayout_3->addWidget(pikPakInfoFrame);
+        verticalLayout_3->addWidget(pikPakLoginFrame);
+
+        pikPakRegistrationFrame = new QFrame(pikpakPage);
+        pikPakRegistrationFrame->setObjectName("pikPakRegistrationFrame");
+        verticalLayout_13 = new QVBoxLayout(pikPakRegistrationFrame);
+        verticalLayout_13->setObjectName("verticalLayout_13");
+        labelRegistrationSection = new QLabel(pikPakRegistrationFrame);
+        labelRegistrationSection->setObjectName("labelRegistrationSection");
+        labelRegistrationSection->setFont(font4);
+
+        verticalLayout_13->addWidget(labelRegistrationSection);
+
+        btnPikPakRegistration = new QPushButton(pikPakRegistrationFrame);
+        btnPikPakRegistration->setObjectName("btnPikPakRegistration");
+        btnPikPakRegistration->setFont(font6);
+
+        verticalLayout_13->addWidget(btnPikPakRegistration, 0, Qt::AlignmentFlag::AlignLeft);
+
+
+        verticalLayout_3->addWidget(pikPakRegistrationFrame);
 
         verticalSpacer_2 = new QSpacerItem(20, 759, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
 
@@ -565,11 +586,9 @@ public:
         verticalLayout_11->setObjectName("verticalLayout_11");
         labelShortcutSection = new QLabel(shortcutFrame);
         labelShortcutSection->setObjectName("labelShortcutSection");
-        labelShortcutSection->setMinimumSize(QSize(0, 30));
-        labelShortcutSection->setMaximumSize(QSize(16777215, 30));
         labelShortcutSection->setFont(font4);
 
-        verticalLayout_11->addWidget(labelShortcutSection, 0, Qt::AlignmentFlag::AlignLeft);
+        verticalLayout_11->addWidget(labelShortcutSection);
 
         suspendProcessFrame = new QFrame(shortcutFrame);
         suspendProcessFrame->setObjectName("suspendProcessFrame");
@@ -609,7 +628,7 @@ public:
 
         retranslateUi(SettingsPage);
 
-        stackedWidget->setCurrentIndex(3);
+        stackedWidget->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(SettingsPage);
@@ -644,12 +663,15 @@ public:
         labelDownloadStatus->setText(QString());
         labelSearchSection->setText(QCoreApplication::translate("SettingsPage", "Bangumi \346\220\234\347\264\242", nullptr));
         checkBoxNsfw->setText(QCoreApplication::translate("SettingsPage", "NSFW \345\206\205\345\256\271", nullptr));
-        labelPikPakTitle->setText(QCoreApplication::translate("SettingsPage", "PikPak \347\231\273\345\275\225", nullptr));
+        labelPikPakTitle->setText(QCoreApplication::translate("SettingsPage", "PikPak", nullptr));
+        labelLoginSection->setText(QCoreApplication::translate("SettingsPage", "PikPak \347\231\273\345\275\225", nullptr));
         labelPikPakUsername->setText(QString());
         labelPikPakPassword->setText(QString());
         labelPikPakAccessToken->setText(QString());
         labelPikPakRefreshToken->setText(QString());
         btnPikPakLogin->setText(QCoreApplication::translate("SettingsPage", "\345\274\200\345\247\213\347\231\273\345\275\225", nullptr));
+        labelRegistrationSection->setText(QCoreApplication::translate("SettingsPage", "PikPak \346\263\250\345\206\214", nullptr));
+        btnPikPakRegistration->setText(QCoreApplication::translate("SettingsPage", "\346\263\250\345\206\214", nullptr));
         labelDownloadTitle->setText(QCoreApplication::translate("SettingsPage", "\344\270\213\350\275\275\350\267\257\345\276\204", nullptr));
         btnSelectDownloadPath->setText(QCoreApplication::translate("SettingsPage", "\351\200\211\346\213\251\350\267\257\345\276\204", nullptr));
         labelGameTitle->setText(QCoreApplication::translate("SettingsPage", "\346\270\270\346\210\217", nullptr));

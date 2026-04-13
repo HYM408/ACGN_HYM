@@ -1,4 +1,5 @@
 #include "settings_page.h"
+#include <QClipboard>
 #include <QJsonArray>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -9,6 +10,7 @@
 #include "api/pikpak_api.h"
 #include "api/bangumi_api.h"
 #include "api/bangumi_oauth.h"
+#include "api/temp_mail_api.h"
 #include "utils/network_util.h"
 #include "utils/context_menu_util.h"
 #include "downloader/chunk_download.h"
@@ -61,14 +63,15 @@ void SettingsPage::setupConnections()
         emit nsfwSettingChanged(checked);
     });
     // PikPak
-    connect(ui.btnPikPak, &QPushButton::clicked, [this] {loadPikpakPage();});
+    connect(ui.btnPikPak, &QPushButton::clicked, this, &SettingsPage::loadPikpakPage);
     connect(ui.btnPikPakLogin, &QPushButton::clicked, this, &SettingsPage::onPikPakLoginButtonClicked);
+    connect(ui.btnPikPakRegistration, &QPushButton::clicked, this, &SettingsPage::onPikPakRegistrationButtonClicked);
     // 下载
+    connect(ui.btnDownload, &QPushButton::clicked, this, &SettingsPage::loadDownloadPage);
     setupLineEditCustomContextMenu(ui.lineEditDownloadPath, CMO_Copy | CMO_SelectAll);
-    connect(ui.btnDownload, &QPushButton::clicked, [this] {loadDownloadPage();});
     connect(ui.btnSelectDownloadPath, &QPushButton::clicked, this, &SettingsPage::onSelectDownloadPath);
     // 游戏
-    connect(ui.btnGame, &QPushButton::clicked, [this] {loadGamePage();});
+    connect(ui.btnGame, &QPushButton::clicked, this, &SettingsPage::loadGamePage);
     connect(ui.suspendProcessKeySequenceEdit, &QKeySequenceEdit::keySequenceChanged, this, [this](const QKeySequence &keySequence) {
         const int keyCode = keySequenceToVirtualKey(keySequence);
         setConfig("Shortcut/suspendProcess", keyCode);
@@ -315,14 +318,48 @@ bool SettingsPage::ensurePikPakCredentials()
     return false;
 }
 
+void SettingsPage::onPikPakRegistrationButtonClicked()
+{   // 辅助注册
+    auto dialog = new QDialog();
+    dialog->setWindowTitle("PikPak注册");
+    dialog->setFixedSize(350, 100);
+    dialog->setWindowFlags(dialog->windowFlags() | Qt::WindowStaysOnTopHint);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    auto layout = new QVBoxLayout(dialog);
+    auto infoLabel = new QLabel("正在生成临时邮箱");
+    layout->addWidget(infoLabel);
+    auto fetchBtn = new QPushButton("获取验证码");
+    auto codeLabel = new QLabel("点击按钮获取验证码");
+    auto btnLayout = new QHBoxLayout;
+    btnLayout->addWidget(fetchBtn);
+    btnLayout->addWidget(codeLabel);
+    btnLayout->setAlignment(Qt::AlignLeft);
+    layout->addLayout(btnLayout);
+    auto tempMailApi = new TempMailApi(dialog);
+    tempMailApi->generateTempEmail([tempMailApi, infoLabel, codeLabel, fetchBtn](const QString &email, const QString &error) {
+        if (!error.isEmpty()) return infoLabel->setText(error);
+        QGuiApplication::clipboard()->setText(email);
+        infoLabel->setText("临时邮箱(已复制):" + email);
+        connect(fetchBtn, &QPushButton::clicked, [tempMailApi, email, codeLabel, fetchBtn] {
+            codeLabel->setText("获取中");
+            tempMailApi->fetchEmails(email, [codeLabel, fetchBtn](const QString &code, const QString &err) {
+                if (!err.isEmpty()) return codeLabel->setText(err);
+                QGuiApplication::clipboard()->setText(code);
+                codeLabel->setText("验证码(已复制):" + code);
+                fetchBtn->setText("已获取");
+            });
+        });
+    });
+    QDesktopServices::openUrl(QUrl("https://mypikpak.com/drive/login"));
+    dialog->show();
+}
+
 void SettingsPage::onSelectDownloadPath()
 {   // 选择下载路径
-    const QString currentPath = ui.lineEditDownloadPath->text();
-    const QString dirPath = QFileDialog::getExistingDirectory(this, "选择下载路径", currentPath);
-    if (!dirPath.isEmpty()) {
-        ui.lineEditDownloadPath->setText(dirPath);
-        setConfig("Download/download_path", dirPath);
-    }
+    const QString dirPath = QFileDialog::getExistingDirectory(this, "选择下载路径", ui.lineEditDownloadPath->text());
+    if (dirPath.isEmpty()) return;
+    ui.lineEditDownloadPath->setText(dirPath);
+    setConfig("Download/download_path", dirPath);
 }
 
 void SettingsPage::clearDownloadTasks(const bool stop)

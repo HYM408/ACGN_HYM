@@ -35,6 +35,8 @@ add_executable(appACGN_HYM
         windows/api/bangumi_oauth.cpp
         windows/api/pikpak_api.h
         windows/api/pikpak_api.cpp
+        windows/api/temp_mail_api.h
+        windows/api/temp_mail_api.cpp
         windows/crawler/crawler.h
         windows/crawler/crawler.cpp
         windows/detail_page/clickable_label.h

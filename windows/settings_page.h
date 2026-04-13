@@ -26,6 +26,10 @@ signals:
     void hotkeyChanged(int keyCode);
 
 private slots:
+    void loadPikpakPage();
+    void loadGamePage();
+    void loadBangumiPage() const;
+    void loadDownloadPage();
     void onLoginButtonClicked();
     void onCollectionButtonClicked() const;
     static void onBangumiUrlChanged(int index);
@@ -33,13 +37,10 @@ private slots:
     void clearDownloadTasks(bool stop);
     void onBackButtonClicked();
     void onPikPakLoginButtonClicked();
+    static void onPikPakRegistrationButtonClicked();
 
 private:
     void setupConnections();
-    void loadBangumiPage() const;
-    void loadPikpakPage();
-    void loadDownloadPage();
-    void loadGamePage();
     void updateBangumiTokenDisplay() const;
     void updatePikpakTokenDisplay() const;
     bool ensureBangumiCredentials();

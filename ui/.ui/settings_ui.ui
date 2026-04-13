@@ -308,7 +308,7 @@
        }</string>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="bangumiPage">
       <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -329,20 +329,8 @@
        <item>
         <widget class="QFrame" name="authFrame">
          <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item alignment="Qt::AlignmentFlag::AlignLeft">
+          <item>
            <widget class="QLabel" name="labelAuthSection">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>30</height>
-             </size>
-            </property>
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -399,12 +387,6 @@
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
            <widget class="QPushButton" name="btnBangumiAuth">
-            <property name="minimumSize">
-             <size>
-              <width>76</width>
-              <height>0</height>
-             </size>
-            </property>
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -418,12 +400,6 @@
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
            <widget class="QPushButton" name="btnGetCollection">
-            <property name="minimumSize">
-             <size>
-              <width>76</width>
-              <height>0</height>
-             </size>
-            </property>
             <property name="font">
              <font>
               <family>微软雅黑</family>
@@ -632,12 +608,6 @@
                     <height>0</height>
                    </size>
                   </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>76</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
                   <property name="font">
                    <font>
                     <family>微软雅黑</family>
@@ -655,12 +625,6 @@
                    <size>
                     <width>76</width>
                     <height>0</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>76</width>
-                    <height>16777215</height>
                    </size>
                   </property>
                   <property name="font">
@@ -767,20 +731,8 @@
      </widget>
      <widget class="QWidget" name="pikpakPage">
       <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item alignment="Qt::AlignmentFlag::AlignLeft">
+       <item>
         <widget class="QLabel" name="labelPikPakTitle">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
          <property name="font">
           <font>
            <family>微软雅黑</family>
@@ -789,12 +741,12 @@
           </font>
          </property>
          <property name="text">
-          <string>PikPak 登录</string>
+          <string>PikPak</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="pikPakInfoFrame">
+        <widget class="QFrame" name="pikPakLoginFrame">
          <property name="frameShape">
           <enum>QFrame::Shape::StyledPanel</enum>
          </property>
@@ -802,6 +754,20 @@
           <enum>QFrame::Shadow::Raised</enum>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_9">
+          <item>
+           <widget class="QLabel" name="labelLoginSection">
+            <property name="font">
+             <font>
+              <family>微软雅黑</family>
+              <pointsize>13</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>PikPak 登录</string>
+            </property>
+           </widget>
+          </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
            <widget class="QLabel" name="labelPikPakUsername">
             <property name="font">
@@ -858,17 +824,10 @@
           </item>
           <item alignment="Qt::AlignmentFlag::AlignLeft">
            <widget class="QPushButton" name="btnPikPakLogin">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
             <property name="font">
              <font>
               <family>微软雅黑</family>
               <pointsize>13</pointsize>
-              <bold>false</bold>
              </font>
             </property>
             <property name="styleSheet">
@@ -1001,20 +960,8 @@
        <item>
         <widget class="QFrame" name="shortcutFrame">
          <layout class="QVBoxLayout" name="verticalLayout_11">
-          <item alignment="Qt::AlignmentFlag::AlignLeft">
+          <item>
            <widget class="QLabel" name="labelShortcutSection">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>30</height>
-             </size>
-            </property>
             <property name="font">
              <font>
               <family>微软雅黑</family>
