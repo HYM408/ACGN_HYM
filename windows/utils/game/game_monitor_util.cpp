@@ -130,22 +130,24 @@ qint64 GameMonitorUtil::findChildProcess(const qint64 parentPid)
 
 QString GameMonitorUtil::getSavePath(const QString &pathA, const QString &pathB)
 {   // 获取存档路径
-    if (pathB.contains("Documents", Qt::CaseInsensitive)) {
-        const QStringList parts = QDir::fromNativeSeparators(pathB).split('/');
-        for (qsizetype i = parts.size() - 1; i >= 0; --i) {
-            bool isNumber;
-            parts[i].toLongLong(&isNumber);
-            if (isNumber) return QDir::fromNativeSeparators(parts.mid(0, i + 1).join('/'));
-        }
-        return QDir::fromNativeSeparators(parts.mid(0, parts.size() - 1).join('/'));
-    }
     const QStringList partsA = QDir::fromNativeSeparators(pathA).split('/');
     const QStringList partsB = QDir::fromNativeSeparators(pathB).split('/');
     int common = 0;
-    const qsizetype minLen = qMin(partsA.size(), partsB.size());
-    while (common < minLen && partsA[common].compare(partsB[common], Qt::CaseInsensitive) == 0) ++common;
-    if (common == 0 || common >= partsB.size()) return pathB;
-    return QDir::fromNativeSeparators(partsB.mid(0, common + 1).join('/'));
+    while (common < partsA.size() && common < partsB.size() && partsA[common].compare(partsB[common], Qt::CaseInsensitive) == 0) ++common;
+    if (common > 0 && common < partsB.size()) return QDir::fromNativeSeparators(partsB.mid(0, common + 1).join('/'));
+    QString current = pathB;
+    while (!current.isEmpty()) {
+        QDir dir(current);
+        if (dir.exists()) {
+            dir.setFilter(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+            const QFileInfoList entries = dir.entryInfoList();
+            if (entries.size() == 1) return entries.first().absoluteFilePath();
+        }
+        const QString parent = QFileInfo(current).path();
+        if (parent == current) break;
+        current = parent;
+    }
+    return pathB;
 }
 
 bool GameMonitorUtil::suspendOrResumeProcess(const DWORD pid, const bool suspend)
